@@ -3,6 +3,20 @@
 // A daily cap keeps usage inside the 10,000 free Neurons per day, so this costs $0 on any plan.
 
 const MODEL = '@cf/black-forest-labs/flux-1-schnell';
+// Open-weight image models on Workers AI, all inside the free daily allowance. Partner models are left out.
+const IMAGE_MODELS = {
+  'flux-1-schnell': { id: MODEL, input: (prompt) => ({ prompt, steps: 6 }) },
+  'sdxl-lightning': { id: '@cf/bytedance/stable-diffusion-xl-lightning', input: (prompt, o) => ({ prompt, negative_prompt: o.negative, width: o.width, height: o.height, num_steps: 8, guidance: 1.5, seed: o.seed }) },
+  'dreamshaper-8-lcm': { id: '@cf/lykon/dreamshaper-8-lcm', input: (prompt, o) => ({ prompt, negative_prompt: o.negative, width: o.width, height: o.height, num_steps: 8, guidance: 2, seed: o.seed }) },
+  'sdxl-base': { id: '@cf/stabilityai/stable-diffusion-xl-base-1.0', input: (prompt, o) => ({ prompt, negative_prompt: o.negative, width: o.width, height: o.height, num_steps: 20, guidance: 7, seed: o.seed }) },
+};
+const dim = (v, def) => Math.max(256, Math.min(1536, Math.round((Number(v) || def) / 64) * 64));
+const clean = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== ''));
+function sniffImage(bytes) {
+  if (bytes[0] === 0x89 && bytes[1] === 0x50) return 'image/png';
+  if (bytes[0] === 0x52 && bytes[1] === 0x49) return 'image/webp';
+  return 'image/jpeg';
+}
 const MAX_PROMPT = 1800;
 
 const json = (body, status = 200, extra = {}) =>
@@ -52,22 +66,26 @@ async function shot(request, env) {
   if (total >= dailyCap) return json({ error: "Today's free Cloudflare frames are used up. Pollinations or your own ComfyUI still work, and the allowance resets at midnight UTC." }, 429);
   if (mine >= perVisitor) return json({ error: `You've used your ${perVisitor} free Cloudflare frames for today. Pollinations or your own ComfyUI still work.` }, 429);
 
+  const pick = IMAGE_MODELS[body.model] || IMAGE_MODELS['flux-1-schnell'];
+  const opts = { width: dim(body.width, 1024), height: dim(body.height, 1024), negative: body.negative ? String(body.negative).slice(0, 400) : undefined, seed: Number.isFinite(Number(body.seed)) ? Math.abs(Math.floor(Number(body.seed))) % 4294967295 : undefined };
   let result;
   try {
-    result = await env.AI.run(MODEL, { prompt, steps: 6 });
+    result = await env.AI.run(pick.id, clean(pick.input(prompt, opts)));
   } catch (e) {
     return json({ error: `Workers AI could not render this frame: ${e.message || e}` }, 502);
   }
-  if (!result || !result.image) return json({ error: 'Workers AI returned no image.' }, 502);
+  let bytes;
+  if (result && typeof result.image === 'string') bytes = Uint8Array.from(atob(result.image), (c) => c.charCodeAt(0));
+  else if (result instanceof ReadableStream || result instanceof ArrayBuffer || ArrayBuffer.isView(result)) bytes = new Uint8Array(await new Response(result).arrayBuffer());
+  if (!bytes || bytes.length < 100) return json({ error: 'Workers AI returned no image.' }, 502);
 
   await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
 
-  const bytes = Uint8Array.from(atob(result.image), (c) => c.charCodeAt(0));
   return new Response(bytes, {
     headers: {
-      'content-type': 'image/jpeg',
+      'content-type': sniffImage(bytes),
       'cache-control': 'no-store',
-      'x-massless-model': MODEL,
+      'x-massless-model': pick.id,
       'x-massless-remaining-today': String(Math.max(0, dailyCap - total - 1)),
     },
   });
@@ -167,6 +185,64 @@ async function ask(request, env) {
   const answer = typeof r === 'string' ? r : r ? JSON.stringify(r) : '';
   if (!answer) return json({ error: 'The model returned no answer.' }, 502);
   return json({ answer, model: LLM });
+}
+
+// POST /api/tts speaks text with MeloTTS (MIT) on Workers AI: English, Spanish, French, Chinese, Japanese, Korean.
+const TTS_LANGS = ['en', 'es', 'fr', 'zh', 'jp', 'kr'];
+async function tts(request, env) {
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  const origin = request.headers.get('origin');
+  if (origin && new URL(origin).host !== new URL(request.url).host) return json({ error: 'Cross-site requests are not allowed.' }, 403);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Send JSON: { "text": "...", "lang": "en" }' }, 400); }
+  const text = String(body.text || '').trim().slice(0, 1200);
+  const lang = TTS_LANGS.includes(body.lang) ? body.lang : 'en';
+  if (!text) return json({ error: 'Write something to say first.' }, 400);
+  const gate = await allow(request, env, 'tts', Number(env.TTS_CAP || 300), Number(env.PER_VISITOR_TTS || 40));
+  if (gate) return gate;
+  let result;
+  try { result = await env.AI.run('@cf/myshell-ai/melotts', { prompt: text, lang }); } catch (e) { return json({ error: `Workers AI could not speak this: ${e.message || e}` }, 502); }
+  const audio = result && (result.audio || result);
+  if (typeof audio !== 'string') return json({ error: 'Workers AI returned no audio.' }, 502);
+  const bytes = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0));
+  const type = bytes[0] === 0x52 && bytes[1] === 0x49 ? 'audio/wav' : 'audio/mpeg';
+  return new Response(bytes, { headers: { 'content-type': type, 'cache-control': 'no-store', 'x-massless-model': '@cf/myshell-ai/melotts' } });
+}
+
+// POST /api/transcribe turns speech into text and WebVTT captions with Whisper large-v3-turbo (MIT).
+// Body: the audio file itself (mp3, wav, m4a, webm, ogg), up to 20 MB. Query: ?lang=xx&task=transcribe|translate
+async function transcribe(request, env) {
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  const origin = request.headers.get('origin');
+  if (origin && new URL(origin).host !== new URL(request.url).host) return json({ error: 'Cross-site requests are not allowed.' }, 403);
+  const size = Number(request.headers.get('content-length') || 0);
+  if (size > 20 * 1024 * 1024) return json({ error: 'That file is over 20 MB. Trim it or export the audio only.' }, 413);
+  const buf = new Uint8Array(await request.arrayBuffer());
+  if (buf.length < 1000) return json({ error: 'Send an audio file as the request body.' }, 400);
+  if (buf.length > 20 * 1024 * 1024) return json({ error: 'That file is over 20 MB. Trim it or export the audio only.' }, 413);
+  const gate = await allow(request, env, 'asr', Number(env.ASR_CAP || 120), Number(env.PER_VISITOR_ASR || 15));
+  if (gate) return gate;
+  const q = new URL(request.url).searchParams;
+  let b64 = '';
+  for (let i = 0; i < buf.length; i += 0x8000) b64 += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+  b64 = btoa(b64);
+  const input = { audio: b64, task: q.get('task') === 'translate' ? 'translate' : 'transcribe', vad_filter: true };
+  if (/^[a-z]{2}$/.test(q.get('lang') || '')) input.language = q.get('lang');
+  let result;
+  try { result = await env.AI.run('@cf/openai/whisper-large-v3-turbo', input); } catch (e) { return json({ error: `Workers AI could not transcribe this: ${e.message || e}` }, 502); }
+  return json({ text: result.text || '', vtt: result.vtt || '', segments: (result.segments || []).map((s) => ({ start: s.start, end: s.end, text: s.text })), language: result.transcription_info?.language || input.language || '', duration: result.transcription_info?.duration || null, model: '@cf/openai/whisper-large-v3-turbo' });
+}
+
+// Daily caps per feature and per visitor keep every endpoint inside the free Workers AI allowance.
+async function allow(request, env, name, cap, perVisitor) {
+  const day = today();
+  const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+  const visitorKey = `${name}v:${day}:${await hashIp(ip)}`;
+  const totalKey = `${name}:${day}`;
+  const [total, mine] = await Promise.all([counter(env.MASSLESS_KV, totalKey), counter(env.MASSLESS_KV, visitorKey)]);
+  if (total >= cap || mine >= perVisitor) return json({ error: 'This free tool is resting for today. It resets at midnight UTC.' }, 429);
+  await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
+  return null;
 }
 
 async function health(env) {
@@ -307,6 +383,8 @@ export default {
     if (url.pathname === '/api/shot') return shot(request, env);
     if (url.pathname === '/api/beats') return beats(request, env);
     if (url.pathname === '/api/ask') return ask(request, env);
+    if (url.pathname === '/api/tts') return tts(request, env);
+    if (url.pathname === '/api/transcribe') return transcribe(request, env);
     if (url.pathname === '/api/health') return health(env);
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
     if (env.ASSETS) return env.ASSETS.fetch(request);
