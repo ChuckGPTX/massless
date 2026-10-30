@@ -324,29 +324,53 @@ export async function renderBed(id, seconds, { intensity = 0.7, seed } = {}) {
   return { blob, url: URL.createObjectURL(blob), duration: frames / BED_RATE, sampleRate: BED_RATE };
 }
 
-/** Set loudness to a target RMS, round off rare peaks, and fade both ends. */
+/** Set loudness to a target RMS, hold peaks under -1 dBFS with a look-ahead limiter, and fade both ends. */
 function finishBed(channels, sr, targetDb) {
+  const [L, R] = channels;
+  const len = L.length;
   let sum = 0;
-  let n = 0;
-  for (const c of channels) {
-    for (let i = 0; i < c.length; i++) sum += c[i] * c[i];
-    n += c.length;
-  }
-  const rms = Math.sqrt(sum / n);
+  for (let i = 0; i < len; i++) sum += L[i] * L[i] + R[i] * R[i];
+  const rms = Math.sqrt(sum / (2 * len));
   const g = rms > 1e-9 ? 10 ** (targetDb / 20) / rms : 0;
-  const T = 0.6; // soft-clip knee
-  const fade = Math.min(Math.round(FADE * sr), Math.floor(channels[0].length / 4));
-  for (const c of channels) {
-    const len = c.length;
-    for (let i = 0; i < len; i++) {
-      let v = c[i] * g;
-      const a = Math.abs(v);
-      if (a > T) v = Math.sign(v) * (T + (1 - T) * Math.tanh((a - T) / (1 - T)));
-      const e = Math.min(i, len - 1 - i);
-      if (e < fade) v *= 0.5 - 0.5 * Math.cos((Math.PI * e) / fade);
-      c[i] = v;
-    }
+  // the gain each frame needs to stay under the ceiling (both channels linked, so the image holds)
+  const CEIL = 0.89;
+  const need = new Float32Array(len);
+  for (let i = 0; i < len; i++) {
+    const p = Math.max(Math.abs(L[i]), Math.abs(R[i])) * g;
+    need[i] = p > CEIL ? CEIL / p : 1;
   }
+  // look ahead 2 ms: ramp down before each peak (average of the sliding minimum), release over ~80 ms
+  const look = Math.round(0.002 * sr);
+  const lim = slidingMin(need, look);
+  const rel = 1 - Math.exp(-1 / (0.08 * sr));
+  const fade = Math.min(Math.round(FADE * sr), Math.floor(len / 4));
+  let box = look + 1; // as if preceded by unity gain
+  let gain = 1;
+  for (let i = 0; i < len; i++) {
+    box += lim[i] - (i > look ? lim[i - look - 1] : 1);
+    gain = Math.min(box / (look + 1), gain + (1 - gain) * rel);
+    let v = g * gain;
+    const e = Math.min(i, len - 1 - i);
+    if (e < fade) v *= 0.5 - 0.5 * Math.cos((Math.PI * e) / fade);
+    L[i] *= v;
+    R[i] *= v;
+  }
+}
+
+/** out[i] = min(a[i .. i + w]) in linear time (monotonic deque). */
+function slidingMin(a, w) {
+  const n = a.length;
+  const out = new Float32Array(n);
+  const q = new Int32Array(n);
+  let h = 0;
+  let t = 0;
+  for (let i = n - 1; i >= 0; i--) {
+    while (t > h && a[q[t - 1]] >= a[i]) t--;
+    q[t++] = i;
+    while (q[h] > i + w) h++;
+    out[i] = a[q[h]];
+  }
+  return out;
 }
 
 /** Small seeded PRNG (mulberry32), so a seed reproduces a bed exactly. */
@@ -512,11 +536,16 @@ function makeKit(ctx, rand, seconds) {
       for (let i = 0; i < nodes.length - 1; i++) nodes[i].connect(nodes[i + 1]);
       return nodes[nodes.length - 1];
     },
-    /** Drive an AudioParam with fn(t) over [start, start + dur]. */
+    /**
+     * Drive an AudioParam with fn(t) over [start, start + dur]. Every curve here moves slowly, so it is
+     * evaluated once per 128-frame block (k-rate): a swept filter then needs new coefficients per block,
+     * not per sample, which keeps renders several times faster.
+     */
     automate(param, fn, start = 0, dur = seconds - start) {
       const n = Math.max(2, Math.ceil(dur * CURVE_RATE) + 1);
       const values = new Float32Array(n);
       for (let i = 0; i < n; i++) values[i] = fn(start + (i * dur) / (n - 1));
+      param.automationRate = 'k-rate';
       param.setValueCurveAtTime(values, start, dur);
     },
     /** Merger whose inputs 0 and 1 are the left and right channels of the master bus. */
@@ -573,11 +602,13 @@ function ringBurst(layer, rand, t, pan, gain, f, bw, tau) {
   const r = Math.exp((-Math.PI * bw) / sr);
   const a1 = 2 * r * Math.cos((2 * Math.PI * f) / sr);
   const a2 = -r * r;
-  const norm = 2 * (1 - r);
+  const dk = Math.exp(-1 / (tau * sr));
+  let e = 2 * (1 - r); // input level, decaying
   let y1 = 0;
   let y2 = 0;
-  layer.add(t, Math.ceil(Math.max(tau * 6, 3 / bw) * sr), pan, gain, (i) => {
-    const y = (rand() * 2 - 1) * Math.exp(-i / (tau * sr)) * norm + a1 * y1 + a2 * y2;
+  layer.add(t, Math.ceil(Math.max(tau * 6, 3 / bw) * sr), pan, gain, () => {
+    const y = (rand() * 2 - 1) * e + a1 * y1 + a2 * y2;
+    e *= dk;
     y2 = y1;
     y1 = y;
     return y;
@@ -669,14 +700,16 @@ const BED_SYNTHS = {
       // ticks: close drops striking hard surfaces, some bright, some dulled by distance
       kit.events(250 + 900 * k, (t) => {
         const tau = between(0.0002, 0.0015);
+        const dk = Math.exp(-1 / (tau * sr));
         const c = between(0.25, 1);
         let prev = 0;
         let lp = 0;
-        drops.add(t, Math.ceil(tau * 8 * sr), between(-1, 1), 0.04 + 0.4 * rand() ** 4, (i) => {
+        let e = 1;
+        drops.add(t, Math.ceil(tau * 8 * sr), between(-1, 1), 0.04 + 0.4 * rand() ** 4, () => {
           const n = rand() * 2 - 1;
           lp += (n - prev - lp) * c;
           prev = n;
-          return lp * Math.exp(-i / (tau * sr));
+          return lp * (e *= dk);
         });
       });
       // patter: drops on leaves and wood ring briefly at a pitch of their own
@@ -689,11 +722,14 @@ const BED_SYNTHS = {
         const f0 = between(1100, 3800);
         const tau = between(0.004, 0.012);
         const rise = between(0.15, 0.6);
+        const dk = Math.exp(-1 / (tau * sr));
+        const w = (2 * Math.PI * f0) / sr;
         let ph = 0;
+        let e = 1;
         drops.add(t, Math.ceil(tau * 6 * sr), between(-0.9, 0.9), 0.04 + 0.35 * rand() ** 3, (i) => {
-          const x = i / sr;
-          ph += (2 * Math.PI * f0 * (1 + rise * (1 - Math.exp(-x / (tau * 1.2))))) / sr;
-          return Math.sin(ph) * Math.exp(-x / tau) * Math.min(1, i / 12);
+          ph += w * (1 + rise * (1 - e)); // the bubble's pitch rises as it rings down
+          e *= dk;
+          return Math.sin(ph) * e * Math.min(1, i / 12);
         });
       });
       const src = chain(drops.source(), filter('highpass', 250));
@@ -792,18 +828,21 @@ const BED_SYNTHS = {
         chain(noise('white'), filter('highpass', 2000), fg).connect(out, 0, ch);
         // bubbles: churned water rings with countless tiny resonances (big and low in the break,
         // small and high in the wash), which is what makes noise sound like water
-        kit.events(1800, (t) => {
+        kit.events(1500, (t) => {
           const c = crash(t);
           const f = foam(t);
           if (rand() > clamp(0.9 * c + 0.6 * f, 0, 1)) return;
           const fr = c > f ? 300 * 2 ** (rand() * 3.5) : 900 * 2 ** (rand() * 3);
-          const tau = between(8, 25) / (Math.PI * fr);
+          const tau = between(6, 18) / (Math.PI * fr);
           const rise = between(0.05, 0.3);
+          const dk = Math.exp(-1 / (tau * sr));
+          const w = (2 * Math.PI * fr) / sr;
           let ph = 0;
-          fizz.add(t, Math.ceil(tau * 6 * sr), ch ? between(0.1, 1) : between(-1, -0.1), 0.02 + 0.13 * rand() ** 2, (i) => {
-            const x = i / sr;
-            ph += (2 * Math.PI * fr * (1 + rise * (1 - Math.exp(-x / tau)))) / sr;
-            return Math.sin(ph) * Math.exp(-x / tau) * Math.min(1, i / 8);
+          let e = 1;
+          fizz.add(t, Math.ceil(tau * 4 * sr), ch ? between(0.1, 1) : between(-1, -0.1), 0.02 + 0.13 * rand() ** 2, (i) => {
+            ph += w * (1 + rise * (1 - e));
+            e *= dk;
+            return Math.sin(ph) * e * Math.min(1, i / 8);
           });
         });
       }
@@ -824,7 +863,7 @@ const BED_SYNTHS = {
     build(kit, k) {
       const { seconds: s, master, rand, between, noise, filter, amp, panner, osc, chain, automate } = kit;
       const out = kit.stereo();
-      const street = kit.reverb(2.4, 0.3); // the echo off buildings
+      const street = kit.reverb(1.7, 0.3); // the echo off buildings
       for (let ch = 0; ch < 2; ch++) {
         // the far, never-ending traffic rumble
         const hum = kit.wander(5);
@@ -987,14 +1026,16 @@ const BED_SYNTHS = {
           return;
         }
         const tau = between(0.00008, 0.0004);
+        const dk = Math.exp(-1 / (tau * sr));
         const c = between(0.3, 1);
         let prev = 0;
         let lp = 0;
-        cr.add(t, Math.ceil(tau * 10 * sr) + 2, pan, a, (i) => {
+        let e = 1;
+        cr.add(t, Math.ceil(tau * 10 * sr) + 2, pan, a, () => {
           const n = rand() * 2 - 1;
           lp += (n - prev - lp) * c;
           prev = n;
-          return lp * Math.exp(-i / (tau * sr));
+          return lp * (e *= dk);
         });
       };
       // bursts: resin pockets crackling in clusters
@@ -1002,7 +1043,7 @@ const BED_SYNTHS = {
         const n = 1 + Math.floor(rand() ** 2 * (5 + 8 * k));
         const spread = between(0.02, 0.25);
         const pan = between(-0.45, 0.45);
-        for (let j = 0; j < n; j++) crackle(t + rand() ** 2 * spread, pan + between(-0.1, 0.1), 0.12 + 0.6 * rand() ** 2);
+        for (let j = 0; j < n; j++) crackle(t + rand() ** 2 * spread, pan + between(-0.1, 0.1), 0.15 + 0.85 * rand() ** 2);
       });
       // a light scatter of single ticks between bursts
       kit.events(2 + 5 * k, (t) => crackle(t, between(-0.5, 0.5), 0.05 + 0.3 * rand() ** 2));
@@ -1049,13 +1090,14 @@ const BED_SYNTHS = {
         const song = kinds[i];
         const [lo, hi] = BIRD_PITCH[song];
         const isNear = i < 2;
-        const b = { f: between(lo, hi), pan: between(-0.85, 0.85), level: isNear ? between(0.45, 0.7) : between(0.15, 0.3) };
+        const pan = i < 2 ? (i ? 1 : -1) * between(0.25, 0.85) : between(-0.85, 0.85); // near birds on opposite sides
+        const b = { f: between(lo, hi), pan, level: isNear ? between(0.45, 0.7) : between(0.15, 0.3) };
         const rest = [1.2 / (0.5 + k), 4.5 / (0.5 + k)];
         for (let t = i === 0 ? between(0.15, 0.8) : between(0.3, 4); t < s - 0.3; ) {
           t += SONGS[song](isNear ? near : far, rand, t, b) + between(...rest);
         }
       }
-      const forest = kit.reverb(1.8, 0.35);
+      const forest = kit.reverb(1.5, 0.35);
       const n = near.source();
       n.connect(kit.master);
       chain(n, amp(0.3), forest);
