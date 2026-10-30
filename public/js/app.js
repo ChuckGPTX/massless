@@ -1,8 +1,8 @@
 import { Renderer, OVERSCAN } from './renderer.js';
-import { MOVES, moveById } from './moves.js';
+import { MOVES, GROUPS, moveById } from './moves.js';
 import { estimateDepth, depthStats, depthBackend, backgroundLayer, refine } from './depth.js';
 import { shoot, ENGINES } from './engines.js';
-import { recordMove } from './recorder.js';
+import { recordMove, recordSegments } from './recorder.js';
 import { calibrationScene } from './scene.js';
 import * as store from './store.js';
 
@@ -38,7 +38,12 @@ const FINISH_CONTROLS = [
 
 const state = {
   rig: null,
-  sel: { camera: '35mm', lens: 'anamorphic', focal: 50, aperture: '1.4', shot: 'ms', angle: 'eye', light: 'neon', stock: 'blockbuster', aspect: '239' },
+  sel: { camera: '35mm', lens: 'anamorphic', focal: 50, aperture: '1.4', shot: 'ms', angle: 'eye', light: 'neon', stock: 'blockbuster', aspect: '239', genre: 'none', palette: 'natural' },
+  takes: 1,
+  board: [],
+  moveGroup: 'all',
+  boardBusy: false,
+  activeCard: null,
   promptEdited: false,
   move: 'dolly-in',
   duration: 4,
@@ -76,6 +81,7 @@ function compilePrompt() {
   const subject = $('#subject').value.trim() || 'a lone traveler with a lantern on a desert ridge at dusk';
   const parts = [
     subject.replace(/[.\s]+$/, ''),
+    find('genre', s.genre).prompt,
     find('shot', s.shot).prompt,
     find('angle', s.angle).prompt,
     find('camera', s.camera).prompt,
@@ -84,9 +90,10 @@ function compilePrompt() {
     find('aperture', s.aperture).prompt,
     find('light', s.light).prompt,
     find('stock', s.stock).prompt,
+    find('palette', s.palette).prompt,
     'cinematic film still, high detail, no text',
   ];
-  return parts.join(', ');
+  return parts.filter(Boolean).join(', ');
 }
 
 function refreshPrompt(force = false) {
@@ -179,6 +186,53 @@ function drawFrame(t, time) {
   const move = moveById(state.move);
   const cam = applyZoom(move.fn(t, moveCtx()));
   renderer.render(cam, finish(), time);
+}
+
+// ---------- storyboard shots: everything needed to render a shot on its own ----------
+
+function cardCtx(card) {
+  return {
+    D: renderer.restDistance,
+    sSub: renderer.sFor(card.stats.subject),
+    focusSub: card.focus ?? card.stats.subject,
+    focusNear: card.stats.near,
+    focusFar: card.stats.far,
+    k: card.intensity,
+    blur: card.blur,
+  };
+}
+
+function zoomFor(move, ctx) {
+  const cams = [];
+  for (let i = 0; i <= 30; i++) cams.push(move.fn(i / 30, ctx));
+  return renderer.requiredZoom(cams, renderer.canvas.width / renderer.canvas.height);
+}
+
+/** Load a card's picture and depth into the renderer and fit its move to the current canvas. */
+function enterCard(card) {
+  renderer.setImage(card.image);
+  renderer.setBackgroundColor(card.depth.bgColor || card.image);
+  renderer.setDepthRange(card.range[0], card.range[1]);
+  renderer.setDepth(card.depth.data, card.depth.w, card.depth.h, card.depth.bg);
+  card.zoom = zoomFor(moveById(card.move), cardCtx(card));
+}
+
+function drawCard(card, t, time) {
+  let cam = moveById(card.move).fn(t, cardCtx(card));
+  if (card.zoom > 1) cam = { ...cam, fov: (2 * Math.atan(Math.tan((cam.fov * Math.PI) / 360) / card.zoom) * 180) / Math.PI };
+  renderer.render(cam, card.fx, time);
+}
+
+/** Put the shot being edited back into the renderer. */
+function enterLive() {
+  const cur = state.current;
+  if (!cur) return;
+  renderer.setImage(cur.image);
+  renderer.setBackgroundColor(cur.depth?.bgColor || cur.image);
+  applyDepthRange();
+  if (cur.depth) renderer.setDepth(cur.depth.data, cur.depth.w, cur.depth.h, cur.depth.bg);
+  setPreviewSize();
+  updateZoom();
 }
 
 function loop(now) {
@@ -313,38 +367,77 @@ async function loadFile(file) {
 
 // ---------- shooting ----------
 
+const ENGINE_LABEL = { pollinations: 'FLUX.1 schnell via Pollinations', workers: 'FLUX.1 schnell via Cloudflare', comfy: 'FLUX.1 schnell on your ComfyUI' };
+
+function renderTakes(takes, total, chosenId) {
+  const strip = $('#takes-strip');
+  const list = $('#takes-list');
+  if (total <= 1) { strip.hidden = true; return; }
+  strip.hidden = false;
+  $('#takes-label').textContent = takes.length < total ? `Takes: ${takes.length} of ${total} ready. Click one to make it the hero frame.` : 'Takes. Click one to make it the hero frame.';
+  list.innerHTML = '';
+  takes.forEach((tk, i) => {
+    const b = el('button', { type: 'button', class: 'take', 'aria-pressed': String(tk.id === chosenId), title: `Use take ${i + 1}` }, el('img', { src: tk.thumbUrl, alt: `Take ${i + 1}` }), el('span', {}, `Take ${i + 1}`));
+    b.addEventListener('click', async () => {
+      list.querySelectorAll('.take').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true');
+      await loadTake(tk);
+    });
+    list.append(el('li', {}, b));
+  });
+  for (let i = takes.length; i < total; i++) list.append(el('li', {}, el('div', { class: 'take pending' }, `Take ${i + 1} rendering`)));
+}
+
+async function loadTake(tk) {
+  const cached = depthCache.get(tk.id);
+  await loadImage(tk.image, { label: tk.label, gradeMix: 0.45, depth: cached, id: tk.id });
+}
+
 async function doShoot(e) {
   e?.preventDefault();
   if (state.busy) return;
   state.busy = true;
   const btn = $('#shoot');
   btn.disabled = true;
-  btn.textContent = 'Shooting';
   const prompt = $('#compiled-text').value.trim() || compilePrompt();
   const aspect = find('aspect', state.sel.aspect);
   const engine = $('#engine').value;
-  const seed = Math.floor(Math.random() * 2 ** 31);
+  const total = state.takes;
+  const takes = [];
+  let firstLoad = null;
+  renderTakes(takes, total, null);
   try {
-    status(`Rendering with ${ENGINES[engine].name}`, null);
-    const res = await shoot({
-      engine,
-      prompt,
-      w: aspect.w,
-      h: aspect.h,
-      seed,
-      comfyUrl: $('#comfy-url').value,
-      ckpt: $('#comfy-ckpt').value,
-      onWait: (ms) => ms > 0 && status(`Free tier: next frame in ${Math.ceil(ms / 1000)} s`, null),
-      onFallback: () => status('Pollinations is busy, switching to Cloudflare Workers AI', null),
-    });
-    const label = { pollinations: 'FLUX.1 schnell via Pollinations', workers: 'FLUX.1 schnell via Cloudflare', comfy: 'FLUX.1 schnell on your ComfyUI' }[res.engine];
-    const id = await addShot(res.image, { prompt, engine: res.engine, rig: { ...state.sel } });
-    status(null);
-    await loadImage(res.image, { label, gradeMix: 0.45, id });
-    toast('Shot ready. Pick a camera move, then record.');
+    for (let i = 0; i < total; i++) {
+      btn.textContent = total > 1 ? `Take ${i + 1} of ${total}` : 'Shooting';
+      status(total > 1 ? `Rendering take ${i + 1} of ${total} with ${ENGINES[engine].name}` : `Rendering with ${ENGINES[engine].name}`, null);
+      const res = await shoot({
+        engine,
+        prompt,
+        w: aspect.w,
+        h: aspect.h,
+        seed: Math.floor(Math.random() * 2 ** 31),
+        comfyUrl: $('#comfy-url').value,
+        ckpt: $('#comfy-ckpt').value,
+        onWait: (ms) => ms > 0 && status(`Free tier: next frame in ${Math.ceil(ms / 1000)} s`, null),
+        onFallback: () => status('Pollinations is busy, switching to Cloudflare Workers AI', null),
+      });
+      const label = ENGINE_LABEL[res.engine];
+      const id = await addShot(res.image, { prompt, engine: res.engine, rig: { ...state.sel } });
+      const thumbUrl = URL.createObjectURL(await thumbOf(res.image, 240));
+      takes.push({ id, image: res.image, label, thumbUrl });
+      renderTakes(takes, total, takes[0].id);
+      if (i === 0) {
+        status(null);
+        // show the first take right away; later takes keep rendering meanwhile
+        firstLoad = loadImage(res.image, { label, gradeMix: 0.45, id });
+      }
+    }
+    await firstLoad;
+    toast(total > 1 ? `${total} takes ready. Pick your hero frame, then a camera move.` : 'Shot ready. Pick a camera move, then record or add it to the storyboard.');
   } catch (err) {
     status(null);
     toast(err.message || 'The shot failed. Try again.', 'error');
+    renderTakes(takes, takes.length, takes[0]?.id);
   } finally {
     state.busy = false;
     btn.disabled = false;
@@ -445,16 +538,71 @@ function onRigChange(group, key) {
   }
 }
 
+const APERTURE_NOTE = { '1.4': 'Very shallow focus', '2.8': 'Shallow focus', '5.6': 'Moderate depth', '11': 'Deep focus' };
+
+function popGroups() {
+  const R = state.rig;
+  return {
+    camera: { title: 'Camera body', items: R.camera, key: (x) => x.id, render: (x) => [el('strong', {}, x.name), el('small', {}, x.note)] },
+    lens: { title: 'Lens', items: R.lens, key: (x) => x.id, render: (x) => [el('strong', {}, x.name), el('small', {}, x.note)] },
+    aperture: { title: 'Aperture', items: R.aperture, key: (x) => x.f, render: (x) => [el('strong', {}, `f/${x.f}`), el('small', {}, APERTURE_NOTE[x.f] || '')] },
+    aspect: { title: 'Frame', items: R.aspect, key: (x) => x.id, render: (x) => [el('strong', {}, x.name), el('small', {}, x.ratio >= 1 ? 'Landscape' : 'Portrait')] },
+  };
+}
+
+function updateChips() {
+  $('#chip-camera').textContent = find('camera', state.sel.camera).name;
+  $('#chip-lens').textContent = find('lens', state.sel.lens).name;
+  $('#chip-aperture').textContent = `f/${state.sel.aperture}`;
+  $('#chip-aspect').textContent = find('aspect', state.sel.aspect).name;
+}
+
+let popOwner = null;
+function closePop() {
+  $('#pop').hidden = true;
+  if (popOwner) popOwner.setAttribute('aria-expanded', 'false');
+  popOwner = null;
+}
+
+function openPop(group, chip) {
+  if (popOwner === chip) { closePop(); return; }
+  closePop();
+  const g = popGroups()[group];
+  const pop = $('#pop');
+  pop.innerHTML = '';
+  pop.append(el('h3', {}, g.title));
+  radioGroup(pop, g.items, g.key, g.render, (k) => {
+    onRigChange(group, k);
+    updateChips();
+    closePop();
+    chip.focus();
+  }, state.sel[group]);
+  const composer = $('#slate');
+  const left = Math.max(10, Math.min(chip.offsetLeft, composer.clientWidth - Math.min(560, composer.clientWidth - 20) - 10));
+  pop.style.left = `${left}px`;
+  pop.style.top = `${chip.offsetTop + chip.offsetHeight + 8}px`;
+  pop.hidden = false;
+  chip.setAttribute('aria-expanded', 'true');
+  popOwner = chip;
+  pop.querySelector('[aria-checked="true"]')?.focus();
+}
+
 function buildRig() {
   const R = state.rig;
-  radioGroup($('#g-camera'), R.camera, (x) => x.id, (x) => [el('strong', {}, x.name), el('small', {}, x.note)], (k) => onRigChange('camera', k), state.sel.camera);
-  radioGroup($('#g-lens'), R.lens, (x) => x.id, (x) => [el('strong', {}, x.name), el('small', {}, x.note)], (k) => onRigChange('lens', k), state.sel.lens);
-  radioGroup($('#g-aperture'), R.aperture, (x) => x.f, (x) => [`f/${x.f}`], (k) => onRigChange('aperture', k), state.sel.aperture);
+  radioGroup($('#g-genre'), R.genre, (x) => x.id, (x) => [x.name], (k) => onRigChange('genre', k), state.sel.genre);
   radioGroup($('#g-shot'), R.shot, (x) => x.id, (x) => [x.name], (k) => onRigChange('shot', k), state.sel.shot);
   radioGroup($('#g-angle'), R.angle, (x) => x.id, (x) => [x.name], (k) => onRigChange('angle', k), state.sel.angle);
   radioGroup($('#g-light'), R.light, (x) => x.id, (x) => [x.name], (k) => onRigChange('light', k), state.sel.light);
+  radioGroup($('#g-palette'), R.palette, (x) => x.id, (x) => [x.name], (k) => onRigChange('palette', k), state.sel.palette);
   radioGroup($('#g-stock'), R.stock, (x) => x.id, (x) => [x.name], (k) => onRigChange('stock', k), state.sel.stock);
-  radioGroup($('#g-aspect'), R.aspect, (x) => x.id, (x) => [x.name], (k) => onRigChange('aspect', k), state.sel.aspect);
+  document.querySelectorAll('[data-pop]').forEach((chip) => chip.addEventListener('click', () => openPop(chip.dataset.pop, chip)));
+  document.addEventListener('click', (e) => {
+    if (!popOwner) return;
+    if ($('#pop').contains(e.target) || popOwner.contains(e.target)) return;
+    closePop();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && popOwner) { const c = popOwner; closePop(); c.focus(); } });
+  updateChips();
 
   const ring = $('#lens-ring');
   for (const f of R.focal) {
@@ -492,25 +640,37 @@ function pickFocal(mm, focus = false) {
   onRigChange('focal', mm);
 }
 
+function selectMove(id) {
+  const m = moveById(id);
+  $('#move-grid').querySelectorAll('.move').forEach((x) => x.setAttribute('aria-checked', String(x.dataset.key === m.id)));
+  state.move = m.id;
+  state.duration = m.duration;
+  $('#duration').value = m.duration;
+  $('#o-duration').textContent = `${m.duration.toFixed(1)} s`;
+  updateZoom();
+  updateHud();
+  state.playing = true;
+  $('#play').textContent = 'Pause preview';
+  startLoop();
+}
+
 function buildMoves() {
   const grid = $('#move-grid');
+  const groups = $('#move-groups');
+  for (const g of GROUPS) {
+    const b = el('button', { type: 'button', role: 'tab', 'aria-selected': String(g.id === state.moveGroup), 'data-group': g.id }, g.name);
+    b.addEventListener('click', () => {
+      state.moveGroup = g.id;
+      groups.querySelectorAll('button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+      grid.querySelectorAll('.move').forEach((x) => (x.hidden = g.id !== 'all' && x.dataset.group !== g.id));
+    });
+    groups.append(b);
+  }
   for (const m of MOVES) {
     const svg = `<svg viewBox="6 6 36 28" aria-hidden="true"><rect class="stage" x="9" y="9" width="30" height="22" rx="3"/><path class="path" d="${m.icon}"/></svg>`;
-    const b = el('button', { type: 'button', class: 'move', role: 'radio', 'aria-checked': String(m.id === state.move), title: m.hint, 'data-key': m.id });
+    const b = el('button', { type: 'button', class: 'move', role: 'radio', 'aria-checked': String(m.id === state.move), title: m.hint, 'data-key': m.id, 'data-group': m.group });
     b.innerHTML = `${svg}<span>${m.name}</span>`;
-    b.addEventListener('click', () => {
-      grid.querySelectorAll('.move').forEach((x) => x.setAttribute('aria-checked', 'false'));
-      b.setAttribute('aria-checked', 'true');
-      state.move = m.id;
-      state.duration = m.duration;
-      $('#duration').value = m.duration;
-      $('#o-duration').textContent = `${m.duration.toFixed(1)} s`;
-      updateZoom();
-      updateHud();
-      state.playing = true;
-      $('#play').textContent = 'Pause preview';
-      startLoop();
-    });
+    b.addEventListener('click', () => selectMove(m.id));
     grid.append(b);
   }
 }
@@ -547,6 +707,7 @@ function applyPreset(p) {
     if (box) setGroupValue(box, k);
   }
   $('#lens-ring').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(Number(b.dataset.key) === state.sel.focal)));
+  updateChips();
   state.overrides = {};
   refreshPrompt(true);
   updateHud();
@@ -594,6 +755,13 @@ function bindUI() {
     startLoop();
   });
   $('#record').addEventListener('click', doRecord);
+  document.querySelectorAll('[data-takes]').forEach((b) => b.addEventListener('click', () => {
+    state.takes = Number(b.dataset.takes);
+    document.querySelectorAll('[data-takes]').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+  }));
+  $('#board-add').addEventListener('click', addToBoard);
+  $('#board-play').addEventListener('click', playBoard);
+  $('#board-export').addEventListener('click', exportBoard);
   $('#still').addEventListener('click', async () => {
     const blob = await renderer.readPixelsPNG();
     download(blob, `massless-frame-${Date.now()}.png`);
@@ -706,6 +874,259 @@ async function doRecord() {
   }
 }
 
+// ---------- storyboard ----------
+
+let calibrationCache = null;
+function calibrationImage() {
+  if (!calibrationCache) {
+    const scene = calibrationScene(1344, 560);
+    calibrationCache = { image: scene.canvas, depth: { ...refine(scene.depth.data, scene.depth.w, scene.depth.h), source: 'exact' } };
+  }
+  return calibrationCache;
+}
+
+function saveBoard() {
+  const slim = state.board.map(({ uid, shotId, move, duration, intensity, fx, blur, focus, range, label }) => ({ uid, shotId, move, duration, intensity, fx, blur, focus, range, label }));
+  try { localStorage.setItem('massless.board', JSON.stringify(slim)); } catch {}
+}
+
+function boardTotal() {
+  return state.board.reduce((a, c) => a + c.duration, 0);
+}
+
+function renderBoard() {
+  const list = $('#board-list');
+  list.innerHTML = '';
+  $('#board-empty').hidden = state.board.length > 0;
+  $('#board-play').disabled = state.board.length === 0;
+  $('#board-export').disabled = state.board.length === 0;
+  $('#board-total').textContent = state.board.length ? `${state.board.length} shot${state.board.length > 1 ? 's' : ''}, ${boardTotal().toFixed(1)} s` : '';
+  state.board.forEach((card, i) => {
+    const move = moveById(card.move);
+    const li = el('li', { class: `shot-card${state.activeCard === card.uid ? ' active' : ''}`, 'data-uid': card.uid },
+      el('button', { type: 'button', class: 'thumb', title: 'Open this shot', onclick: () => openCard(card) }, el('img', { src: card.thumbUrl || '', alt: `Shot ${i + 1}` })),
+      el('div', { class: 'meta' }, el('strong', {}, String(i + 1)), el('span', {}, `${move.name}, ${card.duration.toFixed(1)} s`)),
+      el('div', { class: 'ctrl' },
+        el('button', { type: 'button', 'aria-label': `Move shot ${i + 1} earlier`, onclick: () => moveCard(i, -1), disabled: i === 0 }, '←'),
+        el('button', { type: 'button', 'aria-label': `Move shot ${i + 1} later`, onclick: () => moveCard(i, 1), disabled: i === state.board.length - 1 }, '→'),
+        el('button', { type: 'button', 'aria-label': `Remove shot ${i + 1}`, onclick: () => removeCard(i) }, '×')));
+    list.append(li);
+  });
+}
+
+function moveCard(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= state.board.length) return;
+  [state.board[i], state.board[j]] = [state.board[j], state.board[i]];
+  saveBoard();
+  renderBoard();
+}
+
+function removeCard(i) {
+  state.board.splice(i, 1);
+  saveBoard();
+  renderBoard();
+}
+
+async function addToBoard() {
+  const cur = state.current;
+  if (!cur?.depth) {
+    toast('Wait for depth to finish, then add the shot.', 'error');
+    return;
+  }
+  const card = {
+    uid: `c${Date.now()}${Math.floor(Math.random() * 1e3)}`,
+    shotId: cur.id,
+    image: cur.image,
+    depth: cur.depth,
+    stats: { ...state.stats },
+    move: state.move,
+    duration: state.duration,
+    intensity: state.intensity,
+    fx: finish(),
+    blur: apertureBlur(),
+    focus: state.focusOverride ?? state.stats.subject,
+    range: [...(DEPTH_RANGE[state.sel.focal] || [0.55, 1.5])],
+    label: state.source,
+    thumbUrl: null,
+  };
+  // thumbnail: the move's own framing, rendered at 70% through
+  const wasRecording = state.recording;
+  state.recording = true;
+  drawFrame(0.7, 0);
+  card.thumbUrl = URL.createObjectURL(await thumbOf(renderer.canvas, 320));
+  state.recording = wasRecording;
+  state.board.push(card);
+  state.activeCard = card.uid;
+  saveBoard();
+  renderBoard();
+  toast(`Shot ${state.board.length} added: ${moveById(card.move).name}, ${card.duration.toFixed(1)} s.`);
+  $('#board-list').lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' });
+}
+
+async function ensureCardReady(card, i, n) {
+  if (!card.image) return false;
+  if (!card.depth) {
+    card.depth = depthCache.get(card.shotId) || null;
+    if (!card.depth) {
+      status(`Reading depth for shot ${i + 1} of ${n}`, null);
+      const d = await estimateDepth(card.image, (f, msg) => status(`${msg} (shot ${i + 1} of ${n})`, f));
+      card.depth = d;
+      depthCache.set(card.shotId, d);
+    }
+  }
+  if (!card.depth.bg) {
+    const layer = backgroundLayer(card.image, card.depth.data, card.depth.w, card.depth.h);
+    card.depth.bg = layer.bgDepth;
+    card.depth.bgColor = layer.bgColor;
+  }
+  if (!card.stats) card.stats = depthStats(card.depth.data, card.depth.w, card.depth.h);
+  return true;
+}
+
+async function prepareBoard() {
+  const n = state.board.length;
+  for (let i = 0; i < n; i++) {
+    const ok = await ensureCardReady(state.board[i], i, n);
+    if (!ok) throw new Error(`Shot ${i + 1} is missing its picture. Remove it and add it again.`);
+  }
+  status(null);
+}
+
+function markPlaying(uid) {
+  document.querySelectorAll('.shot-card').forEach((x) => x.classList.toggle('playing', x.dataset.uid === uid));
+}
+
+async function openCard(card) {
+  if (state.boardBusy) return;
+  const i = state.board.indexOf(card);
+  try {
+    await ensureCardReady(card, i, state.board.length);
+    status(null);
+  } catch (e) {
+    toast(e.message, 'error');
+    return;
+  }
+  await loadImage(card.image, { label: card.label || 'Storyboard shot', gradeMix: 1, depth: card.depth, id: card.shotId });
+  state.overrides = { ...card.fx };
+  state.focusOverride = card.focus;
+  state.intensity = card.intensity;
+  $('#intensity').value = card.intensity;
+  $('#o-intensity').textContent = `${Math.round(card.intensity * 100)}%`;
+  selectMove(card.move);
+  state.duration = card.duration;
+  $('#duration').value = card.duration;
+  $('#o-duration').textContent = `${card.duration.toFixed(1)} s`;
+  buildFinishSliders();
+  state.activeCard = card.uid;
+  renderBoard();
+}
+
+async function playBoard() {
+  if (state.boardBusy) { state.stopBoard = true; return; }
+  if (!state.board.length) return;
+  state.boardBusy = true;
+  state.stopBoard = false;
+  state.recording = true;
+  const btn = $('#board-play');
+  btn.textContent = 'Stop';
+  try {
+    await prepareBoard();
+    for (const card of state.board) {
+      if (state.stopBoard) break;
+      enterCard(card);
+      markPlaying(card.uid);
+      const start = performance.now();
+      await new Promise((resolve) => {
+        const step = (now) => {
+          const el2 = (now - start) / 1000;
+          if (state.stopBoard || el2 >= card.duration) { resolve(); return; }
+          drawCard(card, el2 / card.duration, now / 1000);
+          requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    }
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    markPlaying(null);
+    status(null);
+    btn.textContent = 'Play';
+    state.boardBusy = false;
+    state.recording = false;
+    enterLive();
+    startLoop();
+  }
+}
+
+async function exportBoard() {
+  if (state.boardBusy || !state.board.length) return;
+  state.boardBusy = true;
+  state.recording = true;
+  const btn = $('#board-export');
+  btn.disabled = true;
+  $('#tally').hidden = false;
+  try {
+    await prepareBoard();
+    const first = state.board[0];
+    const [w, h] = sizeFor(first.image.width / first.image.height, state.outSize);
+    renderer.setSize(w, h);
+    let filmTime = 0;
+    const segments = state.board.map((card) => ({
+      duration: card.duration,
+      enter: async () => { enterCard(card); markPlaying(card.uid); },
+      draw: (t, time) => {
+        drawCard(card, t, time);
+        $('#timecode').textContent = timecode(filmTime + time, state.fps);
+        if (t >= 1) filmTime += card.duration;
+      },
+    }));
+    const res = await recordSegments(renderer.canvas, {
+      segments,
+      fps: state.fps,
+      onProgress: (f) => (btn.lastChild.textContent = `Exporting ${Math.round(f * 100)}%`),
+    });
+    const item = { id: `film-${Date.now()}`, kind: 'clip', blob: res.blob, ext: res.ext, move: `Film, ${state.board.length} shots`, moveId: 'film', seconds: Math.round(boardTotal() * 10) / 10 };
+    renderReelItem(item, true);
+    download(res.blob, `massless-film-${Date.now()}.${res.ext}`);
+    toast(`Film exported: ${state.board.length} shots, ${boardTotal().toFixed(1)} s, ${res.ext.toUpperCase()}.`);
+  } catch (e) {
+    toast(`Export failed: ${e.message}`, 'error');
+  } finally {
+    markPlaying(null);
+    status(null);
+    $('#tally').hidden = true;
+    btn.disabled = false;
+    btn.lastChild.textContent = 'Export film';
+    state.boardBusy = false;
+    state.recording = false;
+    enterLive();
+    startLoop();
+  }
+}
+
+async function restoreBoard() {
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem('massless.board') || '[]'); } catch {}
+  for (const c of saved) {
+    let image = null;
+    let thumb = null;
+    if (c.shotId === 'calibration') {
+      const cal = calibrationImage();
+      image = cal.image;
+      depthCache.set('calibration', cal.depth);
+    } else {
+      const item = await store.get(c.shotId).catch(() => null);
+      if (!item) continue;
+      image = await createImageBitmap(item.blob);
+      thumb = item.thumb;
+    }
+    state.board.push({ ...c, image, depth: null, stats: null, thumbUrl: URL.createObjectURL(thumb || (await thumbOf(image, 320))) });
+  }
+  renderBoard();
+}
+
 async function restoreReel() {
   try {
     const items = await store.all();
@@ -739,12 +1160,13 @@ async function init() {
   updateHud();
   buildFinishSliders();
 
-  const scene = calibrationScene(1344, 560);
-  const cal = { ...refine(scene.depth.data, scene.depth.w, scene.depth.h), source: 'exact' };
-  await loadImage(scene.canvas, { label: 'Calibration scene', gradeMix: 0.5, depth: cal, id: 'calibration' });
+  const cal = calibrationImage();
+  depthCache.set('calibration', cal.depth);
+  await loadImage(cal.image, { label: 'Calibration scene', gradeMix: 0.5, depth: cal.depth, id: 'calibration' });
   startLoop();
   restoreReel();
-  window.massless = { state, renderer, drawFrame, updateZoom, loadImage };
+  restoreBoard();
+  window.massless = { state, renderer, drawFrame, updateZoom, loadImage, addToBoard, selectMove, enterLive, drawCard, enterCard, prepareBoard };
 }
 
 init();

@@ -42,7 +42,7 @@ with sync_playwright() as p:
           const c = m.renderer.canvas;
           const gl = m.renderer.gl;
           const grab = (t) => { m.drawFrame(t, 0); const w = c.width, h = c.height; const px = new Uint8Array(w*h*4); gl.readPixels(0,0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,px); return {px, w, h}; };
-          const a = grab(0), mid_ = grab(0.5), z = grab(1);
+          const a = grab(0), mid_ = grab(0.3), z = grab(1);
           const diff = (x, y) => { let s = 0; for (let i = 0; i < x.px.length; i += 16) s += Math.abs(x.px[i] - y.px[i]); return s / (x.px.length / 16); };
           // edge check: the clear color is (20,23,28). Count edge pixels that match it exactly-ish.
           const edgeBg = (f) => { let n = 0, tot = 0; const {px, w, h} = f;

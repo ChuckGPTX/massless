@@ -52,16 +52,37 @@
 
       <div class="lens-ring" id="lens-ring" role="radiogroup" aria-label="Focal length"></div>
 
-      <form class="slate" id="slate">
+      <form class="composer" id="slate">
         <label class="sr-only" for="subject">What's in the shot</label>
         <textarea id="subject" rows="2" placeholder="Who or what is in the shot, and where. Example: a bike courier pausing under a flickering awning, rain bouncing off the street"></textarea>
-        <div class="slate-actions">
-          <button type="submit" class="btn primary" id="shoot">Shoot</button>
-          <label class="btn ghost" for="upload">Use my own still</label>
-          <input type="file" id="upload" accept="image/*" hidden>
-          <button type="button" class="btn ghost" id="surprise">Load a preset</button>
+        <div class="composer-bar">
+          <div class="chips-row">
+            <button type="button" class="chip" data-pop="camera" aria-haspopup="dialog"><span class="chip-k">Camera</span><span class="chip-v" id="chip-camera"></span></button>
+            <button type="button" class="chip" data-pop="lens" aria-haspopup="dialog"><span class="chip-k">Lens</span><span class="chip-v" id="chip-lens"></span></button>
+            <button type="button" class="chip" data-pop="aperture" aria-haspopup="dialog"><span class="chip-k">Aperture</span><span class="chip-v" id="chip-aperture"></span></button>
+            <button type="button" class="chip" data-pop="aspect" aria-haspopup="dialog"><span class="chip-k">Frame</span><span class="chip-v" id="chip-aspect"></span></button>
+            <div class="takes-pick" role="radiogroup" aria-label="Takes per shot">
+              <span class="chip-k">Takes</span>
+              <button type="button" role="radio" aria-checked="true" data-takes="1">1</button>
+              <button type="button" role="radio" aria-checked="false" data-takes="2">2</button>
+              <button type="button" role="radio" aria-checked="false" data-takes="3">3</button>
+              <button type="button" role="radio" aria-checked="false" data-takes="4">4</button>
+            </div>
+          </div>
+          <div class="composer-actions">
+            <label class="btn ghost small" for="upload"><span class="long">Use my own still</span><span class="short">Upload</span></label>
+            <input type="file" id="upload" accept="image/*" hidden>
+            <button type="button" class="btn ghost small" id="surprise"><span class="long">Load a preset</span><span class="short">Preset</span></button>
+            <button type="submit" class="btn primary" id="shoot">Shoot</button>
+          </div>
         </div>
+        <div class="pop" id="pop" role="dialog" aria-label="Options" hidden></div>
       </form>
+
+      <div class="takes-strip" id="takes-strip" hidden>
+        <p class="fine" id="takes-label">Takes</p>
+        <ul id="takes-list"></ul>
+      </div>
 
       <details class="compiled" id="compiled">
         <summary>Prompt sent to the model</summary>
@@ -69,24 +90,35 @@
         <p class="fine">Edit freely; Shoot uses this text. Change any rig setting to rebuild it.</p>
       </details>
 
+      <section class="board" aria-label="Storyboard">
+        <div class="board-head">
+          <h2>Storyboard</h2>
+          <span class="fine" id="board-total"></span>
+          <div class="board-actions">
+            <button type="button" class="btn small" id="board-play" disabled>Play</button>
+            <button type="button" class="btn small record" id="board-export" disabled><span class="rec-dot" aria-hidden="true"></span>Export film</button>
+          </div>
+        </div>
+        <ol class="board-list" id="board-list"></ol>
+        <p class="fine" id="board-empty">Pick a move, then press <strong>Add to storyboard</strong>. Shots play in order and export as one MP4.</p>
+      </section>
+
     </section>
 
     <div class="tabs" role="tablist" aria-label="Panels">
-      <button role="tab" aria-selected="true" aria-controls="panel-rig" id="tab-rig">Rig</button>
+      <button role="tab" aria-selected="true" aria-controls="panel-rig" id="tab-rig">Scene</button>
       <button role="tab" aria-selected="false" aria-controls="panel-move" id="tab-move">Move</button>
       <button role="tab" aria-selected="false" aria-controls="panel-finish" id="tab-finish">Finish</button>
     </div>
 
     <section class="panel rig" id="panel-rig" role="tabpanel" aria-labelledby="tab-rig">
-      <h2>Rig</h2>
-      <fieldset class="group" id="g-camera"><legend>Camera</legend></fieldset>
-      <fieldset class="group" id="g-lens"><legend>Lens</legend></fieldset>
-      <fieldset class="group chips" id="g-aperture"><legend>Aperture</legend></fieldset>
+      <h2>Scene</h2>
+      <fieldset class="group chips" id="g-genre"><legend>Genre</legend></fieldset>
       <fieldset class="group chips" id="g-shot"><legend>Shot size</legend></fieldset>
       <fieldset class="group chips" id="g-angle"><legend>Angle</legend></fieldset>
       <fieldset class="group chips" id="g-light"><legend>Light</legend></fieldset>
+      <fieldset class="group chips" id="g-palette"><legend>Color palette</legend></fieldset>
       <fieldset class="group chips" id="g-stock"><legend>Film stock and grade</legend></fieldset>
-      <fieldset class="group chips" id="g-aspect"><legend>Aspect ratio</legend></fieldset>
       <fieldset class="group" id="g-engine"><legend>Engine</legend>
         <label class="select">
           <select id="engine">
@@ -107,6 +139,7 @@
 
     <section class="panel moves" id="panel-move" role="tabpanel" aria-labelledby="tab-move">
       <h2>Camera move</h2>
+      <div class="move-groups" id="move-groups" role="tablist" aria-label="Move categories"></div>
       <div class="move-grid" id="move-grid" role="radiogroup" aria-label="Camera move"></div>
       <div class="sliders">
         <label class="slider"><span>Duration <output id="o-duration">4.0 s</output></span><input type="range" id="duration" min="2" max="8" step="0.5" value="4"></label>
@@ -127,9 +160,12 @@
         </label>
       </div>
       <div class="actions">
-        <button type="button" class="btn" id="play">Pause preview</button>
+        <button type="button" class="btn primary-outline" id="board-add">Add to storyboard</button>
         <button type="button" class="btn record" id="record"><span class="rec-dot" aria-hidden="true"></span>Record clip</button>
-        <button type="button" class="btn ghost" id="still">Save frame</button>
+        <div class="row">
+          <button type="button" class="btn ghost" id="play">Pause preview</button>
+          <button type="button" class="btn ghost" id="still">Save frame</button>
+        </div>
       </div>
       <p class="fine">Tap the picture to set the focus point. Depth comes from Depth Anything V2, running on your own device.</p>
     </section>
@@ -170,10 +206,10 @@
   <dialog id="help-dialog" class="sheet">
     <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="close" aria-label="Close">×</button></form>
     <ol class="steps">
-      <li><strong>Build the rig.</strong> Pick a camera body, lens, focal length, aperture, light and film stock. These become a precise prompt you can read and edit.</li>
-      <li><strong>Shoot.</strong> A free open-weight model renders the hero frame. You can also bring your own still.</li>
-      <li><strong>Move the camera.</strong> Your device estimates depth, turns the still into 3D, and flies a virtual camera through it: dolly zoom, crash zoom, arcs, rack focus and more.</li>
-      <li><strong>Record.</strong> Export an MP4 at 24 or 30 fps, or save a frame.</li>
+      <li><strong>Build the rig.</strong> Pick a camera body, lens, focal length and aperture in the composer, and set the genre, light, palette and film stock for the scene. These become a precise prompt you can read and edit.</li>
+      <li><strong>Shoot.</strong> A free open-weight model renders the hero frame. Ask for up to four takes and pick the best one, or bring your own still.</li>
+      <li><strong>Move the camera.</strong> Your device estimates depth, turns the still into 3D, and flies a virtual camera through it. 28 moves: dolly zooms, crash zooms, orbits, cranes, pans, FPV, snorricam and more.</li>
+      <li><strong>Cut a scene.</strong> Add shots to the storyboard, reorder them, play the sequence, and export it as one MP4. Single clips and frames export too.</li>
     </ol>
     <p class="fine">Limits: people in the shot can't act, and big moves stretch the edges behind foreground objects. Keep intensity moderate for clean results.</p>
   </dialog>

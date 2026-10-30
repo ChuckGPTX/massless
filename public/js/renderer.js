@@ -429,14 +429,18 @@ export class Renderer {
         idx[k++] = b; idx[k++] = d; idx[k++] = c;
       }
     }
+    if (this.meshAspect === this.aspect && this.indexCount) return;
+    this.meshAspect = this.aspect;
     gl.bindVertexArray(this.vao);
-    const vb = gl.createBuffer();
+    if (this.vb) gl.deleteBuffer(this.vb);
+    if (this.ib) gl.deleteBuffer(this.ib);
+    const vb = (this.vb = gl.createBuffer());
     gl.bindBuffer(gl.ARRAY_BUFFER, vb);
     gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(this.scene.p, 'aUv');
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const ib = gl.createBuffer();
+    const ib = (this.ib = gl.createBuffer());
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
     gl.bindVertexArray(null);

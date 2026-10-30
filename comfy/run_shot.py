@@ -40,6 +40,7 @@ def pick(group, key):
 def compile_prompt(subject, a):
     parts = [
         subject.rstrip(". "),
+        pick("genre", a.genre)["prompt"],
         pick("shot", a.shot)["prompt"],
         pick("angle", a.angle)["prompt"],
         pick("camera", a.camera)["prompt"],
@@ -48,9 +49,10 @@ def compile_prompt(subject, a):
         pick("aperture", a.aperture)["prompt"],
         pick("light", a.light)["prompt"],
         pick("stock", a.stock)["prompt"],
+        pick("palette", a.palette)["prompt"],
         "cinematic film still, high detail, no text",
     ]
-    return ", ".join(parts)
+    return ", ".join(x for x in parts if x)
 
 
 def main():
@@ -64,6 +66,8 @@ def main():
     p.add_argument("--angle", default="eye")
     p.add_argument("--light", default="golden")
     p.add_argument("--stock", default="negative")
+    p.add_argument("--genre", default="none")
+    p.add_argument("--palette", default="natural")
     p.add_argument("--aspect", default="239")
     p.add_argument("--seed", type=int, default=None)
     p.add_argument("--out", default="out")

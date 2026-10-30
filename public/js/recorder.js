@@ -29,13 +29,15 @@ async function pickAvc(width, height, fps) {
 }
 
 /**
- * draw(t, timeSec) must render one frame onto `canvas`.
+ * Record one or more segments back to back into a single clip.
+ * segments: [{ duration, enter?: async () => void, draw(t, timeSec) }]
  * onProgress(fraction). Returns { blob, ext, mime }.
  */
-export async function recordMove(canvas, { duration, fps = 24, draw, onProgress = () => {}, signal }) {
+export async function recordSegments(canvas, { segments, fps = 24, onProgress = () => {}, signal }) {
   const width = canvas.width;
   const height = canvas.height;
-  const frames = Math.max(2, Math.round(duration * fps));
+  const counts = segments.map((s) => Math.max(2, Math.round(s.duration * fps)));
+  const total = counts.reduce((a, b) => a + b, 0);
   const cfg = await pickAvc(width, height, fps);
 
   if (cfg) {
@@ -47,18 +49,24 @@ export async function recordMove(canvas, { duration, fps = 24, draw, onProgress 
       error: (e) => { encodeError = e; },
     });
     encoder.configure(cfg);
-    for (let i = 0; i < frames; i++) {
-      if (signal?.aborted) { encoder.close(); throw new Error('Cancelled'); }
-      if (encodeError) throw encodeError;
-      const t = i / (frames - 1);
-      draw(t, i / fps);
-      const frame = new VideoFrame(canvas, { timestamp: Math.round((i * 1e6) / fps), duration: Math.round(1e6 / fps) });
-      encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 });
-      frame.close();
-      while (encoder.encodeQueueSize > 6) await yieldTask();
-      if (i % 4 === 0) {
-        onProgress(i / frames);
-        await yieldTask();
+    let n = 0;
+    for (let s = 0; s < segments.length; s++) {
+      const seg = segments[s];
+      if (seg.enter) await seg.enter();
+      const frames = counts[s];
+      for (let i = 0; i < frames; i++) {
+        if (signal?.aborted) { encoder.close(); throw new Error('Cancelled'); }
+        if (encodeError) throw encodeError;
+        seg.draw(i / (frames - 1), i / fps);
+        const frame = new VideoFrame(canvas, { timestamp: Math.round((n * 1e6) / fps), duration: Math.round(1e6 / fps) });
+        encoder.encode(frame, { keyFrame: i === 0 || i % (fps * 2) === 0 });
+        frame.close();
+        n++;
+        while (encoder.encodeQueueSize > 6) await yieldTask();
+        if (n % 4 === 0) {
+          onProgress(n / total);
+          await yieldTask();
+        }
       }
     }
     await encoder.flush();
@@ -78,23 +86,34 @@ export async function recordMove(canvas, { duration, fps = 24, draw, onProgress 
   rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
   const done = new Promise((r) => (rec.onstop = r));
   rec.start();
-  const start = performance.now();
-  await new Promise((resolve, reject) => {
-    const step = (now) => {
-      if (signal?.aborted) { rec.stop(); reject(new Error('Cancelled')); return; }
-      const el = (now - start) / 1000;
-      const t = Math.min(1, el / duration);
-      draw(t, el);
-      onProgress(t);
-      if (t < 1) requestAnimationFrame(step);
-      else resolve();
-    };
-    requestAnimationFrame(step);
-  });
+  const totalDur = segments.reduce((a, s) => a + s.duration, 0);
+  let elapsedBefore = 0;
+  for (const seg of segments) {
+    if (seg.enter) await seg.enter();
+    const start = performance.now();
+    await new Promise((resolve, reject) => {
+      const step = (now) => {
+        if (signal?.aborted) { rec.stop(); reject(new Error('Cancelled')); return; }
+        const el = (now - start) / 1000;
+        const t = Math.min(1, el / seg.duration);
+        seg.draw(t, el);
+        onProgress((elapsedBefore + Math.min(el, seg.duration)) / totalDur);
+        if (t < 1) requestAnimationFrame(step);
+        else resolve();
+      };
+      requestAnimationFrame(step);
+    });
+    elapsedBefore += seg.duration;
+  }
   await new Promise((r) => setTimeout(r, 120));
   rec.stop();
   await done;
   stream.getTracks().forEach((t) => t.stop());
   const type = rec.mimeType || mime || 'video/webm';
   return { blob: new Blob(chunks, { type }), ext: type.includes('mp4') ? 'mp4' : 'webm', mime: type };
+}
+
+/** One camera move as a clip. draw(t, timeSec) renders a frame onto `canvas`. */
+export function recordMove(canvas, { duration, fps = 24, draw, onProgress, signal }) {
+  return recordSegments(canvas, { segments: [{ duration, draw }], fps, onProgress, signal });
 }

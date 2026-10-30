@@ -11,7 +11,9 @@ The Higgs field is what gives particles mass. Massless is the version with none:
 Two paywalled features of commercial AI film studios, rebuilt clean-room from their public behavior (see [SPEC.md](SPEC.md)):
 
 1. **Cinema Studio, the shot designer.** Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio. Massless compiles these into a prompt you can read and edit, and then applies the same choices physically in post: barrel distortion on wide glass, oval bokeh and streak flares on anamorphic, glow on vintage lenses, grain and gate weave on film bodies, chroma bleed and scanlines on VHS, depth-based blur for aperture.
-2. **Camera-motion presets.** Fourteen moves on any still, generated or your own. A dolly zoom is real geometry here, not a guess by a video model.
+2. **Camera-motion presets.** 28 moves on any still, generated or your own, grouped as push and pull, orbit, crane and tilt, slide and pan, and texture. A dolly zoom is real geometry here, not a guess by a video model.
+3. **Takes and storyboard.** Render up to four takes per shot and pick the hero frame. Add shots with their moves to a storyboard, reorder them, play the scene, and export it as one stitched MP4.
+4. **Scene settings.** Project-wide genre, light, color palette and film stock, next to per-shot camera, lens, focal length, aperture and frame.
 
 ## How it stays free
 

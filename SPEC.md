@@ -22,6 +22,8 @@ This is the "oracle" step of the REA-style loop (observe → write the contract 
 | Aperture | f/1.4, f/2.8, f/5.6, f/11 |
 | Shot size, angle | extreme wide → insert; eye level, low, high, overhead, dutch, over-the-shoulder |
 | Light | 10 presets (golden hour, blue hour, neon night, …) |
+| Genre | 11 options (noir, sci-fi, western, horror, …), project-wide |
+| Color palette | 8 options, project-wide |
 | Stock / grade | 8 presets |
 | Aspect | 2.39:1, 1.85:1, 16:9, 4:5, 9:16, 1:1 |
 
@@ -39,7 +41,9 @@ This is the "oracle" step of the REA-style loop (observe → write the contract 
 **Massless contract**
 
 - Input: any still (generated or uploaded).
-- 14 presets: Breathe (static), Dolly In, Dolly Out, Crash Zoom, Dolly Zoom, Arc Left, Arc Right, Crane Up, Truck Right, Tilt Up, Handheld, Rack Focus, Bullet Time, Float.
+- 28 presets in five groups. Push and pull: dolly in/out, crash zoom in/out, zoom in/out, dolly zoom in/out, FPV dive. Orbit: arc left/right, bullet time, wide orbit, snorricam. Crane and tilt: crane up/down, tilt up/down. Slide and pan: truck left/right, pan left/right. Texture: breathe, handheld, earthquake, float, dutch roll, rack focus.
+- Multi-shot: a storyboard of shots, each with its own still, move, duration and finish, played in order and exported as one MP4 (the public material describes multi-shot scenes and shot planning).
+- Takes: 1 to 4 variations per prompt, with a picker for the hero frame (the public material describes previews and anchor selection).
 - Controls: duration 2–8 s, intensity, focus point, finish (grain, halation, vignette, aberration, grade).
 - Output: MP4 (or WebM where MP4 recording is unavailable) at 24/30 fps, plus PNG frames.
 

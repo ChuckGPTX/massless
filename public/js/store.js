@@ -41,3 +41,12 @@ export async function put(item) {
     await tx(db, 'readwrite', (s) => extra.forEach((x) => s.delete(x.id)));
   }
 }
+
+export async function get(id) {
+  const db = await open();
+  return await new Promise((resolve, reject) => {
+    const req = db.transaction(STORE).objectStore(STORE).get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
