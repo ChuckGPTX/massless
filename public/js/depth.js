@@ -165,8 +165,9 @@ function morph(src, w, h, r, isMax) {
   return out;
 }
 
-const maxFilter = (src, w, h, r) => morph(src, w, h, r, true);
-const minFilter = (src, w, h, r) => morph(src, w, h, r, false);
+/** Grayscale dilation and erosion over a (2r+1) square, edges replicated. */
+export const maxFilter = (src, w, h, r) => morph(src, w, h, r, true);
+export const minFilter = (src, w, h, r) => morph(src, w, h, r, false);
 
 /**
  * Build the background layer that sits behind foreground objects.
@@ -253,7 +254,8 @@ export function backgroundLayer(source, depth, w, h) {
   return { bgDepth, bgColor: img };
 }
 
-function boxBlur(src, w, h, r) {
+/** Box blur of a one-channel Uint8Array, radius r. */
+export function boxBlur(src, w, h, r) {
   const tmp = new Float32Array(src.length);
   const out = new Uint8Array(src.length);
   const d = 2 * r + 1;

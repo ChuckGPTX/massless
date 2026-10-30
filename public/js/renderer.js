@@ -236,7 +236,8 @@ function compile(gl, type, src) {
   return s;
 }
 
-function program(gl, vs, fs) {
+/** Compile and link a WebGL2 program; returns { p, u } with every active uniform location. */
+export function program(gl, vs, fs) {
   const p = gl.createProgram();
   gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, vs));
   gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, fs));
@@ -463,10 +464,7 @@ export class Renderer {
     const H = this.canvas.height;
     const { proj, view } = this.viewProj(cam, W / H);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-    gl.viewport(0, 0, W, H);
-    gl.clearColor(0.08, 0.09, 0.11, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    this.beginScene();
     if (this.hasImage) {
       gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LEQUAL);
@@ -506,7 +504,23 @@ export class Renderer {
       gl.bindVertexArray(null);
       gl.disable(gl.DEPTH_TEST);
     }
+    this.finish(fx, time);
+  }
 
+  /** Bind the offscreen scene target and clear it. Effects draw into it, then call finish(). */
+  beginScene(clear = [0.08, 0.09, 0.11]) {
+    const gl = this.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.clearColor(clear[0], clear[1], clear[2], 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  }
+
+  /** Lens and film pass: the scene target goes to the canvas with the finish applied. */
+  finish(fx, time) {
+    const gl = this.gl;
+    const W = this.canvas.width;
+    const H = this.canvas.height;
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, W, H);
     const { p, u } = this.post;

@@ -145,6 +145,11 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .mcard .use { position: absolute; right: 8px; bottom: 8px; padding: 4px 9px; border-radius: 7px; background: rgba(0, 0, 0, 0.6); font-size: 12px; font-weight: 600; opacity: 0; transition: opacity 0.15s; }
 .mcard:hover .use { opacity: 1; }
 .mcard[aria-checked="true"] .use { opacity: 1; background: var(--accent); color: var(--accent-ink); }
+.mcard .badge { position: absolute; left: 8px; top: 8px; padding: 3px 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.6); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.looks { display: flex; gap: 6px; flex-wrap: wrap; }
+.looks button { height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; color: var(--muted); font-size: 13px; font-weight: 500; }
+.looks button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.looks button:hover:not([aria-checked="true"]) { color: var(--text); background: var(--surface-2); }
 
 .clips-row { display: grid; grid-auto-flow: column; grid-auto-columns: 260px; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
 .clip { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }

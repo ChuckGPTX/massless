@@ -1,5 +1,6 @@
 import { Renderer, OVERSCAN } from '../renderer.js';
 import { MOVES, GROUPS, moveById } from '../moves.js';
+import { EFFECTS, effectById, defaultLook, EffectEngine } from '../effects.js';
 import { estimateDepth, depthStats, depthBackend, backgroundLayer } from '../depth.js';
 import { recordSegments } from '../recorder.js';
 import { loadRig, finishFor, apertureBlur, pick, DEPTH_RANGE } from '../rig.js';
@@ -7,7 +8,7 @@ import * as store from '../store.js';
 import { autoplayVideos, bindDialogs, toast, el, download, SAMPLES } from '../ui.js';
 
 const $ = (s) => document.querySelector(s);
-const GROUP_LABEL = { push: 'Push and pull', orbit: 'Orbit', rise: 'Crane and tilt', slide: 'Slide and pan', feel: 'Texture' };
+const GROUP_LABEL = { effects: 'Effect', push: 'Push and pull', orbit: 'Orbit', rise: 'Crane and tilt', slide: 'Slide and pan', feel: 'Texture' };
 const FINISH_CONTROLS = [
   ['dof', 'Added depth of field', 0, 1, 0.01], ['grain', 'Grain', 0, 1, 0.01], ['halation', 'Halation', 0, 1, 0.01],
   ['streak', 'Streak flares', 0, 1, 0.01], ['ca', 'Chromatic aberration', 0, 1, 0.01], ['vignette', 'Vignette', 0, 1, 0.01],
@@ -18,13 +19,14 @@ const FINISH_CONTROLS = [
 const state = {
   rig: null,
   look: { camera: '35mm', lens: 'spherical', stock: 'negative', aperture: '5.6', focal: 35, light: 'golden' },
-  move: 'dolly-in', duration: 4, intensity: 1, outSize: 1280, fps: 24, playing: true,
+  move: 'dolly-in', effect: null, effectLook: '', duration: 4, intensity: 1, outSize: 1280, fps: 24, playing: true,
   overrides: {}, focusOverride: null, stats: { subject: 0.7, near: 0.95, far: 0.1 }, zoom: 1, gradeMix: 0.45,
   current: null, // { ref, name, image, depth }
   board: [], boardBusy: false, recording: false, activeCard: null, group: 'all',
 };
 
 let renderer;
+let effects;
 let rafId = 0;
 let loopStart = performance.now();
 const depthCache = new Map();
@@ -48,16 +50,34 @@ const tighten = (cam, z) => (z > 1 ? { ...cam, fov: (2 * Math.atan(Math.tan((cam
 function updateZoom() { state.zoom = zoomFor(moveById(state.move), liveCtx()); }
 
 function drawFrame(t, time) {
-  renderer.render(tighten(moveById(state.move).fn(t, liveCtx()), state.zoom), fx(), time);
+  if (state.effect && effects?.prep && effects.prep.image === state.current?.image) effects.draw(state.effect, state.effectLook, t, liveCtx(), fx(), time, state.duration);
+  else renderer.render(tighten(moveById(state.move).fn(state.effect ? 0 : t, liveCtx()), state.zoom), fx(), time);
+}
+
+// Never queue a preview frame while the last one is still drawing: a slow GPU would otherwise pile
+// up seconds of work, and the next export or screenshot would wait for all of it.
+let inFlight = null;
+function gpuBusy() {
+  if (!inFlight) return false;
+  const gl = renderer.gl;
+  if (gl.getSyncParameter(inFlight, gl.SYNC_STATUS) !== gl.SIGNALED) return true;
+  gl.deleteSync(inFlight);
+  inFlight = null;
+  return false;
+}
+function frameSent() {
+  const gl = renderer.gl;
+  inFlight = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+  gl.flush();
 }
 
 function loop(now) {
   rafId = requestAnimationFrame(loop);
-  if (state.recording || !state.current) return;
-  const m = moveById(state.move);
-  const period = state.duration + (m.id === 'float' ? 0 : 0.7);
+  if (state.recording || !state.current || gpuBusy()) return;
+  const period = state.duration + (!state.effect && state.move === 'float' ? 0 : 0.7);
   const el2 = (now - loopStart) / 1000;
   drawFrame(state.playing ? Math.min(1, (el2 % period) / state.duration) : 0, now / 1000);
+  frameSent();
 }
 function startLoop() { cancelAnimationFrame(rafId); loopStart = performance.now(); rafId = requestAnimationFrame(loop); }
 
@@ -66,6 +86,8 @@ function setPreviewSize() {
   const [w, h] = sizeFor(renderer.aspect, Math.min(state.outSize, window.innerWidth < 760 ? 960 : 1280));
   renderer.setSize(w, h);
   $('#viewfinder').style.aspectRatio = `${renderer.aspect}`;
+  // width: 100% wins over aspect-ratio once max-height clamps, which stretched portrait stills
+  $('#viewfinder').style.width = `min(100%, calc(64vh * ${renderer.aspect}))`;
 }
 
 // ---------- status ----------
@@ -111,6 +133,7 @@ function useDepth(d, image) {
   state.stats = d.stats;
   state.focusOverride = null;
   updateZoom();
+  if (state.effect) prepareEffect();
 }
 
 /** ref: 'sample:key' | 'shot:id' | 'upload:n'. */
@@ -223,9 +246,10 @@ function buildFinishSliders() {
   }
 }
 function updateHud() {
-  const m = moveById(state.move);
-  $('#hud-move').textContent = m.name;
-  $('#move-name').textContent = m.name;
+  const name = currentName();
+  $('#hud-move').textContent = name;
+  $('#move-name').textContent = name;
+  $('#move-kind').textContent = state.effect ? 'Effect' : 'Camera move';
   $('#hud-lens').textContent = `${pick(state.rig, 'lens', state.look.lens).name} · ${state.look.focal}mm · f/${state.look.aperture}`;
 }
 
@@ -233,10 +257,12 @@ function updateHud() {
 function selectMove(id, { scroll = false } = {}) {
   const m = moveById(id);
   state.move = m.id;
+  state.effect = null;
+  $('#look-field').hidden = true;
   state.duration = m.duration;
   $('#duration').value = m.duration;
   $('#o-duration').textContent = `${m.duration.toFixed(1)} s`;
-  document.querySelectorAll('.mcard').forEach((x) => x.setAttribute('aria-checked', String(x.dataset.key === m.id)));
+  markCards(m.id);
   updateZoom();
   updateHud();
   state.playing = true;
@@ -245,10 +271,75 @@ function selectMove(id, { scroll = false } = {}) {
   if (scroll) $('#preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+const currentName = () => {
+  if (!state.effect) return moveById(state.move).name;
+  const e = effectById(state.effect);
+  const look = e.looks.find((l) => l.id === state.effectLook);
+  return look ? `${e.name} · ${look.name}` : e.name;
+};
+
+function markCards(key) {
+  document.querySelectorAll('.mcard').forEach((x) => {
+    const on = x.dataset.key === key;
+    x.setAttribute('aria-checked', String(on));
+    x.querySelector('.use').textContent = on ? 'Selected' : x.dataset.group === 'effects' ? 'Use effect' : 'Use move';
+  });
+}
+
+// ---------- effects ----------
+async function prepareEffect() {
+  const cur = state.current;
+  if (!cur?.depth || !state.effect) return;
+  if (!cur.depth.fxPrep || cur.depth.fxPrep.image !== cur.image) {
+    status('Finding the subject', null);
+    await new Promise((r) => setTimeout(r, 30));
+    if (state.current !== cur) return;
+  }
+  try { effects.prepare(cur.image, cur.depth); } catch (e) { toast(`Effect failed: ${e.message}`, 'error'); }
+  status(null);
+}
+
+function buildLooks() {
+  const box = $('#fx-looks');
+  box.innerHTML = '';
+  const e = effectById(state.effect);
+  $('#look-field').hidden = !e || !e.looks.length;
+  if (!e) return;
+  for (const l of e.looks) {
+    const b = el('button', { type: 'button', role: 'radio', 'aria-checked': String(l.id === state.effectLook) }, l.name);
+    b.addEventListener('click', () => {
+      state.effectLook = l.id;
+      box.querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+      updateHud();
+      startLoop();
+    });
+    box.append(b);
+  }
+}
+
+async function selectEffect(id, look, { scroll = false } = {}) {
+  const e = effectById(id);
+  if (!e) return;
+  state.effect = e.id;
+  state.effectLook = e.looks.some((l) => l.id === look) ? look : defaultLook(e.id);
+  state.duration = e.duration;
+  $('#duration').value = e.duration;
+  $('#o-duration').textContent = `${e.duration.toFixed(1)} s`;
+  markCards(e.id);
+  buildLooks();
+  updateHud();
+  state.playing = true;
+  $('#play').textContent = 'Pause';
+  if (scroll) $('#preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  await prepareEffect();
+  startLoop();
+}
+
 function buildLibrary() {
   const groups = $('#groups');
   const lib = $('#lib');
-  for (const g of GROUPS) {
+  const tabs = [GROUPS[0], { id: 'effects', name: 'Effects' }, ...GROUPS.slice(1)];
+  for (const g of tabs) {
     const b = el('button', { type: 'button', role: 'tab', 'aria-selected': String(g.id === 'all') }, g.name);
     b.addEventListener('click', () => {
       groups.querySelectorAll('button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
@@ -256,15 +347,18 @@ function buildLibrary() {
     });
     groups.append(b);
   }
+  for (const e of EFFECTS) {
+    const card = el('button', { type: 'button', class: 'mcard', role: 'radio', 'aria-checked': 'false', 'data-key': e.id, 'data-group': 'effects', title: e.hint },
+      el('div', { class: 'frame' }, el('video', { muted: true, loop: true, playsinline: true, preload: 'none', poster: `/media/clips/effect-${e.id}.jpg`, 'data-src': `/media/clips/effect-${e.id}.mp4` }), el('span', { class: 'badge' }, 'Effect'), el('span', { class: 'use' }, 'Use effect')),
+      el('strong', {}, e.name), el('span', {}, `${GROUP_LABEL.effects} · ${e.hint}`));
+    card.addEventListener('click', () => selectEffect(e.id, state.effect === e.id ? state.effectLook : null, { scroll: true }));
+    lib.append(card);
+  }
   for (const m of MOVES) {
     const card = el('button', { type: 'button', class: 'mcard', role: 'radio', 'aria-checked': String(m.id === state.move), 'data-key': m.id, 'data-group': m.group, title: m.hint },
       el('div', { class: 'frame' }, el('video', { muted: true, loop: true, playsinline: true, preload: 'none', poster: `/media/clips/move-${m.id}.jpg`, 'data-src': `/media/clips/move-${m.id}.mp4` }), el('span', { class: 'use' }, m.id === state.move ? 'Selected' : 'Use move')),
       el('strong', {}, m.name), el('span', {}, `${GROUP_LABEL[m.group]} · ${m.hint}`));
-    card.addEventListener('click', () => {
-      lib.querySelectorAll('.mcard .use').forEach((u) => (u.textContent = 'Use move'));
-      card.querySelector('.use').textContent = 'Selected';
-      selectMove(m.id, { scroll: true });
-    });
+    card.addEventListener('click', () => selectMove(m.id, { scroll: true }));
     lib.append(card);
   }
   lib.querySelectorAll('video').forEach((v) => { v.muted = true; });
@@ -297,14 +391,14 @@ async function doRecord() {
   const [w, h] = sizeFor(renderer.aspect, state.outSize);
   renderer.setSize(w, h);
   updateZoom();
-  const m = moveById(state.move);
+  const label = currentName();
   try {
     const res = await recordSegments(renderer.canvas, {
       segments: [{ duration: state.duration, draw: (t, time) => { drawFrame(t, time); $('#timecode').textContent = timecode(time, state.fps); } }],
       fps: state.fps,
       onProgress: (f) => ($('#record-label').textContent = `Rendering ${Math.round(f * 100)}%`),
     });
-    addClip(res.blob, res.ext, `${m.name}, ${state.duration}s`);
+    addClip(res.blob, res.ext, `${label}, ${state.duration}s`);
     toast(`Clip rendered as ${res.ext.toUpperCase()}. Download it under Your clips.`);
   } catch (e) {
     toast(`Render failed: ${e.message}`, 'error');
@@ -322,7 +416,7 @@ async function doRecord() {
 
 // ---------- storyboard ----------
 function saveBoard() {
-  const slim = state.board.map(({ uid, ref, name, move, duration, intensity, fx: f, blur: b, focus, range: r, look }) => ({ uid, ref, name, move, duration, intensity, fx: f, blur: b, focus, range: r, look }));
+  const slim = state.board.map(({ uid, ref, name, move, effect, effectLook, duration, intensity, fx: f, blur: b, focus, range: r, look }) => ({ uid, ref, name, move, effect, effectLook, duration, intensity, fx: f, blur: b, focus, range: r, look }));
   try { localStorage.setItem('massless.board2', JSON.stringify(slim)); } catch {}
 }
 const boardTotal = () => state.board.reduce((a, c) => a + c.duration, 0);
@@ -341,13 +435,14 @@ function renderBoard() {
   state.board.forEach((c, i) => {
     list.append(el('li', { class: `bcard${state.activeCard === c.uid ? ' active' : ''}`, 'data-uid': c.uid },
       el('button', { type: 'button', class: 'th', title: 'Open this shot', onclick: () => openCard(c) }, el('img', { src: c.thumbUrl || '', alt: `Shot ${i + 1}` })),
-      el('div', { class: 'meta' }, el('strong', {}, `${i + 1}. ${moveById(c.move).name}`), el('span', {}, `${c.name}, ${c.duration.toFixed(1)} s`)),
+      el('div', { class: 'meta' }, el('strong', {}, `${i + 1}. ${cardName(c)}`), el('span', {}, `${c.name}, ${c.duration.toFixed(1)} s`)),
       el('div', { class: 'ctrl' },
         el('button', { type: 'button', 'aria-label': `Move shot ${i + 1} up`, disabled: i === 0, onclick: () => moveCard(i, -1) }, '↑'),
         el('button', { type: 'button', 'aria-label': `Move shot ${i + 1} down`, disabled: i === n - 1, onclick: () => moveCard(i, 1) }, '↓'),
         el('button', { type: 'button', 'aria-label': `Remove shot ${i + 1}`, onclick: () => { state.board.splice(i, 1); saveBoard(); renderBoard(); } }, '×'))));
   });
 }
+const cardName = (c) => (c.effect && effectById(c.effect) ? effectById(c.effect).name : moveById(c.move).name);
 function moveCard(i, d) {
   const j = i + d;
   if (j < 0 || j >= state.board.length) return;
@@ -375,14 +470,14 @@ async function addToBoard() {
   state.recording = was;
   const card = {
     uid: `c${Date.now()}${Math.floor(Math.random() * 1e3)}`, ref: cur.ref, name: cur.name, image: cur.image, depth: cur.depth,
-    move: state.move, duration: state.duration, intensity: state.intensity, fx: fx(), blur: blur(),
+    move: state.move, effect: state.effect, effectLook: state.effectLook, duration: state.duration, intensity: state.intensity, fx: fx(), blur: blur(),
     focus: state.focusOverride ?? state.stats.subject, range: [...range()], look: { ...state.look }, thumbUrl,
   };
   state.board.push(card);
   state.activeCard = card.uid;
   saveBoard();
   renderBoard();
-  toast(`Shot ${state.board.length} added: ${moveById(card.move).name}, ${card.duration.toFixed(1)} s.`);
+  toast(`Shot ${state.board.length} added: ${cardName(card)}, ${card.duration.toFixed(1)} s.`);
 }
 
 async function ensureCard(card, i, n) {
@@ -421,8 +516,12 @@ function enterCard(card) {
   renderer.setDepth(card.depth.data, card.depth.w, card.depth.h, card.depth.bg);
   card.ctx = ctxFor(card.depth.stats, card.intensity, card.blur, card.focus);
   card.zoom = zoomFor(moveById(card.move), card.ctx);
+  if (card.effect && effectById(card.effect)) effects.prepare(card.image, card.depth);
 }
-const drawCard = (card, t, time) => renderer.render(tighten(moveById(card.move).fn(t, card.ctx), card.zoom), card.fx, time);
+function drawCard(card, t, time) {
+  if (card.effect && effectById(card.effect)) effects.draw(card.effect, card.effectLook, t, card.ctx, card.fx, time, card.duration);
+  else renderer.render(tighten(moveById(card.move).fn(t, card.ctx), card.zoom), card.fx, time);
+}
 function enterLive() {
   const cur = state.current;
   if (!cur) return;
@@ -431,6 +530,7 @@ function enterLive() {
   if (cur.depth) { renderer.setDepth(cur.depth.data, cur.depth.w, cur.depth.h, cur.depth.bg); renderer.setBackgroundColor(cur.depth.bgColor || cur.image); }
   setPreviewSize();
   updateZoom();
+  if (state.effect && cur.depth) effects.prepare(cur.image, cur.depth);
 }
 const markPlaying = (uid) => document.querySelectorAll('.bcard').forEach((x) => x.classList.toggle('playing', x.dataset.uid === uid));
 
@@ -445,7 +545,8 @@ async function openCard(card) {
   state.intensity = card.intensity;
   $('#intensity').value = card.intensity;
   $('#o-intensity').textContent = `${Math.round(card.intensity * 100)}%`;
-  selectMove(card.move);
+  if (card.effect && effectById(card.effect)) await selectEffect(card.effect, card.effectLook);
+  else selectMove(card.move);
   state.duration = card.duration;
   $('#duration').value = card.duration;
   $('#o-duration').textContent = `${card.duration.toFixed(1)} s`;
@@ -473,7 +574,7 @@ async function playBoard() {
         const step = (now) => {
           const e = (now - start) / 1000;
           if (state.stopBoard || e >= card.duration) { resolve(); return; }
-          drawCard(card, e / card.duration, now / 1000);
+          if (!gpuBusy()) { drawCard(card, e / card.duration, now / 1000); frameSent(); }
           requestAnimationFrame(step);
         };
         requestAnimationFrame(step);
@@ -601,7 +702,7 @@ function route() {
 }
 
 async function init() {
-  try { renderer = new Renderer($('#view')); } catch (e) { status(e.message); return; }
+  try { renderer = new Renderer($('#view')); effects = new EffectEngine(renderer); } catch (e) { status(e.message); return; }
   state.rig = await loadRig();
   syncLookControls();
   buildFinishSliders();
@@ -611,12 +712,13 @@ async function init() {
   bindDialogs();
   const p = new URLSearchParams(location.search);
   if (p.get('move')) selectMove(p.get('move'));
+  if (p.get('effect') && effectById(p.get('effect'))) selectEffect(p.get('effect'), p.get('look'));
   startLoop();
   route();
   if (p.get('shot')) await loadShot(p.get('shot'));
   else await loadSample(p.get('sample') || 'rider');
   restoreBoard();
-  window.massless = { state, renderer, drawFrame, updateZoom, selectMove, addToBoard, prepareBoard, enterCard, drawCard, enterLive, loadSample };
+  window.massless = { state, renderer, effects, drawFrame, updateZoom, selectMove, selectEffect, addToBoard, prepareBoard, enterCard, drawCard, enterLive, loadSample };
 }
 
 init();

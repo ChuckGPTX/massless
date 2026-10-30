@@ -49,6 +49,10 @@ export async function recordSegments(canvas, { segments, fps = 24, onProgress = 
       error: (e) => { encodeError = e; },
     });
     encoder.configure(cfg);
+    // Wait for each frame to finish drawing before it is captured. Without this a slow GPU (or a
+    // software one) collects frames faster than it draws them, and the encoder can stall for minutes.
+    const gl = canvas.getContext?.('webgl2') || null;
+    const one = new Uint8Array(4);
     let n = 0;
     for (let s = 0; s < segments.length; s++) {
       const seg = segments[s];
@@ -58,6 +62,7 @@ export async function recordSegments(canvas, { segments, fps = 24, onProgress = 
         if (signal?.aborted) { encoder.close(); throw new Error('Cancelled'); }
         if (encodeError) throw encodeError;
         seg.draw(i / (frames - 1), i / fps);
+        if (gl) gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, one);
         const frame = new VideoFrame(canvas, { timestamp: Math.round((n * 1e6) / fps), duration: Math.round(1e6 / fps) });
         encoder.encode(frame, { keyFrame: i === 0 || i % (fps * 2) === 0 });
         frame.close();

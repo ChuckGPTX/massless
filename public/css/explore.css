@@ -87,7 +87,7 @@
 .btn-accent.big { min-height: 50px; padding: 0 24px; font-size: 16px; border-radius: 10px; align-self: flex-start; margin-top: auto; box-shadow: 0 8px 30px rgba(255, 191, 47, 0.18); }
 .promo:hover .btn-accent { background: var(--accent-hi); }
 
-.tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .tool {
   display: flex; flex-direction: column; padding: 18px 18px 17px; border-radius: 10px;
   background: var(--surface); border: 1px solid var(--line); transition: background 0.15s, border-color 0.15s;
