@@ -90,8 +90,8 @@ async function applySpec(spec, { rescore = true } = {}) {
   state.lay = renderer.setSpec(spec);
   await renderer.loadImages(spec.blocks.filter((b) => b.type === 'image').map((b) => b.src));
   renderSheet();
-  renderChecks();
   if (rescore) await scoreIt();
+  renderChecks();
   $('#export').disabled = false;
   $('#src-label').textContent = `${state.source === 'llm' ? 'Llama 3.3 wrote it' : 'Built-in template'} · ${(FALLBACK_STYLES.find((s) => s.id === spec.style) || {}).name || spec.style} · ${spec.bpm} BPM`;
   seek(0);

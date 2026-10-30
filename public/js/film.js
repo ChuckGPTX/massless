@@ -230,17 +230,15 @@ R.hero = (g, W, H, lb, blk, env) => {
   g.transform(1, 0, Math.sin(angle) * -0.18, 1, 0, 0);
   const acc = env.pal.accent;
   extruded(g, text, sz, 26, '#f7f7f3', (d) => `rgba(${hexRgb(acc)},${0.95 - d * 0.55})`, angle);
-  // light sweep across the face
-  g.globalCompositeOperation = 'source-atop';
+  // light sweep across the face: refill the letters with a moving highlight (font and alignment are still set)
   const sx = (-0.7 + 1.4 * ease.inOut(t)) * W;
   const lg = g.createLinearGradient(sx - W * 0.2, 0, sx + W * 0.2, 0);
   lg.addColorStop(0, 'rgba(255,255,255,0)');
   lg.addColorStop(0.5, 'rgba(255,255,255,0.55)');
   lg.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = lg;
-  g.fillRect(-W, -H, W * 2, H * 2);
+  g.fillText(text, 0, 0);
   g.restore();
-  g.globalCompositeOperation = 'source-over';
   if (blk.sub) {
     const p = ease.out((lb - 1) * 1.5);
     g.globalAlpha = p;
