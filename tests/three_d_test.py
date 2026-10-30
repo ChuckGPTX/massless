@@ -7,7 +7,7 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file_
 class H(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
         p = path.split('?')[0].split('#')[0]
-        if p.rstrip('/') in ('/image', '/video', '/audio', '/3d'): p = p.rstrip('/') + '/index.html'
+        if p.rstrip('/') in ('/image', '/video', '/audio', '/3d', '/film', '/office'): p = p.rstrip('/') + '/index.html'
         return super().translate_path(p)
     def log_message(self, *a): pass
 socketserver.TCPServer.allow_reuse_address = True

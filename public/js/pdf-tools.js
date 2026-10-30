@@ -29,6 +29,11 @@ export async function openPdfjs(bytes) {
   }
 }
 
+/** Free a pdf.js document and its worker. pdf.js 6 moved destroy() from the document to its loading task. */
+export function closePdf(pdf) {
+  try { return (pdf?.destroy ? pdf.destroy() : pdf?.loadingTask?.destroy())?.catch?.(() => {}); } catch { return undefined; }
+}
+
 /** Open bytes with pdf-lib for writing. */
 export async function openPdfLib(bytes) {
   const { PDFDocument } = await loadPdfLib();
@@ -183,7 +188,7 @@ export async function pdfToImages(bytes, { format = 'png', scale = 2, pages, onP
       canvas.width = canvas.height = 0;
     }
   } finally {
-    pdf.destroy();
+    closePdf(pdf);
   }
   return out;
 }
@@ -277,7 +282,7 @@ export async function compressPdf(bytes, { quality = 0.6, dpi = 110, onProgress 
       canvas.width = canvas.height = 0;
     }
   } finally {
-    pdf.destroy();
+    closePdf(pdf);
   }
   out.setProducer('Massless Office');
   return out.save();
@@ -305,7 +310,7 @@ export async function extractText(bytes, { maxChars = Infinity, onProgress, pdf:
       size += block.length;
     }
   } finally {
-    if (!given) pdf.destroy();
+    if (!given) closePdf(pdf);
   }
   const text = parts.join('\n');
   return Number.isFinite(maxChars) ? text.slice(0, maxChars) : text;

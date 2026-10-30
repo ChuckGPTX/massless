@@ -16,6 +16,7 @@ Four pages, laid out like a commercial AI film studio, with every paid model swa
 | **Image** (`/image`) | Cinema Studio, the shot designer. Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio, genre and palette compile into a prompt you can read and edit. Up to four takes per prompt with FLUX.1 schnell. |
 | **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
 | **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
+| **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
 | **Audio** (`/audio`) | Voiceover from a script with eight open Kokoro voices, and sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. |
 
 Everything a visitor makes is stored in their own browser (IndexedDB). There are no accounts.
@@ -96,6 +97,7 @@ python3 tests/render_test.py          # every move: first, middle and last frame
 python3 tests/pages_test.py           # Video: render a clip, build and export a storyboard; Audio: render a bed
 python3 tests/pages_test.py voice audio   # also generates a Kokoro voiceover (downloads the model once)
 python3 tests/audio_test.py           # audio engine: every voice and every bed
+python3 tests/office_test.py          # Office: every convert operation, edit and save, and Ask against a mock
 python3 tests/three_d_test.py         # 3D: depth splat from a sample, then the Idol path against a mock server
 python3 tools/bake_depth.py           # precompute depth for the sample stills (public/media/depth)
 python3 tests/shots.py out "/!@1440x900" "/video@390x844"   # screenshots, ! = full page
