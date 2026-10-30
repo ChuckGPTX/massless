@@ -4,6 +4,7 @@
 // timestamps are shifted back into place. Captions are rebuilt from the segments as sentence-level cues.
 
 import { encodeWav, decodeToMono } from './audio-engine.js';
+import { apiFetch } from './human.js';
 
 export const ASR_RATE = 16000;
 export const BYTES_PER_SECOND = ASR_RATE * 2;
@@ -88,7 +89,7 @@ export async function transcribeParts(samples, parts, { lang = '', translate = f
     onPart?.(i, 'sending');
     let res;
     try {
-      res = await fetch(`/api/transcribe${qs ? `?${qs}` : ''}`, { method: 'POST', headers: { 'content-type': 'audio/wav' }, body: partWav(samples, parts[i]) });
+      res = await apiFetch(`/api/transcribe${qs ? `?${qs}` : ''}`, { method: 'POST', headers: { 'content-type': 'audio/wav' }, body: partWav(samples, parts[i]) });
     } catch {
       const err = new Error('Could not reach the transcriber. Check your connection and try again.');
       onPart?.(i, 'error', err);

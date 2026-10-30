@@ -1,6 +1,7 @@
-// Massless Worker: serves the static app and a small free-tier image API.
-// POST /api/shot runs FLUX.1 [schnell] (Apache-2.0) on Cloudflare Workers AI.
-// A daily cap keeps usage inside the 10,000 free Neurons per day, so this costs $0 on any plan.
+// Massless Worker: serves the static app and the free-tier model APIs on Cloudflare Workers AI.
+// /api/shot (images), /api/beats and /api/ask (Llama 3.3), /api/tts (MeloTTS), /api/transcribe (Whisper).
+// Daily caps keep usage inside the 10,000 free Neurons per day, so this costs $0 on any plan.
+// /api/human trades a Cloudflare Turnstile token for a pass cookie that the model endpoints ask for.
 
 const MODEL = '@cf/black-forest-labs/flux-1-schnell';
 // Open-weight image models on Workers AI, all inside the free daily allowance. Partner models are left out.
@@ -21,6 +22,62 @@ const MAX_PROMPT = 1800;
 
 const json = (body, status = 200, extra = {}) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...extra } });
+
+// Every model call goes through AI Gateway when AI_GATEWAY names one: request analytics and a burst rate
+// limit in front of the free allowance. Logging and caching are off on that gateway, so scripts, documents
+// and audio are not stored there either.
+const ai = (env, model, input) => (env.AI_GATEWAY ? env.AI.run(model, input, { gateway: { id: env.AI_GATEWAY, skipCache: true } }) : env.AI.run(model, input));
+
+// ---------- proof of human (Cloudflare Turnstile) ----------
+// Endpoints that spend the free allowance ask for a pass cookie. Without one they answer 401
+// { human: true, sitekey }; the page runs Turnstile, posts the token to /api/human and gets a signed
+// cookie for PASS_HOURS. The check is off unless TURNSTILE_SITEKEY, TURNSTILE_SECRET and PASS_KEY are set.
+const GATED = new Set(['/api/shot', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe']);
+const PASS_COOKIE = 'ml_pass';
+const PASS_HOURS = 6;
+const humanOn = (env) => !!(env.TURNSTILE_SITEKEY && env.TURNSTILE_SECRET && env.PASS_KEY);
+
+async function passSig(env, exp) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(env.PASS_KEY), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const mac = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`massless-pass:${exp}`)));
+  return btoa(String.fromCharCode(...mac)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function sameString(a, b) {
+  if (a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+
+async function needsHuman(request, env) {
+  if (!humanOn(env)) return null;
+  const m = (request.headers.get('cookie') || '').match(/(?:^|;\s*)ml_pass=([0-9]+)\.([A-Za-z0-9_-]+)/);
+  if (m && Number(m[1]) > Date.now() / 1000 && sameString(m[2], await passSig(env, m[1]))) return null;
+  return json({ error: 'One quick check that you are human, then this runs.', human: true, sitekey: env.TURNSTILE_SITEKEY }, 401);
+}
+
+async function humanPass(request, env) {
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  if (!humanOn(env)) return json({ ok: true, off: true });
+  let token = '';
+  try { token = String((await request.json()).token || ''); } catch { /* empty */ }
+  if (!token || token.length > 4096) return json({ error: 'The human check sent no token. Try again.' }, 400);
+  const form = new FormData();
+  form.append('secret', env.TURNSTILE_SECRET);
+  form.append('response', token);
+  const ip = request.headers.get('cf-connecting-ip');
+  if (ip) form.append('remoteip', ip);
+  let out;
+  try {
+    out = await (await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form })).json();
+  } catch {
+    return json({ error: 'The human check is unavailable right now. Try again in a minute.' }, 502);
+  }
+  if (!out || !out.success) return json({ error: 'The human check failed. Reload the page and try again.' }, 403);
+  const exp = Math.floor(Date.now() / 1000) + PASS_HOURS * 3600;
+  return json({ ok: true }, 200, { 'set-cookie': `${PASS_COOKIE}=${exp}.${await passSig(env, exp)}; Path=/api; Max-Age=${PASS_HOURS * 3600}; HttpOnly; Secure; SameSite=Strict` });
+}
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -70,7 +127,7 @@ async function shot(request, env) {
   const opts = { width: dim(body.width, 1024), height: dim(body.height, 1024), negative: body.negative ? String(body.negative).slice(0, 400) : undefined, seed: Number.isFinite(Number(body.seed)) ? Math.abs(Math.floor(Number(body.seed))) % 4294967295 : undefined };
   let result;
   try {
-    result = await env.AI.run(pick.id, clean(pick.input(prompt, opts)));
+    result = await ai(env, pick.id, clean(pick.input(prompt, opts)));
   } catch (e) {
     return json({ error: `Workers AI could not render this frame: ${e.message || e}` }, 502);
   }
@@ -127,7 +184,7 @@ async function beats(request, env) {
   if (total >= Number(env.BEATS_CAP || 60) || mine >= Number(env.PER_VISITOR_BEATS || 10)) return json({ error: 'The free script writer is resting for today. The built-in template still works.' }, 429);
   let result;
   try {
-    result = await env.AI.run(LLM, {
+    result = await ai(env, LLM, {
       messages: [
         { role: 'system', content: BEAT_RULES },
         { role: 'user', content: `Product: ${name || 'unnamed'}\nBrief: ${brief || name}\nWrite ${count} blocks.` },
@@ -169,7 +226,7 @@ async function ask(request, env) {
   if (total >= Number(env.ASK_CAP || 30) || mine >= Number(env.PER_VISITOR_ASK || 8)) return json({ error: 'The free document assistant is resting for today. It resets at midnight UTC.' }, 429);
   let result;
   try {
-    result = await env.AI.run(LLM, {
+    result = await ai(env, LLM, {
       messages: [
         { role: 'system', content: 'You answer questions about one document. Use only the document. If the answer is not in it, say so plainly. Be concise and quote short phrases when useful.' },
         { role: 'user', content: `Document:\n"""\n${text}\n"""\n\nQuestion: ${question}` },
@@ -201,7 +258,7 @@ async function tts(request, env) {
   const gate = await allow(request, env, 'tts', Number(env.TTS_CAP || 300), Number(env.PER_VISITOR_TTS || 40));
   if (gate) return gate;
   let result;
-  try { result = await env.AI.run('@cf/myshell-ai/melotts', { prompt: text, lang }); } catch (e) { return json({ error: `Workers AI could not speak this: ${e.message || e}` }, 502); }
+  try { result = await ai(env, '@cf/myshell-ai/melotts', { prompt: text, lang }); } catch (e) { return json({ error: `Workers AI could not speak this: ${e.message || e}` }, 502); }
   const audio = result && (result.audio || result);
   if (typeof audio !== 'string') return json({ error: 'Workers AI returned no audio.' }, 502);
   const bytes = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0));
@@ -229,7 +286,7 @@ async function transcribe(request, env) {
   const input = { audio: b64, task: q.get('task') === 'translate' ? 'translate' : 'transcribe', vad_filter: true };
   if (/^[a-z]{2}$/.test(q.get('lang') || '')) input.language = q.get('lang');
   let result;
-  try { result = await env.AI.run('@cf/openai/whisper-large-v3-turbo', input); } catch (e) { return json({ error: `Workers AI could not transcribe this: ${e.message || e}` }, 502); }
+  try { result = await ai(env, '@cf/openai/whisper-large-v3-turbo', input); } catch (e) { return json({ error: `Workers AI could not transcribe this: ${e.message || e}` }, 502); }
   return json({ text: result.text || '', vtt: result.vtt || '', segments: (result.segments || []).map((s) => ({ start: s.start, end: s.end, text: s.text })), language: result.transcription_info?.language || input.language || '', duration: result.transcription_info?.duration || null, model: '@cf/openai/whisper-large-v3-turbo' });
 }
 
@@ -380,6 +437,11 @@ async function fromOrigin(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.pathname === '/api/human') return humanPass(request, env);
+    if (GATED.has(url.pathname) && request.method === 'POST') {
+      const stop = await needsHuman(request, env);
+      if (stop) return stop;
+    }
     if (url.pathname === '/api/shot') return shot(request, env);
     if (url.pathname === '/api/beats') return beats(request, env);
     if (url.pathname === '/api/ask') return ask(request, env);

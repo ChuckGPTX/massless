@@ -1,6 +1,7 @@
 import { FilmRenderer, PALETTES, BLOCKS, layout, check, templateSpec, sanitizeSpec } from '../film.js';
 import * as store from '../store.js';
 import { bindDialogs, toast, el } from '../ui.js';
+import { apiFetch } from '../human.js';
 
 const $ = (s) => document.querySelector(s);
 const FALLBACK_STYLES = [
@@ -72,7 +73,7 @@ async function writeSpec() {
   if ($('#use-llm').checked && brief) {
     status('Llama 3.3 is writing the beat sheet', null);
     try {
-      const r = await fetch('/api/beats', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name, brief, length }), signal: AbortSignal.timeout(30000) });
+      const r = await apiFetch('/api/beats', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name, brief, length }), signal: AbortSignal.timeout(30000) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
       const spec = sanitizeSpec(j.spec, base);

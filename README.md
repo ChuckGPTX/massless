@@ -40,6 +40,11 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 
 The `/api/shot` Worker keeps itself inside Cloudflare's 10,000 free Neurons per day with a daily cap (`DAILY_CAP`, default 120 frames) and a per-visitor cap (`PER_VISITOR_CAP`, default 12). When the cap is hit the app keeps working through Pollinations or your ComfyUI.
 
+Every endpoint that spends the free allowance (`/api/shot`, `/api/beats`, `/api/ask`, `/api/tts`, `/api/transcribe`) has its own daily and per-visitor cap, and two free Cloudflare services sit in front of them:
+
+- **Turnstile.** Once every six hours a visitor's browser passes an invisible Cloudflare Turnstile check (`public/js/human.js`), trades the token at `/api/human` for a signed cookie, and retries the request. Bots can't drain the caps, and nothing about the visitor is stored. Set `TURNSTILE_SITEKEY` and the secrets `TURNSTILE_SECRET` and `PASS_KEY` to turn it on; without them the check is off.
+- **AI Gateway.** Model calls go through the `massless` gateway (`AI_GATEWAY`) for request analytics and a burst rate limit. Logging and caching are off on that gateway, so scripts, documents and audio are not kept there.
+
 ## How the camera moves work
 
 1. Depth Anything V2 estimates a depth map of the still, on the visitor's device.
@@ -101,6 +106,7 @@ python3 tests/pages_test.py voice audio   # also generates a Kokoro voiceover (d
 python3 tests/audio_test.py           # audio engine: every voice and every bed
 python3 tests/audio_page_test.py      # Audio page: MeloTTS chunking, Captions (short, CJK, 10-minute split) against mocks
 python3 tests/office_test.py          # Office: every convert operation, edit and save, and Ask against a mock
+python3 tests/human_test.py           # the Turnstile human check: one check for concurrent calls, retries, readable failures
 python3 tests/three_d_test.py         # 3D: depth splat from a sample, then the Idol path against a mock server
 python3 tools/bake_depth.py           # precompute depth for the sample stills (public/media/depth)
 python3 tests/shots.py out "/!@1440x900" "/video@390x844"   # screenshots, ! = full page

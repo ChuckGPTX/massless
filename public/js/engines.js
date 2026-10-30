@@ -4,6 +4,8 @@
 //  2. Pollinations community API: free, no key, NVIDIA Sana, 1 image per 45 seconds per IP.
 //  3. Your own ComfyUI: your GPU, the FLUX.1 schnell workflow in /comfy, no limits.
 
+import { apiFetch } from './human.js';
+
 export const ENGINES = {
   auto: { name: 'Free cloud', detail: 'Cloudflare Workers AI first, Pollinations as backup' },
   workers: { name: 'Cloudflare Workers AI', detail: 'Open models on our Worker, daily cap' },
@@ -160,7 +162,7 @@ export function workersBody({ prompt, w, h, seed, model = DEFAULT_MODEL, negativ
 
 export async function viaWorkers(opts) {
   const body = workersBody(opts);
-  const res = await fetch('/api/shot', {
+  const res = await apiFetch('/api/shot', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),

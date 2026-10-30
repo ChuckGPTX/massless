@@ -4,19 +4,39 @@
   "name": "massless",
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
+  // With Wrangler the app is served as Workers Static Assets and the Worker only runs for /api/*.
+  // Without the ASSETS binding the Worker serves the app itself from this GitHub repo (see src/index.js).
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
+    "html_handling": "drop-trailing-slash",
     "run_worker_first": ["/api/*"]
   },
   "ai": { "binding": "AI" },
   "kv_namespaces": [
     { "binding": "MASSLESS_KV", "id": "3535dddb25a642238792cef5f666aff6" }
   ],
+  // Secrets, set in Cloudflare and never in this file: TURNSTILE_SECRET (the Turnstile widget's secret)
+  // and PASS_KEY (random key that signs the human-check cookie). Without them the human check is off.
   "vars": {
-    // FLUX.1 schnell is roughly 50 Neurons per frame; 120 frames stays well inside the 10,000 free Neurons per day.
+    // Daily caps keep every endpoint inside the 10,000 free Neurons per day.
+    // FLUX.1 schnell is roughly 50 Neurons per frame.
     "DAILY_CAP": "120",
-    "PER_VISITOR_CAP": "12"
+    "PER_VISITOR_CAP": "12",
+    "BEATS_CAP": "60",
+    "PER_VISITOR_BEATS": "10",
+    "ASK_CAP": "30",
+    "PER_VISITOR_ASK": "8",
+    "TTS_CAP": "300",
+    "PER_VISITOR_TTS": "40",
+    "ASR_CAP": "120",
+    "PER_VISITOR_ASR": "15",
+    // Branch the Worker serves the app from when there is no ASSETS binding.
+    "ASSET_REF": "main",
+    // AI Gateway in front of every model call (logs and caching off; burst rate limit on).
+    "AI_GATEWAY": "massless",
+    // Public Turnstile site key for massless.chucksi.com.
+    "TURNSTILE_SITEKEY": "0x4AAAAAAFtDPWdw4pzGXhHG"
   },
   "observability": { "enabled": true }
 }

@@ -1,7 +1,10 @@
 // Free, in-browser audio for Massless.
 // Voices: Kokoro-82M (Apache-2.0, open weights) through kokoro-js, on WebGPU when available,
 // otherwise WebAssembly. Ambience beds: synthesized from scratch with OfflineAudioContext.
-// Nothing is uploaded and no paid API is called: text and audio never leave the visitor's machine.
+// Kokoro and the beds never leave the visitor's machine. MeloTTS (more languages) sends only the script to
+// Cloudflare Workers AI, through /api/tts. No paid API is called.
+
+import { apiFetch } from './human.js';
 
 // kokoro-js bundles its own Transformers.js (3.5.1) and phonemizer, so it loads independently of depth.js.
 const KOKORO_URL = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
@@ -321,7 +324,7 @@ export async function speakMelo(text, { lang = 'en', onProgress } = {}) {
     onProgress?.(chunks.length > 1 ? i / chunks.length : null, chunks.length > 1 ? `Part ${i + 1} of ${chunks.length}` : 'Speaking');
     let res;
     try {
-      res = await fetch('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: chunks[i].text, lang }) });
+      res = await apiFetch('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: chunks[i].text, lang }) });
     } catch {
       throw new Error('could not reach Cloudflare. Check your connection and try again.');
     }

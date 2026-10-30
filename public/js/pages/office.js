@@ -1,5 +1,6 @@
 import * as T from '../pdf-tools.js';
 import { bindDialogs, toast, el, download } from '../ui.js';
+import { apiFetch } from '../human.js';
 
 const $ = (s) => document.querySelector(s);
 const svg = (paths, cls = '') => `<svg viewBox="0 0 16 16" aria-hidden="true"${cls ? ` class="${cls}"` : ''}>${paths}</svg>`;
@@ -814,7 +815,7 @@ async function ask() {
     label.textContent = 'Thinking';
     let res;
     try {
-      res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q, text: state.askText }) });
+      res = await apiFetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q, text: state.askText }) });
     } catch {
       answerCard(q, "Couldn't reach the server. Check your connection and try again.", '', 'warn');
       return;
