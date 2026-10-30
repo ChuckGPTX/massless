@@ -127,59 +127,46 @@ export function refine(data, w, h) {
   return { data: b, w, h };
 }
 
-function maxFilter(src, w, h, r) {
+// Running max/min over a (2r+1) window in linear time (van Herk / Gil-Werman), edges replicated.
+function runFilter1D(src, n, r, isMax, get, set, scratch) {
+  const W = 2 * r + 1;
+  const len = n + 2 * r;
+  const pad = scratch.pad;
+  const g = scratch.g;
+  const hh = scratch.h;
+  for (let i = 0; i < len; i++) pad[i] = get(Math.min(n - 1, Math.max(0, i - r)));
+  for (let i = 0; i < len; i++) {
+    const v = pad[i];
+    g[i] = i % W === 0 ? v : isMax ? (v > g[i - 1] ? v : g[i - 1]) : (v < g[i - 1] ? v : g[i - 1]);
+  }
+  for (let i = len - 1; i >= 0; i--) {
+    const v = pad[i];
+    hh[i] = i === len - 1 || (i + 1) % W === 0 ? v : isMax ? (v > hh[i + 1] ? v : hh[i + 1]) : (v < hh[i + 1] ? v : hh[i + 1]);
+  }
+  for (let i = 0; i < n; i++) {
+    const x = hh[i];
+    const y = g[i + 2 * r];
+    set(i, isMax ? (x > y ? x : y) : (x < y ? x : y));
+  }
+}
+
+function morph(src, w, h, r, isMax) {
   const tmp = new Uint8Array(src.length);
   const out = new Uint8Array(src.length);
+  const L = Math.max(w, h) + 2 * r;
+  const scratch = { pad: new Uint8Array(L), g: new Uint8Array(L), h: new Uint8Array(L) };
   for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      let m = 0;
-      for (let k = -r; k <= r; k++) {
-        const xx = Math.min(w - 1, Math.max(0, x + k));
-        const v = src[y * w + xx];
-        if (v > m) m = v;
-      }
-      tmp[y * w + x] = m;
-    }
+    const row = y * w;
+    runFilter1D(src, w, r, isMax, (i) => src[row + i], (i, v) => (tmp[row + i] = v), scratch);
   }
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      let m = 0;
-      for (let k = -r; k <= r; k++) {
-        const yy = Math.min(h - 1, Math.max(0, y + k));
-        const v = tmp[yy * w + x];
-        if (v > m) m = v;
-      }
-      out[y * w + x] = m;
-    }
+  for (let x = 0; x < w; x++) {
+    runFilter1D(tmp, h, r, isMax, (i) => tmp[i * w + x], (i, v) => (out[i * w + x] = v), scratch);
   }
   return out;
 }
 
-function minFilter(src, w, h, r) {
-  const tmp = new Uint8Array(src.length);
-  const out = new Uint8Array(src.length);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      let m = 255;
-      for (let k = -r; k <= r; k++) {
-        const v = src[y * w + Math.min(w - 1, Math.max(0, x + k))];
-        if (v < m) m = v;
-      }
-      tmp[y * w + x] = m;
-    }
-  }
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      let m = 255;
-      for (let k = -r; k <= r; k++) {
-        const v = tmp[Math.min(h - 1, Math.max(0, y + k)) * w + x];
-        if (v < m) m = v;
-      }
-      out[y * w + x] = m;
-    }
-  }
-  return out;
-}
+const maxFilter = (src, w, h, r) => morph(src, w, h, r, true);
+const minFilter = (src, w, h, r) => morph(src, w, h, r, false);
 
 /**
  * Build the background layer that sits behind foreground objects.
