@@ -73,6 +73,64 @@ async function shot(request, env) {
   });
 }
 
+// POST /api/beats writes a kinetic-film beat sheet with Llama 3.3 70B on Workers AI, inside the same
+// free daily allowance. The page validates the JSON and falls back to its own template if anything is off.
+const LLM = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+const BEAT_RULES = `You write beat sheets for kinetic typography launch films (huge words cut on the beat, like an Apple or Nike launch film).
+Reply with JSON only, no prose: {"title": string, "blocks": [block, ...]}.
+Block types and fields:
+- {"type":"words","beats":4,"words":[4 short punchy words, max 12 chars each],"mode":"slam"|"stack"|"split"}
+- {"type":"strike","beats":4,"text":"the old way, max 18 chars","then":"the new way, max 14 chars"}
+- {"type":"prompt","beats":8,"text":"a lowercase request someone would type, max 80 chars"}
+- {"type":"hero","beats":8,"text":"product name","sub":"three short values joined with ' · '"}
+- {"type":"counter","beats":4,"to":integer,"suffix":"% or X or empty","label":"what the number counts"}
+- {"type":"stretch","beats":4,"text":"one word"}
+- {"type":"fly","beats":8,"words":[5 words the camera flies through]}
+- {"type":"image","beats":4,"words":[2 words shown over a still]}
+- {"type":"graph","beats":4,"to":integer,"label":"what is growing"}
+- {"type":"logo","beats":6,"text":"product name","sub":"tagline, max 60 chars"}
+Rules: one word per beat in words blocks. Open with 3 tension blocks (words, strike, prompt), then exactly one block with "drop": true (the hero right after the prompt). Use concrete words from the brief, all caps in words blocks, no emoji or hashtags, no invented statistics presented as facts (counters and graphs should use numbers from the brief or obviously playful ones). End with a logo block.`;
+
+async function beats(request, env) {
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  const origin = request.headers.get('origin');
+  if (origin && new URL(origin).host !== new URL(request.url).host) return json({ error: 'Cross-site requests are not allowed.' }, 403);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Send JSON: { "name": "...", "brief": "..." }' }, 400); }
+  const name = String(body.name || '').trim().slice(0, 40);
+  const brief = String(body.brief || '').trim().slice(0, 600);
+  if (!brief && !name) return json({ error: 'Describe the product first.' }, 400);
+  const count = { short: 10, standard: 14, long: 18 }[body.length] || 14;
+  const day = today();
+  const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+  const visitorKey = `bv:${day}:${await hashIp(ip)}`;
+  const totalKey = `b:${day}`;
+  const [total, mine] = await Promise.all([counter(env.MASSLESS_KV, totalKey), counter(env.MASSLESS_KV, visitorKey)]);
+  if (total >= Number(env.BEATS_CAP || 60) || mine >= Number(env.PER_VISITOR_BEATS || 10)) return json({ error: 'The free script writer is resting for today. The built-in template still works.' }, 429);
+  let result;
+  try {
+    result = await env.AI.run(LLM, {
+      messages: [
+        { role: 'system', content: BEAT_RULES },
+        { role: 'user', content: `Product: ${name || 'unnamed'}\nBrief: ${brief || name}\nWrite ${count} blocks.` },
+      ],
+      max_tokens: 1600,
+      temperature: 0.8,
+    });
+  } catch (e) {
+    return json({ error: `Workers AI could not write the beat sheet: ${e.message || e}` }, 502);
+  }
+  await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
+  let spec = result && result.response;
+  if (typeof spec === 'string') {
+    const a = spec.indexOf('{');
+    const b = spec.lastIndexOf('}');
+    try { spec = JSON.parse(spec.slice(a, b + 1)); } catch { return json({ error: 'The model returned something that is not a beat sheet.' }, 502); }
+  }
+  if (!spec || !Array.isArray(spec.blocks)) return json({ error: 'The model returned something that is not a beat sheet.' }, 502);
+  return json({ spec, model: LLM });
+}
+
 async function health(env) {
   const total = await counter(env.MASSLESS_KV, `t:${today()}`).catch(() => 0);
   return json({ ok: true, app: 'massless', model: MODEL, framesToday: total, dailyCap: Number(env.DAILY_CAP || 120) });
@@ -149,7 +207,7 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html' };
+const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html' };
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
 
 async function page(request, ref, file, ctx) {
@@ -193,7 +251,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/(image|video|audio|3d)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/(image|video|audio|3d|film)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
@@ -209,6 +267,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/api/shot') return shot(request, env);
+    if (url.pathname === '/api/beats') return beats(request, env);
     if (url.pathname === '/api/health') return health(env);
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
     if (env.ASSETS) return env.ASSETS.fetch(request);
