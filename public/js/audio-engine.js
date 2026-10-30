@@ -722,11 +722,11 @@ const BED_SYNTHS = {
         const roarF = filter('lowpass', 300);
         const roarG = amp(0);
         automate(roarF.frequency, (t) => 100 + 400 * G(t));
-        automate(roarG.gain, (t) => 1.4 * (floor + (1 - floor) * G(t)) * (0.55 + 0.45 * turbulence(t)));
+        automate(roarG.gain, (t) => 1.0 * (floor + (1 - floor) * G(t)) * (0.55 + 0.45 * turbulence(t)));
         chain(noise('brown'), filter('highpass', 25), roarF, roarG).connect(out, 0, ch);
         // howl: resonant bands of moving air whose pitch rises with the gust
-        for (const [ratio, level] of [[1, 2.6], [1.6, 1.5]]) {
-          const bp = filter('bandpass', 400, 6);
+        for (const [ratio, level] of [[1, 4], [1.6, 2.4]]) {
+          const bp = filter('bandpass', 400, 10);
           const hg = amp(0);
           automate(bp.frequency, (t) => ratio * (230 + 600 * G(t)) * (0.9 + 0.2 * drift(t)));
           automate(hg.gain, (t) => level * (0.3 * floor + G(t) ** 1.6));
@@ -794,15 +794,20 @@ const BED_SYNTHS = {
         const fg = amp(0);
         automate(fg.gain, (t) => 0.5 * foam(t));
         chain(noise('white'), filter('highpass', 2000), fg).connect(out, 0, ch);
-        // bubbles popping in the foam, densest while the wash is strongest
-        kit.events(900, (t) => {
-          if (rand() * 1.2 > foam(t)) return;
-          const fr = between(2500, 8000);
-          const tau = between(0.0004, 0.0015);
+        // bubbles: churned water rings with countless tiny resonances (big and low in the break,
+        // small and high in the wash), which is what makes noise sound like water
+        kit.events(1800, (t) => {
+          const c = crash(t);
+          const f = foam(t);
+          if (rand() > clamp(0.9 * c + 0.6 * f, 0, 1)) return;
+          const fr = c > f ? 300 * 2 ** (rand() * 3.5) : 900 * 2 ** (rand() * 3);
+          const tau = between(8, 25) / (Math.PI * fr);
+          const rise = between(0.05, 0.3);
           let ph = 0;
-          fizz.add(t, Math.ceil(tau * 6 * sr), ch ? between(0.2, 1) : between(-1, -0.2), 0.03 + 0.15 * rand() ** 2, (i) => {
-            ph += (2 * Math.PI * fr) / sr;
-            return Math.sin(ph) * Math.exp(-i / (tau * sr));
+          fizz.add(t, Math.ceil(tau * 6 * sr), ch ? between(0.1, 1) : between(-1, -0.1), 0.02 + 0.13 * rand() ** 2, (i) => {
+            const x = i / sr;
+            ph += (2 * Math.PI * fr * (1 + rise * (1 - Math.exp(-x / tau)))) / sr;
+            return Math.sin(ph) * Math.exp(-x / tau) * Math.min(1, i / 8);
           });
         });
       }
@@ -855,19 +860,17 @@ const BED_SYNTHS = {
         automate(lp.frequency, (t) => 700 + (2800 * near(t)) / size, t0, d);
         automate(tg.gain, (t) => 1.1 * near(t), t0, d);
         chain(noise('pink', t0, t1), filter('bandpass', 900, 1), lp, tg, p);
-        // engine: a low growl with harmonics, slightly rough
-        const f0 = between(30, 55);
-        const rough = kit.wander(0.08);
+        // engine: low rumble pulsing at the firing rate, its pitch dropping as the car passes
+        const f0 = between(28, 50);
         const eg = amp(0);
-        automate(eg.gain, (t) => 0.6 * near(t) * (0.75 + 0.25 * rough(t)), t0, d);
-        for (const mult of [1, 2.01]) {
-          const engine = osc('sawtooth', f0 * mult);
-          automate(engine.frequency, (t) => f0 * mult * doppler(t), t0, d);
-          engine.connect(eg);
-          engine.start(t0);
-          engine.stop(t1);
-        }
-        chain(eg, filter('lowpass', 550), p);
+        automate(eg.gain, (t) => 1.2 * near(t), t0, d);
+        const pulse = amp(0.55);
+        const firing = osc('sine', f0);
+        automate(firing.frequency, (t) => f0 * doppler(t), t0, d);
+        chain(firing, amp(0.45), pulse.gain);
+        firing.start(t0);
+        firing.stop(t1);
+        chain(noise('brown', t0, t1), filter('lowpass', 450), pulse, eg, p);
         p.connect(master);
         chain(p, amp(0.35), street);
       };
@@ -950,7 +953,7 @@ const BED_SYNTHS = {
         // the low roar of the fire, flickering
         const flicker = kit.wander(0.35);
         const g = amp(0);
-        automate(g.gain, (t) => (0.22 + 0.12 * k) * (0.6 + 0.4 * flicker(t)));
+        automate(g.gain, (t) => (0.14 + 0.08 * k) * (0.6 + 0.4 * flicker(t)));
         chain(noise('brown'), filter('highpass', 60), filter('lowpass', 320), g).connect(out, 0, ch);
         // flames licking: broadband breath that surges and drops quickly
         const lick = kit.wander(0.3);
@@ -986,14 +989,14 @@ const BED_SYNTHS = {
         });
       };
       // bursts: resin pockets crackling in clusters
-      kit.events(1.5 + 3.5 * k, (t) => {
-        const n = 2 + Math.floor(rand() ** 1.5 * (8 + 14 * k));
-        const spread = between(0.02, 0.3);
+      kit.events(0.8 + 2.2 * k, (t) => {
+        const n = 1 + Math.floor(rand() ** 2 * (5 + 8 * k));
+        const spread = between(0.02, 0.25);
         const pan = between(-0.45, 0.45);
-        for (let j = 0; j < n; j++) crackle(t + rand() ** 2 * spread, pan + between(-0.1, 0.1), 0.08 + 0.8 * rand() ** 3);
+        for (let j = 0; j < n; j++) crackle(t + rand() ** 2 * spread, pan + between(-0.1, 0.1), 0.15 + 0.85 * rand() ** 2);
       });
       // a light scatter of single ticks between bursts
-      kit.events(5 + 12 * k, (t) => crackle(t, between(-0.5, 0.5), 0.03 + 0.25 * rand() ** 3));
+      kit.events(2 + 5 * k, (t) => crackle(t, between(-0.5, 0.5), 0.05 + 0.3 * rand() ** 2));
       // pops: a pocket of steam bursting, a sharp snap with a short thump under it
       kit.events(0.2 + 0.4 * k, (t) => {
         const snap = between(0.0008, 0.003);
