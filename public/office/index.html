@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Free PDF editor and converter | Massless</title>
+  <meta name="description" content="Highlight, write on, draw on and sign PDFs, then merge, split, rotate, compress or convert them. Runs in your browser, files stay on your device. $0.">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Massless">
+  <meta property="og:url" content="https://massless.chucksi.com/office">
+  <meta property="og:title" content="Free PDF editor and converter | Massless">
+  <meta property="og:description" content="Highlight, write on, draw on and sign PDFs, then merge, split, rotate, compress or convert them. Runs in your browser, files stay on your device. $0.">
+  <meta property="og:image" content="https://massless.chucksi.com/og.jpg?v=2">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="massless. The AI film studio that costs $0. Open weights only, no credits, no account, runs in your browser.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://massless.chucksi.com/og.jpg?v=2">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/studio.css">
+  <link rel="stylesheet" href="/css/office.css">
+</head>
+<body class="studio-body">
+  <header class="nav">
+    <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/">Explore</a>
+      <a href="/image">Image</a>
+      <a href="/video">Video</a>
+      <a href="/audio">Audio</a>
+      <a href="/office" aria-current="page">Office</a>
+    </nav>
+    <div class="nav-right">
+      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
+      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
+      <a class="btn-accent" href="/video">Open Video</a>
+    </div>
+  </header>
+
+  <main class="studio">
+    <aside class="side" aria-label="Office controls">
+      <div class="side-tabs" role="tablist">
+        <button role="tab" aria-selected="true" aria-controls="tab-edit" id="t-edit">Edit</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-convert" id="t-convert">Convert</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-ask" id="t-ask">Ask</button>
+      </div>
+
+      <div class="side-scroll" id="tab-edit" role="tabpanel" aria-labelledby="t-edit">
+        <label class="row-sel" for="pdf-in">
+          <span><small>Document</small><strong id="doc-name">No PDF open</strong></span>
+          <span class="btn-ghost small" aria-hidden="true">Open PDF</span>
+        </label>
+        <div class="field">
+          <div class="f-head"><span>Highlight color</span><output id="o-hl">Amber</output></div>
+          <div class="dots" id="hl-colors" role="radiogroup" aria-label="Highlight color"></div>
+        </div>
+        <div class="field">
+          <div class="f-head"><span>Pen and text color</span><output id="o-ink">Black</output></div>
+          <div class="dots" id="ink-colors" role="radiogroup" aria-label="Pen and text color"></div>
+        </div>
+        <div class="field">
+          <div class="f-head"><span>Text size</span><output id="o-size">14 pt</output></div>
+          <input type="range" id="text-size" min="8" max="48" step="1" value="14" aria-label="Text size">
+        </div>
+        <div class="field">
+          <div class="f-head"><span>Pen width</span><output id="o-pen">2 pt</output></div>
+          <input type="range" id="pen-width" min="1" max="12" step="0.5" value="2" aria-label="Pen width">
+        </div>
+        <button type="button" class="row-sel" id="sig-sel" aria-haspopup="dialog">
+          <span><small>Signature</small><strong id="sig-name">Not set yet</strong></span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <p class="side-note">Pick a tool above the pages, then click or drag on a page. Select moves things, Delete removes them, Ctrl+Z undoes. Your PDF stays in this browser; nothing is uploaded.</p>
+      </div>
+
+      <div class="side-scroll" id="tab-convert" role="tabpanel" aria-labelledby="t-convert" hidden>
+        <div class="ops" id="ops" role="radiogroup" aria-label="Conversion"></div>
+        <div class="stack" data-op="images">
+          <label class="row-sel sel"><small>Page size</small><select id="img-size"><option value="image">Same as each image</option><option value="a4">A4, image fitted</option><option value="letter">Letter, image fitted</option></select></label>
+        </div>
+        <div class="stack" data-op="toimg" hidden>
+          <div class="grid2">
+            <label class="row-sel sel"><small>Format</small><select id="img-format"><option value="png">PNG</option><option value="jpeg">JPG</option></select></label>
+            <label class="row-sel sel"><small>Scale</small><select id="img-scale"><option value="1">1x</option><option value="2" selected>2x</option></select></label>
+          </div>
+        </div>
+        <div class="stack" data-op="split" hidden>
+          <div class="field">
+            <div class="f-head"><span>Pages to keep</span><output>e.g. 1-3, 5</output></div>
+            <input type="text" id="split-ranges" class="text-in" placeholder="All pages" spellcheck="false" aria-label="Pages to keep">
+          </div>
+          <label class="check"><input type="checkbox" id="split-each"> <span><strong>One file per page</strong><small>Downloads as a .zip of single-page PDFs</small></span></label>
+        </div>
+        <div class="stack" data-op="rotate" hidden>
+          <label class="row-sel sel"><small>Turn clockwise</small><select id="rot-angle"><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>
+          <div class="field">
+            <div class="f-head"><span>Pages</span><output>blank = all</output></div>
+            <input type="text" id="rot-ranges" class="text-in" placeholder="All pages" spellcheck="false" aria-label="Pages to rotate">
+          </div>
+        </div>
+        <div class="stack" data-op="compress" hidden>
+          <div class="field">
+            <div class="f-head"><span>Quality</span><output id="o-quality">60%</output></div>
+            <input type="range" id="quality" min="0.3" max="0.9" step="0.05" value="0.6" aria-label="Quality">
+          </div>
+          <p class="side-note warn">Compressing turns each page into a picture, so text can no longer be selected or searched.</p>
+        </div>
+        <label class="btn-ghost wide" for="conv-in" id="conv-add">Add files</label>
+        <p class="side-note" id="op-note">Drop images in the order you want the pages. Files stay in this browser.</p>
+      </div>
+
+      <div class="side-scroll" id="tab-ask" role="tabpanel" aria-labelledby="t-ask" hidden>
+        <div class="field">
+          <div class="f-head"><span>Question</span><output id="o-q">0 / 500</output></div>
+          <textarea id="question" maxlength="500" rows="4" aria-label="Question" placeholder="What is this document about?"></textarea>
+        </div>
+        <div class="row-sel" aria-label="Model">
+          <span><small>Model</small><strong>Llama 3.3 70B · open weights</strong></span>
+          <span class="badge-new">$0</span>
+        </div>
+        <p class="side-note">Ask reads the PDF open in Edit. Only its text, up to 12,000 characters, is sent to answer the question; the file itself never leaves this browser.</p>
+      </div>
+
+      <div class="side-foot">
+        <div id="foot-edit"><button type="button" class="go" id="save"><span id="save-label">Save PDF</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v9M4.5 7.5L8 11l3.5-3.5M3 14h10"/></svg></button></div>
+        <div id="foot-convert" hidden><button type="button" class="go" id="convert"><span id="convert-label">Make PDF</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
+        <div id="foot-ask" hidden><button type="button" class="go" id="ask"><span id="ask-label">Ask</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="Documents">
+      <div class="stage-top">
+        <div class="pills" role="tablist" aria-label="Office tools">
+          <button type="button" class="pill on" id="p-edit"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 11.5V13h1.5l7-7L10 4.5l-7 7zM10 4.5l1.5-1.5L13 4.5 11.5 6"/></svg>Edit</button>
+          <button type="button" class="pill" id="p-convert"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 5.5h10l-3-3M13.5 10.5h-10l3 3"/></svg>Convert</button>
+          <button type="button" class="pill" id="p-ask"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"/></svg>Ask</button>
+          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
+        </div>
+        <span class="src" id="src-label">pdf.js and pdf-lib · load on first use</span>
+      </div>
+
+      <div class="stage-head">
+        <div>
+          <h1 class="display" id="stage-title">Edit any<br>PDF</h1>
+          <p id="stage-sub">Highlight, write, draw, sign and leave notes, then save a real PDF. Your file stays in this browser; nothing is uploaded.</p>
+        </div>
+      </div>
+
+      <div id="view-edit">
+        <div class="dropzone" id="edit-drop">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 5h17l9 9v29H12z"/><path d="M29 5v9h9M19 27l5-5 5 5M24 22v13"/></svg>
+          <strong class="display">Drop a PDF here</strong>
+          <span class="muted">It opens right here. Nothing is uploaded.</span>
+          <div class="dz-actions">
+            <label class="btn-accent" for="pdf-in">Open PDF</label>
+            <button type="button" class="btn-ghost" id="sample">Try a sample</button>
+          </div>
+        </div>
+        <input type="file" id="pdf-in" accept="application/pdf,.pdf" hidden>
+
+        <div class="editor" id="editor" hidden>
+          <div class="tools" role="toolbar" aria-label="Edit tools">
+            <div class="tool-group" id="tool-buttons"></div>
+            <div class="tool-group right">
+              <button type="button" class="tbtn" id="undo" title="Undo (Ctrl+Z)" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3L2.5 6l3 3"/><path d="M2.5 6h7a4 4 0 010 8H7"/></svg><span>Undo</span></button>
+              <button type="button" class="tbtn" id="delete" title="Delete selected" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 9h5.6l.7-9"/></svg><span>Delete</span></button>
+              <span class="tsep" aria-hidden="true"></span>
+              <button type="button" class="tbtn icon" id="zoom-out" aria-label="Zoom out"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8"/></svg></button>
+              <output class="zoom" id="zoom-label">100%</output>
+              <button type="button" class="tbtn icon" id="zoom-in" aria-label="Zoom in"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8M8 4v8"/></svg></button>
+              <output class="pageno" id="page-no" aria-live="polite">1 / 1</output>
+            </div>
+          </div>
+          <div class="pages" id="pages"></div>
+        </div>
+      </div>
+
+      <div id="view-convert" hidden>
+        <div class="dropzone small" id="conv-drop">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 30v10h32V30M24 8v22M16 20l8 8 8-8"/></svg>
+          <strong class="display" id="conv-drop-title">Drop images here</strong>
+          <span class="muted" id="conv-drop-sub">JPG, PNG or WebP. One page per image.</span>
+          <div class="dz-actions"><label class="btn-accent" for="conv-in">Choose files</label></div>
+        </div>
+        <input type="file" id="conv-in" multiple hidden>
+        <div class="lib-head" id="queue-head" hidden><h2 class="display">Files</h2><button type="button" class="btn-ghost small" id="queue-clear">Clear</button></div>
+        <ol class="queue" id="queue"></ol>
+        <div class="lib-head" id="results-head" hidden><h2 class="display">Results</h2><button type="button" class="btn-ghost small" id="results-clear">Clear</button></div>
+        <div class="results" id="results"></div>
+        <div class="field text-out" id="text-out-wrap" hidden>
+          <div class="f-head"><span>Extracted text</span><output id="o-text-len"></output></div>
+          <textarea id="text-out" rows="14" readonly aria-label="Extracted text"></textarea>
+        </div>
+      </div>
+
+      <div id="view-ask" hidden>
+        <div class="ask-doc" id="ask-doc">
+          <span class="muted">Asking about</span> <strong id="ask-doc-name">no PDF yet</strong>
+          <label class="btn-ghost small" for="pdf-in">Open PDF</label>
+        </div>
+        <div class="answers" id="answers"></div>
+        <p class="side-note muted" id="answers-empty">Open a PDF, type a question on the left and press Ask. Answers land here.</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="sheet sig-sheet" id="sig">
+    <form method="dialog" class="sheet-head"><h2>Your signature</h2><button class="x" aria-label="Close">×</button></form>
+    <div class="groups" role="tablist" aria-label="Signature style">
+      <button type="button" role="tab" aria-selected="true" id="sig-t-draw">Draw</button>
+      <button type="button" role="tab" aria-selected="false" id="sig-t-type">Type</button>
+    </div>
+    <div class="sig-pad" id="sig-pad-wrap">
+      <canvas id="sig-pad" width="1040" height="360" aria-label="Draw your signature here"></canvas>
+      <span class="sig-line" aria-hidden="true"></span>
+      <span class="sig-hint muted" id="sig-hint">Sign with your mouse, finger or pen</span>
+    </div>
+    <div class="field" id="sig-type-wrap" hidden>
+      <div class="f-head"><span>Your name</span></div>
+      <input type="text" id="sig-text" class="text-in sig-typed" maxlength="60" placeholder="Type your name" autocomplete="name" aria-label="Your name">
+    </div>
+    <div class="sig-actions">
+      <button type="button" class="btn-ghost" id="sig-clear">Clear</button>
+      <button type="button" class="btn-accent" id="sig-use">Use signature</button>
+    </div>
+    <p class="small muted">Your signature is kept only in this tab. Click a page to place it, then drag to move or pull the corner to resize.</p>
+  </dialog>
+
+  <dialog class="sheet" id="how">
+    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
+    <p><strong>Edit:</strong> pdf.js (Apache-2.0) draws each page on your screen. Your highlights, text, ink, signatures and notes sit on top until you press Save, then pdf-lib (MIT) writes them into the PDF itself: highlights as see-through rectangles, text in Helvetica, ink as vector lines, signatures as images and notes as standard PDF comments.</p>
+    <p><strong>Convert:</strong> merge, split, rotate and image to PDF copy pages without re-rendering, so text stays sharp and searchable. PDF to images and Compress render pages with pdf.js; Compress rebuilds the file from JPEGs, so text stops being selectable. Zips are made with fflate (MIT).</p>
+    <p><strong>Ask:</strong> pulls the text out of the PDF in your browser and sends up to 12,000 characters of it, with your question, to Llama 3.3 70B on Cloudflare Workers AI. Edit and Convert never send anything anywhere.</p>
+  </dialog>
+
+  <dialog class="sheet" id="ledger">
+    <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Reading and rendering: pdf.js (Apache-2.0), in your browser. Writing: pdf-lib (MIT), in your browser. Zips: fflate (MIT), in your browser. Ask: Llama 3.3 70B (Llama 3.3 Community License) on Workers AI, free within a daily cap. Cost: $0.</p>
+  </dialog>
+
+  <script type="module" src="/js/pages/office.js"></script>
+</body>
+</html>

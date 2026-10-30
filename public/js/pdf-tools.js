@@ -78,13 +78,6 @@ export function parseRanges(text, total) {
   return out;
 }
 
-/** Group ranges into separate chunks: "1-3, 5" -> [[0,1,2],[4]]. */
-export function parseRangeGroups(text, total) {
-  const s = String(text || '').trim();
-  if (!s) return [[...Array(total).keys()]];
-  return s.split(/[,;]+/).map((p) => p.trim()).filter(Boolean).map((p) => parseRanges(p, total));
-}
-
 // ---------- canvas helpers ----------
 const canvasToBlob = (canvas, type, quality) => new Promise((ok, no) => canvas.toBlob((b) => (b ? ok(b) : no(new Error('Could not encode the image.'))), type, quality));
 
@@ -210,7 +203,7 @@ export async function zipFiles(files) {
   return new Blob([zipSync(entries)], { type: 'application/zip' });
 }
 
-/** Merge PDFs in the given order. */
+/** Merge PDFs in the given order. Returns { bytes, pages }. */
 export async function mergePdfs(list, { onProgress } = {}) {
   const { PDFDocument } = await loadPdfLib();
   const out = await PDFDocument.create();
@@ -221,7 +214,7 @@ export async function mergePdfs(list, { onProgress } = {}) {
     pages.forEach((p) => out.addPage(p));
   }
   out.setProducer('Massless Office');
-  return out.save();
+  return { bytes: await out.save(), pages: out.getPageCount() };
 }
 
 /** Copy the given zero-based pages into a new PDF. */
@@ -235,15 +228,18 @@ export async function extractPages(bytes, indices, srcDoc) {
   return out.save();
 }
 
-/** Split: either one PDF per range group, or one PDF per page. Returns [{ label, bytes }]. */
+/**
+ * Split / extract. Without perPage the chosen pages go into one new PDF;
+ * with perPage every chosen page becomes its own PDF. Returns [{ label, pages, bytes }].
+ */
 export async function splitPdf(bytes, rangeText, { perPage = false, onProgress } = {}) {
   const src = await openPdfLib(bytes);
-  const total = src.getPageCount();
-  const groups = perPage ? parseRanges(rangeText, total).map((i) => [i]) : parseRangeGroups(rangeText, total);
+  const idx = parseRanges(rangeText, src.getPageCount());
+  const groups = perPage ? idx.map((i) => [i]) : [idx];
   const out = [];
   for (const [k, g] of groups.entries()) {
     onProgress?.(k / groups.length, `Writing part ${k + 1} of ${groups.length}`);
-    const label = g.length === 1 ? `p${g[0] + 1}` : contiguous(g) ? `p${g[0] + 1}-${g.at(-1) + 1}` : `part${k + 1}`;
+    const label = g.length === 1 ? `p${g[0] + 1}` : contiguous(g) ? `p${g[0] + 1}-${g.at(-1) + 1}` : 'extract';
     out.push({ label, pages: g.length, bytes: await extractPages(bytes, g, src) });
   }
   return out;
@@ -352,7 +348,7 @@ function winAnsiSafe(font, s) {
  */
 export async function writeAnnotations(bytes, items, toPdf) {
   const lib = await loadPdfLib();
-  const { StandardFonts, rgb, degrees, BlendMode, LineCapStyle, PDFHexString, PDFName } = lib;
+  const { StandardFonts, rgb, degrees, BlendMode, LineCapStyle, PDFHexString } = lib;
   const doc = await openPdfLib(bytes);
   const font = items.some((i) => i.type === 'text') ? await doc.embedFont(StandardFonts.Helvetica) : null;
   const pngs = new Map();
@@ -407,10 +403,8 @@ export async function writeAnnotations(bytes, items, toPdf) {
         Contents: PDFHexString.fromText(it.text || ''),
         T: PDFHexString.fromText('Note'),
         C: colorRgb(it.color),
-        M: PDFHexString.fromText(new Date().toISOString()),
       });
       page.node.addAnnot(doc.context.register(annot));
-      void PDFName;
     }
   }
   return doc.save();
