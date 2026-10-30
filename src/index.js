@@ -131,6 +131,44 @@ async function beats(request, env) {
   return json({ spec, model: LLM });
 }
 
+// POST /api/ask answers a question about a document's text with Llama 3.3 70B (Office > Ask). Only the text
+// the visitor chooses to send leaves the browser; the PDF itself never does.
+async function ask(request, env) {
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  const origin = request.headers.get('origin');
+  if (origin && new URL(origin).host !== new URL(request.url).host) return json({ error: 'Cross-site requests are not allowed.' }, 403);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Send JSON: { "question": "...", "text": "..." }' }, 400); }
+  const question = String(body.question || '').trim().slice(0, 500);
+  const text = String(body.text || '').trim().slice(0, 12000);
+  if (!question) return json({ error: 'Ask a question first.' }, 400);
+  if (!text) return json({ error: 'This document has no readable text.' }, 400);
+  const day = today();
+  const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+  const visitorKey = `av:${day}:${await hashIp(ip)}`;
+  const totalKey = `a:${day}`;
+  const [total, mine] = await Promise.all([counter(env.MASSLESS_KV, totalKey), counter(env.MASSLESS_KV, visitorKey)]);
+  if (total >= Number(env.ASK_CAP || 30) || mine >= Number(env.PER_VISITOR_ASK || 8)) return json({ error: 'The free document assistant is resting for today. It resets at midnight UTC.' }, 429);
+  let result;
+  try {
+    result = await env.AI.run(LLM, {
+      messages: [
+        { role: 'system', content: 'You answer questions about one document. Use only the document. If the answer is not in it, say so plainly. Be concise and quote short phrases when useful.' },
+        { role: 'user', content: `Document:\n"""\n${text}\n"""\n\nQuestion: ${question}` },
+      ],
+      max_tokens: 700,
+      temperature: 0.2,
+    });
+  } catch (e) {
+    return json({ error: `Workers AI could not answer: ${e.message || e}` }, 502);
+  }
+  await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
+  const r = result && result.response;
+  const answer = typeof r === 'string' ? r : r ? JSON.stringify(r) : '';
+  if (!answer) return json({ error: 'The model returned no answer.' }, 502);
+  return json({ answer, model: LLM });
+}
+
 async function health(env) {
   const total = await counter(env.MASSLESS_KV, `t:${today()}`).catch(() => 0);
   return json({ ok: true, app: 'massless', model: MODEL, framesToday: total, dailyCap: Number(env.DAILY_CAP || 120) });
@@ -207,7 +245,7 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html' };
+const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html' };
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
 
 async function page(request, ref, file, ctx) {
@@ -251,7 +289,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/(image|video|audio|3d|film)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/(image|video|audio|3d|film|office)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
@@ -268,6 +306,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/api/shot') return shot(request, env);
     if (url.pathname === '/api/beats') return beats(request, env);
+    if (url.pathname === '/api/ask') return ask(request, env);
     if (url.pathname === '/api/health') return health(env);
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
     if (env.ASSETS) return env.ASSETS.fetch(request);
