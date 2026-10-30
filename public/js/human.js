@@ -34,7 +34,21 @@ async function turnstileToken(sitekey) {
     const box = document.createElement('div');
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-label', 'Human check');
-    box.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483000;';
+    box.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483000;border-radius:14px;';
+    // Shown only if Cloudflare wants a click; otherwise the check stays invisible.
+    const label = document.createElement('p');
+    label.textContent = 'Quick check that you’re human, then your render starts.';
+    label.hidden = true;
+    label.style.cssText = 'margin:0 0 10px;font:600 14px/1.3 system-ui,sans-serif;color:#f6f6f2;';
+    const slot = document.createElement('div');
+    box.append(label, slot);
+    const showCard = (on) => {
+      label.hidden = !on;
+      box.style.background = on ? '#16161a' : '';
+      box.style.border = on ? '1px solid #2c2c33' : '';
+      box.style.padding = on ? '14px' : '';
+      box.style.boxShadow = on ? '0 12px 40px rgba(0,0,0,.5)' : '';
+    };
     document.body.appendChild(box);
     let id = null;
     const finish = (fn, value) => {
@@ -45,9 +59,11 @@ async function turnstileToken(sitekey) {
     };
     const timer = setTimeout(() => finish(reject, new Error('The human check timed out. Try again.')), 45000);
     try {
-      id = ts.render(box, {
+      id = ts.render(slot, {
         sitekey,
         appearance: 'interaction-only',
+        'before-interactive-callback': () => showCard(true),
+        'after-interactive-callback': () => showCard(false),
         callback: (token) => finish(resolve, token),
         'error-callback': () => { finish(reject, new Error('The human check failed. Reload the page and try again.')); return true; },
         'expired-callback': () => finish(reject, new Error('The human check expired. Try again.')),

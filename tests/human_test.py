@@ -12,7 +12,14 @@ port = srv.server_address[1]
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 
 STUB = """window.turnstile = { _n: 0,
-  render(box, o) { const id = ++this._n; window.__renders = (window.__renders || 0) + 1;
+  render(slot, o) { const id = ++this._n; window.__renders = (window.__renders || 0) + 1;
+    if (window.__interactive) {
+      o['before-interactive-callback']();
+      setTimeout(() => { const card = slot.parentElement; const p = card.querySelector('p');
+        window.__card = { label: p && !p.hidden ? p.textContent : null, bg: card.style.background };
+        o['after-interactive-callback'](); o.callback('tok-' + id); }, 100);
+      return id;
+    }
     setTimeout(() => (window.__fail ? o['error-callback']() : o.callback('tok-' + id)), 50); return id; },
   remove() {} };"""
 state = {'passed': False, 'human_posts': 0, 'api_calls': 0}
@@ -70,6 +77,17 @@ with sync_playwright() as p:
     blocked = pg3.evaluate("""async () => { const { apiFetch } = await import('/js/human.js');
       const r = await apiFetch('/api/tts', { method: 'POST', body: '{}' }); return { s: r.status, j: await r.json() }; }""")
     check(blocked['s'] == 403 and 'could not load' in blocked['j']['error'], f"a blocked Turnstile script returns a readable 403: {blocked['j']['error']}")
+    # Cloudflare wants a click: the card explains itself, then goes away
+    state.update(passed=False, human_posts=0)
+    pg4 = b.new_page()
+    pg4.route('https://challenges.cloudflare.com/**', lambda r: r.fulfill(status=200, content_type='text/javascript', body=STUB))
+    pg4.route('**/api/human', human); pg4.route('**/api/tts', api)
+    pg4.goto(f'http://127.0.0.1:{port}/index.html')
+    inter = pg4.evaluate("""async () => { window.__interactive = true; const { apiFetch } = await import('/js/human.js');
+      const r = await apiFetch('/api/tts', { method: 'POST', body: '{}' });
+      return { s: r.status, card: window.__card, left: document.querySelectorAll('[aria-label="Human check"]').length }; }""")
+    check(inter['s'] == 200 and inter['card']['label'] and 'human' in inter['card']['label'] and inter['card']['bg'], f"an interactive check shows a labelled card: {inter['card']}")
+    check(inter['left'] == 0, 'the card is removed after the check')
     check(not errors, f'no page errors {errors}')
     b.close()
 print('FAILED' if fails else 'OK'); sys.exit(1 if fails else 0)
