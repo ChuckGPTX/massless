@@ -672,7 +672,7 @@ const BED_SYNTHS = {
         const c = between(0.25, 1);
         let prev = 0;
         let lp = 0;
-        drops.add(t, Math.ceil(tau * 8 * sr), between(-1, 1), 0.04 + 0.7 * rand() ** 4, (i) => {
+        drops.add(t, Math.ceil(tau * 8 * sr), between(-1, 1), 0.04 + 0.55 * rand() ** 4, (i) => {
           const n = rand() * 2 - 1;
           lp += (n - prev - lp) * c;
           prev = n;
@@ -696,7 +696,7 @@ const BED_SYNTHS = {
           return Math.sin(ph) * Math.exp(-x / tau) * Math.min(1, i / 12);
         });
       });
-      const src = drops.source();
+      const src = chain(drops.source(), filter('highpass', 250));
       src.connect(master);
       chain(src, amp(0.3), kit.reverb(0.9, 0.5));
     },
@@ -707,29 +707,35 @@ const BED_SYNTHS = {
     build(kit, k) {
       const { master, rand, between, noise, filter, amp, panner, chain, automate } = kit;
       const out = kit.stereo();
-      const swell = kit.wander(6);
-      const surge = kit.wander(2.2);
-      const flutter = kit.wander(0.7);
+      const swell = kit.wander(5);
+      const surge = kit.wander(1.8);
       const drift = kit.wander(4);
-      // gust strength 0..1: slow swells, quicker surges and some flutter, stretched so lulls go quiet
-      const gust = (t) => clamp((0.5 * swell(t) + 0.35 * surge(t) + 0.15 * flutter(t) - 0.28) / 0.5, 0, 1) ** 1.3;
-      const floor = 0.05 + 0.1 * k;
+      // gust strength 0..1: slow swells with quicker surges, stretched so lulls go quiet
+      const gust = (t) => clamp((0.6 * swell(t) + 0.4 * surge(t) - 0.25) / 0.5, 0, 1) ** 1.4;
+      const floor = 0.04 + 0.08 * k;
       // one side hears each gust a moment later, so gusts sweep across the stereo field
       const sweep = between(0.4, 0.9) * (rand() < 0.5 ? -1 : 1);
       for (let ch = 0; ch < 2; ch++) {
         const G = (t) => gust(t + (ch ? sweep : 0));
-        // roar: low turbulence that swells with each gust
+        const turbulence = kit.wander(0.12);
+        // buffeting: low turbulence that swells with each gust and churns inside it
         const roarF = filter('lowpass', 300);
         const roarG = amp(0);
-        automate(roarF.frequency, (t) => 120 + 480 * G(t));
-        automate(roarG.gain, (t) => 1.6 * (floor + (1 - floor) * G(t)));
+        automate(roarF.frequency, (t) => 100 + 400 * G(t));
+        automate(roarG.gain, (t) => 1.4 * (floor + (1 - floor) * G(t)) * (0.55 + 0.45 * turbulence(t)));
         chain(noise('brown'), filter('highpass', 25), roarF, roarG).connect(out, 0, ch);
-        // whoosh: a band of moving air whose centre rises with the gust
-        const bp = filter('bandpass', 500, 1.1);
-        const wg = amp(0);
-        automate(bp.frequency, (t) => 220 + 900 * G(t));
-        automate(wg.gain, (t) => 0.9 * (0.5 * floor + G(t) ** 1.5));
-        chain(noise('pink'), bp, wg).connect(out, 0, ch);
+        // howl: resonant bands of moving air whose pitch rises with the gust
+        for (const [ratio, level] of [[1, 2.6], [1.6, 1.5]]) {
+          const bp = filter('bandpass', 400, 6);
+          const hg = amp(0);
+          automate(bp.frequency, (t) => ratio * (230 + 600 * G(t)) * (0.9 + 0.2 * drift(t)));
+          automate(hg.gain, (t) => level * (0.3 * floor + G(t) ** 1.6));
+          chain(noise('pink'), bp, hg).connect(out, 0, ch);
+        }
+        // air rushing through trees and over edges at the peaks
+        const hs = amp(0);
+        automate(hs.gain, (t) => 0.15 * G(t) ** 2.5);
+        chain(noise('white'), filter('highpass', 2500), filter('lowpass', 7000), hs).connect(out, 0, ch);
       }
       // whistle: narrow resonances that sing at gust peaks, their pitch rising with the gust
       for (const [f, pan] of [[520, -0.45], [780, 0.4]]) {
@@ -777,24 +783,24 @@ const BED_SYNTHS = {
         // body of the water: dark in the trough, opening up as the wave breaks
         const lp = filter('lowpass', 500);
         const bg = amp(0);
-        automate(lp.frequency, (t) => 220 + 300 * swell(t) + 3000 * crash(t));
-        automate(bg.gain, (t) => 0.04 + 0.9 * swell(t));
+        automate(lp.frequency, (t) => 250 + 600 * swell(t) + 3500 * crash(t));
+        automate(bg.gain, (t) => 0.04 + 0.7 * swell(t));
         chain(noise('pink'), lp, bg).connect(out, 0, ch);
         // the break itself: a bright broadband rush
         const cg = amp(0);
-        automate(cg.gain, (t) => 0.9 * crash(t));
-        chain(noise('white'), filter('highpass', 500), filter('lowpass', 7000), cg).connect(out, 0, ch);
+        automate(cg.gain, (t) => 1.1 * crash(t));
+        chain(noise('white'), filter('highpass', 400), filter('lowpass', 8000), cg).connect(out, 0, ch);
         // the wash running back: high fizz
         const fg = amp(0);
-        automate(fg.gain, (t) => 0.35 * foam(t));
-        chain(noise('white'), filter('highpass', 3000), fg).connect(out, 0, ch);
+        automate(fg.gain, (t) => 0.5 * foam(t));
+        chain(noise('white'), filter('highpass', 2000), fg).connect(out, 0, ch);
         // bubbles popping in the foam, densest while the wash is strongest
         kit.events(900, (t) => {
           if (rand() * 1.2 > foam(t)) return;
           const fr = between(2500, 8000);
           const tau = between(0.0004, 0.0015);
           let ph = 0;
-          fizz.add(t, Math.ceil(tau * 6 * sr), ch ? between(0.2, 1) : between(-1, -0.2), 0.02 + 0.08 * rand() ** 2, (i) => {
+          fizz.add(t, Math.ceil(tau * 6 * sr), ch ? between(0.2, 1) : between(-1, -0.2), 0.03 + 0.15 * rand() ** 2, (i) => {
             ph += (2 * Math.PI * fr) / sr;
             return Math.sin(ph) * Math.exp(-i / (tau * sr));
           });
@@ -803,7 +809,7 @@ const BED_SYNTHS = {
       // deep rumble of surf along the shore, plus a far, steady wash
       const both = sum('swell', 0);
       const rg = amp(0);
-      automate(rg.gain, (t) => 0.2 + 0.6 * both(t));
+      automate(rg.gain, (t) => 0.08 + 0.45 * both(t));
       const rumble = chain(noise('brown'), filter('highpass', 25), filter('lowpass', 140), rg);
       rumble.connect(out, 0, 0);
       rumble.connect(out, 0, 1);
@@ -822,13 +828,13 @@ const BED_SYNTHS = {
         // the far, never-ending traffic rumble
         const hum = kit.wander(5);
         const g = amp(0);
-        automate(g.gain, (t) => (0.45 + 0.2 * k) * (0.7 + 0.3 * hum(t)));
+        automate(g.gain, (t) => (0.35 + 0.15 * k) * (0.7 + 0.3 * hum(t)));
         chain(noise('brown'), filter('highpass', 30), filter('lowpass', 220), g).connect(out, 0, ch);
-        // the city's mid-band wash: distant roads, air conditioners
+        // the city's mid-band roar: many far roads at once, air conditioners
         const wash = kit.wander(4);
         const wg = amp(0);
-        automate(wg.gain, (t) => 0.1 * (0.7 + 0.3 * wash(t)));
-        chain(noise('pink'), filter('bandpass', 650, 0.5), filter('lowpass', 1800), wg).connect(out, 0, ch);
+        automate(wg.gain, (t) => (0.18 + 0.08 * k) * (0.7 + 0.3 * wash(t)));
+        chain(noise('pink'), filter('bandpass', 700, 0.7), filter('lowpass', 2000), wg).connect(out, 0, ch);
       }
       // passing cars: tyre roar and engine swell up, sweep across and fade, with a slight Doppler drop
       const car = (tc) => {
@@ -843,16 +849,17 @@ const BED_SYNTHS = {
         const doppler = (t) => 1 - 0.035 * Math.tanh((t - tc) / (w * 0.5));
         const p = panner(0);
         automate(p.pan, (t) => 0.85 * dir * Math.tanh((t - tc) / (w * 0.8)), t0, d);
-        // tyres on asphalt: a broad band centred near 1 kHz, brighter as the car gets close
+        // tyres on asphalt: a band centred near 900 Hz, a little brighter as the car gets close
         const lp = filter('lowpass', 800);
         const tg = amp(0);
-        automate(lp.frequency, (t) => 600 + (5000 * near(t)) / size, t0, d);
-        automate(tg.gain, (t) => 1.2 * near(t), t0, d);
-        chain(noise('pink', t0, t1), filter('bandpass', 1000, 0.6), lp, tg, p);
-        // engine: low firing tone with harmonics
+        automate(lp.frequency, (t) => 700 + (2800 * near(t)) / size, t0, d);
+        automate(tg.gain, (t) => 1.1 * near(t), t0, d);
+        chain(noise('pink', t0, t1), filter('bandpass', 900, 1), lp, tg, p);
+        // engine: a low growl with harmonics, slightly rough
         const f0 = between(30, 55);
+        const rough = kit.wander(0.08);
         const eg = amp(0);
-        automate(eg.gain, (t) => 0.35 * near(t), t0, d);
+        automate(eg.gain, (t) => 0.6 * near(t) * (0.75 + 0.25 * rough(t)), t0, d);
         for (const mult of [1, 2.01]) {
           const engine = osc('sawtooth', f0 * mult);
           automate(engine.frequency, (t) => f0 * mult * doppler(t), t0, d);
@@ -860,7 +867,7 @@ const BED_SYNTHS = {
           engine.start(t0);
           engine.stop(t1);
         }
-        chain(eg, filter('bandpass', 160, 0.8), p);
+        chain(eg, filter('lowpass', 550), p);
         p.connect(master);
         chain(p, amp(0.35), street);
       };
@@ -943,13 +950,13 @@ const BED_SYNTHS = {
         // the low roar of the fire, flickering
         const flicker = kit.wander(0.35);
         const g = amp(0);
-        automate(g.gain, (t) => (0.45 + 0.25 * k) * (0.6 + 0.4 * flicker(t)));
-        chain(noise('brown'), filter('highpass', 30), filter('lowpass', 400), g).connect(out, 0, ch);
+        automate(g.gain, (t) => (0.22 + 0.12 * k) * (0.6 + 0.4 * flicker(t)));
+        chain(noise('brown'), filter('highpass', 60), filter('lowpass', 320), g).connect(out, 0, ch);
         // flames licking: broadband breath that surges and drops quickly
         const lick = kit.wander(0.3);
         const lg = amp(0);
-        automate(lg.gain, (t) => 0.12 * (0.35 + 0.65 * lick(t) ** 2));
-        chain(noise('pink'), filter('highpass', 200), filter('lowpass', 2400), lg).connect(out, 0, ch);
+        automate(lg.gain, (t) => 0.14 * (0.35 + 0.65 * lick(t) ** 2));
+        chain(noise('pink'), filter('highpass', 300), filter('lowpass', 3000), lg).connect(out, 0, ch);
       }
       // sap hiss that comes and goes
       const sizzle = kit.wander(2);
@@ -960,8 +967,13 @@ const BED_SYNTHS = {
       hiss.connect(out, 0, 1);
 
       const cr = kit.grains();
-      // a crackle is a sub-millisecond broadband click; distance and wood dull some of them
+      // a crackle is a sub-millisecond click: some sharp and broadband, some with a dull woody knock
       const crackle = (t, pan, a) => {
+        if (rand() < 0.4) {
+          const f = between(700, 3000);
+          ringBurst(cr, rand, t, pan, a * 1.5, f, f / between(1, 2), between(0.0003, 0.0008));
+          return;
+        }
         const tau = between(0.00008, 0.0004);
         const c = between(0.3, 1);
         let prev = 0;
@@ -980,8 +992,8 @@ const BED_SYNTHS = {
         const pan = between(-0.45, 0.45);
         for (let j = 0; j < n; j++) crackle(t + rand() ** 2 * spread, pan + between(-0.1, 0.1), 0.08 + 0.8 * rand() ** 3);
       });
-      // a steady scatter of small ticks
-      kit.events(15 + 40 * k, (t) => crackle(t, between(-0.5, 0.5), 0.03 + 0.3 * rand() ** 3));
+      // a light scatter of single ticks between bursts
+      kit.events(5 + 12 * k, (t) => crackle(t, between(-0.5, 0.5), 0.03 + 0.25 * rand() ** 3));
       // pops: a pocket of steam bursting, a sharp snap with a short thump under it
       kit.events(0.2 + 0.4 * k, (t) => {
         const snap = between(0.0008, 0.003);
@@ -990,7 +1002,7 @@ const BED_SYNTHS = {
         cr.add(t, Math.ceil(thump * 7 * sr), between(-0.4, 0.4), between(0.5, 1), (i) => {
           const n = rand() * 2 - 1;
           lp += (n - lp) * 0.06;
-          return n * Math.exp(-i / (snap * sr)) + 3 * lp * Math.exp(-i / (thump * sr));
+          return n * Math.exp(-i / (snap * sr)) + 1.5 * lp * Math.exp(-i / (thump * sr));
         });
       });
       const src = cr.source();
