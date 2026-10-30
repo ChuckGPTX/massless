@@ -4,6 +4,16 @@
 
 const AVC_CODECS = ['avc1.640028', 'avc1.4d0028', 'avc1.42002a', 'avc1.42001f'];
 
+// Yield to the event loop without timers or animation frames, which Chrome throttles in background tabs.
+const channel = typeof MessageChannel !== 'undefined' ? new MessageChannel() : null;
+function yieldTask() {
+  if (!channel) return new Promise((r) => setTimeout(r, 0));
+  return new Promise((r) => {
+    channel.port1.onmessage = () => r();
+    channel.port2.postMessage(0);
+  });
+}
+
 async function pickAvc(width, height, fps) {
   if (typeof VideoEncoder === 'undefined') return null;
   for (const codec of AVC_CODECS) {
@@ -45,10 +55,10 @@ export async function recordMove(canvas, { duration, fps = 24, draw, onProgress 
       const frame = new VideoFrame(canvas, { timestamp: Math.round((i * 1e6) / fps), duration: Math.round(1e6 / fps) });
       encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 });
       frame.close();
-      if (encoder.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 0));
+      while (encoder.encodeQueueSize > 6) await yieldTask();
       if (i % 4 === 0) {
         onProgress(i / frames);
-        await new Promise((r) => requestAnimationFrame(r));
+        await yieldTask();
       }
     }
     await encoder.flush();

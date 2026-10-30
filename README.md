@@ -43,6 +43,8 @@ Any static server works for the app alone (`python3 -m http.server -d public`); 
 
 Deploy to your own Cloudflare account: create a KV namespace, put its id in `wrangler.jsonc`, then `npx wrangler deploy`. Workers AI is enabled through the `ai` binding.
 
+How massless.chucksi.com runs today: the Worker in `src/index.js` was uploaded through the Cloudflare API without an assets binding, so it serves the files in `public/` straight from this repo's `main` branch and caches them at Cloudflare's edge. Pushing to `main` updates the live site within about ten minutes; only changes to `src/index.js` need a Worker re-upload (or a switch to `wrangler deploy`, which uses the assets binding instead).
+
 ## Open weights only, on your GPU (ComfyUI)
 
 `public/comfy/massless_shot_flux_schnell.api.json` is the hero-frame workflow in ComfyUI API format: core nodes only, FLUX.1 [schnell] fp8, no partner nodes.
