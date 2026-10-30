@@ -58,6 +58,11 @@ async function needsHuman(request, env) {
 }
 
 async function humanPass(request, env) {
+  // GET: is the check on, and does this visitor already have a pass? Pages ask on load and warm up early.
+  if (request.method === 'GET') {
+    const on = humanOn(env);
+    return json({ on, sitekey: on ? env.TURNSTILE_SITEKEY : null, passed: on ? (await needsHuman(request, env)) === null : true });
+  }
   if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
   if (!humanOn(env)) return json({ ok: true, off: true });
   let token = '';
