@@ -242,19 +242,114 @@ function trimSilence(x, sr) {
   return x.subarray(Math.max(0, a - Math.round(0.05 * sr)), Math.min(x.length, b + Math.round(0.12 * sr)));
 }
 
-function joinParts(parts) {
+function joinParts(parts, rate = VOICE_RATE) {
   let total = 0;
-  parts.forEach((p, i) => (total += p.samples.length + (i < parts.length - 1 ? Math.round(p.pause * VOICE_RATE) : 0)));
+  parts.forEach((p, i) => (total += p.samples.length + (i < parts.length - 1 ? Math.round(p.pause * rate) : 0)));
   const out = new Float32Array(total);
   let o = 0;
   let peak = 0;
   parts.forEach((p, i) => {
     out.set(p.samples, o);
-    o += p.samples.length + (i < parts.length - 1 ? Math.round(p.pause * VOICE_RATE) : 0);
+    o += p.samples.length + (i < parts.length - 1 ? Math.round(p.pause * rate) : 0);
   });
   for (let i = 0; i < out.length; i++) peak = Math.max(peak, Math.abs(out[i]));
   const g = peak > 0 ? Math.min(8, 0.89 / peak) : 1;
   for (let i = 0; i < out.length; i++) out[i] *= g;
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------------
+// MeloTTS (MIT) on Cloudflare Workers AI: six languages, one voice each, through /api/tts.
+// Unlike Kokoro, the script is sent to Cloudflare to be spoken; nothing is stored there.
+// ---------------------------------------------------------------------------------------------
+
+export const MELO_MODEL = 'MeloTTS';
+const MELO_RATE = 44100;
+const MELO_MAX_CHARS = 950; // the endpoint takes 1,200; stay well under 1,000
+const MELO_SENTENCE_PAUSE = 0.25;
+const MELO_PARAGRAPH_PAUSE = 0.5;
+
+export const MELO_LANGS = [
+  { id: 'en', name: 'English', native: 'English', tag: 'EN', sample: 'Hi, this is MeloTTS speaking English, generated on Cloudflare for free.' },
+  { id: 'es', name: 'Spanish', native: 'Español', tag: 'ES', sample: 'Hola, esta es la voz en español de MeloTTS, gratis.' },
+  { id: 'fr', name: 'French', native: 'Français', tag: 'FR', sample: 'Bonjour, voici la voix française de MeloTTS, gratuite.' },
+  { id: 'zh', name: 'Chinese', native: '中文', tag: 'ZH', sample: '你好，这是中文的声音，完全免费。' },
+  { id: 'jp', name: 'Japanese', native: '日本語', tag: 'JA', sample: 'こんにちは。これは日本語の声です。無料で作りました。' },
+  { id: 'kr', name: 'Korean', native: '한국어', tag: 'KO', sample: '안녕하세요. 이것은 한국어 목소리입니다.' },
+];
+
+/** Split a script into chunks under MELO_MAX_CHARS, packing whole sentences (also 。！？ for CJK). */
+export function splitForMelo(text, max = MELO_MAX_CHARS) {
+  const chunks = [];
+  for (const para of String(text).split(/\n\s*\n/)) {
+    if (!para.trim()) continue;
+    const sentences = para
+      .replace(/\s+/g, ' ')
+      .replace(/([.!?…]["'”’)\]]*)\s+/g, '$1\n')
+      .replace(/([。！？])/g, '$1\n')
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .flatMap((s) => breakLong(s.replace(/([，、；：])/g, '$1 '), max).map((p) => p.replace(/([，、；：]) /g, '$1')))
+      .flatMap((s) => (s.length > max ? s.match(new RegExp(`[\\s\\S]{1,${max}}`, 'gu')) : [s]));
+    let cur = '';
+    for (const s of sentences) {
+      const sep = /[。！？]$/.test(cur) ? '' : ' ';
+      if (cur && cur.length + sep.length + s.length > max) {
+        chunks.push({ text: cur, pause: MELO_SENTENCE_PAUSE });
+        cur = s;
+      } else {
+        cur = cur ? `${cur}${sep}${s}` : s;
+      }
+    }
+    if (cur) chunks.push({ text: cur, pause: MELO_PARAGRAPH_PAUSE });
+  }
+  return chunks;
+}
+
+/**
+ * Speak text with MeloTTS through /api/tts. Long scripts are split on sentences, sent one chunk at a
+ * time and joined with short pauses into one 44.1 kHz mono WAV, peak-normalized to -1 dBFS.
+ * onProgress(fraction, label). Errors carry the server's message (for example the daily cap).
+ */
+export async function speakMelo(text, { lang = 'en', onProgress } = {}) {
+  const input = String(text ?? '').trim();
+  if (!input) throw new Error('Nothing to speak: the text is empty');
+  const chunks = splitForMelo(input);
+  const parts = [];
+  for (let i = 0; i < chunks.length; i++) {
+    onProgress?.(chunks.length > 1 ? i / chunks.length : null, chunks.length > 1 ? `Part ${i + 1} of ${chunks.length}` : 'Speaking');
+    let res;
+    try {
+      res = await fetch('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: chunks[i].text, lang }) });
+    } catch {
+      throw new Error('could not reach Cloudflare. Check your connection and try again.');
+    }
+    if (!res.ok) {
+      let msg = `the server answered ${res.status}`;
+      try { msg = (await res.json()).error || msg; } catch {}
+      throw new Error(msg);
+    }
+    const audio = await decodeToMono(await res.arrayBuffer(), MELO_RATE);
+    parts.push({ samples: trimSilence(audio, MELO_RATE), pause: chunks[i].pause });
+  }
+  onProgress?.(1, 'Joining');
+  const samples = joinParts(parts, MELO_RATE);
+  const blob = encodeWav([samples], MELO_RATE);
+  return { blob, url: URL.createObjectURL(blob), duration: samples.length / MELO_RATE, sampleRate: MELO_RATE, chunks: chunks.length };
+}
+
+/** Decode any audio the browser can read (wav, mp3, m4a, mp4, webm, ogg) to one channel at sampleRate. */
+export async function decodeToMono(arrayBuffer, sampleRate) {
+  const ctx = new OfflineAudioContext(1, 1, sampleRate);
+  const buf = await ctx.decodeAudioData(arrayBuffer);
+  if (buf.numberOfChannels === 1) return buf.getChannelData(0);
+  const out = new Float32Array(buf.length);
+  const n = buf.numberOfChannels;
+  for (let c = 0; c < n; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < d.length; i++) out[i] += d[i] / n;
+  }
   return out;
 }
 

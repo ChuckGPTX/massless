@@ -17,7 +17,7 @@ Four pages, laid out like a commercial AI film studio, with every paid model swa
 | **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
 | **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
 | **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
-| **Audio** (`/audio`) | Voiceover from a script with eight open Kokoro voices, and sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. |
+| **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Deep links: `/audio?tab=captions`, `/audio?engine=melo&lang=es`. |
 
 Everything a visitor makes is stored in their own browser (IndexedDB). There are no accounts.
 
@@ -32,6 +32,8 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 | Camera, lens, film | Massless renderer (WebGL2) | MIT | The visitor's browser |
 | Video | WebCodecs H.264 + mp4-muxer | Built in / MIT | The visitor's device |
 | Voiceover | Kokoro-82M via kokoro-js | Apache-2.0 | The visitor's browser, WebGPU or WebAssembly |
+| Voiceover, 6 languages | MeloTTS | MIT | Cloudflare Workers AI free daily allocation (`/api/tts`, capped) |
+| Captions | Whisper large-v3-turbo | MIT | Cloudflare Workers AI free daily allocation (`/api/transcribe`, capped); audio is downmixed to 16 kHz mono in the browser first |
 | Sound beds | Massless synth (Web Audio) | MIT | The visitor's browser |
 | 3D, in the browser | Depth Anything V2 + Massless splat builder, rendered with Spark | Apache-2.0 / MIT | The visitor's browser |
 | 3D, full object | Idol (speridlabs) | Apache-2.0 | Your own NVIDIA GPU, through `comfy/idol_server.py` |
@@ -97,6 +99,7 @@ python3 tests/render_test.py          # every move: first, middle and last frame
 python3 tests/pages_test.py           # Video: render a clip, build and export a storyboard; Audio: render a bed
 python3 tests/pages_test.py voice audio   # also generates a Kokoro voiceover (downloads the model once)
 python3 tests/audio_test.py           # audio engine: every voice and every bed
+python3 tests/audio_page_test.py      # Audio page: MeloTTS chunking, Captions (short, CJK, 10-minute split) against mocks
 python3 tests/office_test.py          # Office: every convert operation, edit and save, and Ask against a mock
 python3 tests/three_d_test.py         # 3D: depth splat from a sample, then the Idol path against a mock server
 python3 tools/bake_depth.py           # precompute depth for the sample stills (public/media/depth)

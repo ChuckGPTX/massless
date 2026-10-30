@@ -1,0 +1,63 @@
+/* Audio page: voice engines, MeloTTS languages and the Captions tool. Builds on studio.css. */
+
+.engines { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.engine { display: grid; gap: 1px; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-align: left; }
+.engine:hover { background: var(--surface-2); }
+.engine small { font-size: 11.5px; color: var(--muted); }
+.engine strong { font-size: 14px; font-weight: 600; }
+.engine span { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+.engine[aria-checked="true"] { border-color: var(--accent); background: rgba(255, 191, 47, 0.07); }
+.engine[aria-checked="true"] small { color: var(--accent); }
+
+.field-note { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.field.off input[type="range"] { opacity: 0.35; }
+.field.off .f-head output { color: var(--dim); }
+
+.avatar.tag { font-size: 13px; letter-spacing: 0.04em; }
+.vcard .native { color: var(--text); font-weight: 500; }
+
+/* ---------- captions ---------- */
+.dropzone {
+  display: grid; justify-items: center; gap: 8px; text-align: center; padding: 48px 20px 42px;
+  border: 1.5px dashed var(--line-2); border-radius: 16px; background: radial-gradient(120% 100% at 50% 0%, #19191c 0%, #111113 70%);
+  transition: border-color 0.15s, background 0.15s;
+}
+.dropzone svg { width: 54px; height: 54px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; margin-bottom: 4px; }
+.dropzone strong { font-size: clamp(28px, 3vw, 40px); }
+.dropzone .muted { font-size: 14px; max-width: 50ch; }
+.dz-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+.dz-actions label { cursor: pointer; }
+.dropzone.compact { grid-template-columns: auto 1fr auto; justify-items: start; text-align: left; padding: 14px 18px; gap: 2px 14px; }
+.dropzone.compact svg { grid-row: 1 / span 2; width: 30px; height: 30px; margin: 0; }
+.dropzone.compact strong { font-size: 22px; word-break: break-word; }
+.dropzone.compact .muted { font-size: 12.5px; }
+.dropzone.compact .dz-actions { grid-column: 3; grid-row: 1 / span 2; margin: 0; }
+.stage.dragging .dropzone { border-color: var(--accent); background: rgba(255, 191, 47, 0.05); }
+
+.parts { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+.part { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; align-items: center; padding: 9px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; }
+.part .n { font: 800 18px/1 var(--display); color: var(--muted); min-width: 22px; }
+.part .span { color: var(--muted); font-size: 12.5px; }
+.part .st { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.part .meter { grid-column: 1 / -1; }
+.part.sending { border-color: var(--line-2); }
+.part.sending .st { color: var(--text); }
+.part.done .st, .part.done .n { color: var(--accent); }
+.part.done .meter-fill { width: 100%; }
+.part.error { border-color: var(--hot); }
+.part.error .st { color: var(--hot); }
+
+#cap-go-inline { display: none; }
+.cap-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.cap-field textarea { min-height: 320px; font: 13.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; white-space: pre-wrap; }
+.cap-field .f-head { gap: 12px; }
+#cap-result .side-note { margin-top: 10px; }
+
+@media (max-width: 900px) {
+  .dropzone { padding: 30px 16px 26px; }
+  .dropzone strong { font-size: 28px; }
+  .dropzone.compact { grid-template-columns: auto 1fr; }
+  .dropzone.compact .dz-actions { grid-column: 1 / -1; grid-row: auto; margin-top: 6px; }
+  #cap-go-inline:not([hidden]) { display: inline-flex; }
+  .cap-field textarea { min-height: 240px; font-size: 12.5px; }
+}

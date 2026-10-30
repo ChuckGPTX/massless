@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Free AI voiceover and sound beds | Massless</title>
-  <meta name="description" content="Turn a script into voiceover with eight open Kokoro voices, and render rain, wind, ocean or city ambience from scratch. Runs in your browser. $0.">
+  <title>Free AI voiceover, captions and sound beds | Massless</title>
+  <meta name="description" content="Turn a script into voiceover in six languages with open Kokoro and MeloTTS voices, make captions from any audio or video with Whisper, and render rain, wind or city ambience. $0.">
   <meta name="theme-color" content="#0b0b0c">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Massless">
   <meta property="og:url" content="https://massless.chucksi.com/audio">
-  <meta property="og:title" content="Free AI voiceover and sound beds | Massless">
-  <meta property="og:description" content="Turn a script into voiceover with eight open Kokoro voices, and render rain, wind, ocean or city ambience from scratch. Runs in your browser. $0.">
+  <meta property="og:title" content="Free AI voiceover, captions and sound beds | Massless">
+  <meta property="og:description" content="Turn a script into voiceover in six languages with open Kokoro and MeloTTS voices, make captions from any audio or video with Whisper, and render rain, wind or city ambience. $0.">
   <meta property="og:image" content="https://massless.chucksi.com/og.jpg?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -23,6 +23,7 @@
   <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/css/site.css">
   <link rel="stylesheet" href="/css/studio.css">
+  <link rel="stylesheet" href="/css/audio.css">
 </head>
 <body class="studio-body">
   <header class="nav">
@@ -45,6 +46,7 @@
     <aside class="side" aria-label="Audio controls">
       <div class="side-tabs" role="tablist">
         <button role="tab" aria-selected="true" aria-controls="tab-voice" id="t-voice">Voiceover</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-cap" id="t-cap">Captions</button>
         <button role="tab" aria-selected="false" aria-controls="tab-bed" id="t-bed">Sound beds</button>
       </div>
 
@@ -53,19 +55,38 @@
           <div class="f-head"><span>Script</span><output id="o-chars">0 / 2000</output></div>
           <textarea id="script" maxlength="2000" rows="7" aria-label="Script">The road ran straight for ninety miles. No towns, no signs, just heat on the asphalt and one rider chasing the last of the light.</textarea>
         </div>
+        <div class="engines" id="engines" role="radiogroup" aria-label="Voice engine">
+          <button type="button" class="engine" role="radio" aria-checked="true" data-id="kokoro"><small>In your browser</small><strong>Kokoro</strong><span>English · 8 voices · private</span></button>
+          <button type="button" class="engine" role="radio" aria-checked="false" data-id="melo"><small>Cloudflare</small><strong>MeloTTS</strong><span>6 languages · sent to Cloudflare</span></button>
+        </div>
         <button type="button" class="row-sel" id="voice-sel">
-          <span class="voice-row"><span class="avatar" id="voice-avatar">H</span><span><small>Voice</small><strong id="voice-name">Heart</strong></span></span>
+          <span class="voice-row"><span class="avatar" id="voice-avatar">H</span><span><small id="voice-kind">Voice</small><strong id="voice-name">Heart</strong></span></span>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
         </button>
-        <div class="field">
+        <div class="field" id="speed-field">
           <div class="f-head"><span>Speed</span><output id="o-speed">1.00×</output></div>
           <input type="range" id="speed" min="0.7" max="1.3" step="0.05" value="1" aria-label="Speed">
+          <small class="field-note" id="speed-note" hidden>Speed works with Kokoro voices only.</small>
         </div>
         <div class="row-sel" aria-label="Model">
-          <span><small>Model</small><strong>Kokoro-82M · open weights</strong></span>
+          <span><small>Model</small><strong id="model-name">Kokoro-82M · open weights</strong></span>
           <span class="badge-new">$0</span>
         </div>
-        <p class="side-note">The first voice downloads the model once (about 90 MB), then it runs offline in this tab. Nothing you type leaves your device.</p>
+        <p class="side-note" id="voice-note">The first voice downloads the model once (about 90 MB), then it runs offline in this tab. Nothing you type leaves your device.</p>
+      </div>
+
+      <div class="side-scroll" id="tab-cap" role="tabpanel" aria-labelledby="t-cap" hidden>
+        <button type="button" class="row-sel" id="cap-file-sel">
+          <span><small>File</small><strong id="cap-file-name">Choose audio or video</strong></span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <label class="row-sel sel"><small>Spoken language</small><select id="cap-lang"></select></label>
+        <label class="check"><input type="checkbox" id="cap-translate"> <span><strong>Translate to English</strong><small>Captions come out in English, whatever the language spoken</small></span></label>
+        <div class="row-sel" aria-label="Model">
+          <span><small>Model</small><strong>Whisper large-v3-turbo · open weights</strong></span>
+          <span class="badge-new">$0</span>
+        </div>
+        <p class="side-note">Your file is decoded in this tab and nothing leaves it until you press Transcribe. Then only the audio, as 16 kHz mono, goes to Cloudflare's Whisper for transcription. It is not stored.</p>
       </div>
 
       <div class="side-scroll" id="tab-bed" role="tabpanel" aria-labelledby="t-bed" hidden>
@@ -83,14 +104,16 @@
 
       <div class="side-foot">
         <div id="foot-voice"><button type="button" class="go" id="gen-voice"><span id="gen-voice-label">Generate voice</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
+        <div id="foot-cap" hidden><button type="button" class="go" id="gen-cap" disabled><span id="gen-cap-label">Transcribe</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
         <div id="foot-bed" hidden><button type="button" class="go" id="gen-bed"><span id="gen-bed-label">Render bed</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
       </div>
     </aside>
 
-    <section class="stage" aria-label="Voices and history">
+    <section class="stage" aria-label="Audio stage">
       <div class="stage-top">
         <div class="pills" role="tablist" aria-label="Audio tools">
           <button type="button" class="pill on" id="p-voice"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="6" y="1.5" width="4" height="8" rx="2"/><path d="M3.5 7.5a4.5 4.5 0 009 0M8 12v2.5"/></svg>Voiceover</button>
+          <button type="button" class="pill" id="p-cap"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="2"/><path d="M4.5 9.5h3M9.5 9.5h2M4.5 7h7"/></svg>Captions</button>
           <button type="button" class="pill" id="p-bed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8h2l1.5-4 2 8 2-10 2 9 1.5-3h2"/></svg>Sound beds</button>
           <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
         </div>
@@ -104,7 +127,7 @@
         </div>
       </div>
 
-      <div class="feature-duo">
+      <div class="feature-duo" id="voice-view-cards">
         <article class="fcard">
           <h3>Narrate any script</h3>
           <p>Paste up to 2,000 characters. Long scripts are split on sentences and stitched with natural pauses.</p>
@@ -117,24 +140,59 @@
         </article>
       </div>
 
-      <div class="lib-head" id="voices-head"><h2 class="display">Voices</h2><span class="muted small">Tap to choose · ▶ to hear a line</span></div>
-      <div class="voices" id="voices" role="radiogroup" aria-label="Voice"></div>
+      <div id="voice-view">
+        <div class="lib-head" id="voices-head"><h2 class="display" id="voices-title">Voices</h2><span class="muted small" id="voices-hint">Tap to choose · ▶ to hear a line</span></div>
+        <div class="voices" id="voices" role="radiogroup" aria-label="Voice"></div>
+        <div class="voices" id="langs" role="radiogroup" aria-label="Language" hidden></div>
+      </div>
 
-      <div class="lib-head"><h2 class="display">History</h2><button type="button" class="btn-ghost small" id="clear-history" hidden>Clear</button></div>
-      <div class="history" id="history"></div>
-      <p class="side-note muted" id="history-empty">Nothing yet. Generate a voice or render a bed and it lands here, saved in this browser.</p>
+      <div id="cap-view" hidden>
+        <div class="dropzone" id="cap-drop">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="9" width="38" height="30" rx="4"/><path d="M12 27h9M25 27h11M12 32h16"/><path d="M24 14v8M20 18l4 4 4-4"/></svg>
+          <strong class="display" id="cap-drop-title">Drop audio or video here</strong>
+          <span class="muted" id="cap-drop-sub">mp3, wav, m4a, mp4, mov or webm, up to 60 minutes. Nothing is sent until you press Transcribe.</span>
+          <div class="dz-actions"><label class="btn-accent" for="cap-in" id="cap-choose">Choose file</label><button type="button" class="btn-ghost" id="cap-go-inline" hidden>Transcribe</button></div>
+        </div>
+        <input type="file" id="cap-in" accept="audio/*,video/*,.mp3,.wav,.m4a,.mp4,.mov,.webm,.ogg,.opus,.flac,.aac" hidden>
+        <ol class="parts" id="cap-parts" hidden></ol>
+
+        <div id="cap-result" hidden>
+          <div class="lib-head"><h2 class="display">Transcript</h2>
+            <div class="cap-actions">
+              <button type="button" class="btn-ghost small" id="cap-copy">Copy</button>
+              <button type="button" class="btn-ghost small" id="cap-txt">.txt</button>
+              <button type="button" class="btn-ghost small" id="cap-srt">.srt</button>
+              <button type="button" class="btn-ghost small" id="cap-vtt">.vtt</button>
+            </div>
+          </div>
+          <div class="field cap-field">
+            <div class="f-head"><span id="cap-meta">Edit the words; keep the [start → end] times</span><output id="cap-count"></output></div>
+            <textarea id="cap-text" rows="14" spellcheck="true" aria-label="Transcript"></textarea>
+          </div>
+          <p class="side-note muted">Captions are rebuilt from your edits as sentence-level cues, at most two lines of 42 characters. The transcript is kept in this browser until you transcribe another file.</p>
+        </div>
+      </div>
+
+      <div id="history-view">
+        <div class="lib-head"><h2 class="display">History</h2><button type="button" class="btn-ghost small" id="clear-history" hidden>Clear</button></div>
+        <div class="history" id="history"></div>
+        <p class="side-note muted" id="history-empty">Nothing yet. Generate a voice or render a bed and it lands here, saved in this browser.</p>
+      </div>
     </section>
   </main>
 
   <dialog class="sheet" id="how">
     <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Voiceover uses Kokoro-82M, an 82-million-parameter open-weight text-to-speech model (Apache-2.0), run through kokoro-js on WebGPU or WebAssembly. Text is split into sentences, spoken chunk by chunk and joined into one 24 kHz WAV.</p>
-    <p>Sound beds are built from noise, filters and envelopes in an OfflineAudioContext and exported as 48 kHz stereo WAV. Everything happens in this tab; nothing is uploaded.</p>
+    <p>Voiceover in your browser uses Kokoro-82M, an 82-million-parameter open-weight text-to-speech model (Apache-2.0), run through kokoro-js on WebGPU or WebAssembly. Text is split into sentences, spoken chunk by chunk and joined into one 24 kHz WAV. Nothing leaves your device.</p>
+    <p>For Spanish, French, Chinese, Japanese and Korean, pick MeloTTS (MIT). Your script is sent to Cloudflare Workers AI in chunks under 1,000 characters, and the audio comes back and is joined here into one 44.1 kHz WAV. Nothing is stored there.</p>
+    <p>Captions use Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Your file is decoded in this tab and only the audio is sent, as 16 kHz mono WAV, when you press Transcribe. Files over about nine minutes go in parts of up to eight minutes, and the timestamps are joined back together. It is not stored.</p>
+    <p>Sound beds are built from noise, filters and envelopes in an OfflineAudioContext and exported as 48 kHz stereo WAV. They are made in this tab; nothing is uploaded.</p>
+    <p>Free tools on Cloudflare have a daily cap so they stay at $0. If you hit it, try again after midnight UTC, or use Kokoro, which has no limit.</p>
   </dialog>
 
   <dialog class="sheet" id="ledger">
     <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Voice: Kokoro-82M (Apache-2.0), in your browser. Sound beds: Massless synth (MIT), in your browser. Cost: $0.</p>
+    <p>Voice: Kokoro-82M (Apache-2.0), in your browser, or MeloTTS (MIT) on Cloudflare Workers AI. Captions: Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Sound beds: Massless synth (MIT), in your browser. Cost: $0.</p>
   </dialog>
 
   <script type="module" src="/js/pages/audio.js"></script>
