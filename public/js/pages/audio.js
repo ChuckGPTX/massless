@@ -1,6 +1,8 @@
 import { VOICES, BEDS, MELO_LANGS, speak, speakMelo, renderBed, voiceBackend, MAX_BED_SECONDS } from '../audio-engine.js';
 import * as T from '../transcribe.js';
+import * as X from '../extract.js';
 import * as store from '../store.js';
+import { warmHuman } from '../human.js';
 import { bindDialogs, toast, el, download } from '../ui.js';
 
 const $ = (s) => document.querySelector(s);
@@ -18,8 +20,9 @@ const COPY = {
   voice: ['Turn text<br>into voiceover', 'Eight English voices on your own device, or six languages with MeloTTS on Cloudflare. Pair a voice with a sound bed and drop both under a clip from Video.'],
   cap: ['Captions from<br>any clip', 'Drop audio or video and get an editable transcript, plus .srt and .vtt captions with timestamps. Whisper large-v3-turbo, free.'],
   bed: ['Score the<br>scene', 'Rain, wind, ocean and city ambience synthesized from scratch in seconds. Fades at both ends, so it loops under any clip.'],
+  ext: ['Extract audio<br>from video', 'Drop a video or audio file, pick MP3, M4A or WAV and press Convert. It all runs in this tab, so nothing is uploaded.'],
 };
-const TABS = ['voice', 'cap', 'bed'];
+const TABS = ['voice', 'cap', 'bed', 'ext'];
 function showTab(which) {
   state.tab = which;
   for (const t of TABS) {
@@ -29,18 +32,22 @@ function showTab(which) {
     $(`#foot-${t}`).hidden = !on;
     $(`#p-${t}`).classList.toggle('on', on);
   }
-  const captions = which === 'cap';
-  $('#voice-view-cards').hidden = captions;
-  $('#history-view').hidden = captions;
-  $('#cap-view').hidden = !captions;
+  const files = which === 'cap' || which === 'ext';
+  $('#voice-view-cards').hidden = files;
+  if (which === 'cap') warmHuman(); // Captions uses Whisper on Cloudflare
+  $('#history-view').hidden = files;
+  $('#cap-view').hidden = which !== 'cap';
+  $('#ext-view').hidden = which !== 'ext';
   $('#voice-view').hidden = which !== 'voice';
   $('#stage-title').innerHTML = COPY[which][0];
   $('#stage-sub').textContent = COPY[which][1];
   syncSource();
+  if (which === 'ext') extCaps();
 }
 function syncSource() {
   let s;
   if (state.tab === 'cap') s = 'Whisper large-v3-turbo on Cloudflare Workers AI';
+  else if (state.tab === 'ext') s = 'Runs in your browser · nothing is uploaded';
   else if (state.tab === 'voice' && state.engine === 'melo') s = 'MeloTTS on Cloudflare Workers AI';
   else s = voiceBackend() ? `Kokoro-82M on ${voiceBackend()}` : 'Kokoro-82M · loads on first use';
   $('#src-label').textContent = s;
@@ -50,7 +57,8 @@ function syncSource() {
 function selectEngine(id) {
   state.engine = id === 'melo' ? 'melo' : 'kokoro';
   const melo = state.engine === 'melo';
-  document.querySelectorAll('.engine').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.id === state.engine)));
+  if (melo) warmHuman(); // MeloTTS runs on Cloudflare
+  document.querySelectorAll('#engines .engine').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.id === state.engine)));
   $('#voices').hidden = melo;
   $('#langs').hidden = !melo;
   $('#voices-title').textContent = melo ? 'Languages' : 'Voices';
@@ -146,7 +154,7 @@ function buildBeds() {
 }
 
 // ---------- generation ----------
-const LABELS = { voice: 'Generate voice', bed: 'Render bed', cap: 'Transcribe' };
+const LABELS = { voice: 'Generate voice', bed: 'Render bed', cap: 'Transcribe', ext: 'Convert' };
 function progress(f, label) {
   const lbl = $(`#gen-${state.tab}-label`);
   lbl.textContent = label ? `${label}${f != null ? ` ${Math.round(f * 100)}%` : ''}` : 'Working…';
@@ -155,13 +163,14 @@ function setBusy(on, label) {
   state.busy = on;
   for (const t of TABS) {
     const b = $(`#gen-${t}`);
-    b.disabled = on || (t === 'cap' && !cap.prep);
+    b.disabled = on || (t === 'cap' && !cap.prep) || (t === 'ext' && !extTodo().length);
     b.classList.toggle('busy', on);
-    $(`#gen-${t}-label`).textContent = on && state.tab === t ? label || 'Working…' : LABELS[t];
+    $(`#gen-${t}-label`).textContent = on && state.tab === t ? label || 'Working…' : t === 'ext' ? extLabel() : LABELS[t];
   }
   $('#cap-go-inline').hidden = !cap.prep;
   $('#cap-go-inline').disabled = on;
   $('#cap-go-inline').textContent = on && state.tab === 'cap' ? label || 'Working…' : 'Transcribe';
+  syncExtInline();
   if (!on) syncSource();
 }
 
@@ -335,8 +344,512 @@ function bindDrop() {
     e.preventDefault();
     depth = 0;
     stage.classList.remove('dragging');
-    pickFile(e.dataTransfer.files[0]);
+    if (state.tab === 'ext') extAdd(e.dataTransfer.files);
+    else pickFile(e.dataTransfer.files[0]);
   });
+}
+
+// ---------- extract audio ----------
+const ext = { items: [], fmt: 'mp3', kbps: { mp3: 192, m4a: 192 }, mono: false, fadeIn: 0, fadeOut: 0, loud: false, aac: null, run: null };
+const preview = new Audio();
+let previewing = null;
+let extSeq = 0;
+let readChain = Promise.resolve();
+const STEP = 0.1; // trim resolution, seconds
+const KBPS_NOTE = {
+  mp3: { 128: 'Fine for speech and podcasts. About 1 MB a minute.', 192: 'Good for music, and the usual pick. About 1.4 MB a minute.', 320: 'The most MP3 can hold. About 2.4 MB a minute.' },
+  m4a: { 128: 'AAC sounds better than MP3 at the same size. About 1 MB a minute.', 192: 'Very good for music. About 1.4 MB a minute.', 256: 'The rate Apple Music uses. About 1.9 MB a minute.' },
+};
+const ENCODER = { mp3: 'LAME 3.100 · open source', m4a: 'AAC · this browser’s encoder', wav: '16-bit PCM · no encoder needed' };
+const kHz = (r) => `${r / 1000} kHz`; // 48, 44.1, 22.05
+const fsize = (b) => (b < 1e6 ? `${Math.max(1, Math.round(b / 1e3))} KB` : mb(b));
+const chName = (n) => (n === 1 ? 'Mono' : n === 2 ? 'Stereo' : `${n} channels`);
+const clockX = (t) => T.clock(t, 1);
+const extSettings = () => ({ format: ext.fmt, kbps: ext.fmt === 'wav' ? 0 : ext.kbps[ext.fmt], mono: ext.mono, fadeIn: ext.fadeIn, fadeOut: ext.fadeOut, normalize: ext.loud });
+const keyFor = (it, s = extSettings()) => [s.format, s.kbps, s.mono, s.fadeIn, s.fadeOut, s.normalize, it.start, it.end].join('|');
+const needsWork = (it, s) => it.status === 'ready' && !it.ctl && (!it.result || it.result.key !== keyFor(it, s));
+const extTodo = (s) => ext.items.filter((it) => needsWork(it, s));
+function extLabel() {
+  const n = extTodo().length;
+  return n > 1 ? `Convert ${n} files` : 'Convert';
+}
+function syncExtInline() {
+  const b = $('#ext-go-inline');
+  b.hidden = !ext.items.length;
+  b.disabled = state.busy || !extTodo().length;
+  b.textContent = ext.run ? $('#gen-ext-label').textContent : extLabel();
+}
+function syncExt() {
+  const n = ext.items.length;
+  $('#ext-files').hidden = !n;
+  $('#ext-drop').classList.toggle('compact', n > 0);
+  $('#ext-drop-title').textContent = n ? 'Add more files' : 'Drop video or audio here';
+  $('#ext-drop-sub').textContent = n
+    ? `${n} file${n === 1 ? '' : 's'} below. Drop more here, or choose them. Nothing is uploaded.`
+    : 'mp4, mov, webm, mp3, wav, m4a, ogg or flac. Add several at once. Nothing is uploaded.';
+  $('#ext-choose').textContent = n ? 'Add files' : 'Choose files';
+  const results = ext.items.filter((it) => it.result).length;
+  $('#ext-all').hidden = results < 2;
+  if (!state.busy) {
+    $('#gen-ext').disabled = !extTodo().length;
+    $('#gen-ext-label').textContent = extLabel();
+  }
+  syncExtInline();
+  for (const it of ext.items) paintStatus(it);
+}
+function saveExt() {
+  save('massless.extract', JSON.stringify({ fmt: ext.fmt, kbps: ext.kbps, mono: ext.mono, fadeIn: ext.fadeIn, fadeOut: ext.fadeOut, loud: ext.loud }));
+}
+function loadExt() {
+  let d = null;
+  try { d = JSON.parse(load('massless.extract') || 'null'); } catch {}
+  if (!d) return;
+  if (X.FORMATS[d.fmt]) ext.fmt = d.fmt;
+  for (const f of ['mp3', 'm4a']) if (X.FORMATS[f].kbps.includes(d.kbps?.[f])) ext.kbps[f] = d.kbps[f];
+  ext.mono = !!d.mono;
+  ext.loud = !!d.loud;
+  ext.fadeIn = Math.min(10, Math.max(0, Number(d.fadeIn) || 0));
+  ext.fadeOut = Math.min(10, Math.max(0, Number(d.fadeOut) || 0));
+}
+
+// format, quality and options
+let wantM4a = false; // M4A was the saved choice: pick it again once the encoder check says yes
+async function extCaps() {
+  if (ext.aac) return;
+  const c = await X.caps();
+  if (ext.aac) return;
+  ext.aac = c.aac || [];
+  const off = !ext.aac.length;
+  const m4a = $('.engine[data-fmt="m4a"]');
+  m4a.classList.toggle('off', off);
+  m4a.setAttribute('aria-disabled', String(off));
+  $('#ext-m4a-note').textContent = off ? 'Not in this browser' : 'Smaller files';
+  if (!off && wantM4a) selectFormat('m4a');
+  else buildKbps();
+  wantM4a = false;
+}
+function selectFormat(id, persist = true) {
+  if (id === 'm4a' && !ext.aac?.length) {
+    toast(ext.aac ? 'This browser can’t make M4A files. MP3 plays everywhere, or try Chrome, Edge or Safari on a Mac or PC.' : 'Checking what this browser can encode…');
+    return;
+  }
+  ext.fmt = X.FORMATS[id] ? id : 'mp3';
+  wantM4a = false;
+  document.querySelectorAll('#ext-fmts .engine').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.fmt === ext.fmt)));
+  buildKbps();
+  if (persist) saveExt();
+  syncExt();
+  if (ext.fmt === 'mp3' && ext.items.length) X.warm();
+}
+function buildKbps() {
+  const f = X.FORMATS[ext.fmt];
+  const opts = ext.fmt === 'm4a' ? f.kbps.filter((k) => (ext.aac || f.kbps).includes(k)) : f.kbps;
+  if (opts.length && !opts.includes(ext.kbps[ext.fmt])) ext.kbps[ext.fmt] = opts.includes(f.def) ? f.def : opts[0];
+  const box = $('#ext-kbps');
+  box.replaceChildren(...opts.map((k) => el('button', { type: 'button', role: 'radio', 'aria-checked': String(k === ext.kbps[ext.fmt]), 'data-kbps': k, onclick: () => selectKbps(k) }, `${k} kbps`)));
+  box.hidden = !opts.length;
+  const wav = ext.fmt === 'wav';
+  $('#o-ext-q').textContent = wav ? '16-bit PCM' : `${ext.kbps[ext.fmt]} kbps`;
+  $('#ext-q-note').textContent = wav ? 'Uncompressed, for editing. About 10 MB a minute in stereo.' : KBPS_NOTE[ext.fmt][ext.kbps[ext.fmt]] || '';
+  $('#ext-enc').textContent = ENCODER[ext.fmt];
+}
+function selectKbps(k) {
+  ext.kbps[ext.fmt] = k;
+  buildKbps();
+  saveExt();
+  syncExt();
+}
+function syncOptions() {
+  $('#ext-mono').checked = ext.mono;
+  $('#ext-loud').checked = ext.loud;
+  $('#ext-fi').value = ext.fadeIn;
+  $('#ext-fo').value = ext.fadeOut;
+  $('#o-ext-fi').textContent = ext.fadeIn ? `${ext.fadeIn} s` : 'Off';
+  $('#o-ext-fo').textContent = ext.fadeOut ? `${ext.fadeOut} s` : 'Off';
+}
+
+// the queue
+function extAdd(files) {
+  const list = [...(files || [])];
+  if (!list.length) return;
+  if (state.tab !== 'ext') showTab('ext');
+  let skipped = 0;
+  for (const file of list) {
+    if (!X.looksLikeMedia(file)) { skipped++; continue; }
+    const it = { id: `x${++extSeq}`, file, name: file.name, size: file.size, status: 'reading', start: 0, end: 0, duration: 0 };
+    ext.items.push(it);
+    $('#ext-queue').append(extCard(it));
+    readChain = readChain.then(() => extRead(it));
+  }
+  if (skipped) toast(skipped === list.length ? 'Choose a video or audio file.' : `Skipped ${skipped} file${skipped === 1 ? '' : 's'} that ${skipped === 1 ? 'isn’t' : 'aren’t'} audio or video.`, 'error');
+  syncExt();
+  if (ext.fmt === 'mp3' && ext.items.length) X.warm();
+}
+async function extRead(it) {
+  if (!ext.items.includes(it)) return;
+  try {
+    const info = await X.read(it.file, it.id, (f) => {
+      if (it.status !== 'reading') return;
+      it.statusEl.textContent = `Reading the audio… ${Math.round(f * 100)}%`;
+      it.meterEl.classList.remove('indeterminate');
+      it.meterEl.firstChild.style.width = `${Math.round(f * 100)}%`;
+    });
+    Object.assign(it, info, { status: 'ready', start: 0, end: info.duration });
+  } catch (e) {
+    it.status = 'error';
+    it.error = e.message;
+  }
+  if (!ext.items.includes(it)) { X.forget(it.id); return; }
+  fillCard(it);
+  syncExt();
+  if (it.status === 'error') toast(`${it.name}: ${it.error}`, 'error');
+}
+function extRemove(it) {
+  it.ctl?.abort();
+  if (previewing === it) stopPreview();
+  if (it.result) URL.revokeObjectURL(it.result.url);
+  if (it.url) URL.revokeObjectURL(it.url);
+  X.forget(it.id);
+  ext.items = ext.items.filter((x) => x !== it);
+  it.el.remove();
+  syncExt();
+}
+function extClear() {
+  for (const it of [...ext.items]) extRemove(it);
+}
+
+const ICON_VIDEO = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="9" height="9" rx="1.5"/><path d="M10.5 7l4-2.5v7l-4-2.5"/></svg>';
+const ICON_AUDIO = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 12V3.5l7-1.5v8.5"/><circle cx="4.3" cy="12" r="1.8"/><circle cx="11.3" cy="10.5" r="1.8"/></svg>';
+function extCard(it) {
+  const x = el('button', { type: 'button', class: 'xc-x', 'aria-label': `Remove ${it.name}`, html: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>' });
+  x.addEventListener('click', () => extRemove(it));
+  it.metaEl = el('span', { class: 'xc-meta' }, `${fsize(it.size)} · reading…`);
+  it.icoEl = el('span', { class: 'xc-ico', html: /^video\//.test(it.file.type) ? ICON_VIDEO : ICON_AUDIO });
+  it.statusEl = el('span', { class: 'xc-status' }, 'Reading the audio…');
+  it.meterEl = el('div', { class: 'meter indeterminate' }, el('div', { class: 'meter-fill' }));
+  it.bodyEl = el('div', { class: 'xc-body' });
+  it.el = el('li', { class: 'xcard reading', 'data-id': it.id },
+    el('div', { class: 'xc-head' }, it.icoEl, el('div', { class: 't' }, el('strong', { title: it.name }, it.name), it.metaEl), x),
+    it.bodyEl,
+    el('div', { class: 'xc-foot' }, it.statusEl, it.meterEl));
+  return it.el;
+}
+/** Once read: the waveform with trim handles, the time fields, the play and download buttons. */
+function fillCard(it) {
+  it.el.classList.remove('reading');
+  it.meterEl.classList.remove('indeterminate');
+  if (it.status === 'error') {
+    it.el.classList.add('error');
+    it.metaEl.textContent = fsize(it.size);
+    it.statusEl.textContent = it.error;
+    it.statusEl.classList.add('err');
+    it.meterEl.hidden = true;
+    return;
+  }
+  it.icoEl.innerHTML = it.video ? ICON_VIDEO : ICON_AUDIO;
+  it.metaEl.textContent = `${clockX(it.duration)} · ${chName(it.channels)} · ${kHz(it.sampleRate)} · ${fsize(it.size)}`;
+  it.canvas = el('canvas', { 'aria-hidden': 'true' });
+  it.handles = ['start', 'end'].map((which) => {
+    const h = el('div', { class: `xc-h ${which}`, role: 'slider', tabindex: 0, 'aria-label': which === 'start' ? `Trim start of ${it.name}` : `Trim end of ${it.name}`, 'aria-valuemin': 0, 'aria-valuemax': it.duration.toFixed(1) });
+    h.addEventListener('keydown', (e) => {
+      const d = (e.shiftKey ? 10 : 1) * STEP;
+      const cur = it[which];
+      const to = { ArrowLeft: cur - d, ArrowDown: cur - d, ArrowRight: cur + d, ArrowUp: cur + d, Home: 0, End: it.duration, PageDown: cur - 10, PageUp: cur + 10 }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      setTrim(it, which, to);
+    });
+    return h;
+  });
+  it.playhead = el('div', { class: 'xc-ph', hidden: true });
+  const wave = el('div', { class: 'xc-wave' }, it.canvas, it.playhead, ...it.handles);
+  bindWave(it, wave);
+  it.playEl = el('button', { type: 'button', class: 'vplay', 'aria-label': `Play the selection of ${it.name}`, html: PLAY });
+  it.playEl.addEventListener('click', () => togglePreview(it));
+  it.startIn = timeField(it, 'start');
+  it.endIn = timeField(it, 'end');
+  it.lenEl = el('output', { class: 'xc-len' });
+  it.dlEl = el('a', { class: 'btn-accent small xc-dl', hidden: true }, 'Download');
+  it.bodyEl.append(wave, el('div', { class: 'xc-row' }, it.playEl,
+    el('label', { class: 'xc-time' }, el('small', {}, 'Start'), it.startIn),
+    el('label', { class: 'xc-time' }, el('small', {}, 'End'), it.endIn),
+    el('span', { class: 'xc-lenw' }, el('small', {}, 'Length'), it.lenEl),
+    it.dlEl));
+  waveObserver.observe(wave);
+  syncTrim(it);
+}
+function timeField(it, which) {
+  const input = el('input', { class: 'xt', inputmode: 'decimal', autocomplete: 'off', spellcheck: 'false', 'aria-label': `${which === 'start' ? 'Start' : 'End'} time of ${it.name}` });
+  input.addEventListener('change', () => {
+    const t = T.parseTime(input.value);
+    if (!Number.isFinite(t)) { toast('Type a time like 1:05.5 or 65.5.', 'error'); syncTrim(it); return; }
+    setTrim(it, which, t);
+  });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
+  return input;
+}
+function setTrim(it, which, t) {
+  const D = it.duration;
+  let v = Math.round(t / STEP) / (1 / STEP);
+  if (t >= D - STEP / 2) v = D;
+  if (which === 'start') it.start = Math.max(0, Math.min(v, it.end - X.MIN_SECONDS));
+  else it.end = Math.min(D, Math.max(v, it.start + X.MIN_SECONDS));
+  syncTrim(it);
+  syncExt();
+}
+function syncTrim(it) {
+  const D = it.duration;
+  it.handles.forEach((h, i) => {
+    const t = i ? it.end : it.start;
+    h.style.left = `${(t / D) * 100}%`;
+    h.setAttribute('aria-valuenow', t.toFixed(1));
+    h.setAttribute('aria-valuetext', clockX(t));
+  });
+  if (document.activeElement !== it.startIn) it.startIn.value = clockX(it.start);
+  if (document.activeElement !== it.endIn) it.endIn.value = clockX(it.end);
+  it.lenEl.textContent = clockX(it.end - it.start);
+  drawTrim(it);
+}
+/** Drag on the waveform: the nearer handle follows. A touch only drags once it moves sideways, so the page still scrolls. */
+function bindWave(it, wave) {
+  let drag = null;
+  const at = (e) => {
+    const r = wave.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * it.duration;
+  };
+  wave.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    const t = at(e);
+    const which = Math.abs(t - it.start) <= Math.abs(t - it.end) ? 'start' : 'end';
+    drag = { id: e.pointerId, x: e.clientX, which, live: e.pointerType === 'mouse' };
+    if (drag.live) { e.preventDefault(); wave.setPointerCapture(e.pointerId); setTrim(it, which, t); it.handles[which === 'start' ? 0 : 1].focus({ preventScroll: true }); }
+  });
+  wave.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (!drag.live && Math.abs(e.clientX - drag.x) > 6) { drag.live = true; wave.setPointerCapture(e.pointerId); }
+    if (drag.live) setTrim(it, drag.which, at(e));
+  });
+  const end = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (!drag.live && e.type === 'pointerup') setTrim(it, drag.which, at(e)); // a tap moves the nearer handle there
+    drag = null;
+  };
+  wave.addEventListener('pointerup', end);
+  wave.addEventListener('pointercancel', () => (drag = null));
+}
+const fadeEnv = (p, len) => {
+  const fi = Math.min(ext.fadeIn, len / 2);
+  const fo = Math.min(ext.fadeOut, len / 2);
+  let g = 1;
+  if (fi && p < fi) g *= 0.5 - 0.5 * Math.cos((Math.PI * p) / fi);
+  if (fo && len - p < fo) g *= 0.5 - 0.5 * Math.cos((Math.PI * (len - p)) / fo);
+  return g;
+};
+function drawTrim(it) {
+  const c = it.canvas;
+  if (!c || !it.peaks) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth;
+  const h = c.clientHeight;
+  if (!w || !h) return;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+  const g = c.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  const pk = it.peaks;
+  const bars = Math.max(24, Math.floor(w / 3));
+  const bw = w / bars;
+  const D = it.duration;
+  const len = it.end - it.start;
+  for (let i = 0; i < bars; i++) {
+    const a = Math.floor((i * pk.length) / bars);
+    const b = Math.max(a + 1, Math.floor(((i + 1) * pk.length) / bars));
+    let m = 0;
+    for (let j = a; j < b; j++) if (pk[j] > m) m = pk[j];
+    const t = ((i + 0.5) / bars) * D;
+    const inside = t >= it.start && t <= it.end;
+    const amp = inside ? m * fadeEnv(t - it.start, len) : m;
+    const bh = Math.max(2, amp * (h - 6));
+    g.fillStyle = inside ? '#ffbf2f' : '#3b3b41';
+    g.fillRect(i * bw + 0.5, (h - bh) / 2, Math.max(1, bw - 1), bh);
+  }
+}
+const waveObserver = new ResizeObserver((entries) => {
+  for (const e of entries) {
+    const it = ext.items.find((x) => x.canvas && e.target.contains(x.canvas));
+    if (it) drawTrim(it);
+  }
+});
+function paintStatus(it) {
+  if (!it.statusEl || it.status === 'reading' || it.status === 'error') return;
+  const s = it.statusEl;
+  const busy = !!it.job;
+  const fresh = it.result && it.result.key === keyFor(it);
+  it.el.classList.toggle('busy', busy);
+  it.el.classList.toggle('done', !!fresh && !busy);
+  s.classList.toggle('err', !!it.convError && !busy);
+  if (busy) {
+    const f = it.job.f;
+    s.textContent = f == null ? `${it.job.label}…` : `${it.job.label} ${Math.round(f * 100)}%`;
+  } else if (it.convError) s.textContent = it.convError;
+  else if (ext.run && needsWork(it, ext.run)) s.textContent = 'Waiting';
+  else if (fresh) s.textContent = `${X.FORMATS[it.result.fmt].label} · ${fsize(it.result.size)} · ${clockX(it.result.duration)}${it.result.note || ''}`;
+  else if (it.result) s.textContent = 'Settings changed. Press Convert for a new file.';
+  else s.textContent = 'Ready';
+  it.meterEl.classList.toggle('indeterminate', busy && it.job.f == null);
+  it.meterEl.firstChild.style.width = busy ? `${Math.round((it.job.f || 0) * 100)}%` : '0%';
+  it.meterEl.hidden = !busy;
+  if (it.dlEl) {
+    it.dlEl.hidden = !it.result || busy;
+    if (it.result) {
+      it.dlEl.href = it.result.url;
+      it.dlEl.download = it.result.name;
+      it.dlEl.textContent = `Download ${X.FORMATS[it.result.fmt].label}`;
+      it.dlEl.classList.toggle('stale', !fresh);
+    }
+  }
+}
+function setResult(it, r, s) {
+  if (it.result) URL.revokeObjectURL(it.result.url);
+  const ext2 = X.FORMATS[s.format].ext;
+  let name = X.outputName(it.name, ext2);
+  const taken = new Set(ext.items.filter((x) => x !== it && x.result).map((x) => x.result.name.toLowerCase()));
+  for (let k = 2; taken.has(name.toLowerCase()); k++) name = X.outputName(it.name, ext2).replace(/(\.[^.]+)$/, ` (${k})$1`);
+  const note = s.normalize && Number.isFinite(r.gainDb) && Math.abs(r.gainDb) >= 0.1 ? ` · ${r.gainDb > 0 ? '+' : '−'}${Math.abs(r.gainDb).toFixed(1)} dB` : '';
+  it.result = { blob: r.blob, url: URL.createObjectURL(r.blob), name, key: keyFor(it, s), fmt: s.format, size: r.blob.size, duration: r.duration, note };
+}
+
+async function genExtract() {
+  if (state.busy) { if (!ext.run) toast('One job at a time. Try again in a moment.'); return; }
+  if (!ext.items.length) { $('#ext-in').click(); return; }
+  const s = extSettings();
+  if (!extTodo(s).length) {
+    toast(ext.items.some((it) => it.status === 'reading') ? 'Still reading your files. One moment.' : 'All converted. Change a setting or add a file to convert again.');
+    return;
+  }
+  ext.run = s;
+  setBusy(true, 'Converting');
+  let made = 0;
+  let failed = 0;
+  let last = null;
+  const tried = new Set();
+  try {
+    for (let n = 1; ; n++) {
+      const it = ext.items.find((x) => needsWork(x, s) && !tried.has(x));
+      if (!it) break;
+      tried.add(it);
+      const total = n - 1 + ext.items.filter((x) => needsWork(x, s) && !tried.has(x)).length + 1;
+      const ctl = new AbortController();
+      it.ctl = ctl;
+      it.convError = null;
+      it.job = { f: null, label: 'Starting' };
+      syncExt();
+      const label = (f, l) => {
+        it.job = { f, label: l };
+        paintStatus(it);
+        const pct = f == null ? '' : ` ${Math.round(f * 100)}%`;
+        const text = total > 1 ? `Converting ${n} of ${total}${pct}` : `${l === 'Converting' ? 'Converting' : l}${pct}`;
+        $('#gen-ext-label').textContent = text;
+        syncExtInline();
+      };
+      try {
+        const r = await X.convert(it, s, { signal: ctl.signal, onProgress: label });
+        it.job = null;
+        it.ctl = null;
+        if (!ext.items.includes(it)) continue;
+        setResult(it, r, s);
+        made++;
+        last = it;
+      } catch (e) {
+        it.job = null;
+        it.ctl = null;
+        if (e.name === 'AbortError' || !ext.items.includes(it)) continue;
+        it.convError = e.message;
+        failed++;
+        toast(`${it.name}: ${e.message}`, 'error');
+      }
+      syncExt();
+    }
+  } finally {
+    ext.run = null;
+    setBusy(false);
+    syncExt();
+  }
+  if (made === 1 && !failed) toast(`Ready: ${last.result.name}, ${fsize(last.result.size)}. Download it from the list.`);
+  else if (made > 1) toast(`${made} files converted${failed ? `, ${failed} failed` : ''}. Download them from the list.`);
+}
+async function downloadAll() {
+  const done = ext.items.filter((it) => it.result);
+  for (const [i, it] of done.entries()) {
+    if (i) await new Promise((r) => setTimeout(r, 400)); // browsers drop downloads that arrive together
+    download(it.result.blob, it.result.name);
+  }
+}
+
+// preview: play the selection with a media element (it plays the sound of a video too)
+function togglePreview(it) {
+  if (previewing === it && !preview.paused) { stopPreview(); return; }
+  stopPreview();
+  if (playingBtn) { player.pause(); playingBtn.innerHTML = PLAY; playingBtn = null; }
+  it.url ||= URL.createObjectURL(it.file);
+  previewing = it;
+  if (preview.src !== it.url) preview.src = it.url;
+  const go = () => {
+    if (previewing !== it) return;
+    preview.currentTime = it.start;
+    preview.play().then(() => {
+      it.playEl.innerHTML = PAUSE;
+      it.playhead.hidden = false;
+      requestAnimationFrame(function tick() {
+        if (previewing !== it || preview.paused) return;
+        const t = preview.currentTime;
+        if (t >= it.end) { stopPreview(); return; }
+        it.playhead.style.left = `${(t / it.duration) * 100}%`;
+        requestAnimationFrame(tick);
+      });
+    }).catch(() => { stopPreview(); toast('This browser can’t play this file here, but it can still convert it.'); });
+  };
+  if (preview.readyState >= 1) go();
+  else preview.addEventListener('loadedmetadata', go, { once: true });
+}
+function stopPreview() {
+  preview.pause();
+  if (previewing) {
+    previewing.playEl.innerHTML = PLAY;
+    previewing.playhead.hidden = true;
+  }
+  previewing = null;
+}
+preview.addEventListener('ended', stopPreview);
+preview.addEventListener('error', () => { if (previewing) { stopPreview(); toast('This browser can’t play this file here, but it can still convert it.'); } });
+
+function bindExtract() {
+  loadExt();
+  syncOptions();
+  document.querySelectorAll('#ext-fmts .engine').forEach((b) => b.addEventListener('click', () => selectFormat(b.dataset.fmt)));
+  if (ext.fmt === 'm4a') {
+    // M4A waits for the encoder check; show MP3 meanwhile without forgetting the choice
+    selectFormat('mp3', false);
+    wantM4a = true;
+    extCaps();
+  } else selectFormat(ext.fmt, false);
+  $('#ext-mono').addEventListener('change', (e) => { ext.mono = e.target.checked; saveExt(); syncExt(); });
+  $('#ext-loud').addEventListener('change', (e) => { ext.loud = e.target.checked; saveExt(); syncExt(); });
+  for (const [id, k] of [['#ext-fi', 'fadeIn'], ['#ext-fo', 'fadeOut']]) {
+    $(id).addEventListener('input', (e) => {
+      ext[k] = Number(e.target.value);
+      syncOptions();
+      saveExt();
+      syncExt();
+      for (const it of ext.items) drawTrim(it);
+    });
+  }
+  $('#ext-in').addEventListener('change', (e) => { extAdd(e.target.files); e.target.value = ''; });
+  $('#gen-ext').addEventListener('click', genExtract);
+  $('#ext-go-inline').addEventListener('click', genExtract);
+  $('#ext-clear').addEventListener('click', extClear);
+  $('#ext-all').addEventListener('click', downloadAll);
+  syncExt();
 }
 
 // ---------- history ----------
@@ -464,7 +977,7 @@ function init() {
     $(`#t-${t}`).addEventListener('click', () => showTab(t));
     $(`#p-${t}`).addEventListener('click', () => showTab(t));
   }
-  document.querySelectorAll('.engine').forEach((b) => b.addEventListener('click', () => selectEngine(b.dataset.id)));
+  document.querySelectorAll('#engines .engine').forEach((b) => b.addEventListener('click', () => selectEngine(b.dataset.id)));
   $('#voice-sel').addEventListener('click', () => $('#voices-head').scrollIntoView({ behavior: 'smooth', block: 'start' }));
   const chars = () => ($('#o-chars').textContent = `${$('#script').value.length} / 2000`);
   $('#script').addEventListener('input', chars);
@@ -488,17 +1001,19 @@ function init() {
   });
   $('#clear-history').addEventListener('click', clearHistory);
   bindDrop();
+  bindExtract();
   restoreDraft();
   const p = new URLSearchParams(location.search);
   if (location.hash === '#beds' || p.get('tab') === 'beds') showTab('bed');
   else if (location.hash === '#captions' || p.get('tab') === 'captions') showTab('cap');
+  else if (location.hash === '#extract' || p.get('tab') === 'extract') showTab('ext');
   else showTab('voice');
   if (p.get('engine') === 'melo' || p.get('lang')) selectEngine('melo');
   if (p.get('lang') && MELO_LANGS.some((l) => l.id === p.get('lang'))) selectLang(p.get('lang'));
   if (p.get('text')) { $('#script').value = p.get('text').slice(0, 2000); chars(); }
   restoreHistory();
   animateCards();
-  window.massless = { state: { ...state, recording: false }, genVoice, genBed, genCaptions, selectEngine, selectLang, showTab, cap };
+  window.massless = { state: { ...state, recording: false }, genVoice, genBed, genCaptions, genExtract, selectEngine, selectLang, showTab, cap, ext, extract: X };
 }
 
 init();

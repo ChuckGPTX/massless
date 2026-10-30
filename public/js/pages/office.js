@@ -1,6 +1,6 @@
 import * as T from '../pdf-tools.js';
 import { bindDialogs, toast, el, download } from '../ui.js';
-import { apiFetch } from '../human.js';
+import { apiFetch, warmHuman } from '../human.js';
 
 const $ = (s) => document.querySelector(s);
 const svg = (paths, cls = '') => `<svg viewBox="0 0 16 16" aria-hidden="true"${cls ? ` class="${cls}"` : ''}>${paths}</svg>`;
@@ -55,7 +55,7 @@ function showTab(which) {
   }
   $('#stage-title').innerHTML = COPY[which][0];
   $('#stage-sub').textContent = COPY[which][1];
-  if (which === 'ask') syncAskDoc();
+  if (which === 'ask') { syncAskDoc(); warmHuman(); }
   if (which === 'edit' && state.doc) requestAnimationFrame(() => (state.fit ? fitZoom() : renderVisible()));
 }
 

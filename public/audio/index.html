@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Free AI voiceover, captions and sound beds | Massless</title>
-  <meta name="description" content="Turn a script into voiceover in six languages with open Kokoro and MeloTTS voices, make captions from any audio or video with Whisper, and render rain, wind or city ambience. $0.">
+  <title>Free AI voiceover, captions and video to MP3 | Massless</title>
+  <meta name="description" content="Turn a script into voiceover in six languages with open Kokoro and MeloTTS voices, make captions with Whisper, extract MP3, M4A or WAV from your own videos right in the browser, and render rain, wind or city ambience. $0.">
   <meta name="theme-color" content="#0b0b0c">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Massless">
   <meta property="og:url" content="https://massless.chucksi.com/audio">
-  <meta property="og:title" content="Free AI voiceover, captions and sound beds | Massless">
-  <meta property="og:description" content="Turn a script into voiceover in six languages with open Kokoro and MeloTTS voices, make captions from any audio or video with Whisper, and render rain, wind or city ambience. $0.">
+  <meta property="og:title" content="Free AI voiceover, captions and video to MP3 | Massless">
+  <meta property="og:description" content="Turn a script into voiceover in six languages with open Kokoro and MeloTTS voices, make captions with Whisper, extract MP3, M4A or WAV from your own videos right in the browser, and render rain, wind or city ambience. $0.">
   <meta property="og:image" content="https://massless.chucksi.com/og.jpg?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/css/studio.css">
   <link rel="stylesheet" href="/css/audio.css">
 </head>
-<body class="studio-body">
+<body class="studio-body" data-human="lazy">
   <header class="nav">
     <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
     <nav class="nav-links" aria-label="Main">
@@ -48,6 +48,7 @@
         <button role="tab" aria-selected="true" aria-controls="tab-voice" id="t-voice">Voiceover</button>
         <button role="tab" aria-selected="false" aria-controls="tab-cap" id="t-cap">Captions</button>
         <button role="tab" aria-selected="false" aria-controls="tab-bed" id="t-bed">Sound beds</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-ext" id="t-ext">Extract audio</button>
       </div>
 
       <div class="side-scroll" id="tab-voice" role="tabpanel" aria-labelledby="t-voice">
@@ -102,10 +103,35 @@
         <p class="side-note">Beds are synthesized from scratch with the Web Audio API: no samples, no model, no download. They fade at both ends so they loop cleanly under a clip.</p>
       </div>
 
+      <div class="side-scroll" id="tab-ext" role="tabpanel" aria-labelledby="t-ext" hidden>
+        <div class="engines fmts" id="ext-fmts" role="radiogroup" aria-label="Format">
+          <button type="button" class="engine" role="radio" aria-checked="true" data-fmt="mp3"><strong>MP3</strong><span>Plays anywhere</span></button>
+          <button type="button" class="engine" role="radio" aria-checked="false" data-fmt="m4a"><strong>M4A</strong><span id="ext-m4a-note">Smaller files</span></button>
+          <button type="button" class="engine" role="radio" aria-checked="false" data-fmt="wav"><strong>WAV</strong><span>Lossless</span></button>
+        </div>
+        <div class="field" id="ext-q-field">
+          <div class="f-head"><span>Quality</span><output id="o-ext-q">192 kbps</output></div>
+          <div class="looks" id="ext-kbps" role="radiogroup" aria-label="Bitrate"></div>
+          <small class="field-note" id="ext-q-note"></small>
+        </div>
+        <label class="check"><input type="checkbox" id="ext-mono"> <span><strong>Mono</strong><small>Mix down to one channel. Off keeps stereo.</small></span></label>
+        <div class="grid2">
+          <div class="field"><div class="f-head"><span>Fade in</span><output id="o-ext-fi">Off</output></div><input type="range" id="ext-fi" min="0" max="10" step="0.5" value="0" aria-label="Fade in"></div>
+          <div class="field"><div class="f-head"><span>Fade out</span><output id="o-ext-fo">Off</output></div><input type="range" id="ext-fo" min="0" max="10" step="0.5" value="0" aria-label="Fade out"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="ext-loud"> <span><strong>Even out loudness</strong><small>About −14 LUFS, the level YouTube and Spotify play at, with peaks held under −1 dB</small></span></label>
+        <div class="row-sel" aria-label="Encoder">
+          <span><small>Encoder</small><strong id="ext-enc">LAME 3.100 · open source</strong></span>
+          <span class="badge-new">$0</span>
+        </div>
+        <p class="side-note">Files are read and converted in this tab. Nothing is uploaded. The only download is the MP3 encoder, once.</p>
+      </div>
+
       <div class="side-foot">
         <div id="foot-voice"><button type="button" class="go" id="gen-voice"><span id="gen-voice-label">Generate voice</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
         <div id="foot-cap" hidden><button type="button" class="go" id="gen-cap" disabled><span id="gen-cap-label">Transcribe</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
         <div id="foot-bed" hidden><button type="button" class="go" id="gen-bed"><span id="gen-bed-label">Render bed</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
+        <div id="foot-ext" hidden><button type="button" class="go" id="gen-ext" disabled><span id="gen-ext-label">Convert</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
       </div>
     </aside>
 
@@ -115,6 +141,7 @@
           <button type="button" class="pill on" id="p-voice"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="6" y="1.5" width="4" height="8" rx="2"/><path d="M3.5 7.5a4.5 4.5 0 009 0M8 12v2.5"/></svg>Voiceover</button>
           <button type="button" class="pill" id="p-cap"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="2"/><path d="M4.5 9.5h3M9.5 9.5h2M4.5 7h7"/></svg>Captions</button>
           <button type="button" class="pill" id="p-bed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8h2l1.5-4 2 8 2-10 2 9 1.5-3h2"/></svg>Sound beds</button>
+          <button type="button" class="pill" id="p-ext"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="7" height="9" rx="1.5"/><path d="M8.5 6.5l-2-1.3v5.6l2-1.3M11 6.5v3M13 4.5v7M15 7v2"/></svg>Extract audio</button>
           <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
         </div>
         <span class="src" id="src-label">Kokoro-82M · loads on first use</span>
@@ -173,6 +200,26 @@
         </div>
       </div>
 
+      <div id="ext-view" hidden>
+        <div class="dropzone" id="ext-drop">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="10" width="24" height="28" rx="4"/><path d="M10 10v28M22 10v28M4 17h6M4 24h6M4 31h6M22 17h6M22 24h6M22 31h6"/><path d="M34 19v10M39 14v20M44 21v6"/></svg>
+          <strong class="display" id="ext-drop-title">Drop video or audio here</strong>
+          <span class="muted" id="ext-drop-sub">mp4, mov, webm, mp3, wav, m4a, ogg or flac. Add several at once. Nothing is uploaded.</span>
+          <div class="dz-actions"><label class="btn-accent" for="ext-in" id="ext-choose">Choose files</label><button type="button" class="btn-ghost" id="ext-go-inline" hidden>Convert</button></div>
+        </div>
+        <input type="file" id="ext-in" multiple accept="audio/*,video/*,.mp4,.m4v,.mov,.webm,.mkv,.mp3,.wav,.m4a,.aac,.ogg,.oga,.opus,.flac,.aif,.aiff" hidden>
+        <p class="side-note muted ext-rights">Works with any video or audio file you have the rights to. For your own YouTube uploads, download them from YouTube Studio first.</p>
+        <div id="ext-files" hidden>
+          <div class="lib-head"><h2 class="display">Files</h2>
+            <div class="cap-actions">
+              <button type="button" class="btn-ghost small" id="ext-clear">Clear</button>
+              <button type="button" class="btn-accent small" id="ext-all" hidden>Download all</button>
+            </div>
+          </div>
+          <ol class="xq" id="ext-queue"></ol>
+        </div>
+      </div>
+
       <div id="history-view">
         <div class="lib-head"><h2 class="display">History</h2><button type="button" class="btn-ghost small" id="clear-history" hidden>Clear</button></div>
         <div class="history" id="history"></div>
@@ -187,12 +234,14 @@
     <p>For Spanish, French, Chinese, Japanese and Korean, pick MeloTTS (MIT). Your script is sent to Cloudflare Workers AI in chunks under 1,000 characters, and the audio comes back and is joined here into one 44.1 kHz WAV. Nothing is stored there.</p>
     <p>Captions use Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Your file is decoded in this tab and only the audio is sent, as 16 kHz mono WAV, when you press Transcribe. Files over about nine minutes go in parts of up to eight minutes, and the timestamps are joined back together. It is not stored.</p>
     <p>Sound beds are built from noise, filters and envelopes in an OfflineAudioContext and exported as 48 kHz stereo WAV. They are made in this tab; nothing is uploaded.</p>
+    <p>Extract audio decodes your file in this tab with the browser's own decoder, at the file's own sample rate. A background worker trims, fades and encodes it. Even out loudness measures the whole file (ITU-R BS.1770), sets it to about −14 LUFS and holds peaks under −1 dB with a look-ahead limiter. Nothing is uploaded.</p>
+    <p>MP3 uses LAME 3.100 (LGPL), built for browsers by wasm-media-encoders (MIT). It is loaded unmodified from jsDelivr and checked against a fixed hash before it runs. M4A uses your browser's AAC encoder and mp4-muxer (MIT). WAV is 16-bit PCM. Use it with files you have the rights to; for your own YouTube uploads, download them from YouTube Studio first.</p>
     <p>Free tools on Cloudflare have a daily cap so they stay at $0. If you hit it, try again after midnight UTC, or use Kokoro, which has no limit.</p>
   </dialog>
 
   <dialog class="sheet" id="ledger">
     <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Voice: Kokoro-82M (Apache-2.0), in your browser, or MeloTTS (MIT) on Cloudflare Workers AI. Captions: Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Sound beds: Massless synth (MIT), in your browser. Cost: $0.</p>
+    <p>Voice: Kokoro-82M (Apache-2.0), in your browser, or MeloTTS (MIT) on Cloudflare Workers AI. Captions: Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Sound beds: Massless synth (MIT), in your browser. Extract audio: LAME 3.100 MP3 encoder (LGPL) via wasm-media-encoders 0.7.0 (MIT), or your browser's AAC encoder with mp4-muxer (MIT), in your browser. Cost: $0.</p>
   </dialog>
 
   <script type="module" src="/js/pages/audio.js"></script>

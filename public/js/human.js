@@ -2,8 +2,8 @@
 // The Worker asks for it at most once every few hours: a 401 with { human: true, sitekey }. We then run
 // Cloudflare Turnstile (invisible unless Cloudflare needs a click), trade its one-time token for a
 // short-lived cookie at /api/human, and retry the request once. Nothing about the visitor is stored.
-// Pages that use the APIs also warm the check up in the background after load, so the first Generate
-// doesn't wait for it.
+// Pages also warm the check up in the background (after load, or when an API feature is picked), so the
+// first Generate doesn't wait for it.
 
 const SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 let loading = null;
@@ -100,13 +100,19 @@ export async function apiFetch(url, init = {}) {
 }
 
 // Warm-up: ask the Worker whether this visitor needs a pass and, if so, earn it now in the background.
-// HTTPS only, because the pass cookie is Secure (local test servers are plain HTTP).
-function warm() {
-  if (location.protocol !== 'https:') return;
+// HTTPS only, because the pass cookie is Secure (local test servers are plain HTTP). Pages whose main
+// tools run offline (<body data-human="lazy">: Audio, Office) call warmHuman() only when the visitor
+// picks a feature that uses the APIs, so nothing loads from Cloudflare for offline-only use.
+let warmed = false;
+export function warmHuman() {
+  if (warmed || location.protocol !== 'https:') return;
+  warmed = true;
   fetch('/api/human')
     .then((r) => (r.ok ? r.json() : null))
     .then((s) => (s && s.on && !s.passed && s.sitekey ? pass(s.sitekey) : null))
-    .catch(() => { /* the check runs again on the first real call */ });
+    .catch(() => { warmed = false; /* the check runs again on the first real call */ });
 }
-if (document.readyState === 'complete') setTimeout(warm, 800);
-else window.addEventListener('load', () => setTimeout(warm, 800), { once: true });
+if (document.body?.dataset.human !== 'lazy') {
+  if (document.readyState === 'complete') setTimeout(warmHuman, 800);
+  else window.addEventListener('load', () => setTimeout(warmHuman, 800), { once: true });
+}
