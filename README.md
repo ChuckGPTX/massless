@@ -15,6 +15,7 @@ Four pages, laid out like a commercial AI film studio, with every paid model swa
 | **Explore** (`/`) | Launch rail, tool tiles, the moves showcase and a wall of clips made in Massless. |
 | **Image** (`/image`) | Cinema Studio, the shot designer. Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio, genre and palette compile into a prompt you can read and edit. Up to four takes per prompt with FLUX.1 schnell. |
 | **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
+| **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
 | **Audio** (`/audio`) | Voiceover from a script with eight open Kokoro voices, and sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. |
 
 Everything a visitor makes is stored in their own browser (IndexedDB). There are no accounts.
@@ -31,6 +32,8 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 | Video | WebCodecs H.264 + mp4-muxer | Built in / MIT | The visitor's device |
 | Voiceover | Kokoro-82M via kokoro-js | Apache-2.0 | The visitor's browser, WebGPU or WebAssembly |
 | Sound beds | Massless synth (Web Audio) | MIT | The visitor's browser |
+| 3D, in the browser | Depth Anything V2 + Massless splat builder, rendered with Spark | Apache-2.0 / MIT | The visitor's browser |
+| 3D, full object | Idol (speridlabs) | Apache-2.0 | Your own NVIDIA GPU, through `comfy/idol_server.py` |
 
 The `/api/shot` Worker keeps itself inside Cloudflare's 10,000 free Neurons per day with a daily cap (`DAILY_CAP`, default 120 frames) and a per-visitor cap (`PER_VISITOR_CAP`, default 12). When the cap is hit the app keeps working through Pollinations or your ComfyUI.
 
@@ -72,6 +75,19 @@ python comfy/run_shot.py "a lighthouse keeper on a spiral stair" --camera 16mm -
 
 `run_shot.py` compiles the prompt from the same `rig.json` the web app uses, so a shot designed in the browser renders identically on your GPU.
 
+## Idol on your GPU (full 3D objects)
+
+Idol turns one image into a complete 3D Gaussian splat, including the sides the picture never showed. It needs PyTorch and an NVIDIA GPU with about 8 GB, which neither the browser nor Cloudflare can provide (Workers AI runs a fixed model catalog, and Cloudflare Containers have no GPUs yet), so it runs on your machine:
+
+```bash
+# request access to facebook/dinov3-vith16plus-pretrain-lvd1689m and black-forest-labs/FLUX.2-dev first
+hf auth login
+git clone https://github.com/speridlabs/idol-sdk && pip install -e idol-sdk
+python comfy/idol_server.py          # http://127.0.0.1:7861, allows massless.chucksi.com and localhost:8787
+```
+
+Open `/3d`, choose **Idol on your GPU** and press **Build 3D**. The page posts the still to `/generate` and shows the returned `.ply`. No GPU: Idol's Hugging Face demo exports a `.ply` that **Open .ply** loads.
+
 ## Tests
 
 ```bash
@@ -80,6 +96,8 @@ python3 tests/render_test.py          # every move: first, middle and last frame
 python3 tests/pages_test.py           # Video: render a clip, build and export a storyboard; Audio: render a bed
 python3 tests/pages_test.py voice audio   # also generates a Kokoro voiceover (downloads the model once)
 python3 tests/audio_test.py           # audio engine: every voice and every bed
+python3 tests/three_d_test.py         # 3D: depth splat from a sample, then the Idol path against a mock server
+python3 tools/bake_depth.py           # precompute depth for the sample stills (public/media/depth)
 python3 tests/shots.py out "/!@1440x900" "/video@390x844"   # screenshots, ! = full page
 ```
 

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Image to 3D, free | Massless</title>
+  <meta name="description" content="Turn any still into a 3D Gaussian splat you can orbit, in your browser for $0, or run the open Idol model on your own GPU for full objects. Export .ply.">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta property="og:image" content="/og.jpg">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/studio.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+        "@sparkjsdev/spark": "https://cdn.jsdelivr.net/npm/@sparkjsdev/spark@2.3.1/dist/spark.module.js"
+      }
+    }
+  </script>
+</head>
+<body class="studio-body">
+  <header class="nav">
+    <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/">Explore</a>
+      <a href="/image">Image</a>
+      <a href="/video">Video</a>
+      <a href="/audio">Audio</a>
+    </nav>
+    <div class="nav-right">
+      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
+      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
+      <a class="btn-accent" href="/image">New image</a>
+    </div>
+  </header>
+
+  <main class="studio">
+    <aside class="side" aria-label="3D controls">
+      <div class="side-tabs" role="tablist">
+        <button role="tab" aria-selected="true" aria-controls="tab-depth" id="t-depth">In your browser</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-idol" id="t-idol">Idol on your GPU</button>
+      </div>
+
+      <div class="side-scroll" id="tab-shared">
+        <button type="button" class="frame-card" id="frame-card" aria-haspopup="dialog">
+          <img id="frame-img" src="/media/art/samurai.jpg" alt="">
+          <span class="fc-label display" id="frame-name">Rain samurai</span>
+          <span class="fc-sub" id="frame-sub">Source still</span>
+          <span class="fc-change"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 11.5V13h1.5l7-7L10 4.5l-7 7zM10 4.5l1.5-1.5L13 4.5 11.5 6"/></svg>Change</span>
+        </button>
+
+        <div id="tab-depth" role="tabpanel" aria-labelledby="t-depth" class="stack">
+          <div class="field">
+            <div class="f-head"><span>Depth strength</span><output id="o-strength">100%</output></div>
+            <input type="range" id="strength" min="0.4" max="1.8" step="0.05" value="1" aria-label="Depth strength">
+          </div>
+          <label class="row-sel sel"><small>Detail</small><select id="detail"><option value="300">Fast · 300 columns</option><option value="420" selected>Standard · 420 columns</option><option value="600">High · 600 columns</option></select></label>
+          <label class="check"><input type="checkbox" id="fill" checked> <span><strong>Fill behind objects</strong><small>Adds a refilled background layer so orbiting doesn't show holes</small></span></label>
+          <p class="side-note">Depth Anything V2 reads the still on your device, then every pixel becomes a small Gaussian. You get the front of the scene in true 3D, instantly, for $0.</p>
+        </div>
+
+        <div id="tab-idol" role="tabpanel" aria-labelledby="t-idol" class="stack" hidden>
+          <div class="field">
+            <div class="f-head"><span>Idol server</span><output id="o-idol">not checked</output></div>
+            <input type="url" id="idol-url" class="text-in" value="http://127.0.0.1:7861" spellcheck="false" aria-label="Idol server address">
+          </div>
+          <div class="grid2">
+            <label class="row-sel sel"><small>Source</small><select id="idol-mode"><option value="synthetic">AI image</option><option value="real">Photo</option></select></label>
+            <label class="row-sel sel"><small>Splats</small><select id="idol-count"><option value="131072">131k</option><option value="262144" selected>262k</option><option value="524288">524k</option><option value="1048576">1M</option></select></label>
+          </div>
+          <div class="field">
+            <div class="f-head"><span>Seed</span><output id="o-seed">42</output></div>
+            <input type="range" id="idol-seed" min="0" max="999" step="1" value="42" aria-label="Seed">
+          </div>
+          <details class="adv" open>
+            <summary>Set up Idol <span class="muted">one time, NVIDIA GPU with 8 GB+</span></summary>
+            <ol class="setup">
+              <li>Request access to <a href="https://huggingface.co/facebook/dinov3-vith16plus-pretrain-lvd1689m" rel="noopener">DINOv3</a> and <a href="https://huggingface.co/black-forest-labs/FLUX.2-dev" rel="noopener">FLUX.2-dev</a> on Hugging Face, then <code>hf auth login</code>.</li>
+              <li><code>git clone https://github.com/speridlabs/idol-sdk && pip install -e idol-sdk</code></li>
+              <li><code>python comfy/idol_server.py</code> from the Massless repo, then press Build 3D.</li>
+            </ol>
+            <p class="side-note">Idol (Apache-2.0) generates the whole object, including the sides the photo never showed. No GPU? Its free <a href="https://huggingface.co/spaces/speridlabs/idol" rel="noopener">Hugging Face demo</a> exports a .ply you can open here.</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="side-foot">
+        <div>
+          <button type="button" class="go" id="build"><span id="build-label">Build 3D</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button>
+          <div class="grid2">
+            <button type="button" class="btn-ghost wide" id="download" disabled>Download .ply</button>
+            <label class="btn-ghost wide" for="ply-in">Open .ply</label>
+          </div>
+          <input type="file" id="ply-in" accept=".ply,.spz,.splat,.ksplat" hidden>
+        </div>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="3D viewer">
+      <div class="stage-top">
+        <div class="pills" role="tablist" aria-label="Viewer">
+          <button type="button" class="pill on" id="p-orbit"><svg viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="8" rx="6.5" ry="3.2"/><circle cx="8" cy="8" r="1.6"/></svg>Auto-orbit</button>
+          <button type="button" class="pill" id="p-reset"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 105-5H5M5 1v4h4"/></svg>Reset view</button>
+          <button type="button" class="pill" id="p-flip" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M4 5l-2 3 2 3M12 5l2 3-2 3"/></svg>Flip</button>
+          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
+        </div>
+        <span class="src" id="src-label">Loading the viewer</span>
+      </div>
+
+      <div class="stage-head">
+        <div>
+          <h1 class="display">Turn a still<br>into 3D</h1>
+          <p>Drag to orbit, scroll to zoom. Download the splat as a standard .ply that opens in any Gaussian splat viewer.</p>
+        </div>
+        <div class="stage-actions"><span class="badge-new">NEW</span></div>
+      </div>
+
+      <div class="viewfinder three-view" id="viewfinder">
+        <canvas id="view3d" aria-label="3D viewer"></canvas>
+        <div class="vf-hud" aria-live="polite"><span class="hud-move" id="hud-name">Depth splat</span><span id="hud-count"></span></div>
+        <div class="vf-status" id="vf-status" hidden><div class="meter"><div class="meter-fill" id="meter-fill"></div></div><p id="vf-status-text"></p></div>
+        <div class="drop-hint" id="drop-hint" hidden>Drop a still or a .ply</div>
+      </div>
+
+      <div class="lib-head"><h2 class="display">Try a still</h2><span class="muted small">Samples load instantly</span></div>
+      <div class="pick-grid wide" id="samples"></div>
+    </section>
+  </main>
+
+  <dialog class="sheet picker" id="picker">
+    <form method="dialog" class="sheet-head"><h2>Choose a still</h2><button class="x" aria-label="Close">×</button></form>
+    <div class="picker-actions">
+      <label class="btn-accent" for="upload">Upload a still</label>
+      <input type="file" id="upload" accept="image/*" hidden>
+      <a class="btn-ghost" href="/image">Generate a new image</a>
+    </div>
+    <h3 id="mine-head" hidden>Your shots</h3>
+    <div class="pick-grid" id="pick-mine"></div>
+  </dialog>
+
+  <dialog class="sheet" id="how">
+    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
+    <p><strong>In your browser:</strong> Depth Anything V2 estimates depth on your device. Each sample of the still becomes a flat Gaussian placed along its camera ray, and a second layer built from the refilled background sits behind foreground objects. The result is the visible front of the scene in true 3D.</p>
+    <p><strong>Idol on your GPU:</strong> Idol (speridlabs, Apache-2.0) predicts a complete 3D object as up to a million Gaussians from one image, including its unseen sides. It needs PyTorch and an NVIDIA GPU, so it runs on your machine through a small local server, and the browser only sends the picture and shows the result.</p>
+    <p>Splats render with Spark (MIT) on three.js.</p>
+  </dialog>
+
+  <dialog class="sheet" id="ledger">
+    <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Depth: Depth Anything V2 Small (Apache-2.0), in your browser. Splat viewer: Spark (MIT). Full objects: Idol (Apache-2.0), on your own GPU. Cost: $0.</p>
+  </dialog>
+
+  <script type="module" src="/js/pages/three-d.js"></script>
+</body>
+</html>

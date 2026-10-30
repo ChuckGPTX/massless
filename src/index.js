@@ -100,6 +100,7 @@ const TYPES = {
   webm: 'video/webm',
   wav: 'audio/wav',
   mp3: 'audio/mpeg',
+  ply: 'application/octet-stream',
   woff2: 'font/woff2',
   txt: 'text/plain; charset=utf-8',
   ico: 'image/x-icon',
@@ -148,7 +149,7 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html' };
+const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html' };
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
 
 async function page(request, ref, file, ctx) {
@@ -192,7 +193,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/(image|video|audio)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/(image|video|audio|3d)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();

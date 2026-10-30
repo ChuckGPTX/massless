@@ -5,7 +5,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public')
 class H(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
         p = path.split('?')[0].split('#')[0]
-        if p.rstrip('/') in ('/image', '/video', '/audio'): p = p.rstrip('/') + '/index.html'
+        if p.rstrip('/') in ('/image', '/video', '/audio', '/3d'): p = p.rstrip('/') + '/index.html'
         return super().translate_path(p)
     def log_message(self, *a): pass
 socketserver.TCPServer.allow_reuse_address = True

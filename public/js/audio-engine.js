@@ -712,38 +712,34 @@ const BED_SYNTHS = {
       const drift = kit.wander(4);
       // gust strength 0..1: slow swells with quicker surges, stretched so lulls go quiet
       const gust = (t) => clamp((0.6 * swell(t) + 0.4 * surge(t) - 0.25) / 0.5, 0, 1) ** 1.4;
-      const floor = 0.04 + 0.08 * k;
+      const floor = 0.06 + 0.08 * k;
       // one side hears each gust a moment later, so gusts sweep across the stereo field
       const sweep = between(0.4, 0.9) * (rand() < 0.5 ? -1 : 1);
       for (let ch = 0; ch < 2; ch++) {
         const G = (t) => gust(t + (ch ? sweep : 0));
-        const turbulence = kit.wander(0.12);
-        // buffeting: low turbulence that swells with each gust and churns inside it
-        const roarF = filter('lowpass', 300);
-        const roarG = amp(0);
-        automate(roarF.frequency, (t) => 100 + 400 * G(t));
-        automate(roarG.gain, (t) => 1.0 * (floor + (1 - floor) * G(t)) * (0.55 + 0.45 * turbulence(t)));
-        chain(noise('brown'), filter('highpass', 25), roarF, roarG).connect(out, 0, ch);
-        // howl: resonant bands of moving air whose pitch rises with the gust
-        for (const [ratio, level] of [[1, 4], [1.6, 2.4]]) {
-          const bp = filter('bandpass', 400, 10);
-          const hg = amp(0);
-          automate(bp.frequency, (t) => ratio * (230 + 600 * G(t)) * (0.9 + 0.2 * drift(t)));
-          automate(hg.gain, (t) => level * (0.3 * floor + G(t) ** 1.6));
-          chain(noise('pink'), bp, hg).connect(out, 0, ch);
-        }
-        // air rushing through trees and over edges at the peaks
-        const hs = amp(0);
-        automate(hs.gain, (t) => 0.15 * G(t) ** 2.5);
-        chain(noise('white'), filter('highpass', 2500), filter('lowpass', 7000), hs).connect(out, 0, ch);
-      }
-      // whistle: narrow resonances that sing at gust peaks, their pitch rising with the gust
-      for (const [f, pan] of [[520, -0.45], [780, 0.4]]) {
-        const bp = filter('bandpass', f, 35);
+        // the rush of moving air: a broad band that rises in pitch and level with each gust
+        const bp = filter('bandpass', 500, 1);
         const g = amp(0);
-        automate(bp.frequency, (t) => f * (0.8 + 0.5 * gust(t) + 0.1 * drift(t)));
-        automate(g.gain, (t) => (1.5 + 2.5 * k) * smoothstep(0.35, 0.95, gust(t)));
-        chain(noise('white'), bp, g, panner(pan), master);
+        automate(bp.frequency, (t) => 250 + 1200 * G(t));
+        automate(g.gain, (t) => floor + G(t));
+        chain(noise('pink'), bp, g).connect(out, 0, ch);
+        // low buffeting under it, churning a little
+        const churn = kit.wander(0.15);
+        const r = amp(0);
+        automate(r.gain, (t) => 0.5 * (floor + G(t)) * (0.5 + 0.5 * churn(t)));
+        chain(noise('brown'), filter('highpass', 30), filter('lowpass', 250), r).connect(out, 0, ch);
+        // leaves and grass hissing at the peaks
+        const hs = amp(0);
+        automate(hs.gain, (t) => 0.12 * G(t) ** 2);
+        chain(noise('white'), filter('bandpass', 4000, 0.7), hs).connect(out, 0, ch);
+      }
+      // whistle: narrow resonances that sing softly at gust peaks, their pitch rising with the gust
+      for (const [f, pan] of [[520, -0.45], [780, 0.4]]) {
+        const wb = filter('bandpass', f, 35);
+        const wg = amp(0);
+        automate(wb.frequency, (t) => f * (0.8 + 0.5 * gust(t) + 0.1 * drift(t)));
+        automate(wg.gain, (t) => (0.8 + 1.2 * k) * smoothstep(0.4, 0.95, gust(t)));
+        chain(noise('white'), wb, wg, panner(pan), master);
       }
     },
   },
@@ -833,15 +829,16 @@ const BED_SYNTHS = {
         // the far, never-ending traffic rumble
         const hum = kit.wander(5);
         const g = amp(0);
-        automate(g.gain, (t) => (0.35 + 0.15 * k) * (0.7 + 0.3 * hum(t)));
+        automate(g.gain, (t) => (0.15 + 0.08 * k) * (0.7 + 0.3 * hum(t)));
         chain(noise('brown'), filter('highpass', 30), filter('lowpass', 220), g).connect(out, 0, ch);
         // the city's mid-band roar: many far roads at once, air conditioners
         const wash = kit.wander(4);
         const wg = amp(0);
-        automate(wg.gain, (t) => (0.18 + 0.08 * k) * (0.7 + 0.3 * wash(t)));
+        automate(wg.gain, (t) => (0.24 + 0.1 * k) * (0.7 + 0.3 * wash(t)));
         chain(noise('pink'), filter('bandpass', 700, 0.7), filter('lowpass', 2000), wg).connect(out, 0, ch);
       }
       // passing cars: tyre roar and engine swell up, sweep across and fade, with a slight Doppler drop
+      const exhaust = kit.grains();
       const car = (tc) => {
         const w = between(0.7, 1.6);
         const dir = rand() < 0.5 ? -1 : 1;
@@ -852,8 +849,9 @@ const BED_SYNTHS = {
         const d = t1 - t0;
         const near = (t) => size / (1 + ((t - tc) / w) ** 2);
         const doppler = (t) => 1 - 0.035 * Math.tanh((t - tc) / (w * 0.5));
+        const pan = (t) => 0.85 * dir * Math.tanh((t - tc) / (w * 0.8));
         const p = panner(0);
-        automate(p.pan, (t) => 0.85 * dir * Math.tanh((t - tc) / (w * 0.8)), t0, d);
+        automate(p.pan, pan, t0, d);
         // tyres on asphalt: a band centred near 900 Hz, a little brighter as the car gets close
         const lp = filter('lowpass', 800);
         const tg = amp(0);
@@ -861,29 +859,40 @@ const BED_SYNTHS = {
         automate(tg.gain, (t) => 1.1 * near(t), t0, d);
         chain(noise('pink', t0, t1), filter('bandpass', 900, 1), lp, tg, p);
         // engine: low rumble pulsing at the firing rate, its pitch dropping as the car passes
-        const f0 = between(28, 50);
+        const f0 = between(45, 80);
         const eg = amp(0);
-        automate(eg.gain, (t) => 1.2 * near(t), t0, d);
-        const pulse = amp(0.55);
+        automate(eg.gain, (t) => 0.6 * near(t), t0, d);
+        const pulse = amp(0.4);
         const firing = osc('sine', f0);
         automate(firing.frequency, (t) => f0 * doppler(t), t0, d);
-        chain(firing, amp(0.45), pulse.gain);
+        chain(firing, amp(0.6), pulse.gain);
         firing.start(t0);
         firing.stop(t1);
-        chain(noise('brown', t0, t1), filter('lowpass', 450), pulse, eg, p);
+        chain(noise('pink', t0, t1), filter('bandpass', 260, 0.7), pulse, eg, p);
+        // and the exhaust: individual firing pulses ringing a low resonance, slightly irregular
+        const fr = between(140, 260);
+        for (let t = t0; t < t1; t += 1 / (f0 * doppler(t) * (1 + 0.04 * (rand() - 0.5)))) {
+          const a = 0.5 * near(t) * (0.7 + 0.3 * rand());
+          if (a > 0.004) ringBurst(exhaust, rand, t, pan(t), a, fr, fr * 0.6, 0.004);
+        }
         p.connect(master);
         chain(p, amp(0.35), street);
       };
       for (let tc = between(1, 2.5); tc < s + 3; tc += between(2, 5.5) / (0.5 + k)) car(tc);
-      // a distant siren wailing between buildings
-      const sirens = s >= 6 ? Math.max(1, Math.round(s / 45)) : 0;
+      const ex = exhaust.source();
+      ex.connect(master);
+      chain(ex, amp(0.35), street);
+      // a distant siren wailing between buildings: one in a short bed, about one every 45 s in a long one
+      const sirens = Math.max(1, Math.round(s / 45));
       for (let i = 0; i < sirens; i++) {
-        const ts = (s * (i + between(0.05, 0.5))) / sirens;
+        const ts = s < 10 ? between(0, 0.3) * s : (s * (i + between(0.05, 0.5))) / sirens;
         const dur = Math.min(s - ts, between(7, 12));
         if (dur < 2) continue;
         const period = between(3.4, 4.6);
+        const fin = Math.min(2.5, dur / 3);
+        const fout = Math.min(3, dur / 3);
         const sg = amp(0);
-        automate(sg.gain, (t) => 0.05 * Math.min(1, (t - ts) / 2.5, (ts + dur - t) / 3) ** 2, ts, dur);
+        automate(sg.gain, (t) => 0.09 * clamp(Math.min((t - ts) / fin, (ts + dur - t) / fout), 0, 1) ** 2, ts, dur);
         const p = panner(between(-0.7, 0.7));
         for (const detune of [0, 4]) {
           const o = osc('triangle', 900);
@@ -893,8 +902,8 @@ const BED_SYNTHS = {
           o.start(ts);
           o.stop(ts + dur);
         }
-        chain(sg, filter('lowpass', 1600), p);
-        chain(p, amp(0.3), master);
+        chain(sg, filter('lowpass', 1800), p);
+        chain(p, amp(0.5), master);
         p.connect(street);
       }
       // the odd far-off horn
@@ -953,12 +962,12 @@ const BED_SYNTHS = {
         // the low roar of the fire, flickering
         const flicker = kit.wander(0.35);
         const g = amp(0);
-        automate(g.gain, (t) => (0.14 + 0.08 * k) * (0.6 + 0.4 * flicker(t)));
+        automate(g.gain, (t) => (0.1 + 0.06 * k) * (0.6 + 0.4 * flicker(t)));
         chain(noise('brown'), filter('highpass', 60), filter('lowpass', 320), g).connect(out, 0, ch);
         // flames licking: broadband breath that surges and drops quickly
         const lick = kit.wander(0.3);
         const lg = amp(0);
-        automate(lg.gain, (t) => 0.14 * (0.35 + 0.65 * lick(t) ** 2));
+        automate(lg.gain, (t) => 0.08 * (0.35 + 0.65 * lick(t) ** 2));
         chain(noise('pink'), filter('highpass', 300), filter('lowpass', 3000), lg).connect(out, 0, ch);
       }
       // sap hiss that comes and goes

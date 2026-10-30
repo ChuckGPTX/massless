@@ -143,6 +143,7 @@ function shotCard(item, fresh = false) {
     el('span', { class: 'tag' }, label),
     el('div', { class: 'acts' },
       el('a', { class: 'go', href: `/video?shot=${encodeURIComponent(item.id)}` }, 'Animate'),
+      el('a', { href: `/3d?shot=${encodeURIComponent(item.id)}` }, '3D'),
       el('button', { type: 'button', onclick: () => download(item.blob, `${item.id}.jpg`) }, 'Download'),
       item.prompt ? el('button', { type: 'button', onclick: () => { $('#compiled').value = item.prompt; state.edited = true; $('#prompt-peek').open = true; toast('Prompt loaded. Press Generate to shoot it again.'); } }, 'Reuse prompt') : null,
       el('button', { type: 'button', 'aria-label': 'Delete shot', onclick: async () => { await store.del(item.id).catch(() => {}); card.remove(); if (!$('#results').children.length) $('#results-wrap').hidden = true; } }, '×')));
