@@ -1144,7 +1144,7 @@ async function init() {
     status(e.message);
     return;
   }
-  state.rig = await fetch('/data/rig.json').then((r) => r.json());
+  state.rig = await fetch(new URL('../data/rig.json', import.meta.url)).then((r) => r.json());
   try {
     const eng = localStorage.getItem('massless.engine');
     if (eng) { $('#engine').value = eng; $('#comfy-settings').hidden = eng !== 'comfy'; }

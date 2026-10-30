@@ -76,7 +76,7 @@ export async function viaWorkers({ prompt, w, h, seed, signal }) {
 /** ComfyUI's own HTTP API (start ComfyUI with --enable-cors-header). */
 export async function viaComfy({ prompt, w, h, seed, signal, comfyUrl, ckpt, onWait }) {
   const base = comfyUrl.replace(/\/$/, '');
-  const wfRes = await fetch('/comfy/massless_shot_flux_schnell.api.json');
+  const wfRes = await fetch(new URL('../comfy/massless_shot_flux_schnell.api.json', import.meta.url));
   const wf = await wfRes.json();
   wf['6'].inputs.text = prompt;
   wf['5'].inputs.width = Math.round(w / 16) * 16;

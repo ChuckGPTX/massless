@@ -78,9 +78,12 @@ async function health(env) {
   return json({ ok: true, app: 'massless', model: MODEL, framesToday: total, dailyCap: Number(env.DAILY_CAP || 120) });
 }
 
-// Static files: served from the ASSETS binding when deployed with Wrangler, otherwise pulled from
-// the public GitHub repo (ASSET_ORIGIN at ASSET_REF) and cached at Cloudflare's edge, so a push to
-// the repo updates the live site within minutes.
+// Static files: served from the ASSETS binding when deployed with Wrangler; otherwise pulled from the
+// public GitHub repo and cached at Cloudflare's edge. Each page load is pinned to one commit: the
+// Worker resolves the branch (ASSET_REF, default main) to a commit SHA, rewrites index.html to load
+// /v/<sha>/..., and every module import resolves inside that same immutable version. A push to the
+// branch goes live within about a minute, and a page never mixes files from two versions.
+const REPO = 'ChuckGPTX/massless';
 const TYPES = {
   html: 'text/html; charset=utf-8',
   css: 'text/css; charset=utf-8',
@@ -96,12 +99,7 @@ const TYPES = {
   txt: 'text/plain; charset=utf-8',
   ico: 'image/x-icon',
 };
-
-function cacheControlFor(path) {
-  if (path.startsWith('/fonts/') || path.startsWith('/js/vendor/')) return 'public, max-age=31536000, immutable';
-  if (path.endsWith('.html')) return 'public, max-age=60, must-revalidate';
-  return 'public, max-age=300';
-}
+const SHA = /^[0-9a-f]{40}$/;
 
 function securityHeaders(h) {
   h.set('x-content-type-options', 'nosniff');
@@ -110,29 +108,67 @@ function securityHeaders(h) {
   return h;
 }
 
+async function resolveRef(env, ctx) {
+  const ref = env.ASSET_REF || 'main';
+  if (SHA.test(ref)) return ref;
+  const key = new Request(`https://massless-assets.internal/ref/${ref}`);
+  const hit = await caches.default.match(key);
+  if (hit) return await hit.text();
+  try {
+    const r = await fetch(`https://github.com/${REPO}.git/info/refs?service=git-upload-pack`, { headers: { 'user-agent': 'massless-worker' } });
+    const m = (await r.text()).match(new RegExp(`([0-9a-f]{40}) refs/heads/${ref}\\b`));
+    if (m) {
+      ctx.waitUntil(caches.default.put(key, new Response(m[1], { headers: { 'cache-control': 'public, max-age=60' } })));
+      return m[1];
+    }
+  } catch {
+    /* fall back to the branch name */
+  }
+  return ref;
+}
+
+async function fetchFile(ref, path, ctx) {
+  const ext = (path.split('.').pop() || '').toLowerCase();
+  if (!TYPES[ext]) return null;
+  const pinned = SHA.test(ref);
+  const key = new Request(`https://massless-assets.internal/f/${ref}${path}`);
+  const hit = await caches.default.match(key);
+  if (hit) return hit;
+  const upstream = await fetch(`https://raw.githubusercontent.com/${REPO}/${ref}/public${path}`, { cf: { cacheTtl: pinned ? 86400 : 60, cacheEverything: true } });
+  if (!upstream.ok) return null;
+  const headers = securityHeaders(new Headers({ 'content-type': TYPES[ext], 'cache-control': pinned ? 'public, max-age=31536000, immutable' : 'public, max-age=60' }));
+  const res = new Response(upstream.body, { status: 200, headers });
+  ctx.waitUntil(caches.default.put(key, res.clone()));
+  return res;
+}
+
+const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
+
 async function fromOrigin(request, env, ctx) {
   const url = new URL(request.url);
   let path = decodeURIComponent(url.pathname);
-  if (path.endsWith('/')) path += 'index.html';
-  if (path.includes('..') || path.startsWith('/_')) return new Response('Not found', { status: 404 });
-  const ext = (path.split('.').pop() || '').toLowerCase();
-  if (!TYPES[ext]) return new Response('Not found', { status: 404 });
+  if (path.includes('..') || path.includes('//')) return notFound();
 
-  const origin = env.ASSET_ORIGIN || 'https://raw.githubusercontent.com/ChuckGPTX/massless';
-  const ref = env.ASSET_REF || 'main';
-  const src = `${origin}/${ref}/public${path}`;
-  const cacheKey = new Request(`https://massless-assets.internal/${ref}${path}`);
-  const cache = caches.default;
-  let res = await cache.match(cacheKey);
-  if (!res) {
-    const upstream = await fetch(src, { cf: { cacheTtl: 300, cacheEverything: true } });
-    if (!upstream.ok) return new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-    const headers = securityHeaders(new Headers({ 'content-type': TYPES[ext], 'cache-control': cacheControlFor(path) }));
-    res = new Response(upstream.body, { status: 200, headers });
-    ctx.waitUntil(cache.put(cacheKey, res.clone()));
+  // versioned module and stylesheet URLs: /v/<sha>/js/app.js
+  const v = path.match(/^\/v\/([0-9a-f]{40})(\/.+)$/);
+  if (v) return (await fetchFile(v[1], v[2], ctx)) || notFound();
+
+  const ref = await resolveRef(env, ctx);
+  if (path === '/' || path === '/index.html') {
+    const res = await fetchFile(ref, '/index.html', ctx);
+    if (!res) return notFound();
+    let html = await res.text();
+    if (SHA.test(ref)) html = html.replace(/(href|src)="\/(css|js)\//g, `$1="/v/${ref}/$2/`);
+    const headers = securityHeaders(new Headers({ 'content-type': TYPES.html, 'cache-control': 'public, max-age=0, must-revalidate' }));
+    return new Response(request.method === 'HEAD' ? null : html, { headers });
   }
-  if (request.method === 'HEAD') return new Response(null, { status: res.status, headers: res.headers });
-  return res;
+  if (path.startsWith('/_')) return notFound();
+  const res = await fetchFile(ref, path, ctx);
+  if (!res) return notFound();
+  // unversioned paths (fonts, images, data) get a short cache so they follow the branch
+  const out = new Response(request.method === 'HEAD' ? null : res.body, res);
+  if (!path.startsWith('/fonts/')) out.headers.set('cache-control', 'public, max-age=300');
+  return out;
 }
 
 export default {
