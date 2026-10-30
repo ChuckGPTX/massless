@@ -41,7 +41,6 @@ async function shot(request, env) {
   }
   const prompt = String(body.prompt || '').trim().slice(0, MAX_PROMPT);
   if (!prompt) return json({ error: 'The prompt is empty.' }, 400);
-  const seed = Number.isFinite(body.seed) ? Math.abs(Math.floor(body.seed)) % 2147483647 : Math.floor(Math.random() * 1e9);
 
   const dailyCap = Number(env.DAILY_CAP || 120);
   const perVisitor = Number(env.PER_VISITOR_CAP || 12);
@@ -55,7 +54,7 @@ async function shot(request, env) {
 
   let result;
   try {
-    result = await env.AI.run(MODEL, { prompt, steps: 6, seed });
+    result = await env.AI.run(MODEL, { prompt, steps: 6 });
   } catch (e) {
     return json({ error: `Workers AI could not render this frame: ${e.message || e}` }, 502);
   }
