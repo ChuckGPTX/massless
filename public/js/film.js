@@ -382,25 +382,35 @@ R.fly = (g, W, H, lb, blk, env) => {
   const bg = env.ground(0);
   g.fillStyle = bg;
   g.fillRect(0, 0, W, H);
+  // a faint tunnel of guide lines gives the flight depth
+  g.strokeStyle = 'rgba(255,255,255,0.06)';
+  g.lineWidth = 1;
+  for (let k = 0; k < 12; k++) {
+    const a = (k / 12) * Math.PI * 2 + lb * 0.15;
+    g.beginPath();
+    g.moveTo(W / 2, H / 2);
+    g.lineTo(W / 2 + Math.cos(a) * W, H / 2 + Math.sin(a) * W);
+    g.stroke();
+  }
   const words = (blk.words && blk.words.length ? blk.words : ['FLY', 'THROUGH', 'WORDS']).slice(0, 8);
   const per = blk.beats / words.length;
-  const camZ = lb / per; // one word per beat-slot
-  const focal = Math.min(W, H) * 1.1;
+  const camZ = lb / per; // word i is closest to the lens a quarter of the way into its slot
   for (let i = words.length - 1; i >= 0; i--) {
-    const z = i + 1 - camZ; // distance in word units
-    if (z < 0.08 || z > 4) continue;
+    const z = i + 1.25 - camZ;
+    if (z < 0.12 || z > 3.2) continue;
     const s = 1 / z;
-    const ang = i * 2.1;
-    const ox = Math.cos(ang) * W * 0.18 * (i % 2 ? 1 : -1);
-    const oy = Math.sin(ang) * H * 0.12;
+    const alpha = z > 1.5 ? 0.3 * clamp01((3.2 - z) / 1.0) + 0.7 * clamp01((2.1 - z) / 0.6) : z > 0.45 ? 1 : clamp01((z - 0.15) / 0.3);
+    const ang = i * 2.4;
+    const r = i % 3 === 0 ? 0 : 0.2;
+    const ox = Math.cos(ang) * W * r;
+    const oy = Math.sin(ang) * H * r * 0.8;
     const word = words[i].toUpperCase();
-    const base = fitFont(g, word, W * 0.6, H * 0.3);
+    const base = fitFont(g, word, W * 0.55, H * 0.26);
     g.save();
-    g.globalAlpha = clamp01(1.6 - z * 0.5) * clamp01(z * 6);
-    g.translate(W / 2 + ox * s * 0.6, H / 2 + oy * s * 0.6);
-    g.scale(s * 0.55 * (focal / Math.min(W, H)), s * 0.55 * (focal / Math.min(W, H)));
-    const col = i % 2 ? env.pal.accent : '#f4f4f1';
-    extruded(g, word, base, 10, col, () => 'rgba(0,0,0,0.55)', 0.4);
+    g.globalAlpha = alpha;
+    g.translate(W / 2 + ox * s, H / 2 + oy * s);
+    g.scale(s, s);
+    extruded(g, word, base, 8, i % 2 ? env.pal.accent : '#f4f4f1', (d) => `rgba(0,0,0,${0.75 - d * 0.4})`, 0.3);
     g.restore();
   }
   g.globalAlpha = 1;

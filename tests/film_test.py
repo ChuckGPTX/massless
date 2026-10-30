@@ -3,7 +3,9 @@ python3 tests/film_test.py [out_dir]"""
 import http.server, threading, socketserver, os, sys, functools, json, base64
 from playwright.sync_api import sync_playwright
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public')
-OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), 'out'); os.makedirs(OUT, exist_ok=True)
+args = [a for a in sys.argv[1:] if not a.startswith('--')]
+NO_EXPORT = '--no-export' in sys.argv
+OUT = args[0] if args else os.path.join(os.path.dirname(__file__), 'out'); os.makedirs(OUT, exist_ok=True)
 class H(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
         p = path.split('?')[0].split('#')[0]
@@ -41,6 +43,8 @@ with sync_playwright() as p:
     for i, t in enumerate(tiles): sheet.paste(t.resize((320, 180)), ((i % cols) * 320, (i // cols) * 180))
     sheet.save(f'{OUT}/film-blocks.jpg', quality=85)
     res['frames'] = len(tiles)
+    if NO_EXPORT:
+        b.close(); print(json.dumps(res, indent=1)); print('errors:', errors); sys.exit(1 if errors else 0)
     # short export: a 3-block film at 720p
     pg.evaluate("""async () => {
       const s = massless.state.spec;
