@@ -29,22 +29,50 @@ const MADE = [
   ['dancer', 'Ballet dancer leaping in an abandoned theater', 'Bullet time'],
 ];
 
+// Stills from real projects by the Massless maker, moved by Massless's camera. tall = 9:16.
+const PROJECTS = [
+  ['tp-greenhouse', 'Tiny Prompters', 'https://tinyprompters.com', 'Robots tending a seedling in a dome greenhouse on the Moon', 'Dolly in'],
+  ['tp-city', 'Tiny Prompters', 'https://tinyprompters.com', 'Kids and a robot walking through a green future city', 'Crane up', true],
+  ['t1-keyart', 'T1 Vendetta', '', 'T1 Vendetta 16-bit fighting game key art', 'Dolly in'],
+  ['t1-skywalk', 'T1 Vendetta', '', 'Pixel-art skywalk over a neon street at night', 'Crane up', true],
+  ['tp-crew', 'Tiny Prompters', 'https://tinyprompters.com', 'Astra, Rivet and Quark, the Tiny Prompters robot crew', 'Arc right'],
+  ['tp-garden', 'Tiny Prompters', 'https://tinyprompters.com', 'A little robot beside a sprout in a space garden', 'Dolly zoom', true],
+  ['t1-navypier', 'T1 Vendetta', '', 'Pixel-art pier with a Ferris wheel on a snowy night', 'Arc right'],
+];
+
+function hoverCard(a) {
+  const v = a.querySelector('video');
+  const start = () => {
+    if (!v.src) v.src = v.dataset.src;
+    v.play().then(() => a.classList.add('playing')).catch(() => {});
+  };
+  const stop = () => { v.pause(); a.classList.remove('playing'); };
+  a.addEventListener('pointerenter', start);
+  a.addEventListener('pointerleave', stop);
+  a.addEventListener('focus', start);
+  a.addEventListener('blur', stop);
+}
+
+function buildProjects() {
+  const box = $('#projects');
+  if (!box) return;
+  for (const [key, project, site, alt, move, tall] of PROJECTS) {
+    const a = document.createElement('a');
+    a.className = tall ? 'reel-card tall' : 'reel-card';
+    a.href = site || '/video';
+    if (site) a.rel = 'noopener';
+    a.innerHTML = `<video muted loop playsinline preload="none" poster="/media/art/${key}.jpg" data-src="/media/clips/wall-${key}.mp4" aria-label="${alt}"></video><span class="cap">${project} · ${move}</span>`;
+    box.append(a);
+  }
+}
+
 function buildMade() {
   const box = $('#masonry');
   for (const [key, alt, move] of MADE) {
     const a = document.createElement('a');
     a.href = `/video?sample=${key}`;
     a.innerHTML = `<img loading="lazy" src="/media/art/${key}.jpg" alt="${alt}"><video muted loop playsinline preload="none" data-src="/media/clips/wall-${key}.mp4" data-hover></video><span class="cap">${move}</span>`;
-    const v = a.querySelector('video');
-    const start = () => {
-      if (!v.src) v.src = v.dataset.src;
-      v.play().then(() => a.classList.add('playing')).catch(() => {});
-    };
-    const stop = () => { v.pause(); a.classList.remove('playing'); };
-    a.addEventListener('pointerenter', start);
-    a.addEventListener('pointerleave', stop);
-    a.addEventListener('focus', start);
-    a.addEventListener('blur', stop);
+    hoverCard(a);
     box.append(a);
   }
 }
@@ -66,6 +94,7 @@ function bindRail() {
 }
 
 buildTrending();
+buildProjects();
 buildMade();
 bindRail();
 bindDialogs();

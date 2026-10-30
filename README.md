@@ -14,7 +14,7 @@ Four pages, laid out like a commercial AI film studio, with every paid model swa
 | --- | --- |
 | **Explore** (`/`) | Launch rail, tool tiles, the moves showcase and a wall of clips made in Massless. |
 | **Image** (`/image`) | Cinema Studio, the shot designer. Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio, genre and palette compile into a prompt you can read and edit. Up to four takes per prompt with FLUX.1 schnell. |
-| **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
+| **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish, plus one-tap effects: LiDAR scan, Vanish, Bullet time freeze and Clones. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
 | **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
 | **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
 | **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Deep links: `/audio?tab=captions`, `/audio?engine=melo&lang=es`. |
@@ -52,6 +52,19 @@ Every endpoint that spends the free allowance (`/api/shot`, `/api/beats`, `/api/
 3. Triangles that span a depth cliff are cut away. Behind them sits a background layer: the same scene with foreground objects refilled from whatever is farther away, so a move reveals plausible background instead of stretched streaks.
 4. A virtual camera follows the chosen preset. The app measures where the image edges would enter the frame over the whole move and tightens the field of view just enough to keep them out.
 5. A finishing pass applies lens and film character, then WebCodecs encodes H.264 MP4 frame by frame.
+
+## How the effects work
+
+The effects need no video model either. They start from the same depth map:
+
+1. **Subject.** Each row of the depth map gets a baseline (the ground or the far scene at that height). What stands out toward the camera from it is the subject: Otsu splits it, a small open and close cleans it, and the strongest piece wins, with a penalty for pieces stuck to the frame sides. A colour model then adds legs and feet that sit at floor depth and tightens the edge. No clear subject: the nearest depth band.
+2. **Clean plate.** The scene behind the subject is filled with coarse-to-fine PatchMatch, copying patches from nearby places at the right depth, so a floor is filled with floor and a wall with wall.
+3. **LiDAR scan.** A plane sweeps through depth and turns the photo into about 345k points on scan lines (at 1080p), drawn as glowing sprites while the camera drifts through them; a second sweep hands back the photo. Cyan, thermal or white.
+4. **Vanish.** A noisy front crosses the subject. Each bit of it comes loose as a particle (ash, embers or pixels) and rides wind plus curl noise, and the clean plate shows where it was.
+5. **Bullet time freeze.** Push in, a flash, then the camera swings about 34° around the subject over the clean plate, mirrored past the picture's edge, and settles back on the photo.
+6. **Clones.** The camera slides sideways and copies of the subject from earlier in the move trail behind it: natural, rainbow or ghost glow.
+
+Every frame is a function of time only, so the preview, the MP4 and the tests see the same picture. The finish (lens, film, grade) and the recorder are the ones the moves use.
 
 ## Run it
 
@@ -101,6 +114,7 @@ Open `/3d`, choose **Idol on your GPU** and press **Build 3D**. The page posts t
 ```bash
 pip install playwright && python -m playwright install chromium
 python3 tests/render_test.py          # every move: first, middle and last frame, motion and edge checks
+python3 tests/effects_test.py         # every effect and look: contact sheets, photo in and out, Vanish reveal, MP4 export
 python3 tests/pages_test.py           # Video: render a clip, build and export a storyboard; Audio: render a bed
 python3 tests/pages_test.py voice audio   # also generates a Kokoro voiceover (downloads the model once)
 python3 tests/audio_test.py           # audio engine: every voice and every bed
@@ -109,12 +123,13 @@ python3 tests/office_test.py          # Office: every convert operation, edit an
 python3 tests/human_test.py           # the Turnstile human check: one check for concurrent calls, retries, readable failures
 python3 tests/three_d_test.py         # 3D: depth splat from a sample, then the Idol path against a mock server
 python3 tools/bake_depth.py           # precompute depth for the sample stills (public/media/depth)
+python3 tools/effect_previews.py      # the effect tiles in the library (public/media/clips/effect-*)
 python3 tests/shots.py out "/!@1440x900" "/video@390x844"   # screenshots, ! = full page
 ```
 
 ## Launch media
 
-The sample stills in `public/media/art` were generated for the launch page with a commercial image model (Higgsfield Soul). Every clip in `public/media/clips` was rendered from those stills by Massless's own camera in headless Chromium. Nothing a visitor runs touches a paid model, and the stills can be swapped for FLUX.1 schnell renders without code changes.
+The sample stills in `public/media/art` were generated for the launch page with a commercial image model (Higgsfield Soul). The "Real projects" row uses art from two projects by the Massless maker, used with permission: [Tiny Prompters](https://tinyprompters.com) (`tp-*`) and the T1 Vendetta fighting game (`t1-*`). Every clip in `public/media/clips` was rendered from those stills by Massless's own camera in headless Chromium. Nothing a visitor runs touches a paid model, and the stills can be swapped for FLUX.1 schnell renders without code changes.
 
 ## Limits
 
