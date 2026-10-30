@@ -27,7 +27,7 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 
 | Job | Model | License | Where it runs |
 | --- | --- | --- | --- |
-| Hero frame | FLUX.1 [schnell] | Apache-2.0 | Pollinations (no key), Cloudflare Workers AI free daily allocation, or your own ComfyUI |
+| Hero frame | FLUX.1 [schnell] (Apache-2.0), SDXL-Lightning and SDXL 1.0 (OpenRAIL++), DreamShaper 8 (CreativeML OpenRAIL-M) | Open weights | Cloudflare Workers AI free daily allocation, or your own ComfyUI; Pollinations' community API (NVIDIA Sana, 1 image per 45 s) as a fallback |
 | Depth | Depth Anything V2 Small | Apache-2.0 | The visitor's browser, WebGPU or WebAssembly, via Transformers.js |
 | Camera, lens, film | Massless renderer (WebGL2) | MIT | The visitor's browser |
 | Video | WebCodecs H.264 + mp4-muxer | Built in / MIT | The visitor's device |
@@ -111,7 +111,7 @@ The sample stills in `public/media/art` were generated for the launch page with 
 
 - People in the shot cannot act; the scene is frozen and the camera moves. For in-scene motion, open video models (LTX-Video, Wan) slot into the ComfyUI path.
 - Large moves reveal stretched background behind foreground objects. Keep intensity moderate for clean results.
-- Pollinations' anonymous tier allows about one frame per 15 seconds per visitor.
+- Pollinations' anonymous tier allows one image per 45 seconds per IP and now serves NVIDIA Sana.
 
 ## Roadmap
 

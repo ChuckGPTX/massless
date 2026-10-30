@@ -38,7 +38,7 @@
 .chip.stepper button { width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 16px; line-height: 1; }
 .chip.stepper button:hover { background: var(--surface-3); color: var(--text); }
 .chip.stepper span { min-width: 34px; text-align: center; }
-.chip.stepper span::after { content: ' takes'; color: var(--muted); }
+.chip.stepper span::after { content: ' ' attr(data-unit); color: var(--muted); }
 .pbar-go {
   grid-area: go; align-self: stretch; min-width: 132px; border: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;
   background: var(--accent); color: var(--accent-ink); font: 800 17px/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase;
@@ -65,6 +65,15 @@
 .opts.chips .opt { padding: 6px 11px; font-size: 13px; }
 .opt[aria-checked="true"] { border-color: var(--accent); background: rgba(255, 191, 47, 0.08); }
 .pop .note { color: var(--muted); font-size: 12.5px; margin: 10px 0 0; }
+/* model picker: wider cards so the note and licence read on one line each */
+.opts.models { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.opts.models .opt { padding: 8px 12px; }
+.opt small.lic { margin-top: 3px; color: var(--dim); font-size: 11px; letter-spacing: 0.01em; }
+.pop .mgroup h4 { margin: 12px 0 7px; }
+.pop h3 + .mgroup h4 { margin-top: 0; }
+.mgroup-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 6px; }
+.mgroup-row .opts.models { grid-template-columns: 1fr; }
+.opt[aria-checked="true"] small.lic { color: rgba(255, 191, 47, 0.75); }
 .pop label.f { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
 .pop label.f input { background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; color: var(--text); }
 
@@ -75,6 +84,8 @@
 .prompt-peek[open] summary::after { content: ' ▴'; }
 .prompt-peek textarea { width: 100%; margin-top: 10px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; padding: 12px 14px; color: #d8d8d4; font-size: 13px; line-height: 1.5; resize: vertical; }
 .prompt-peek p { text-align: center; font-size: 12.5px; margin: 6px 0 0; }
+.prompt-peek .neg { text-align: left; color: var(--muted); margin-top: 8px; padding: 0 2px; }
+.prompt-peek .neg #neg { color: #d8d8d4; }
 
 /* results */
 .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
@@ -85,7 +96,7 @@
 .shot .acts a, .shot .acts button { height: 30px; padding: 0 10px; border-radius: 8px; border: 0; display: inline-flex; align-items: center; font-size: 12.5px; font-weight: 600; background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(8px); color: #fff; }
 .shot .acts .go { background: var(--accent); color: var(--accent-ink); }
 .shot .tag { position: absolute; top: 8px; left: 8px; font-size: 11px; font-weight: 600; background: rgba(0, 0, 0, 0.55); padding: 3px 7px; border-radius: 6px; }
-.shot.pending { display: grid; place-items: center; background: linear-gradient(110deg, #151517 30%, #222226 50%, #151517 70%); background-size: 220% 100%; animation: shimmer 1.4s linear infinite; color: var(--muted); font-size: 13px; }
+.shot.pending { display: grid; place-items: center; padding: 12px; text-align: center; background: linear-gradient(110deg, #151517 30%, #222226 50%, #151517 70%); background-size: 220% 100%; animation: shimmer 1.4s linear infinite; color: var(--muted); font-size: 13px; }
 @keyframes shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
 .shot.fresh { outline: 2px solid var(--accent); outline-offset: -2px; }
 
@@ -115,4 +126,5 @@
   .feats { grid-template-columns: 1fr; gap: 32px; margin-top: 44px; }
   .inspo-grid { columns: 2; column-gap: 10px; }
   .pop { left: 0; width: 100%; }
+  .mgroup-row { grid-template-columns: 1fr; }
 }

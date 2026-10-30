@@ -1,9 +1,15 @@
 import { loadRig, compilePrompt, pick, DEFAULT_SEL } from '../rig.js';
-import { shoot, ENGINES } from '../engines.js';
+import { shoot, MODELS, MODEL_GROUPS, DEFAULT_MODEL, negativeFor } from '../engines.js';
 import * as store from '../store.js';
 import { autoplayVideos, bindDialogs, toast, el, download, SAMPLES } from '../ui.js';
 
 const $ = (s) => document.querySelector(s);
+const ls = {
+  get(k, d = '') { try { return localStorage.getItem(k) || d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+const COMFY_URL = 'http://127.0.0.1:8188';
+const COMFY_CKPT = 'flux1-schnell-fp8.safetensors';
 
 const LOOKS = {
   rider: { camera: '65mm', lens: 'spherical', focal: 24, aperture: '11', shot: 'ews', angle: 'low', light: 'golden', stock: 'negative', aspect: '239', genre: 'western', palette: 'earth' },
@@ -22,13 +28,26 @@ const LOOKS = {
   canyon: { camera: '65mm', lens: 'spherical', focal: 24, aperture: '11', shot: 'ews', angle: 'top', light: 'golden', stock: 'negative', aspect: '239', genre: 'western', palette: 'earth' },
 };
 
-const state = { rig: null, sel: { ...DEFAULT_SEL }, takes: 1, edited: false, busy: false, engine: 'auto' };
+const state = { rig: null, sel: { ...DEFAULT_SEL }, takes: 1, edited: false, busy: false, model: DEFAULT_MODEL };
 
 // ---------- prompt ----------
 function refreshPrompt(force = false) {
   if (state.edited && !force) return;
   $('#compiled').value = compilePrompt(state.rig, $('#subject').value, state.sel);
   state.edited = false;
+  updateNegative();
+}
+
+/** Show the negative prompt SDXL-family models receive, so the prompt peek stays the whole truth. */
+function updateNegative() {
+  const neg = negativeFor(state.model, $('#compiled').value);
+  $('#neg-line').hidden = !neg;
+  $('#neg-model').textContent = MODELS[state.model].short;
+  $('#neg').textContent = neg;
+}
+
+function comfyLabel(ckpt = COMFY_CKPT) {
+  return /schnell/i.test(ckpt) ? MODELS.comfy.short : `ComfyUI · ${ckpt.replace(/\.(safetensors|ckpt|gguf|pt)$/i, '')}`;
 }
 
 function updateChips() {
@@ -38,8 +57,9 @@ function updateChips() {
   $('#chip-focal').textContent = `${state.sel.focal}mm`;
   $('#chip-aperture').textContent = `f/${state.sel.aperture}`;
   $('#chip-aspect').textContent = pick(R, 'aspect', state.sel.aspect).name;
-  $('#chip-engine').textContent = state.engine === 'comfy' ? 'FLUX.1 schnell · ComfyUI' : 'FLUX.1 schnell';
+  $('#chip-model').textContent = state.model === 'comfy' ? comfyLabel(ls.get('massless.comfy-ckpt', COMFY_CKPT)) : MODELS[state.model].short;
   $('#takes-n').textContent = state.takes;
+  $('#takes-n').dataset.unit = state.takes === 1 ? 'take' : 'takes';
 }
 
 // ---------- popovers ----------
@@ -74,6 +94,16 @@ function setSel(group, k, close = true) {
   if (close) closePop();
 }
 
+function pickModel(k, chip) {
+  if (!MODELS[k]) return;
+  state.model = k;
+  ls.set('massless.image-model', k);
+  updateChips();
+  updateNegative();
+  closePop();
+  if (k === 'comfy') { openPop('model', chip); $('#pop').scrollTop = $('#pop').scrollHeight; }
+}
+
 function openPop(kind, chip) {
   if (popOwner === chip) { closePop(); return; }
   closePop();
@@ -92,30 +122,50 @@ function openPop(kind, chip) {
       pop.append(el('h4', {}, label), optGroup(R[group], (x) => x.id, (x) => [x.name], state.sel[group], (k) => setSel(group, k, false), true));
     }
   }
-  if (kind === 'engine') {
-    pop.append(el('h3', {}, 'Engine'));
-    const items = Object.entries(ENGINES).map(([id, e]) => ({ id, ...e }));
-    pop.append(optGroup(items, (x) => x.id, (x) => [el('strong', {}, x.name), el('small', {}, x.detail)], state.engine, (k) => {
-      state.engine = k;
-      try { localStorage.setItem('massless.engine', k); } catch {}
-      updateChips();
-      closePop();
-      if (k === 'comfy') openPop('engine', chip);
-    }));
-    if (state.engine === 'comfy') {
-      const url = el('input', { value: localStorage.getItem('massless.comfy-url') || 'http://127.0.0.1:8188', inputmode: 'url' });
-      const ck = el('input', { value: localStorage.getItem('massless.comfy-ckpt') || 'flux1-schnell-fp8.safetensors' });
-      url.addEventListener('change', () => { try { localStorage.setItem('massless.comfy-url', url.value); } catch {} });
-      ck.addEventListener('change', () => { try { localStorage.setItem('massless.comfy-ckpt', ck.value); } catch {} });
+  if (kind === 'model') {
+    pop.append(el('h3', {}, 'Model'));
+    const groups = MODEL_GROUPS.map((g) => {
+      const items = Object.entries(MODELS).filter(([, m]) => m.group === g.id).map(([id, m]) => ({ id, ...m }));
+      const opts = optGroup(items, (x) => x.id, (x) => [el('strong', {}, x.name), el('small', {}, x.note), el('small', { class: 'lic' }, x.licence)], state.model, (k) => pickModel(k, chip));
+      opts.classList.add('models');
+      opts.setAttribute('aria-label', g.name);
+      return el('div', { class: 'mgroup' }, el('h4', {}, g.name), opts);
+    });
+    // Cloudflare's four get the full width; the two single options share a row.
+    pop.append(groups[0], el('div', { class: 'mgroup-row' }, ...groups.slice(1)));
+    if (state.model === 'comfy') {
+      const url = el('input', { value: ls.get('massless.comfy-url', COMFY_URL), inputmode: 'url' });
+      const ck = el('input', { value: ls.get('massless.comfy-ckpt', COMFY_CKPT) });
+      url.addEventListener('change', () => ls.set('massless.comfy-url', url.value));
+      ck.addEventListener('change', () => { ls.set('massless.comfy-ckpt', ck.value); updateChips(); });
       pop.append(el('label', { class: 'f' }, 'ComfyUI address', url), el('label', { class: 'f' }, 'Checkpoint', ck));
       pop.append(el('p', { class: 'note', html: 'Start ComfyUI with <code>--enable-cors-header</code>. <a href="/comfy/massless_shot_flux_schnell.api.json" download style="color:var(--accent)">Download the workflow</a>.' }));
     }
-    pop.append(el('p', { class: 'note' }, 'Every engine runs FLUX.1 schnell, an open-weight model under Apache-2.0.'));
+    pop.append(el('p', { class: 'note' }, 'Every option runs open weights at $0. The Cloudflare models share one free daily allowance.'));
   }
+  pop.setAttribute('aria-label', pop.querySelector('h3')?.textContent || 'Options');
   pop.hidden = false;
   chip.setAttribute('aria-expanded', 'true');
   popOwner = chip;
-  pop.querySelector('[aria-checked="true"]')?.focus({ preventScroll: true });
+  fitPop();
+  const checked = pop.querySelector('[aria-checked="true"]');
+  if (checked) {
+    if (checked.offsetTop + checked.offsetHeight > pop.clientHeight) pop.scrollTop = checked.offsetTop - 48;
+    checked.focus({ preventScroll: true });
+  }
+}
+
+/** Popovers open upward: keep them below the sticky nav, scrolling the page up or capping the height. */
+function fitPop() {
+  const pop = $('#pop');
+  pop.style.maxHeight = '';
+  pop.scrollTop = 0;
+  const cap = parseFloat(getComputedStyle(pop).maxHeight);
+  const want = Math.min(pop.scrollHeight, Number.isFinite(cap) ? cap : Infinity);
+  const navBottom = document.querySelector('.nav')?.getBoundingClientRect().bottom || 0;
+  const room = () => $('#pbar').getBoundingClientRect().top - 10 - navBottom - 8;
+  if (room() < want && window.scrollY > 0) window.scrollBy({ top: -Math.min(window.scrollY, want - room()), behavior: 'instant' });
+  if (room() < want) pop.style.maxHeight = `${Math.max(180, Math.floor(room()))}px`;
 }
 
 // ---------- results ----------
@@ -135,12 +185,20 @@ async function toJpeg(image) {
   return await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.92));
 }
 
+/** The model that actually rendered a shot. Older saved shots only know their engine. */
+function shotLabel(item) {
+  if (item.engine === 'upload') return 'Your still';
+  if (item.model === 'comfy' || item.engine === 'comfy') return comfyLabel(item.ckpt);
+  if (MODELS[item.model]) return MODELS[item.model].short;
+  return { pollinations: 'Pollinations', workers: 'FLUX.1 schnell' }[item.engine] || 'Shot';
+}
+
 function shotCard(item, fresh = false) {
   const url = URL.createObjectURL(item.thumb || item.blob);
-  const label = item.engine === 'upload' ? 'Your still' : { pollinations: 'Pollinations', workers: 'Cloudflare', comfy: 'ComfyUI' }[item.engine] || 'Shot';
-  const card = el('div', { class: `shot${fresh ? ' fresh' : ''}`, 'data-id': item.id },
+  const label = shotLabel(item);
+  const card = el('div', { class: `shot${fresh ? ' fresh' : ''}`, 'data-id': item.id, 'data-model': item.model || item.engine || '', 'data-seed': item.seed ?? '' },
     el('img', { src: url, alt: item.prompt ? item.prompt.slice(0, 120) : 'Shot' }),
-    el('span', { class: 'tag' }, label),
+    el('span', { class: 'tag', title: item.seed != null ? `${label}, seed ${item.seed}` : label }, label),
     el('div', { class: 'acts' },
       el('a', { class: 'go', href: `/video?shot=${encodeURIComponent(item.id)}` }, 'Animate'),
       el('a', { href: `/3d?shot=${encodeURIComponent(item.id)}` }, '3D'),
@@ -165,6 +223,18 @@ async function restore() {
 }
 
 // ---------- shooting ----------
+/** Pollinations' free tier spaces images 45 s apart; count the wait down on the pending card. */
+function countdown(node, ms, after) {
+  const end = Date.now() + ms;
+  const tick = () => {
+    const s = Math.ceil((end - Date.now()) / 1000);
+    if (s <= 0 || !node.isConnected) { clearInterval(timer); if (node.isConnected) node.textContent = after; return; }
+    node.textContent = `Pollinations allows 1 image per 45 s. Next one in ${s} s`;
+  };
+  const timer = setInterval(tick, 1000);
+  tick();
+}
+
 async function doShoot(e) {
   e?.preventDefault();
   if (state.busy) return;
@@ -177,29 +247,38 @@ async function doShoot(e) {
   $('#results-wrap').hidden = false;
   const grid = $('#results');
   const pendings = [];
+  const model = state.model;
+  const name = model === 'comfy' ? comfyLabel(ls.get('massless.comfy-ckpt', COMFY_CKPT)) : MODELS[model].short;
   for (let i = 0; i < state.takes; i++) {
-    const p = el('div', { class: 'shot pending' }, state.takes > 1 ? `Take ${i + 1} rendering` : 'Rendering');
+    const p = el('div', { class: 'shot pending' }, i === 0 ? `${state.takes > 1 ? 'Take 1 rendering' : 'Rendering'} · ${name}` : `Take ${i + 1} queued`);
     p.style.aspectRatio = `${aspect.w} / ${aspect.h}`;
     grid.prepend(p);
     pendings.unshift(p);
   }
   $('#results-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const negative = negativeFor(model, prompt);
+  const comfyUrl = ls.get('massless.comfy-url', COMFY_URL);
+  const ckpt = ls.get('massless.comfy-ckpt', COMFY_CKPT);
+  // Distinct seeds per take: one random base, then fixed prime steps.
+  const base = Math.floor(Math.random() * 2 ** 31);
   let done = 0;
   try {
     for (let i = 0; i < state.takes; i++) {
       $('#shoot-label').textContent = state.takes > 1 ? `Take ${i + 1}/${state.takes}` : 'Shooting';
+      if (i > 0) pendings[i].textContent = `Take ${i + 1} rendering · ${name}`;
+      const seed = (base + i * 104729) % 2 ** 31;
       const res = await shoot({
-        engine: state.engine,
+        model,
         prompt,
+        negative,
         w: aspect.w,
         h: aspect.h,
-        seed: Math.floor(Math.random() * 2 ** 31),
-        comfyUrl: localStorage.getItem('massless.comfy-url') || 'http://127.0.0.1:8188',
-        ckpt: localStorage.getItem('massless.comfy-ckpt') || 'flux1-schnell-fp8.safetensors',
-        onWait: (ms) => ms > 0 && (pendings[i].textContent = `Free tier: next frame in ${Math.ceil(ms / 1000)} s`),
-        onFallback: () => (pendings[i].textContent = 'Switching to Cloudflare Workers AI'),
+        seed,
+        comfyUrl,
+        ckpt,
+        onWait: (ms) => ms > 0 && countdown(pendings[i], ms, `${state.takes > 1 ? `Take ${i + 1} rendering` : 'Rendering'} · ${name}`),
       });
-      const item = await addShot(res.image, { prompt, engine: res.engine, rig: { ...state.sel } });
+      const item = await addShot(res.image, { prompt, negative: negative || undefined, engine: res.engine, model: res.model, seed, ckpt: res.engine === 'comfy' ? ckpt : undefined, rig: { ...state.sel } });
       pendings[i].replaceWith(shotCard(item, true));
       done++;
     }
@@ -258,7 +337,10 @@ function autoGrow() {
 
 async function init() {
   state.rig = await loadRig();
-  try { state.engine = localStorage.getItem('massless.engine') || 'auto'; } catch {}
+  // Remembered model; earlier visits stored an engine instead.
+  const legacy = { pollinations: 'sana', comfy: 'comfy' }[ls.get('massless.engine')];
+  const saved = ls.get('massless.image-model') || legacy;
+  if (MODELS[saved]) state.model = saved;
   updateChips();
   refreshPrompt(true);
   buildInspo();
@@ -269,13 +351,14 @@ async function init() {
   $('#pbar').addEventListener('submit', doShoot);
   $('#subject').addEventListener('input', () => { autoGrow(); refreshPrompt(); });
   $('#subject').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doShoot(); } });
-  $('#compiled').addEventListener('input', () => (state.edited = true));
+  $('#compiled').addEventListener('input', () => { state.edited = true; updateNegative(); });
   $('#hero-cta').addEventListener('click', () => $('#subject').focus());
   $('#upload').addEventListener('change', (e) => loadUpload(e.target.files[0]));
   $('#takes-minus').addEventListener('click', () => { state.takes = Math.max(1, state.takes - 1); updateChips(); });
   $('#takes-plus').addEventListener('click', () => { state.takes = Math.min(4, state.takes + 1); updateChips(); });
   document.querySelectorAll('[data-pop]').forEach((c) => c.addEventListener('click', () => openPop(c.dataset.pop, c)));
-  document.addEventListener('click', (e) => { if (popOwner && !$('#pop').contains(e.target) && !popOwner.contains(e.target)) closePop(); });
+  // A click inside a popover that rebuilt itself (ComfyUI settings) lands on a detached node: not outside.
+  document.addEventListener('click', (e) => { if (popOwner && e.target.isConnected && !$('#pop').contains(e.target) && !popOwner.contains(e.target)) closePop(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && popOwner) { const c = popOwner; closePop(); c.focus(); } });
   const params = new URLSearchParams(location.search);
   if (params.get('prompt')) { $('#subject').value = params.get('prompt'); refreshPrompt(true); autoGrow(); }

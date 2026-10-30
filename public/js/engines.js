@@ -1,20 +1,97 @@
-// Where hero frames come from. Every engine runs FLUX.1 [schnell] (Apache-2.0, open weights).
-//  1. Pollinations community API: free, no key, about one frame per 15 seconds per visitor.
-//  2. Cloudflare Workers AI through our own /api/shot: free daily allocation, capped server-side.
-//  3. Your own ComfyUI: your GPU, the workflow in /comfy, no limits.
+// Where hero frames come from. Every model here has open weights and costs $0 to run.
+//  1. Cloudflare Workers AI through our own /api/shot: FLUX.1 schnell, SDXL-Lightning, DreamShaper 8, SDXL 1.0.
+//     Free daily allocation, capped server-side.
+//  2. Pollinations community API: free, no key, NVIDIA Sana, 1 image per 45 seconds per IP.
+//  3. Your own ComfyUI: your GPU, the FLUX.1 schnell workflow in /comfy, no limits.
 
 export const ENGINES = {
-  auto: { name: 'Free cloud', detail: 'Pollinations first, Cloudflare Workers AI as backup' },
-  pollinations: { name: 'Pollinations', detail: 'Community FLUX.1 schnell, no key' },
-  workers: { name: 'Cloudflare Workers AI', detail: 'FLUX.1 schnell on our Worker, daily cap' },
+  auto: { name: 'Free cloud', detail: 'Cloudflare Workers AI first, Pollinations as backup' },
+  workers: { name: 'Cloudflare Workers AI', detail: 'Open models on our Worker, daily cap' },
+  pollinations: { name: 'Pollinations', detail: 'Community API, NVIDIA Sana, 1 image per 45 s' },
   comfy: { name: 'Your ComfyUI', detail: 'Local open weights on your GPU' },
 };
+
+/** Every model the Image page offers, keyed by id. `server` is the /api/shot model name. */
+export const MODELS = {
+  'flux-1-schnell': {
+    engine: 'workers', server: 'flux-1-schnell', cf: '@cf/black-forest-labs/flux-1-schnell', family: 'flux', group: 'cloudflare',
+    name: 'FLUX.1 schnell', short: 'FLUX.1 schnell', note: 'Black Forest Labs. Sharp, follows prompts', licence: 'Apache-2.0',
+  },
+  'sdxl-lightning': {
+    engine: 'workers', server: 'sdxl-lightning', cf: '@cf/bytedance/stable-diffusion-xl-lightning', family: 'sdxl', group: 'cloudflare',
+    name: 'SDXL-Lightning', short: 'SDXL-Lightning', note: 'ByteDance. 8 steps, the quickest SDXL', licence: 'OpenRAIL++',
+  },
+  'dreamshaper-8-lcm': {
+    engine: 'workers', server: 'dreamshaper-8-lcm', cf: '@cf/lykon/dreamshaper-8-lcm', family: 'sd15', group: 'cloudflare',
+    name: 'DreamShaper 8', short: 'DreamShaper 8', note: 'Lykon. Stylized looks and illustration', licence: 'CreativeML OpenRAIL-M',
+  },
+  'sdxl-base': {
+    engine: 'workers', server: 'sdxl-base', cf: '@cf/stabilityai/stable-diffusion-xl-base-1.0', family: 'sdxl', group: 'cloudflare',
+    name: 'SDXL 1.0', short: 'SDXL 1.0', note: 'Stability AI base. 20 steps, slower', licence: 'OpenRAIL++',
+  },
+  sana: {
+    engine: 'pollinations', family: 'sana', group: 'community',
+    name: 'Pollinations · Sana', short: 'Sana', note: 'Community API, NVIDIA Sana, 1 image per 45 s', licence: "NVIDIA's licence, open weights",
+  },
+  comfy: {
+    engine: 'comfy', family: 'flux', group: 'gpu',
+    name: 'ComfyUI · FLUX.1 schnell', short: 'FLUX.1 schnell · ComfyUI', note: 'Your own GPU, no limits', licence: 'Your choice',
+  },
+};
+
+export const MODEL_GROUPS = [
+  { id: 'cloudflare', name: 'Free on Cloudflare' },
+  { id: 'community', name: 'Community' },
+  { id: 'gpu', name: 'Your GPU' },
+];
+
+export const DEFAULT_MODEL = 'flux-1-schnell';
+
+// Default negative prompt terms, each with the words that mean the prompt asks for it.
+const NEGATIVE = [
+  ['blurry', 'blur\\w*'],
+  ['lowres', 'low[- ]?res\\w*'],
+  ['watermark', 'watermark\\w*'],
+  ['text', 'text|lettering|typography|caption\\w*'],
+  ['deformed hands', 'deformed'],
+];
+
+/** True for the diffusion models that take a negative prompt (everything on Cloudflare except FLUX). */
+export const takesNegative = (model) => MODELS[model]?.engine === 'workers' && MODELS[model].family !== 'flux';
+
+/**
+ * The default negative prompt for SDXL-family models, minus anything the prompt asks for
+ * ("motion blur" keeps blur, "a sign with lettering" keeps text; "no text" still counts as avoiding it).
+ */
+export function negativeFor(model, prompt = '') {
+  if (!takesNegative(model)) return '';
+  const p = prompt.toLowerCase();
+  const wanted = (words) => [...p.matchAll(new RegExp(`(no |without |not )?\\b(?:${words})\\b`, 'g'))].some((m) => !m[1]);
+  return NEGATIVE.filter(([, words]) => !wanted(words)).map(([term]) => term).join(', ');
+}
+
+/** Request size for /api/shot: the frame's aspect, long side 1024, short side at least 512, multiples of 64. */
+export function requestSize(w, h, base = 1024) {
+  const r64 = (v) => Math.max(256, Math.min(1536, Math.round(v / 64) * 64));
+  const ratio = w / h;
+  let long = base;
+  let short = base / Math.max(ratio, 1 / ratio);
+  if (short < base / 2) { short = base / 2; long = (base / 2) * Math.max(ratio, 1 / ratio); }
+  return ratio >= 1 ? { width: r64(long), height: r64(short) } : { width: r64(short), height: r64(long) };
+}
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function blobToBitmap(blob) {
   if (!blob.type.startsWith('image/')) throw new Error('The engine did not return an image.');
   return await createImageBitmap(blob);
+}
+
+async function errorText(res) {
+  const j = await res.json().catch(() => null);
+  if (!j) return '';
+  const e = j.error;
+  return String((e && typeof e === 'object' ? e.message : e) || j.message || '').trim();
 }
 
 /** Center-crop a bitmap to the requested aspect and size. */
@@ -32,45 +109,72 @@ export function cropTo(bitmap, w, h) {
   return c;
 }
 
-let lastPollinations = 0;
+// Pollinations' anonymous tier allows 1 image per 45 seconds per IP.
+const POLLINATIONS_GAP = 45500;
+let nextPollinations = 0;
 
 export async function viaPollinations({ prompt, w, h, seed, signal, onWait }) {
-  const gap = 15500 - (Date.now() - lastPollinations);
-  if (lastPollinations && gap > 0) {
+  const gap = nextPollinations - Date.now();
+  if (gap > 0) {
     onWait?.(gap);
     await sleep(gap);
   }
-  lastPollinations = Date.now();
-  const params = new URLSearchParams({ width: String(w), height: String(h), seed: String(seed), model: 'flux', nologo: 'true', private: 'true', safe: 'true' });
+  nextPollinations = Date.now() + POLLINATIONS_GAP;
+  const params = new URLSearchParams({ width: String(w), height: String(h), seed: String(seed), model: 'sana', nologo: 'true', private: 'true', safe: 'true' });
   const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${params}`;
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), 90000);
   signal?.addEventListener('abort', () => ctl.abort());
   try {
-    const res = await fetch(url, { signal: ctl.signal, mode: 'cors' });
-    if (res.status === 429) throw Object.assign(new Error('Pollinations is busy. Try again in a few seconds.'), { retry: true });
-    if (!res.ok) throw new Error(`Pollinations returned ${res.status}.`);
+    let res;
+    try {
+      res = await fetch(url, { signal: ctl.signal, mode: 'cors' });
+    } catch (e) {
+      if (signal?.aborted) throw e;
+      throw new Error('Could not reach Pollinations. Its free tier allows 1 image per 45 seconds, so try again shortly.');
+    }
+    if (!res.ok) {
+      const retry = Number(res.headers.get('retry-after'));
+      if (retry > 0) nextPollinations = Date.now() + retry * 1000;
+      const msg = await errorText(res);
+      if (msg) throw Object.assign(new Error(`Pollinations: ${msg}`), { retry: res.status === 402 || res.status === 429 || res.status === 503 });
+      if (res.status === 429 || res.status === 402) throw Object.assign(new Error('Pollinations allows 1 image per 45 seconds. Try again in a moment.'), { retry: true });
+      throw new Error(`Pollinations returned ${res.status}.`);
+    }
     const bmp = await blobToBitmap(await res.blob());
-    return { image: bmp.width === w && bmp.height === h ? bmp : cropTo(bmp, w, h), engine: 'pollinations' };
+    return { image: bmp.width === w && bmp.height === h ? bmp : cropTo(bmp, w, h), engine: 'pollinations', model: 'sana' };
   } finally {
     clearTimeout(timer);
   }
 }
 
-export async function viaWorkers({ prompt, w, h, seed, signal }) {
+/** Request body for /api/shot. Exported so the page and tests can show exactly what is sent. */
+export function workersBody({ prompt, w, h, seed, model = DEFAULT_MODEL, negative }) {
+  const m = MODELS[model]?.engine === 'workers' ? model : DEFAULT_MODEL;
+  // DreamShaper 8 is an SD 1.5 model (native 512 px): a 768 long side avoids repeated subjects
+  const body = { prompt, model: MODELS[m].server, ...requestSize(w, h, m === 'dreamshaper-8-lcm' ? 768 : 1024), seed };
+  const neg = negative ?? negativeFor(m, prompt);
+  if (takesNegative(m) && neg) body.negative = neg;
+  return body;
+}
+
+export async function viaWorkers(opts) {
+  const body = workersBody(opts);
   const res = await fetch('/api/shot', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ prompt, seed }),
-    signal,
+    body: JSON.stringify(body),
+    signal: opts.signal,
   });
-  if (res.status === 429) {
-    const j = await res.json().catch(() => ({}));
-    throw new Error(j.error || "Today's free Cloudflare frames are used up. Pollinations or your own ComfyUI still work.");
+  if (!res.ok) {
+    const msg = await errorText(res);
+    if (res.status === 429) throw Object.assign(new Error(msg || "Today's free Cloudflare frames are used up. Pollinations or your own ComfyUI still work."), { cap: true });
+    throw new Error(msg || `Cloudflare Workers AI returned ${res.status}.`);
   }
-  if (!res.ok) throw new Error(`Cloudflare Workers AI returned ${res.status}.`);
+  const used = res.headers.get('x-massless-model');
+  const model = Object.keys(MODELS).find((k) => MODELS[k].cf && MODELS[k].cf === used) || body.model;
   const bmp = await blobToBitmap(await res.blob());
-  return { image: cropTo(bmp, w, h), engine: 'workers' };
+  return { image: cropTo(bmp, opts.w, opts.h), engine: 'workers', model };
 }
 
 /** ComfyUI's own HTTP API (start ComfyUI with --enable-cors-header). */
@@ -111,22 +215,27 @@ export async function viaComfy({ prompt, w, h, seed, signal, comfyUrl, ckpt, onW
     const q = new URLSearchParams({ filename: out.filename, subfolder: out.subfolder || '', type: out.type || 'output' });
     const img = await fetch(`${base}/view?${q}`, { signal }).then((r) => r.blob());
     const bmp = await blobToBitmap(img);
-    return { image: cropTo(bmp, w, h), engine: 'comfy' };
+    return { image: cropTo(bmp, w, h), engine: 'comfy', model: 'comfy' };
   }
   throw new Error('ComfyUI took longer than five minutes.');
 }
 
+/**
+ * Render one frame. Pass `model` (a MODELS key) to pick a model, or a bare `engine`
+ * ('auto' | 'workers' | 'pollinations' | 'comfy'). Resolves to { image, engine, model }.
+ */
 export async function shoot(opts) {
-  const { engine } = opts;
+  const m = MODELS[opts.model];
+  const engine = m ? m.engine : opts.engine || 'auto';
   if (engine === 'pollinations') return viaPollinations(opts);
-  if (engine === 'workers') return viaWorkers(opts);
+  if (engine === 'workers') return viaWorkers({ ...opts, model: m ? opts.model : DEFAULT_MODEL });
   if (engine === 'comfy') return viaComfy(opts);
-  // auto: Pollinations, then our Worker
+  // auto: our Worker (FLUX.1 schnell), then Pollinations
   try {
-    return await viaPollinations(opts);
+    return await viaWorkers({ ...opts, model: DEFAULT_MODEL });
   } catch (e) {
     if (opts.signal?.aborted) throw e;
     opts.onFallback?.(e);
-    return await viaWorkers(opts);
+    return await viaPollinations(opts);
   }
 }
