@@ -29,13 +29,15 @@ function bilinear(data, w, h, x, y) {
 }
 
 /**
- * opts: { image, depth: { data, w, h, bg?, bgColor? }, cols = 400, sNear = 0.5, sFar = 1.6, D, background = true }
+ * opts: { image, depth: { data, w, h, bg?, bgColor? }, cols = 400 (samples along the long side), sNear = 0.5, sFar = 1.6, D, background = true }
  * Coordinates: x right, y up, camera at (0, 0, D) looking down -z, image height = 1 unit at s = 1.
  * Returns { bytes (Uint8Array .ply), count, target: [x, y, z], D, aspect }.
  */
 export function depthToSplat({ image, depth, cols = 400, sNear = 0.5, sFar = 1.6, D = 1.4, background = true, subject = 0.7 }) {
   const aspect = image.width / image.height;
-  const rows = Math.max(2, Math.round(cols / aspect));
+  const long = cols;
+  cols = Math.max(2, Math.round(aspect >= 1 ? long : long * aspect));
+  const rows = Math.max(2, Math.round(aspect >= 1 ? long / aspect : long));
   const sFor = (d) => 1 / (1 / sFar + (1 / sNear - 1 / sFar) * d);
   const layers = [{ cols, rows, depth: depth.data, color: pixels(image, cols, rows), push: 1, alpha: 0.98 }];
   if (background && depth.bg) {

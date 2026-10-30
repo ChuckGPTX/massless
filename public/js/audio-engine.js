@@ -672,7 +672,7 @@ const BED_SYNTHS = {
         const c = between(0.25, 1);
         let prev = 0;
         let lp = 0;
-        drops.add(t, Math.ceil(tau * 8 * sr), between(-1, 1), 0.04 + 0.55 * rand() ** 4, (i) => {
+        drops.add(t, Math.ceil(tau * 8 * sr), between(-1, 1), 0.04 + 0.4 * rand() ** 4, (i) => {
           const n = rand() * 2 - 1;
           lp += (n - prev - lp) * c;
           prev = n;
@@ -1002,7 +1002,7 @@ const BED_SYNTHS = {
         const n = 1 + Math.floor(rand() ** 2 * (5 + 8 * k));
         const spread = between(0.02, 0.25);
         const pan = between(-0.45, 0.45);
-        for (let j = 0; j < n; j++) crackle(t + rand() ** 2 * spread, pan + between(-0.1, 0.1), 0.15 + 0.85 * rand() ** 2);
+        for (let j = 0; j < n; j++) crackle(t + rand() ** 2 * spread, pan + between(-0.1, 0.1), 0.12 + 0.6 * rand() ** 2);
       });
       // a light scatter of single ticks between bursts
       kit.events(2 + 5 * k, (t) => crackle(t, between(-0.5, 0.5), 0.05 + 0.3 * rand() ** 2));
@@ -1011,7 +1011,7 @@ const BED_SYNTHS = {
         const snap = between(0.0008, 0.003);
         const thump = between(0.004, 0.01);
         let lp = 0;
-        cr.add(t, Math.ceil(thump * 7 * sr), between(-0.4, 0.4), between(0.5, 1), (i) => {
+        cr.add(t, Math.ceil(thump * 7 * sr), between(-0.4, 0.4), between(0.3, 0.55), (i) => {
           const n = rand() * 2 - 1;
           lp += (n - lp) * 0.06;
           return n * Math.exp(-i / (snap * sr)) + 1.5 * lp * Math.exp(-i / (thump * sr));
