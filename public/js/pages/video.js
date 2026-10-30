@@ -283,7 +283,8 @@ function addClip(blob, ext, label) {
   const url = URL.createObjectURL(blob);
   const v = el('video', { src: url, muted: true, loop: true, playsinline: true, autoplay: true });
   v.muted = true;
-  $('#clips').prepend(el('div', { class: 'clip' }, v, el('div', { class: 'meta' }, el('span', {}, label), el('a', { href: url, download: `massless-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.${ext}` }, 'Download'))));
+  $('#clips').prepend(el('div', { class: 'clip fresh' }, v, el('div', { class: 'meta' }, el('span', {}, label), el('a', { class: 'dl', href: url, download: `massless-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now() % 1e6}.${ext}` }, 'Download'))));
+  $('#clips-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function doRecord() {
@@ -304,8 +305,7 @@ async function doRecord() {
       onProgress: (f) => ($('#record-label').textContent = `Rendering ${Math.round(f * 100)}%`),
     });
     addClip(res.blob, res.ext, `${m.name}, ${state.duration}s`);
-    download(res.blob, `massless-${m.id}-${Date.now()}.${res.ext}`);
-    toast(`Clip rendered as ${res.ext.toUpperCase()} and downloaded.`);
+    toast(`Clip rendered as ${res.ext.toUpperCase()}. Download it under Your clips.`);
   } catch (e) {
     toast(`Render failed: ${e.message}`, 'error');
   } finally {
@@ -510,7 +510,6 @@ async function exportBoard() {
     }));
     const res = await recordSegments(renderer.canvas, { segments, fps: state.fps, onProgress: (f) => ($('#export-label').textContent = `Exporting ${Math.round(f * 100)}%`) });
     addClip(res.blob, res.ext, `Film, ${state.board.length} shots`);
-    download(res.blob, `massless-film-${Date.now()}.${res.ext}`);
     toast(`Film exported: ${state.board.length} shots, ${boardTotal().toFixed(1)} s, ${res.ext.toUpperCase()}.`);
   } catch (e) { toast(`Export failed: ${e.message}`, 'error'); } finally {
     markPlaying(null);

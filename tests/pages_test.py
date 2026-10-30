@@ -38,16 +38,15 @@ with sync_playwright() as p:
         res['loaded'] = pg.evaluate("({move: massless.state.move, ref: massless.state.current.ref, src: document.querySelector('#src-label').textContent, cards: document.querySelectorAll('.mcard').length})")
         pg.evaluate("massless.state.duration = 1; massless.state.fps = 12")
         t = time.time()
-        with pg.expect_download(timeout=600000) as d: pg.click('#record')
-        res['record'] = {'s': round(time.time() - t, 1), 'file': d.value.suggested_filename, 'clips': pg.locator('.clip').count()}
+        pg.click('#record'); pg.wait_for_function("document.querySelectorAll('.clip').length === 1 && !massless.state.recording", timeout=600000)
+        res['record'] = {'s': round(time.time() - t, 1), 'file': pg.get_attribute('.clip a.dl', 'download'), 'bytes': pg.evaluate("fetch(document.querySelector('.clip a.dl').href).then(r => r.blob()).then(b => b.size)")}
         pg.click('#board-add'); pg.wait_for_function("document.querySelectorAll('.bcard').length === 1")
         pg.evaluate("massless.selectMove('arc-left'); massless.state.duration = 1")
         pg.click('#board-add'); pg.wait_for_function("document.querySelectorAll('.bcard').length === 2")
-        for c in pg.evaluate("massless.state.board.map(c => c.uid)"): pass
         pg.evaluate("massless.state.board.forEach(c => c.duration = 1)")
         pg.click('#t-board'); t = time.time()
-        with pg.expect_download(timeout=600000) as d: pg.click('#board-export')
-        res['export'] = {'s': round(time.time() - t, 1), 'file': d.value.suggested_filename, 'board': pg.inner_text('#board-total')}
+        pg.click('#board-export'); pg.wait_for_function("document.querySelectorAll('.clip').length === 2 && !massless.state.boardBusy", timeout=600000)
+        res['export'] = {'s': round(time.time() - t, 1), 'file': pg.get_attribute('.clip a.dl', 'download'), 'board': pg.inner_text('#board-total')}
         pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(4000)
         res['restored'] = pg.evaluate("document.querySelectorAll('.bcard').length")
         pg.close()
