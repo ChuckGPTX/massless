@@ -79,12 +79,71 @@ async function health(env) {
   return json({ ok: true, app: 'massless', model: MODEL, framesToday: total, dailyCap: Number(env.DAILY_CAP || 120) });
 }
 
+// Static files: served from the ASSETS binding when deployed with Wrangler, otherwise pulled from
+// the public GitHub repo (ASSET_ORIGIN at ASSET_REF) and cached at Cloudflare's edge, so a push to
+// the repo updates the live site within minutes.
+const TYPES = {
+  html: 'text/html; charset=utf-8',
+  css: 'text/css; charset=utf-8',
+  js: 'text/javascript; charset=utf-8',
+  mjs: 'text/javascript; charset=utf-8',
+  json: 'application/json; charset=utf-8',
+  svg: 'image/svg+xml',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  woff2: 'font/woff2',
+  txt: 'text/plain; charset=utf-8',
+  ico: 'image/x-icon',
+};
+
+function cacheControlFor(path) {
+  if (path.startsWith('/fonts/') || path.startsWith('/js/vendor/')) return 'public, max-age=31536000, immutable';
+  if (path.endsWith('.html')) return 'public, max-age=60, must-revalidate';
+  return 'public, max-age=300';
+}
+
+function securityHeaders(h) {
+  h.set('x-content-type-options', 'nosniff');
+  h.set('referrer-policy', 'strict-origin-when-cross-origin');
+  h.set('permissions-policy', 'camera=(), microphone=(), geolocation=()');
+  return h;
+}
+
+async function fromOrigin(request, env, ctx) {
+  const url = new URL(request.url);
+  let path = decodeURIComponent(url.pathname);
+  if (path.endsWith('/')) path += 'index.html';
+  if (path.includes('..') || path.startsWith('/_')) return new Response('Not found', { status: 404 });
+  const ext = (path.split('.').pop() || '').toLowerCase();
+  if (!TYPES[ext]) return new Response('Not found', { status: 404 });
+
+  const origin = env.ASSET_ORIGIN || 'https://raw.githubusercontent.com/ChuckGPTX/massless';
+  const ref = env.ASSET_REF || 'main';
+  const src = `${origin}/${ref}/public${path}`;
+  const cacheKey = new Request(`https://massless-assets.internal/${ref}${path}`);
+  const cache = caches.default;
+  let res = await cache.match(cacheKey);
+  if (!res) {
+    const upstream = await fetch(src, { cf: { cacheTtl: 300, cacheEverything: true } });
+    if (!upstream.ok) return new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
+    const headers = securityHeaders(new Headers({ 'content-type': TYPES[ext], 'cache-control': cacheControlFor(path) }));
+    res = new Response(upstream.body, { status: 200, headers });
+    ctx.waitUntil(cache.put(cacheKey, res.clone()));
+  }
+  if (request.method === 'HEAD') return new Response(null, { status: res.status, headers: res.headers });
+  return res;
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/api/shot') return shot(request, env);
     if (url.pathname === '/api/health') return health(env);
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
-    return env.ASSETS.fetch(request);
+    if (env.ASSETS) return env.ASSETS.fetch(request);
+    if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
+    return fromOrigin(request, env, ctx);
   },
 };
