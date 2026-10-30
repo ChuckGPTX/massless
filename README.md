@@ -6,14 +6,20 @@ Live: **https://massless.chucksi.com**
 
 The Higgs field is what gives particles mass. Massless is the version with none: no subscription, no credits, no paid models. Every model it uses has open weights and costs $0 to run.
 
-## What it rebuilds
+## The site
 
-Two paywalled features of commercial AI film studios, rebuilt clean-room from their public behavior (see [SPEC.md](SPEC.md)):
+Four pages, laid out like a commercial AI film studio, with every paid model swapped for an open one:
 
-1. **Cinema Studio, the shot designer.** Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio. Massless compiles these into a prompt you can read and edit, and then applies the same choices physically in post: barrel distortion on wide glass, oval bokeh and streak flares on anamorphic, glow on vintage lenses, grain and gate weave on film bodies, chroma bleed and scanlines on VHS, depth-based blur for aperture.
-2. **Camera-motion presets.** 28 moves on any still, generated or your own, grouped as push and pull, orbit, crane and tilt, slide and pan, and texture. A dolly zoom is real geometry here, not a guess by a video model.
-3. **Takes and storyboard.** Render up to four takes per shot and pick the hero frame. Add shots with their moves to a storyboard, reorder them, play the scene, and export it as one stitched MP4.
-4. **Scene settings.** Project-wide genre, light, color palette and film stock, next to per-shot camera, lens, focal length, aperture and frame.
+| Page | What it does |
+| --- | --- |
+| **Explore** (`/`) | Launch rail, tool tiles, the moves showcase and a wall of clips made in Massless. |
+| **Image** (`/image`) | Cinema Studio, the shot designer. Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio, genre and palette compile into a prompt you can read and edit. Up to four takes per prompt with FLUX.1 schnell. |
+| **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
+| **Audio** (`/audio`) | Voiceover from a script with eight open Kokoro voices, and sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. |
+
+Everything a visitor makes is stored in their own browser (IndexedDB). There are no accounts.
+
+What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the shot designer, camera-motion presets, takes, storyboard and voiceover of paywalled AI film studios.
 
 ## How it stays free
 
@@ -23,6 +29,8 @@ Two paywalled features of commercial AI film studios, rebuilt clean-room from th
 | Depth | Depth Anything V2 Small | Apache-2.0 | The visitor's browser, WebGPU or WebAssembly, via Transformers.js |
 | Camera, lens, film | Massless renderer (WebGL2) | MIT | The visitor's browser |
 | Video | WebCodecs H.264 + mp4-muxer | Built in / MIT | The visitor's device |
+| Voiceover | Kokoro-82M via kokoro-js | Apache-2.0 | The visitor's browser, WebGPU or WebAssembly |
+| Sound beds | Massless synth (Web Audio) | MIT | The visitor's browser |
 
 The `/api/shot` Worker keeps itself inside Cloudflare's 10,000 free Neurons per day with a daily cap (`DAILY_CAP`, default 120 frames) and a per-visitor cap (`PER_VISITOR_CAP`, default 12). When the cap is hit the app keeps working through Pollinations or your ComfyUI.
 
@@ -45,7 +53,7 @@ Any static server works for the app alone (`python3 -m http.server -d public`); 
 
 Deploy to your own Cloudflare account: create a KV namespace, put its id in `wrangler.jsonc`, then `npx wrangler deploy`. Workers AI is enabled through the `ai` binding.
 
-How massless.chucksi.com runs today: the Worker in `src/index.js` was uploaded through the Cloudflare API without an assets binding, so it serves the files in `public/` straight from this repo's `main` branch and caches them at Cloudflare's edge. Pushing to `main` updates the live site within about ten minutes; only changes to `src/index.js` need a Worker re-upload (or a switch to `wrangler deploy`, which uses the assets binding instead).
+How massless.chucksi.com runs today: the Worker in `src/index.js` was uploaded through the Cloudflare API without an assets binding, so it serves the files in `public/` straight from this repo's `main` branch and caches them at Cloudflare's edge. Each page load is pinned to one commit, so a push to `main` goes live within about a minute and a page never mixes two versions; only changes to `src/index.js` need a Worker re-upload (or a switch to `wrangler deploy`, which uses the assets binding instead).
 
 ## Open weights only, on your GPU (ComfyUI)
 
@@ -68,10 +76,16 @@ python comfy/run_shot.py "a lighthouse keeper on a spiral stair" --camera 16mm -
 
 ```bash
 pip install playwright && python -m playwright install chromium
-python3 tests/render_test.py
+python3 tests/render_test.py          # every move: first, middle and last frame, motion and edge checks
+python3 tests/pages_test.py           # Video: render a clip, build and export a storyboard; Audio: render a bed
+python3 tests/pages_test.py voice audio   # also generates a Kokoro voiceover (downloads the model once)
+python3 tests/audio_test.py           # audio engine: every voice and every bed
+python3 tests/shots.py out "/!@1440x900" "/video@390x844"   # screenshots, ! = full page
 ```
 
-Renders the first, middle and last frame of every move headlessly and checks for motion, for image edges entering the frame, and for console errors.
+## Launch media
+
+The sample stills in `public/media/art` were generated for the launch page with a commercial image model (Higgsfield Soul). Every clip in `public/media/clips` was rendered from those stills by Massless's own camera in headless Chromium. Nothing a visitor runs touches a paid model, and the stills can be swapped for FLUX.1 schnell renders without code changes.
 
 ## Limits
 

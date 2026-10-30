@@ -455,7 +455,7 @@ export class Renderer {
 
   /**
    * cam: { eye, target, fov, roll, focus, blur }
-   * fx: finishing parameters (see app.js finishFor)
+   * fx: finishing parameters (see rig.js finishFor)
    */
   render(cam, fx, time) {
     const gl = this.gl;

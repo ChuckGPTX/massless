@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Free AI voiceover and sound beds | Massless</title>
+  <meta name="description" content="Turn a script into voiceover with eight open Kokoro voices, and render rain, wind, ocean or city ambience from scratch. Runs in your browser. $0.">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta property="og:image" content="/og.jpg">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/studio.css">
+</head>
+<body class="studio-body">
+  <header class="nav">
+    <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/">Explore</a>
+      <a href="/image">Image</a>
+      <a href="/video">Video</a>
+      <a href="/audio" aria-current="page">Audio</a>
+    </nav>
+    <div class="nav-right">
+      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
+      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
+      <a class="btn-accent" href="/video">Open Video</a>
+    </div>
+  </header>
+
+  <main class="studio">
+    <aside class="side" aria-label="Audio controls">
+      <div class="side-tabs" role="tablist">
+        <button role="tab" aria-selected="true" aria-controls="tab-voice" id="t-voice">Voiceover</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-bed" id="t-bed">Sound beds</button>
+      </div>
+
+      <div class="side-scroll" id="tab-voice" role="tabpanel" aria-labelledby="t-voice">
+        <div class="field">
+          <div class="f-head"><span>Script</span><output id="o-chars">0 / 2000</output></div>
+          <textarea id="script" maxlength="2000" rows="7" aria-label="Script">The road ran straight for ninety miles. No towns, no signs, just heat on the asphalt and one rider chasing the last of the light.</textarea>
+        </div>
+        <button type="button" class="row-sel" id="voice-sel">
+          <span class="voice-row"><span class="avatar" id="voice-avatar">H</span><span><small>Voice</small><strong id="voice-name">Heart</strong></span></span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <div class="field">
+          <div class="f-head"><span>Speed</span><output id="o-speed">1.00×</output></div>
+          <input type="range" id="speed" min="0.7" max="1.3" step="0.05" value="1" aria-label="Speed">
+        </div>
+        <div class="row-sel" aria-label="Model">
+          <span><small>Model</small><strong>Kokoro-82M · open weights</strong></span>
+          <span class="badge-new">$0</span>
+        </div>
+        <p class="side-note">The first voice downloads the model once (about 90 MB), then it runs offline in this tab. Nothing you type leaves your device.</p>
+      </div>
+
+      <div class="side-scroll" id="tab-bed" role="tabpanel" aria-labelledby="t-bed" hidden>
+        <div class="beds" id="beds" role="radiogroup" aria-label="Sound bed"></div>
+        <div class="field">
+          <div class="f-head"><span>Length</span><output id="o-length">20 s</output></div>
+          <input type="range" id="length" min="5" max="120" step="5" value="20" aria-label="Length">
+        </div>
+        <div class="field">
+          <div class="f-head"><span>Intensity</span><output id="o-bed-intensity">70%</output></div>
+          <input type="range" id="bed-intensity" min="0" max="1" step="0.05" value="0.7" aria-label="Intensity">
+        </div>
+        <p class="side-note">Beds are synthesized from scratch with the Web Audio API: no samples, no model, no download. They fade at both ends so they loop cleanly under a clip.</p>
+      </div>
+
+      <div class="side-foot">
+        <div id="foot-voice"><button type="button" class="go" id="gen-voice"><span id="gen-voice-label">Generate voice</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
+        <div id="foot-bed" hidden><button type="button" class="go" id="gen-bed"><span id="gen-bed-label">Render bed</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="Voices and history">
+      <div class="stage-top">
+        <div class="pills" role="tablist" aria-label="Audio tools">
+          <button type="button" class="pill on" id="p-voice"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="6" y="1.5" width="4" height="8" rx="2"/><path d="M3.5 7.5a4.5 4.5 0 009 0M8 12v2.5"/></svg>Voiceover</button>
+          <button type="button" class="pill" id="p-bed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8h2l1.5-4 2 8 2-10 2 9 1.5-3h2"/></svg>Sound beds</button>
+          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
+        </div>
+        <span class="src" id="src-label">Kokoro-82M · loads on first use</span>
+      </div>
+
+      <div class="stage-head">
+        <div>
+          <h1 class="display" id="stage-title">Turn text<br>into voiceover</h1>
+          <p id="stage-sub">Eight open voices with natural pacing, generated on your own device. Pair a voice with a sound bed and drop both under a clip from Video.</p>
+        </div>
+      </div>
+
+      <div class="feature-duo">
+        <article class="fcard">
+          <h3>Narrate any script</h3>
+          <p>Paste up to 2,000 characters. Long scripts are split on sentences and stitched with natural pauses.</p>
+          <div class="vis"><img src="/media/art/diner.jpg" alt="" loading="lazy"><canvas class="wave-anim" id="wave-a" aria-hidden="true"></canvas></div>
+        </article>
+        <article class="fcard">
+          <h3>Score the scene</h3>
+          <p>Rain, wind, ocean, city night, campfire, forest and room tone, rendered from scratch in seconds.</p>
+          <div class="vis"><img src="/media/art/lighthouse.jpg" alt="" loading="lazy"><canvas class="wave-anim bars" id="wave-b" aria-hidden="true"></canvas></div>
+        </article>
+      </div>
+
+      <div class="lib-head" id="voices-head"><h2 class="display">Voices</h2><span class="muted small">Tap to choose · ▶ to hear a line</span></div>
+      <div class="voices" id="voices" role="radiogroup" aria-label="Voice"></div>
+
+      <div class="lib-head"><h2 class="display">History</h2><button type="button" class="btn-ghost small" id="clear-history" hidden>Clear</button></div>
+      <div class="history" id="history"></div>
+      <p class="side-note muted" id="history-empty">Nothing yet. Generate a voice or render a bed and it lands here, saved in this browser.</p>
+    </section>
+  </main>
+
+  <dialog class="sheet" id="how">
+    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Voiceover uses Kokoro-82M, an 82-million-parameter open-weight text-to-speech model (Apache-2.0), run through kokoro-js on WebGPU or WebAssembly. Text is split into sentences, spoken chunk by chunk and joined into one 24 kHz WAV.</p>
+    <p>Sound beds are built from noise, filters and envelopes in an OfflineAudioContext and exported as 48 kHz stereo WAV. Everything happens in this tab; nothing is uploaded.</p>
+  </dialog>
+
+  <dialog class="sheet" id="ledger">
+    <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Voice: Kokoro-82M (Apache-2.0), in your browser. Sound beds: Massless synth (MIT), in your browser. Cost: $0.</p>
+  </dialog>
+
+  <script type="module" src="/js/pages/audio.js"></script>
+</body>
+</html>

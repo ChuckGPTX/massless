@@ -34,7 +34,8 @@ export async function all() {
 export async function put(item) {
   const db = await open();
   await tx(db, 'readwrite', (s) => s.put(item));
-  const items = await all();
+  const kind = item.kind || 'shot';
+  const items = (await all()).filter((x) => (x.kind || 'shot') === kind);
   if (items.length > MAX_ITEMS) {
     items.sort((a, b) => a.created - b.created);
     const extra = items.slice(0, items.length - MAX_ITEMS);
@@ -49,4 +50,9 @@ export async function get(id) {
     req.onsuccess = () => resolve(req.result || null);
     req.onerror = () => reject(req.error);
   });
+}
+
+export async function del(id) {
+  const db = await open();
+  await tx(db, 'readwrite', (s) => s.delete(id));
 }

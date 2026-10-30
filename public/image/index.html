@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Free AI image generator with a real camera rig | Massless</title>
+  <meta name="description" content="Pick a camera body, lens and film stock, describe the shot, and open-weight FLUX.1 renders it. No account, no credits, $0.">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta property="og:image" content="/og.jpg">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/image.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/">Explore</a>
+      <a href="/image" aria-current="page">Image</a>
+      <a href="/video">Video</a>
+      <a href="/audio">Audio</a>
+    </nav>
+    <div class="nav-right">
+      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
+      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
+      <a class="btn-accent" href="/video">Animate a still</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap">
+      <div class="img-hero">
+        <video muted loop playsinline preload="none" poster="/media/art/canyon.jpg" data-src="/media/clips/promo-canyon.mp4"></video>
+        <div class="hero-copy">
+          <h1 class="display">AI images shot<br>with a real camera</h1>
+          <p>Pick the body, lens and film stock. Open-weight FLUX.1 renders it. No account, no credits, $0.</p>
+          <button type="button" class="btn-white" id="hero-cta">Create image now</button>
+        </div>
+
+        <form class="pbar" id="pbar" autocomplete="off">
+          <div class="pbar-main">
+            <label class="pbar-add" for="upload" title="Use your own still"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg><span class="sr-only">Use your own still</span></label>
+            <input type="file" id="upload" accept="image/*" hidden>
+            <label class="sr-only" for="subject">Describe the shot</label>
+            <textarea id="subject" rows="1" placeholder="Describe the shot. The rig handles the cinematography."></textarea>
+          </div>
+          <div class="pbar-chips">
+            <button type="button" class="chip model" data-pop="engine"><span class="dot"></span><span id="chip-engine">FLUX.1 schnell</span></button>
+            <button type="button" class="chip" data-pop="camera"><span class="k">Camera</span><span id="chip-camera"></span></button>
+            <button type="button" class="chip" data-pop="lens"><span class="k">Lens</span><span id="chip-lens"></span></button>
+            <button type="button" class="chip" data-pop="focal"><span id="chip-focal"></span></button>
+            <button type="button" class="chip" data-pop="aperture"><span id="chip-aperture"></span></button>
+            <button type="button" class="chip" data-pop="aspect"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="4" width="12" height="8" rx="1.5"/></svg><span id="chip-aspect"></span></button>
+            <div class="chip stepper" role="group" aria-label="Takes"><button type="button" id="takes-minus" aria-label="Fewer takes">−</button><span id="takes-n">1</span><button type="button" id="takes-plus" aria-label="More takes">+</button></div>
+            <button type="button" class="chip" data-pop="scene"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h7M12 4h2M2 12h2M7 12h7"/><circle cx="10.5" cy="4" r="1.6"/><circle cx="5.5" cy="12" r="1.6"/></svg><span>Scene</span></button>
+          </div>
+          <button type="submit" class="pbar-go" id="shoot"><span id="shoot-label">Generate</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button>
+          <div class="pop" id="pop" role="dialog" aria-label="Options" hidden></div>
+        </form>
+      </div>
+      <details class="prompt-peek" id="prompt-peek">
+        <summary>Prompt sent to the model</summary>
+        <textarea id="compiled" rows="3" spellcheck="false"></textarea>
+        <p class="muted">Edit freely; Generate uses this text. Change any rig setting to rebuild it.</p>
+      </details>
+    </section>
+
+    <section class="wrap results" id="results-wrap" hidden>
+      <div class="row-head"><h2 class="display">Your shots</h2><span class="muted" id="results-note">Saved in this browser only.</span></div>
+      <div class="results-grid" id="results"></div>
+    </section>
+
+    <section class="wrap feats">
+      <article class="feat">
+        <div class="media"><img loading="lazy" src="/media/art/cinema.jpg" alt="Cinematographer adjusting a cinema camera on a rainy night street"></div>
+        <h3>A real camera, not a prompt hack</h3>
+        <p>Body, lens, focal length and aperture compile into a precise prompt you can read and edit, then shape the look again in post.</p>
+      </article>
+      <article class="feat" id="takes">
+        <div class="media takes-demo"><img loading="lazy" src="/media/art/neon.jpg" alt="Woman in a red raincoat under neon"><img loading="lazy" src="/media/art/samurai.jpg" alt=""><img loading="lazy" src="/media/art/diner.jpg" alt=""><img loading="lazy" src="/media/art/train.jpg" alt=""></div>
+        <h3>Four takes, one hero</h3>
+        <p>Ask for up to four variations of the same shot. The first appears right away while the rest keep rendering.</p>
+      </article>
+      <article class="feat">
+        <div class="media"><video muted loop playsinline preload="none" poster="/media/art/rider.jpg" data-src="/media/clips/hero-rider.mp4"></video></div>
+        <h3>From still to shot in one click</h3>
+        <p>Send any frame to Video and fly a dolly zoom, orbit or crane through it, on your own device.</p>
+      </article>
+      <article class="feat">
+        <div class="media"><img loading="lazy" src="/media/art/astronaut.jpg" alt="Astronaut in a golden wheat field"></div>
+        <h3>Open weights, $0</h3>
+        <p>FLUX.1 schnell runs on Pollinations, Cloudflare's free tier or your own ComfyUI. Nothing asks for a card.</p>
+      </article>
+    </section>
+
+    <section class="wrap inspo">
+      <div class="row-head"><h2 class="display">Start from a look</h2><span class="muted">Click one to load its prompt and rig.</span></div>
+      <div class="inspo-grid" id="inspo"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>© 2026 Massless · MIT licensed · Built on open weights</span>
+    <nav aria-label="Footer"><a href="#" data-dialog="ledger">The $0 ledger</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a></nav>
+  </footer>
+
+  <dialog class="sheet" id="ledger">
+    <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Every model in Massless is free to use and has open weights.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Job</th><th>Model</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Image</td><td>FLUX.1 [schnell]</td><td>Apache-2.0</td><td>Pollinations, Cloudflare Workers AI free tier, or your ComfyUI</td><td>$0</td></tr>
+        <tr><td>Depth for moves</td><td>Depth Anything V2 Small</td><td>Apache-2.0</td><td>Your browser</td><td>$0</td></tr>
+        <tr><td>Voiceover</td><td>Kokoro-82M</td><td>Apache-2.0</td><td>Your browser</td><td>$0</td></tr>
+      </tbody>
+    </table></div>
+  </dialog>
+
+  <script type="module" src="/js/pages/image.js"></script>
+</body>
+</html>

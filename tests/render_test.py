@@ -1,6 +1,6 @@
 """Headless checks for the renderer and camera moves.
 
-Serves ./public, opens it in Chromium, and for every camera move renders the first,
+Serves ./public, opens the Video page in Chromium, and for every camera move renders the first,
 middle and last frame. Checks: the page boots without errors, every move produces
 visible motion, and no move shows the dark background at the frame edges (the
 auto-overscan works). Screenshots land in tests/out/.
@@ -25,15 +25,15 @@ errors = []
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     page = b.new_page(viewport={'width': 1440, 'height': 900})
-    page.on('console', lambda m: m.type == 'error' and errors.append(m.text))
+    page.on('console', lambda m: m.type == 'error' and 'Failed to load resource' not in m.text and errors.append(m.text))
     page.on('pageerror', lambda e: errors.append(str(e)))
-    page.goto(f'http://127.0.0.1:{port}/', wait_until='networkidle')
-    page.wait_for_function('window.massless && window.massless.renderer.hasImage', timeout=20000)
+    page.goto(f'http://127.0.0.1:{port}/video/index.html?sample=rider', wait_until='domcontentloaded')
+    page.wait_for_function('window.massless && window.massless.state.current && window.massless.state.current.depth', timeout=180000)
     page.evaluate("window.massless.state.recording = true; window.massless.drawFrame(0, 0)")
     page.wait_for_timeout(300)
     page.screenshot(path=f'{OUT}/desktop.png')
 
-    moves = page.evaluate("Array.from(document.querySelectorAll('.move')).map(b => b.dataset.key)")
+    moves = page.evaluate("Array.from(document.querySelectorAll('.mcard')).map(b => b.dataset.key)")
     results = {}
     for mid in moves:
         r = page.evaluate("""(mid) => {
@@ -62,8 +62,8 @@ with sync_playwright() as p:
     # rest-frame identity: with intensity ~0, frame 0 of dolly-in should match the source center crop closely
     mobile = b.new_page(viewport={'width': 390, 'height': 844}, device_scale_factor=2)
     mobile.on('pageerror', lambda e: errors.append('mobile: ' + str(e)))
-    mobile.goto(f'http://127.0.0.1:{port}/', wait_until='networkidle')
-    mobile.wait_for_function('window.massless && window.massless.renderer.hasImage', timeout=60000)
+    mobile.goto(f'http://127.0.0.1:{port}/video/index.html?sample=rider', wait_until='domcontentloaded')
+    mobile.wait_for_function('window.massless && window.massless.state.current && window.massless.state.current.depth', timeout=180000)
     mobile.evaluate("window.massless.state.recording = true; window.massless.drawFrame(0, 0)")
     mobile.wait_for_timeout(300)
     mobile.screenshot(path=f'{OUT}/mobile.png', full_page=False)

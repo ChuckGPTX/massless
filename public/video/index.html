@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Camera moves and storyboards from any still | Massless</title>
+  <meta name="description" content="Turn one still into a shot: 28 camera moves including dolly zoom, crash zoom and bullet time, rendered on your own device. Cut a storyboard and export MP4. $0.">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta property="og:image" content="/og.jpg">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/studio.css">
+</head>
+<body class="studio-body">
+  <header class="nav">
+    <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/">Explore</a>
+      <a href="/image">Image</a>
+      <a href="/video" aria-current="page">Video</a>
+      <a href="/audio">Audio</a>
+    </nav>
+    <div class="nav-right">
+      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
+      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
+      <a class="btn-accent" href="/image">New image</a>
+    </div>
+  </header>
+
+  <main class="studio">
+    <aside class="side" aria-label="Video controls">
+      <div class="side-tabs" role="tablist">
+        <button role="tab" aria-selected="true" aria-controls="tab-move" id="t-move">Camera move</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-board" id="t-board">Storyboard <span class="count" id="board-count">0</span></button>
+      </div>
+
+      <div class="side-scroll" id="tab-move" role="tabpanel" aria-labelledby="t-move">
+        <button type="button" class="frame-card" id="frame-card" aria-haspopup="dialog">
+          <img id="frame-img" src="/media/art/rider.jpg" alt="">
+          <span class="fc-label display" id="frame-name">Desert rider</span>
+          <span class="fc-sub" id="frame-sub">Start frame</span>
+          <span class="fc-change"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 11.5V13h1.5l7-7L10 4.5l-7 7zM10 4.5l1.5-1.5L13 4.5 11.5 6"/></svg>Change</span>
+        </button>
+
+        <button type="button" class="row-sel" id="move-sel"><small>Camera move</small><strong id="move-name">Dolly in</strong><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button>
+
+        <div class="field">
+          <div class="f-head"><span>Duration</span><output id="o-duration">4.0 s</output></div>
+          <input type="range" id="duration" min="2" max="8" step="0.5" value="4" aria-label="Duration">
+        </div>
+        <div class="field">
+          <div class="f-head"><span>Intensity</span><output id="o-intensity">100%</output></div>
+          <input type="range" id="intensity" min="0.3" max="1.6" step="0.05" value="1" aria-label="Intensity">
+        </div>
+
+        <div class="grid2">
+          <label class="row-sel sel"><small>Camera body</small><select id="look-camera"></select></label>
+          <label class="row-sel sel"><small>Lens</small><select id="look-lens"></select></label>
+          <label class="row-sel sel"><small>Film stock</small><select id="look-stock"></select></label>
+          <label class="row-sel sel"><small>Aperture</small><select id="look-aperture"></select></label>
+          <label class="row-sel sel"><small>Quality</small><select id="out-size"><option value="1280">720p</option><option value="1920">1080p</option></select></label>
+          <label class="row-sel sel"><small>Frame rate</small><select id="out-fps"><option value="24">24 fps</option><option value="30">30 fps</option></select></label>
+        </div>
+
+        <details class="adv">
+          <summary>Finish <span class="muted">grain, halation, grade</span></summary>
+          <div id="finish-sliders"></div>
+          <button type="button" class="btn-ghost small" id="finish-reset">Reset to the look</button>
+        </details>
+      </div>
+
+      <div class="side-scroll" id="tab-board" role="tabpanel" aria-labelledby="t-board" hidden>
+        <p class="side-note">Shots play in order and export as one MP4. Pick a move, then press <strong>Add to storyboard</strong>.</p>
+        <ol class="board-list" id="board-list"></ol>
+        <p class="side-note muted" id="board-empty">No shots yet.</p>
+        <div class="board-total" id="board-total"></div>
+      </div>
+
+      <div class="side-foot">
+        <div class="foot-move" id="foot-move">
+          <button type="button" class="btn-ghost wide" id="board-add"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Add to storyboard</button>
+          <button type="button" class="go" id="record"><span id="record-label">Render clip</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button>
+        </div>
+        <div class="foot-board" id="foot-board" hidden>
+          <button type="button" class="btn-ghost wide" id="board-play" disabled>Play storyboard</button>
+          <button type="button" class="go" id="board-export" disabled><span id="export-label">Export film</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="Preview and move library">
+      <div class="stage-top">
+        <div class="pills" role="tablist" aria-label="Stage sections">
+          <a class="pill on" href="#preview"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z"/></svg>Preview</a>
+          <a class="pill" href="#library"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Move library</a>
+          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
+        </div>
+        <span class="src" id="src-label">Sample · depth precomputed</span>
+      </div>
+
+      <div class="stage-head" id="preview">
+        <div>
+          <h1 class="display">Turn one still<br>into a shot</h1>
+          <p>Your device reads the depth, turns the frame into 3D and flies a real camera through it. Tap the picture to set focus.</p>
+        </div>
+        <div class="stage-actions">
+          <button type="button" class="btn-ghost" id="play">Pause</button>
+          <button type="button" class="btn-ghost" id="still">Save frame</button>
+        </div>
+      </div>
+
+      <div class="viewfinder" id="viewfinder">
+        <canvas id="view" aria-label="Camera preview"></canvas>
+        <div class="vf-lines" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="vf-hud" aria-live="polite"><span class="hud-move" id="hud-move">Dolly in</span><span id="hud-lens">50mm · f/1.4</span></div>
+        <div class="tally" id="tally" hidden><span class="dot"></span><span id="timecode">00:00:00</span></div>
+        <div class="vf-status" id="vf-status" hidden><div class="meter"><div class="meter-fill" id="meter-fill"></div></div><p id="vf-status-text"></p></div>
+        <div class="drop-hint" id="drop-hint" hidden>Drop the still to load it</div>
+      </div>
+
+      <div class="clips" id="clips-wrap" hidden>
+        <div class="lib-head"><h2 class="display">Your clips</h2></div>
+        <div class="clips-row" id="clips"></div>
+      </div>
+
+      <div class="lib-head" id="library">
+        <h2 class="display">Move library</h2>
+        <div class="groups" id="groups" role="tablist" aria-label="Move categories"></div>
+      </div>
+      <div class="lib" id="lib" role="radiogroup" aria-label="Camera move"></div>
+    </section>
+  </main>
+
+  <dialog class="sheet picker" id="picker">
+    <form method="dialog" class="sheet-head"><h2>Choose a start frame</h2><button class="x" aria-label="Close">×</button></form>
+    <div class="picker-actions">
+      <label class="btn-accent" for="upload">Upload a still</label>
+      <input type="file" id="upload" accept="image/*" hidden>
+      <a class="btn-ghost" href="/image">Generate a new image</a>
+    </div>
+    <h3 id="mine-head" hidden>Your shots</h3>
+    <div class="pick-grid" id="pick-mine"></div>
+    <h3>Samples</h3>
+    <div class="pick-grid" id="pick-samples"></div>
+  </dialog>
+
+  <dialog class="sheet" id="how">
+    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Depth Anything V2 estimates depth on your device. Massless turns the still into a displaced mesh, cuts it at depth cliffs, fills a background layer behind foreground objects, and flies a virtual camera through it. Lens, film and grade are applied in a finishing pass, and WebCodecs encodes H.264 MP4 frame by frame.</p>
+    <p>Limits: people in the frame can't act, and big moves stretch the background behind foreground objects. Keep intensity moderate for clean results.</p>
+  </dialog>
+
+  <dialog class="sheet" id="ledger">
+    <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Depth: Depth Anything V2 Small (Apache-2.0), in your browser. Camera, lens and film: Massless engine (MIT), in your browser. Encoding: your browser's H.264 encoder. Cost: $0.</p>
+  </dialog>
+
+  <script type="module" src="/js/pages/video.js"></script>
+</body>
+</html>

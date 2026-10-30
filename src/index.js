@@ -95,6 +95,11 @@ const TYPES = {
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
   webp: 'image/webp',
+  gif: 'image/gif',
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+  wav: 'audio/wav',
+  mp3: 'audio/mpeg',
   woff2: 'font/woff2',
   txt: 'text/plain; charset=utf-8',
   ico: 'image/x-icon',
@@ -143,6 +148,38 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
+const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html' };
+const MEDIA = /\.(mp4|webm|wav|mp3)$/;
+
+async function page(request, ref, file, ctx) {
+  const res = await fetchFile(ref, file, ctx);
+  if (!res) return notFound();
+  let html = await res.text();
+  if (SHA.test(ref)) html = html.replace(/(href|src)="\/(css|js)\//g, `$1="/v/${ref}/$2/`);
+  const headers = securityHeaders(new Headers({ 'content-type': TYPES.html, 'cache-control': 'public, max-age=0, must-revalidate' }));
+  return new Response(request.method === 'HEAD' ? null : html, { headers });
+}
+
+// Video and audio need byte ranges: Safari will not play an <video> whose server ignores Range.
+async function ranged(request, res, cacheControl) {
+  const buf = await res.arrayBuffer();
+  const size = buf.byteLength;
+  const headers = securityHeaders(new Headers({ 'content-type': res.headers.get('content-type'), 'accept-ranges': 'bytes', 'cache-control': cacheControl }));
+  const m = (request.headers.get('range') || '').match(/^bytes=(\d*)-(\d*)$/);
+  if (!m || (m[1] === '' && m[2] === '')) {
+    headers.set('content-length', String(size));
+    return new Response(request.method === 'HEAD' ? null : buf, { status: 200, headers });
+  }
+  let start = m[1] === '' ? Math.max(0, size - Number(m[2])) : Number(m[1]);
+  let end = m[1] === '' || m[2] === '' ? size - 1 : Math.min(size - 1, Number(m[2]));
+  if (start >= size || start > end) {
+    headers.set('content-range', `bytes */${size}`);
+    return new Response(null, { status: 416, headers });
+  }
+  headers.set('content-range', `bytes ${start}-${end}/${size}`);
+  headers.set('content-length', String(end - start + 1));
+  return new Response(request.method === 'HEAD' ? null : buf.slice(start, end + 1), { status: 206, headers });
+}
 
 async function fromOrigin(request, env, ctx) {
   const url = new URL(request.url);
@@ -154,20 +191,16 @@ async function fromOrigin(request, env, ctx) {
   if (v) return (await fetchFile(v[1], v[2], ctx)) || notFound();
 
   const ref = await resolveRef(env, ctx);
-  if (path === '/' || path === '/index.html') {
-    const res = await fetchFile(ref, '/index.html', ctx);
-    if (!res) return notFound();
-    let html = await res.text();
-    if (SHA.test(ref)) html = html.replace(/(href|src)="\/(css|js)\//g, `$1="/v/${ref}/$2/`);
-    const headers = securityHeaders(new Headers({ 'content-type': TYPES.html, 'cache-control': 'public, max-age=0, must-revalidate' }));
-    return new Response(request.method === 'HEAD' ? null : html, { headers });
-  }
+  const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
+  if (PAGES[route] || /^\/(image|video|audio)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
-  // unversioned paths (fonts, images, data) get a short cache so they follow the branch
+  // unversioned paths get a short cache so they follow the branch; fonts and media change rarely
+  const cc = path.startsWith('/fonts/') ? res.headers.get('cache-control') : path.startsWith('/media/') ? 'public, max-age=3600' : 'public, max-age=300';
+  if (MEDIA.test(path)) return ranged(request, res, cc);
   const out = new Response(request.method === 'HEAD' ? null : res.body, res);
-  if (!path.startsWith('/fonts/')) out.headers.set('cache-control', 'public, max-age=300');
+  out.headers.set('cache-control', cc);
   return out;
 }
 

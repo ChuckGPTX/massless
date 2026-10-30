@@ -3,219 +3,180 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Massless: a free cinema camera for AI shots</title>
-  <meta name="description" content="Design a shot with real camera, lens and film choices, generate it with free open-weight FLUX, then fly a camera through it: dolly zoom, crash zoom, arcs, rack focus. Every model is free and open.">
-  <meta name="theme-color" content="#1c2129">
-  <meta property="og:title" content="Massless">
-  <meta property="og:description" content="A free cinema camera for AI shots. Open models only. $0.">
+  <title>Massless: free AI cinema studio</title>
+  <meta name="description" content="Shoot AI frames with a real camera rig, fly 28 camera moves through them, cut a storyboard and add a voiceover. Every model is free and open-weight. No account, no credits, $0.">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta property="og:title" content="Massless: free AI cinema studio">
+  <meta property="og:description" content="Images, camera moves, storyboards and voiceover on open-weight models. $0, forever.">
   <meta property="og:image" content="/og.jpg">
-  <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="preload" href="/fonts/big-shoulders-display-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/instrument-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/css/app.css">
+  <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/instrument-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/explore.css">
 </head>
 <body>
-  <header class="topbar">
-    <a class="wordmark" href="/" aria-label="Massless home">
-      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="3.2" fill="currentColor"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5" stroke="currentColor" stroke-width="2"/></svg>
-      <span>Massless</span>
-    </a>
-    <p class="tagline">A free cinema camera for AI shots</p>
-    <nav class="topnav">
-      <button type="button" class="linkish" data-dialog="ledger-dialog"><span class="cost">$0.00</span> spent</button>
-      <button type="button" class="linkish" data-dialog="help-dialog">How it works</button>
-      <a class="linkish" href="https://github.com/ChuckGPTX/massless" rel="noopener">Source</a>
+  <header class="nav">
+    <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/" aria-current="page">Explore</a>
+      <a href="/image">Image</a>
+      <a href="/video">Video</a>
+      <a href="/audio">Audio</a>
     </nav>
+    <div class="nav-right">
+      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
+      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
+      <a class="btn-accent" href="/image">Start creating</a>
+    </div>
   </header>
 
-  <main class="studio">
-    <section class="monitor" aria-label="Viewfinder">
-      <div class="viewfinder" id="viewfinder">
-        <canvas id="view" aria-label="Camera preview"></canvas>
-        <div class="frame-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
-        <div class="tally" id="tally" hidden><span class="dot"></span><span id="timecode">00:00:00</span></div>
-        <div class="vf-status" id="vf-status" hidden>
-          <div class="meter"><div class="meter-fill" id="meter-fill"></div></div>
-          <p id="vf-status-text"></p>
-        </div>
-        <div class="drop-hint" id="drop-hint" hidden>Drop the still to load it</div>
-      </div>
-
-      <div class="hud" aria-live="polite">
-        <div class="hud-cell"><span class="hud-num" id="hud-focal">50</span><span class="hud-unit">mm</span></div>
-        <div class="hud-cell"><span class="hud-unit">f/</span><span class="hud-num" id="hud-f">1.4</span></div>
-        <div class="hud-cell"><span class="hud-num" id="hud-aspect">2.39</span><span class="hud-unit" id="hud-aspect-unit">:1</span></div>
-        <div class="hud-cell hud-wide"><span class="hud-small" id="hud-move">Dolly in</span><span class="hud-small muted" id="hud-source">Calibration scene</span></div>
-      </div>
-
-      <div class="lens-ring" id="lens-ring" role="radiogroup" aria-label="Focal length"></div>
-
-      <form class="composer" id="slate">
-        <label class="sr-only" for="subject">What's in the shot</label>
-        <textarea id="subject" rows="2" placeholder="Who or what is in the shot, and where. Example: a bike courier pausing under a flickering awning, rain bouncing off the street"></textarea>
-        <div class="composer-bar">
-          <div class="chips-row">
-            <button type="button" class="chip" data-pop="camera" aria-haspopup="dialog"><span class="chip-k">Camera</span><span class="chip-v" id="chip-camera"></span></button>
-            <button type="button" class="chip" data-pop="lens" aria-haspopup="dialog"><span class="chip-k">Lens</span><span class="chip-v" id="chip-lens"></span></button>
-            <button type="button" class="chip" data-pop="aperture" aria-haspopup="dialog"><span class="chip-k">Aperture</span><span class="chip-v" id="chip-aperture"></span></button>
-            <button type="button" class="chip" data-pop="aspect" aria-haspopup="dialog"><span class="chip-k">Frame</span><span class="chip-v" id="chip-aspect"></span></button>
-            <div class="takes-pick" role="radiogroup" aria-label="Takes per shot">
-              <span class="chip-k">Takes</span>
-              <button type="button" role="radio" aria-checked="true" data-takes="1">1</button>
-              <button type="button" role="radio" aria-checked="false" data-takes="2">2</button>
-              <button type="button" role="radio" aria-checked="false" data-takes="3">3</button>
-              <button type="button" role="radio" aria-checked="false" data-takes="4">4</button>
+  <main>
+    <section class="launches" aria-label="What's new">
+      <div class="rail" id="rail">
+        <a class="launch" href="/image">
+          <div class="poster p-studio">
+            <video muted loop playsinline preload="none" poster="/media/art/cinema.jpg" data-src="/media/clips/hero-cinema.mp4"></video>
+            <div class="poster-type" aria-hidden="true">
+              <span class="mini-mark">◉ Massless</span>
+              <b class="big">Cinema</b>
+              <b class="outline">Studio</b>
             </div>
           </div>
-          <div class="composer-actions">
-            <label class="btn ghost small" for="upload"><span class="long">Use my own still</span><span class="short">Upload</span></label>
-            <input type="file" id="upload" accept="image/*" hidden>
-            <button type="button" class="btn ghost small" id="surprise"><span class="long">Load a preset</span><span class="short">Preset</span></button>
-            <button type="submit" class="btn primary" id="shoot">Shoot</button>
+          <h3>Massless Cinema Studio</h3>
+          <p>Build the camera rig, then shoot the frame. Free.</p>
+        </a>
+        <a class="launch" href="/video">
+          <div class="poster p-moves">
+            <video muted loop playsinline preload="none" poster="/media/art/rider.jpg" data-src="/media/clips/hero-rider.mp4"></video>
+            <div class="poster-type" aria-hidden="true">
+              <b class="streak" data-text="Dolly">Dolly</b>
+              <b class="streak" data-text="Zoom">Zoom</b>
+            </div>
           </div>
-        </div>
-        <div class="pop" id="pop" role="dialog" aria-label="Options" hidden></div>
-      </form>
-
-      <div class="takes-strip" id="takes-strip" hidden>
-        <p class="fine" id="takes-label">Takes</p>
-        <ul id="takes-list"></ul>
-      </div>
-
-      <details class="compiled" id="compiled">
-        <summary>Prompt sent to the model</summary>
-        <textarea id="compiled-text" rows="4" spellcheck="false"></textarea>
-        <p class="fine">Edit freely; Shoot uses this text. Change any rig setting to rebuild it.</p>
-      </details>
-
-      <section class="board" aria-label="Storyboard">
-        <div class="board-head">
-          <h2>Storyboard</h2>
-          <span class="fine" id="board-total"></span>
-          <div class="board-actions">
-            <button type="button" class="btn small" id="board-play" disabled>Play</button>
-            <button type="button" class="btn small record" id="board-export" disabled><span class="rec-dot" aria-hidden="true"></span>Export film</button>
+          <h3>28 camera moves</h3>
+          <p>Dolly zoom, crash zoom, bullet time. On any still.</p>
+        </a>
+        <a class="launch" href="/video#storyboard">
+          <div class="poster p-board">
+            <video muted loop playsinline preload="none" poster="/media/art/lighthouse.jpg" data-src="/media/clips/hero-lighthouse.mp4"></video>
+            <div class="poster-type" aria-hidden="true">
+              <span class="slate tl">SC 01</span><span class="slate tr">TK 03</span>
+              <b class="big">Story</b><b class="big">board</b>
+              <span class="slate bl">00:00:04:12</span><span class="slate br"><i></i>REC</span>
+            </div>
           </div>
-        </div>
-        <ol class="board-list" id="board-list"></ol>
-        <p class="fine" id="board-empty">Pick a move, then press <strong>Add to storyboard</strong>. Shots play in order and export as one MP4.</p>
-      </section>
-
-    </section>
-
-    <div class="tabs" role="tablist" aria-label="Panels">
-      <button role="tab" aria-selected="true" aria-controls="panel-rig" id="tab-rig">Scene</button>
-      <button role="tab" aria-selected="false" aria-controls="panel-move" id="tab-move">Move</button>
-      <button role="tab" aria-selected="false" aria-controls="panel-finish" id="tab-finish">Finish</button>
-    </div>
-
-    <section class="panel rig" id="panel-rig" role="tabpanel" aria-labelledby="tab-rig">
-      <h2>Scene</h2>
-      <fieldset class="group chips" id="g-genre"><legend>Genre</legend></fieldset>
-      <fieldset class="group chips" id="g-shot"><legend>Shot size</legend></fieldset>
-      <fieldset class="group chips" id="g-angle"><legend>Angle</legend></fieldset>
-      <fieldset class="group chips" id="g-light"><legend>Light</legend></fieldset>
-      <fieldset class="group chips" id="g-palette"><legend>Color palette</legend></fieldset>
-      <fieldset class="group chips" id="g-stock"><legend>Film stock and grade</legend></fieldset>
-      <fieldset class="group" id="g-engine"><legend>Engine</legend>
-        <label class="select">
-          <select id="engine">
-            <option value="auto">Free cloud: Pollinations, then Cloudflare</option>
-            <option value="pollinations">Pollinations only</option>
-            <option value="workers">Cloudflare Workers AI only</option>
-            <option value="comfy">My own ComfyUI (local GPU)</option>
-          </select>
-        </label>
-        <div class="comfy-settings" id="comfy-settings" hidden>
-          <label>ComfyUI address <input id="comfy-url" value="http://127.0.0.1:8188" inputmode="url"></label>
-          <label>Checkpoint <input id="comfy-ckpt" value="flux1-schnell-fp8.safetensors"></label>
-          <p class="fine">Start ComfyUI with <code>--enable-cors-header</code>. Allow local network access if your browser asks. <a href="/comfy/massless_shot_flux_schnell.api.json" download>Download the workflow</a>.</p>
-        </div>
-        <p class="fine">All engines run FLUX.1 schnell, an open-weight model under Apache-2.0.</p>
-      </fieldset>
-    </section>
-
-    <section class="panel moves" id="panel-move" role="tabpanel" aria-labelledby="tab-move">
-      <h2>Camera move</h2>
-      <div class="move-groups" id="move-groups" role="tablist" aria-label="Move categories"></div>
-      <div class="move-grid" id="move-grid" role="radiogroup" aria-label="Camera move"></div>
-      <div class="sliders">
-        <label class="slider"><span>Duration <output id="o-duration">4.0 s</output></span><input type="range" id="duration" min="2" max="8" step="0.5" value="4"></label>
-        <label class="slider"><span>Intensity <output id="o-intensity">100%</output></span><input type="range" id="intensity" min="0.3" max="1.6" step="0.05" value="1"></label>
+          <h3>Storyboard</h3>
+          <p>Cut your shots into one film and export an MP4.</p>
+        </a>
+        <a class="launch" href="/image#takes">
+          <div class="poster p-takes">
+            <video muted loop playsinline preload="none" poster="/media/art/neon.jpg" data-src="/media/clips/hero-neon.mp4"></video>
+            <div class="poster-type" aria-hidden="true">
+              <b class="neon">4 takes</b>
+              <span class="neon-sub">One prompt</span>
+            </div>
+          </div>
+          <h3>Takes</h3>
+          <p>Shoot up to four variations and pick the hero frame.</p>
+        </a>
+        <a class="launch" href="/audio">
+          <div class="poster p-free">
+            <video muted loop playsinline preload="none" poster="/media/art/astronaut.jpg" data-src="/media/clips/hero-astronaut.mp4"></video>
+            <div class="poster-type" aria-hidden="true">
+              <b class="price">$0</b>
+              <span class="price-sub">Open weights. Forever.</span>
+            </div>
+          </div>
+          <h3>Open weights only</h3>
+          <p>FLUX.1 schnell, Depth Anything V2 and Kokoro. No paid models.</p>
+        </a>
       </div>
-      <div class="row">
-        <label class="select small">Size
-          <select id="out-size">
-            <option value="1280">720p</option>
-            <option value="1920">1080p</option>
-          </select>
-        </label>
-        <label class="select small">Frame rate
-          <select id="out-fps">
-            <option value="24">24 fps</option>
-            <option value="30">30 fps</option>
-          </select>
-        </label>
-      </div>
-      <div class="actions">
-        <button type="button" class="btn primary-outline" id="board-add">Add to storyboard</button>
-        <button type="button" class="btn record" id="record"><span class="rec-dot" aria-hidden="true"></span>Record clip</button>
-        <div class="row">
-          <button type="button" class="btn ghost" id="play">Pause preview</button>
-          <button type="button" class="btn ghost" id="still">Save frame</button>
+      <button type="button" class="rail-btn prev" id="rail-prev" aria-label="Scroll back" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+      <button type="button" class="rail-btn next" id="rail-next" aria-label="Scroll forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+    </section>
+
+    <section class="duo wrap">
+      <a class="promo" href="/image">
+        <video muted loop playsinline preload="none" poster="/media/art/canyon.jpg" data-src="/media/clips/promo-canyon.mp4"></video>
+        <div class="promo-body">
+          <h2 class="display"><span>Make a film today.</span> <em>Pay nothing.</em></h2>
+          <ul>
+            <li>Unlimited FLUX.1 schnell frames, no account</li>
+            <li>28 camera moves rendered on your own device</li>
+          </ul>
+          <span class="btn-accent big">Start creating free</span>
         </div>
+      </a>
+      <div class="tools">
+        <a class="tool" href="/image"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="M15.5 10l6-3.5v11l-6-3.5"/><circle cx="9" cy="12" r="3"/></svg><strong>Cinema Studio<span class="badge-new">NEW</span></strong><span>Camera, lens and film stock, then shoot</span></a>
+        <a class="tool" href="/video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M3 12l4-4M3 12l4 4M21 12l-4-4M21 12l-4 4"/><circle cx="12" cy="12" r="2.2"/></svg><strong>Camera Moves</strong><span>28 moves on any still image</span></a>
+        <a class="tool" href="/video#storyboard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="5.5" height="14" rx="1"/><rect x="9.25" y="5" width="5.5" height="14" rx="1"/><rect x="16" y="5" width="5.5" height="14" rx="1"/></svg><strong>Storyboard<span class="badge-new">NEW</span></strong><span>Cut shots into one MP4 film</span></a>
+        <a class="tool" href="/audio"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5"/><path d="M5 11a7 7 0 0014 0M12 18v3.5"/></svg><strong>Voiceover<span class="badge-new">NEW</span></strong><span>Open Kokoro voices, in your browser</span></a>
+        <a class="tool" href="/audio#beds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h2l2-6 3 12 3-9 2 5 2-2h4"/></svg><strong>Sound Beds</strong><span>Rain, wind, ocean and city ambience</span></a>
+        <a class="tool" href="https://github.com/ChuckGPTX/massless#open-weights-only-on-your-gpu-comfyui" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M7 8h3M7 11h6"/></svg><strong>ComfyUI Mode</strong><span>Run every shot on your own GPU</span></a>
       </div>
-      <p class="fine">Tap the picture to set the focus point. Depth comes from Depth Anything V2, running on your own device.</p>
     </section>
 
-    <section class="panel finish" id="panel-finish" role="tabpanel" aria-labelledby="tab-finish">
-      <h2>Finish</h2>
-      <p class="fine">Your camera, lens and stock choices set these. Adjust to taste.</p>
-      <div class="sliders" id="finish-sliders"></div>
-      <button type="button" class="btn ghost" id="finish-reset">Back to the rig's look</button>
+    <section class="wrap">
+      <a class="showcase" href="/video#library">
+        <div class="wall" aria-hidden="true">
+          <video muted loop playsinline preload="none" class="t916" poster="/media/art/samurai.jpg" data-src="/media/clips/wall-samurai.mp4"></video>
+          <video muted loop playsinline preload="none" poster="/media/art/bmx.jpg" data-src="/media/clips/wall-bmx.mp4"></video>
+          <video muted loop playsinline preload="none" class="t916" poster="/media/art/fisherman.jpg" data-src="/media/clips/wall-fisherman.mp4"></video>
+          <video muted loop playsinline preload="none" poster="/media/art/dancer.jpg" data-src="/media/clips/wall-dancer.mp4"></video>
+          <span class="wall-gap"></span>
+          <video muted loop playsinline preload="none" poster="/media/art/train.jpg" data-src="/media/clips/wall-train.mp4"></video>
+          <video muted loop playsinline preload="none" class="t916" poster="/media/art/jellyfish.jpg" data-src="/media/clips/wall-jellyfish.mp4"></video>
+          <video muted loop playsinline preload="none" poster="/media/art/diner.jpg" data-src="/media/clips/wall-diner.mp4"></video>
+          <video muted loop playsinline preload="none" class="t916" poster="/media/art/summit.jpg" data-src="/media/clips/wall-summit.mp4"></video>
+        </div>
+        <div class="showcase-mid">
+          <span class="mini-mark">◉ Massless</span>
+          <h2 class="display"><b>Moves</b><span>Library</span></h2>
+          <span class="btn-accent big">28 moves · $0</span>
+        </div>
+      </a>
     </section>
 
-    <section class="reel" aria-label="Reel">
-      <h2>Reel</h2>
-      <p class="fine" id="reel-empty">Shots and clips you make appear here. They stay in this browser only.</p>
-      <ul class="reel-list" id="reel-list"></ul>
-      </section>
+    <section class="wrap trending">
+      <div class="row-head">
+        <h2 class="display">Trending moves</h2>
+        <a class="btn-ghost" href="/video#library">See all 28</a>
+      </div>
+      <div class="move-row" id="move-row"></div>
+    </section>
+
+    <section class="wrap made">
+      <div class="row-head">
+        <h2 class="display">Made in Massless</h2>
+        <p class="muted">Every motion here was rendered by Massless's own camera from a single still.</p>
+      </div>
+      <div class="masonry" id="masonry"></div>
+    </section>
   </main>
 
-  <dialog id="ledger-dialog" class="sheet">
-    <form method="dialog" class="sheet-head"><h2>The ledger</h2><button class="close" aria-label="Close">×</button></form>
-    <p>Every model here is free to use and has open weights. Nothing on this page asks for a card, a key or credits.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Job</th><th>Model</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
-        <tbody>
-          <tr><td>Hero frame</td><td>FLUX.1 [schnell], Black Forest Labs</td><td>Apache-2.0</td><td>Pollinations, Cloudflare Workers AI free tier, or your ComfyUI</td><td>$0</td></tr>
-          <tr><td>Depth for camera moves</td><td>Depth Anything V2 Small</td><td>Apache-2.0</td><td>Your browser (WebGPU or WebAssembly)</td><td>$0</td></tr>
-          <tr><td>Camera, lens and film</td><td>Massless renderer</td><td>MIT</td><td>Your browser (WebGL2)</td><td>$0</td></tr>
-          <tr><td>Video encoding</td><td>Your browser's H.264 encoder</td><td>Built in</td><td>Your device</td><td>$0</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <h3>What it replaces</h3>
-    <p>Paywalled studios charge credits per shot for this workflow and route it through closed video models. Massless rebuilds the two core features, a camera-and-lens shot designer and one-click camera moves, from their public behavior only. No proprietary code, prompts or assets were used.</p>
-    <p class="fine">Inspired by the Open Source Higgsfield challenge. Source and the ComfyUI workflow are on GitHub under the MIT license.</p>
+  <footer class="foot">
+    <span>© 2026 Massless · MIT licensed · Built on open weights</span>
+    <nav aria-label="Footer"><a href="#" data-dialog="ledger">The $0 ledger</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a><a href="https://github.com/ChuckGPTX/massless/blob/main/SPEC.md" rel="noopener">How it was built</a></nav>
+  </footer>
+
+  <dialog class="sheet" id="ledger">
+    <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Every model in Massless is free to use and has open weights. Nothing asks for a card, a key or credits.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Job</th><th>Model</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Image</td><td>FLUX.1 [schnell]</td><td>Apache-2.0</td><td>Pollinations, Cloudflare Workers AI free tier, or your ComfyUI</td><td>$0</td></tr>
+        <tr><td>Depth for moves</td><td>Depth Anything V2 Small</td><td>Apache-2.0</td><td>Your browser</td><td>$0</td></tr>
+        <tr><td>Voiceover</td><td>Kokoro-82M</td><td>Apache-2.0</td><td>Your browser</td><td>$0</td></tr>
+        <tr><td>Camera, lens, film, sound beds</td><td>Massless engine</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
+      </tbody>
+    </table></div>
+    <p>The launch key art on this page was made separately; every motion on it was rendered by Massless's own camera from those stills.</p>
   </dialog>
 
-  <dialog id="help-dialog" class="sheet">
-    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="close" aria-label="Close">×</button></form>
-    <ol class="steps">
-      <li><strong>Build the rig.</strong> Pick a camera body, lens, focal length and aperture in the composer, and set the genre, light, palette and film stock for the scene. These become a precise prompt you can read and edit.</li>
-      <li><strong>Shoot.</strong> A free open-weight model renders the hero frame. Ask for up to four takes and pick the best one, or bring your own still.</li>
-      <li><strong>Move the camera.</strong> Your device estimates depth, turns the still into 3D, and flies a virtual camera through it. 28 moves: dolly zooms, crash zooms, orbits, cranes, pans, FPV, snorricam and more.</li>
-      <li><strong>Cut a scene.</strong> Add shots to the storyboard, reorder them, play the sequence, and export it as one MP4. Single clips and frames export too.</li>
-    </ol>
-    <p class="fine">Limits: people in the shot can't act, and big moves stretch the edges behind foreground objects. Keep intensity moderate for clean results.</p>
-  </dialog>
-
-  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-
-  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/pages/explore.js"></script>
 </body>
 </html>
