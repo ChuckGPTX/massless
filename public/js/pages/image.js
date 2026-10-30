@@ -195,31 +195,48 @@ function shotLabel(item) {
 
 function shotCard(item, fresh = false) {
   const url = URL.createObjectURL(item.thumb || item.blob);
-  const label = shotLabel(item);
+  const label = shotLabel(item) + (item.unsaved ? ' · Not saved — download before leaving' : '');
   const card = el('div', { class: `shot${fresh ? ' fresh' : ''}`, 'data-id': item.id, 'data-model': item.model || item.engine || '', 'data-seed': item.seed ?? '' },
     el('img', { src: url, alt: item.prompt ? item.prompt.slice(0, 120) : 'Shot' }),
     el('span', { class: 'tag', title: item.seed != null ? `${label}, seed ${item.seed}` : label }, label),
     el('div', { class: 'acts' },
-      el('a', { class: 'go', href: `/video?shot=${encodeURIComponent(item.id)}` }, 'Animate'),
-      el('a', { href: `/3d?shot=${encodeURIComponent(item.id)}` }, '3D'),
+      item.unsaved ? null : el('a', { class: 'go', href: `/video?shot=${encodeURIComponent(item.id)}` }, 'Animate'),
+      item.unsaved ? null : el('a', { href: `/3d?shot=${encodeURIComponent(item.id)}` }, '3D'),
       el('button', { type: 'button', onclick: () => download(item.blob, `${item.id}.jpg`) }, 'Download'),
       item.prompt ? el('button', { type: 'button', onclick: () => { $('#compiled').value = item.prompt; state.edited = true; $('#prompt-peek').open = true; toast('Prompt loaded. Press Generate to shoot it again.'); } }, 'Reuse prompt') : null,
-      el('button', { type: 'button', 'aria-label': 'Delete shot', onclick: async () => { await store.del(item.id).catch(() => {}); card.remove(); if (!$('#results').children.length) $('#results-wrap').hidden = true; } }, '×')));
+      el('button', { type: 'button', 'aria-label': 'Delete shot', onclick: async () => {
+        try { if (!item.unsaved) await store.del(item.id); }
+        catch { toast('Could not delete this shot. Try again.', 'error'); return; }
+        URL.revokeObjectURL(url);
+        card.remove();
+        if (!$('#results').children.length) loadOlderShots();
+        if (!$('#results').children.length) $('#results-wrap').hidden = true;
+      } }, '×')));
   return card;
 }
 
 async function addShot(image, meta) {
   const id = `shot-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
   const item = { id, kind: 'shot', created: Date.now(), ...meta, blob: await toJpeg(image), thumb: await thumbOf(image) };
-  await store.put(item).catch(() => {});
+  try { await store.put(item); } catch { item.unsaved = true; }
   return item;
 }
 
+let olderShots = [];
+function loadOlderShots() {
+  for (const item of olderShots.splice(0, 24)) $('#results').append(shotCard(item));
+  $('#more-shots').hidden = olderShots.length === 0;
+}
+
 async function restore() {
-  const items = (await store.all().catch(() => [])).filter((x) => x.kind === 'shot').sort((a, b) => b.created - a.created);
+  let saved;
+  try { saved = await store.all(); }
+  catch { toast('Could not open your saved shots. Try reloading this page.', 'error'); return; }
+  const items = saved.filter((x) => (x.kind || 'shot') === 'shot').sort((a, b) => b.created - a.created);
   if (!items.length) return;
   $('#results-wrap').hidden = false;
-  for (const it of items.slice(0, 24)) $('#results').append(shotCard(it));
+  olderShots = items;
+  loadOlderShots();
 }
 
 // ---------- shooting ----------
@@ -262,6 +279,7 @@ async function doShoot(e) {
   // Distinct seeds per take: one random base, then fixed prime steps.
   const base = Math.floor(Math.random() * 2 ** 31);
   let done = 0;
+  let unsaved = 0;
   try {
     for (let i = 0; i < state.takes; i++) {
       $('#shoot-label').textContent = state.takes > 1 ? `Take ${i + 1}/${state.takes}` : 'Shooting';
@@ -279,10 +297,12 @@ async function doShoot(e) {
         onWait: (ms) => ms > 0 && countdown(pendings[i], ms, `${state.takes > 1 ? `Take ${i + 1} rendering` : 'Rendering'} · ${name}`),
       });
       const item = await addShot(res.image, { prompt, negative: negative || undefined, engine: res.engine, model: res.model, seed, ckpt: res.engine === 'comfy' ? ckpt : undefined, rig: { ...state.sel } });
+      if (item.unsaved) unsaved++;
       pendings[i].replaceWith(shotCard(item, true));
       done++;
     }
-    toast(state.takes > 1 ? `${done} takes ready. Hover one and press Animate to move the camera.` : 'Shot ready. Hover it and press Animate to move the camera.');
+    if (unsaved) toast('Browser storage could not save every shot. Download the shots marked Not saved before leaving.', 'error');
+    else toast(state.takes > 1 ? `${done} takes ready. Hover one and press Animate to move the camera.` : 'Shot ready. Hover it and press Animate to move the camera.');
   } catch (err) {
     pendings.slice(done).forEach((p) => p.remove());
     toast(err.message || 'The shot failed. Try again.', 'error');
@@ -304,7 +324,7 @@ async function loadUpload(file) {
   const item = await addShot(c, { prompt: '', engine: 'upload' });
   $('#results-wrap').hidden = false;
   $('#results').prepend(shotCard(item, true));
-  toast('Still added. Press Animate on it to move the camera.');
+  toast(item.unsaved ? 'This still could not be saved. Download it before leaving.' : 'Still added. Press Animate on it to move the camera.', item.unsaved ? 'error' : undefined);
 }
 
 // ---------- inspiration ----------
@@ -344,7 +364,8 @@ async function init() {
   updateChips();
   refreshPrompt(true);
   buildInspo();
-  restore();
+  $('#more-shots').addEventListener('click', loadOlderShots);
+  await restore();
   bindDialogs();
   autoplayVideos(document.querySelectorAll('video[data-src]'));
 

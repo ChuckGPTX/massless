@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Massless: free AI cinema studio</title>
-  <meta name="description" content="Shoot AI frames with a real camera rig, fly 28 camera moves through them, cut a storyboard and add a voiceover. Every model is free and open-weight. No account, no credits, $0.">
+  <title>Massless — An open studio for your imagination</title>
+  <meta name="description" content="Create images, camera moves, voiceovers, launch films and 3D with open creative tools. Browser tools are free; hosted AI has daily limits.">
   <meta name="theme-color" content="#0b0b0c">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Massless">
   <meta property="og:url" content="https://massless.chucksi.com/">
-  <meta property="og:title" content="Massless: the AI film studio that costs $0">
-  <meta property="og:description" content="Images, camera moves, voiceover, 3D and launch films on open-weight models. No account, no credits. $0.">
-  <meta property="og:image" content="https://massless.chucksi.com/og.jpg?v=2">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="massless. The AI film studio that costs $0. Open weights only, no credits, no account, runs in your browser.">
+  <meta property="og:title" content="Massless — Imagination, without the weight">
+  <meta property="og:description" content="An open studio for images, films, sound and 3D. Start with an idea. Make it yours.">
+  <meta property="og:image" content="https://massless.chucksi.com/media/art/massless-portal-v1.jpg">
+  <meta property="og:image:width" content="1536">
+  <meta property="og:image:height" content="1024">
+  <meta property="og:image:alt" content="An explorer facing an amber portal. Massless: an open creative studio.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://massless.chucksi.com/og.jpg?v=2">
+  <meta name="twitter:image" content="https://massless.chucksi.com/media/art/massless-portal-v1.jpg">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -33,16 +33,29 @@
       <a href="/image">Image</a>
       <a href="/video">Video</a>
       <a href="/audio">Audio</a>
+      <a href="/3d">3D</a>
       <a href="/office">Office</a>
     </nav>
     <div class="nav-right">
-      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
+      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">OPEN SOURCE</span></button>
       <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
       <a class="btn-accent" href="/image">Start creating</a>
     </div>
   </header>
 
   <main>
+    <section class="studio-hero" aria-labelledby="studio-title">
+      <img class="studio-hero-art" src="/media/art/massless-portal-v1.jpg" width="1536" height="1024" fetchpriority="high" alt="An explorer facing a monumental amber portal across a dark mountain landscape">
+      <div class="studio-hero-copy">
+        <p class="studio-eyebrow"><span></span> MASSLESS / THE OPEN CREATIVE STUDIO</p>
+        <h1 id="studio-title">IMAGINATION.<br>WITHOUT<br><em>THE WEIGHT.</em></h1>
+        <p class="studio-intro">A frame. A film. A world of your own.<br>Create with open tools, from the first idea to the final cut.</p>
+        <div class="studio-actions"><a class="btn-accent" href="/image">Create your first frame <span aria-hidden="true">↗</span></a><a class="btn-ghost" href="#tools">Explore the studio <span aria-hidden="true">↓</span></a></div>
+        <p class="studio-availability">No account needed. Free browser tools. Daily limits on hosted AI.</p>
+      </div>
+      <div class="studio-hero-footer"><span>OPEN TO EVERY IMAGINATION</span><span>ORIGINAL ART / MASSLESS 001</span></div>
+    </section>
+    <div class="studio-disciplines wrap" aria-label="Creative disciplines"><a href="/image">01 / IMAGE</a><a href="/video">02 / MOTION</a><a href="/audio">03 / SOUND</a><a href="/3d">04 / WORLDS</a><a href="/film">05 / LAUNCH FILMS</a></div>
     <section class="launches" aria-label="What's new">
       <div class="rail" id="rail">
         <a class="launch" href="#trailer" data-dialog="trailer" id="trailer-card">
@@ -108,7 +121,7 @@
             <video muted loop playsinline preload="none" poster="/media/art/astronaut.jpg" data-src="/media/clips/hero-astronaut.mp4"></video>
             <div class="poster-type" aria-hidden="true">
               <b class="price">$0</b>
-              <span class="price-sub">Open weights. Forever.</span>
+              <span class="price-sub">Free browser tools.</span>
             </div>
           </div>
           <h3>Open weights only</h3>
@@ -119,16 +132,16 @@
       <button type="button" class="rail-btn next" id="rail-next" aria-label="Scroll forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
     </section>
 
-    <section class="duo wrap">
+    <section class="duo wrap" id="tools" aria-label="Creative tools">
       <a class="promo" href="/image">
-        <video muted loop playsinline preload="none" poster="/media/art/canyon.jpg" data-src="/media/clips/promo-canyon.mp4"></video>
+        <img class="studio-world-art" src="/media/art/massless-world-v1.jpg" width="1536" height="1024" loading="lazy" alt="An illuminated miniature world floating in a dark studio">
         <div class="promo-body">
-          <h2 class="display"><span>Make a film today.</span> <em>Pay nothing.</em></h2>
+          <h2 class="display"><span>A still is only</span> <em>the start.</em></h2>
           <ul>
-            <li>Unlimited FLUX.1 schnell frames, no account</li>
-            <li>28 camera moves rendered on your own device</li>
+            <li>Design the frame. Find your visual language.</li>
+            <li>Add camera motion, sound or a new dimension.</li>
           </ul>
-          <span class="btn-accent big">Start creating free</span>
+          <span class="btn-accent big">Start with an image</span>
         </div>
       </a>
       <div class="tools">
@@ -201,7 +214,7 @@
 
   <dialog class="sheet" id="ledger">
     <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Every model in Massless is free to use and has open weights. Nothing asks for a card, a key or credits.</p>
+    <p>Massless uses open-weight models. Browser tools have no service charge. Hosted AI shares a daily allowance; your own GPU or third-party providers can have compute costs and separate terms.</p>
     <div class="scroll"><table>
       <thead><tr><th>Job</th><th>Model</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
       <tbody>
@@ -214,7 +227,7 @@
         <tr><td>Camera, lens, film, sound beds</td><td>Massless engine</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
       </tbody>
     </table></div>
-    <p>The launch key art on this page was made separately; every motion on it was rendered by Massless's own camera from those stills.</p>
+    <p>The portal and floating-world artwork were generated separately for this site with OpenAI's image tool. They are brand artwork, not examples of Massless model output. The existing camera-move clips were rendered by Massless from launch stills.</p>
   </dialog>
 
   <script type="module" src="/js/pages/explore.js"></script>

@@ -4,22 +4,23 @@
 
 Live: **https://massless.chucksi.com**
 
-The Higgs field is what gives particles mass. Massless is the version with none: no subscription, no credits, no paid models. Every model it uses has open weights and costs $0 to run.
+The Higgs field is what gives particles mass. Massless aims to remove the weight from creative tools: no account required, open-weight models, and editing that runs on your device. Browser tools are free to use. Hosted inference has shared daily limits; operating a GPU or exceeding a provider's free allowance can cost money.
 
 ## The site
 
-Four pages, laid out like a commercial AI film studio, with every paid model swapped for an open one:
+Seven pages combine image creation, motion, audio, 3D and document tools:
 
 | Page | What it does |
 | --- | --- |
-| **Explore** (`/`) | Launch rail, tool tiles, the moves showcase and a wall of clips made in Massless. |
+| **Explore** (`/`) | Original cinematic artwork, clear starting points, launch rail, tool tiles, the moves showcase and a wall of clips made in Massless. |
 | **Image** (`/image`) | Cinema Studio, the shot designer. Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio, genre and palette compile into a prompt you can read and edit. Up to four takes per prompt with FLUX.1 schnell. |
 | **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish, plus one-tap effects: LiDAR scan, Vanish, Bullet time freeze and Clones. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
+| **Launch Film** (`/film`) | Build a kinetic launch film from a brief, with typography, scenes, music and export. |
 | **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
 | **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
 | **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Extract audio: drop a video or audio file you have the rights to and get MP3 (128–320 kbps), M4A or WAV, with trim, fades and loudness levelling, all in the browser. Deep links: `/audio?tab=captions`, `/audio?tab=extract`, `/audio?engine=melo&lang=es`. |
 
-Everything a visitor makes is stored in their own browser (IndexedDB). There are no accounts.
+Saved shots and audio live in the visitor's browser (IndexedDB). New saves never automatically delete older originals. The Image page loads older shots in batches of 24. If a save fails, the result stays available for download in that session and is visibly marked as unsaved. There are no accounts or cloud backups; browser data can still be cleared or evicted, so download work you want to keep.
 
 What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the shot designer, camera-motion presets, takes, storyboard and voiceover of paywalled AI film studios.
 
@@ -39,11 +40,11 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 | 3D, in the browser | Depth Anything V2 + Massless splat builder, rendered with Spark | Apache-2.0 / MIT | The visitor's browser |
 | 3D, full object | Idol (speridlabs) | Apache-2.0 | Your own NVIDIA GPU, through `comfy/idol_server.py` |
 
-The `/api/shot` Worker keeps itself inside Cloudflare's 10,000 free Neurons per day with a daily cap (`DAILY_CAP`, default 120 frames) and a per-visitor cap (`PER_VISITOR_CAP`, default 12). When the cap is hit the app keeps working through Pollinations or your ComfyUI.
+The `/api/shot` Worker has a daily request cap (`DAILY_CAP`, default 120 frames) and a per-visitor cap (`PER_VISITOR_CAP`, default 12). These KV-backed request counters are best-effort limits, not a guaranteed spending ceiling: concurrent requests can race, models consume different amounts, and other AI endpoints share Cloudflare's allocation. Atomic budget reservation across all inference endpoints is required before expanding hosted GPU features. When a cap is hit, alternative engines may still be available through Pollinations or your ComfyUI.
 
 Every endpoint that spends the free allowance (`/api/shot`, `/api/beats`, `/api/ask`, `/api/tts`, `/api/transcribe`) has its own daily and per-visitor cap, and two free Cloudflare services sit in front of them:
 
-- **Turnstile.** Once every six hours a visitor's browser passes an invisible Cloudflare Turnstile check (`public/js/human.js`), trades the token at `/api/human` for a signed cookie, and retries the request. Bots can't drain the caps, and nothing about the visitor is stored. Set `TURNSTILE_SITEKEY` and the secrets `TURNSTILE_SECRET` and `PASS_KEY` to turn it on; without them the check is off.
+- **Turnstile.** Once every six hours a visitor's browser passes a Cloudflare Turnstile check (`public/js/human.js`), trades the token at `/api/human` for a signed cookie, and retries the request. This helps reduce automated abuse; it does not guarantee a spending ceiling. Set `TURNSTILE_SITEKEY` and the secrets `TURNSTILE_SECRET` and `PASS_KEY` to turn it on; without them the check is off.
 - **AI Gateway.** Model calls go through the `massless` gateway (`AI_GATEWAY`) for request analytics and a burst rate limit. Logging and caching are off on that gateway, so scripts, documents and audio are not kept there.
 
 ## How the camera moves work
@@ -113,6 +114,8 @@ Open `/3d`, choose **Idol on your GPU** and press **Build 3D**. The page posts t
 ## Tests
 
 ```bash
+npm ci --ignore-scripts
+npm test                            # saved-library retention, isolation, failures and connection cleanup
 pip install playwright && python -m playwright install chromium
 python3 tests/render_test.py          # every move: first, middle and last frame, motion and edge checks
 python3 tests/effects_test.py         # every effect and look: contact sheets, photo in and out, Vanish reveal, MP4 export
@@ -131,6 +134,8 @@ python3 tests/shots.py out "/!@1440x900" "/video@390x844"   # screenshots, ! = f
 
 ## Launch media
 
+The portal hero and floating-world artwork (`massless-portal-v1.jpg`, `massless-world-v1.jpg`) were created with OpenAI image generation for the site's visual identity. They are promotional artwork, not examples of output from a Massless model. See [asset provenance and generation prompts](docs/asset-provenance.md).
+
 The sample stills in `public/media/art` were generated for the launch page with a commercial image model (Higgsfield Soul). The "Real projects" row uses art from two projects by the Massless maker, used with permission: [Tiny Prompters](https://tinyprompters.com) (`tp-*`) and the T1 Vendetta fighting game (`t1-*`). Every clip in `public/media/clips` was rendered from those stills by Massless's own camera in headless Chromium. Nothing a visitor runs touches a paid model, and the stills can be swapped for FLUX.1 schnell renders without code changes.
 
 ## Limits
@@ -141,9 +146,14 @@ The sample stills in `public/media/art` were generated for the launch page with 
 
 ## Roadmap
 
-- Multi-shot sequencer with cuts, exported as one clip
+- Shared project and asset library, exportable backups and resumable jobs
+- Transcript-based editing, speech cleanup, beat-aligned cuts and measured mastering
+- A versioned model/workflow catalog with license, capability and measured cost information
 - Open video models in ComfyUI for true in-scene motion
 - Shared reels stored in R2 with a D1 index
+- Atomic inference budgets, preview deployments and provider contract tests
+
+Games, a website builder, expanded contract/e-sign workflows and hosted Runpod inference are planned experiments, not capabilities shipped by this branch. Research notes in `docs/rea/` are design inputs; they do not certify working integrations.
 
 ## Credits and license
 
