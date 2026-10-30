@@ -70,3 +70,12 @@ buildMade();
 bindRail();
 bindDialogs();
 autoplayVideos(document.querySelectorAll('video[data-src]:not([data-hover])'));
+
+// the trailer opens in a dialog with sound; it stops when the dialog closes
+const trailer = document.getElementById('trailer');
+const trailerVideo = document.getElementById('trailer-video');
+if (trailer && trailerVideo) {
+  document.getElementById('trailer-card')?.addEventListener('click', () => { trailerVideo.currentTime = 0; trailerVideo.muted = false; trailerVideo.play().catch(() => {}); });
+  trailer.addEventListener('close', () => trailerVideo.pause());
+  if (location.hash === '#trailer') { trailer.showModal(); }
+}

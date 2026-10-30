@@ -172,3 +172,13 @@
   .masonry { columns: 2; column-gap: 10px; }
   .masonry a { margin-bottom: 10px; }
 }
+
+/* trailer card and player */
+.p-trailer::after { content: ''; position: absolute; inset: 0; z-index: 1; background: radial-gradient(60% 70% at 50% 55%, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.55)); }
+.p-trailer .poster-type { align-items: center; justify-content: center; gap: 2.2cqw; }
+.p-trailer .play { width: 17cqw; height: 17cqw; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-size: 6.5cqw; padding-left: 1.2cqw; box-shadow: 0 1.5cqw 5cqw rgba(0, 0, 0, 0.5), 0.8cqw 0.8cqw 0 #0b0b0c; border: 0.6cqw solid #0b0b0c; transition: transform 0.2s; }
+.launch:hover .p-trailer .play { transform: scale(1.08) rotate(-4deg); }
+.p-trailer .big { font-size: 15cqw; color: #fff; letter-spacing: 0.02em; text-shadow: 0 1cqw 4cqw rgba(0, 0, 0, 0.5); }
+.p-trailer .sound { font: 700 2.8cqw/1 var(--ui); letter-spacing: 0.14em; text-transform: uppercase; color: #0b0b0c; background: #fff; padding: 1.1cqw 1.8cqw; border-radius: 1cqw; transform: rotate(-2deg); }
+.sheet.trailer-sheet { width: min(1120px, 94vw); max-width: none; padding: 14px; }
+.trailer-sheet video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; background: #000; }

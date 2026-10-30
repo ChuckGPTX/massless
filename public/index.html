@@ -44,6 +44,18 @@
   <main>
     <section class="launches" aria-label="What's new">
       <div class="rail" id="rail">
+        <a class="launch" href="#trailer" data-dialog="trailer" id="trailer-card" hidden>
+          <div class="poster p-trailer">
+            <video muted loop playsinline preload="none" poster="/media/trailer.jpg" data-src="/media/trailer.mp4"></video>
+            <div class="poster-type" aria-hidden="true">
+              <span class="play">▶</span>
+              <b class="big">Trailer</b>
+              <span class="sound">Sound on · 15 s</span>
+            </div>
+          </div>
+          <h3>We open-sourced everything</h3>
+          <p>The 15-second trailer. Turn your sound on.</p>
+        </a>
         <a class="launch" href="/image">
           <div class="poster p-studio">
             <video muted loop playsinline preload="none" poster="/media/art/cinema.jpg" data-src="/media/clips/hero-cinema.mp4"></video>
@@ -170,6 +182,11 @@
     <span>© 2026 Massless · MIT licensed · Built on open weights</span>
     <nav aria-label="Footer"><a href="#" data-dialog="ledger">The $0 ledger</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a><a href="https://github.com/ChuckGPTX/massless/blob/main/SPEC.md" rel="noopener">How it was built</a></nav>
   </footer>
+
+  <dialog class="sheet trailer-sheet" id="trailer">
+    <form method="dialog" class="sheet-head"><h2>We open-sourced everything</h2><button class="x" aria-label="Close">×</button></form>
+    <video id="trailer-video" controls playsinline preload="none" poster="/media/trailer.jpg" src="/media/trailer.mp4"></video>
+  </dialog>
 
   <dialog class="sheet" id="ledger">
     <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
