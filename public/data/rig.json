@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "camera": [
+    { "id": "lf-digital", "name": "Large-format digital", "note": "Clean, wide dynamic range", "prompt": "shot on a large-format digital cinema camera, clean highlights, wide dynamic range", "finish": { "grain": 0.06, "weave": 0, "vhs": 0, "fade": 0.02 } },
+    { "id": "s35-digital", "name": "Super 35 digital", "note": "The modern default", "prompt": "shot on a Super 35 digital cinema camera, natural skin tones", "finish": { "grain": 0.1, "weave": 0, "vhs": 0, "fade": 0.03 } },
+    { "id": "65mm", "name": "65mm film", "note": "Epic, fine grain", "prompt": "shot on 65mm large-format film, immense detail, epic scale, fine organic grain", "finish": { "grain": 0.18, "weave": 0.08, "vhs": 0, "fade": 0.05 } },
+    { "id": "35mm", "name": "35mm film", "note": "Classic feature look", "prompt": "shot on 35mm motion picture film, organic grain, gentle highlight rolloff", "finish": { "grain": 0.32, "weave": 0.18, "vhs": 0, "fade": 0.07 } },
+    { "id": "16mm", "name": "16mm film", "note": "Indie, textured", "prompt": "shot on 16mm film, visible grain, slightly soft, indie documentary texture", "finish": { "grain": 0.55, "weave": 0.35, "vhs": 0, "fade": 0.1 } },
+    { "id": "super8", "name": "Super 8", "note": "Home-movie memory", "prompt": "shot on Super 8 film, heavy grain, faded warm colors, home movie", "finish": { "grain": 0.8, "weave": 0.7, "vhs": 0, "fade": 0.2 } },
+    { "id": "vhs", "name": "VHS camcorder", "note": "Tape, bleed, scanlines", "prompt": "1990s VHS camcorder footage, analog video, soft focus, color bleed", "finish": { "grain": 0.25, "weave": 0.1, "vhs": 0.85, "fade": 0.12 } }
+  ],
+  "lens": [
+    { "id": "spherical", "name": "Clean spherical prime", "note": "Sharp and neutral", "prompt": "modern spherical prime lens, crisp, neutral rendering", "finish": { "halation": 0.1, "streak": 0, "ovalBokeh": 0, "ca": 0.05, "soft": 0 } },
+    { "id": "vintage", "name": "Vintage prime", "note": "Glow, low contrast", "prompt": "vintage prime lens, soft glow, blooming highlights, lower contrast", "finish": { "halation": 0.45, "streak": 0, "ovalBokeh": 0, "ca": 0.25, "soft": 0.35 } },
+    { "id": "anamorphic", "name": "Anamorphic", "note": "Oval bokeh, streak flares", "prompt": "anamorphic lens, oval bokeh, horizontal lens flares, widescreen character", "finish": { "halation": 0.25, "streak": 0.7, "ovalBokeh": 1, "ca": 0.2, "soft": 0.1 } },
+    { "id": "macro", "name": "Macro", "note": "Tiny worlds up close", "prompt": "macro lens, extreme close detail, razor-thin focus plane", "finish": { "halation": 0.1, "streak": 0, "ovalBokeh": 0, "ca": 0.08, "soft": 0 } },
+    { "id": "tiltshift", "name": "Tilt-shift", "note": "Miniature effect", "prompt": "tilt-shift lens, miniature effect, selective focus band", "finish": { "halation": 0.1, "streak": 0, "ovalBokeh": 0, "ca": 0.08, "soft": 0 } }
+  ],
+  "focal": [
+    { "mm": 8, "prompt": "8mm fisheye lens, extreme ultra-wide, curved horizon", "fov": 100, "distort": 0.55 },
+    { "mm": 14, "prompt": "14mm ultra-wide lens, dramatic perspective", "fov": 82, "distort": 0.18 },
+    { "mm": 24, "prompt": "24mm wide-angle lens, environmental framing", "fov": 62, "distort": 0.05 },
+    { "mm": 35, "prompt": "35mm lens, natural perspective", "fov": 48, "distort": 0.0 },
+    { "mm": 50, "prompt": "50mm lens, normal human perspective", "fov": 38, "distort": 0.0 },
+    { "mm": 85, "prompt": "85mm portrait lens, flattering compression", "fov": 24, "distort": 0.0 },
+    { "mm": 135, "prompt": "135mm telephoto lens, strong background compression", "fov": 15, "distort": 0.0 }
+  ],
+  "aperture": [
+    { "f": "1.4", "prompt": "aperture f/1.4, very shallow depth of field, creamy bokeh", "blur": 1.0 },
+    { "f": "2.8", "prompt": "aperture f/2.8, shallow depth of field", "blur": 0.6 },
+    { "f": "5.6", "prompt": "aperture f/5.6, moderate depth of field", "blur": 0.28 },
+    { "f": "11", "prompt": "aperture f/11, deep focus, everything sharp", "blur": 0.05 }
+  ],
+  "shot": [
+    { "id": "ews", "name": "Extreme wide", "prompt": "extreme wide shot, subject small in a vast environment" },
+    { "id": "ws", "name": "Wide", "prompt": "wide shot, full body with surroundings" },
+    { "id": "ms", "name": "Medium", "prompt": "medium shot, framed from the waist up" },
+    { "id": "mcu", "name": "Medium close-up", "prompt": "medium close-up, chest up" },
+    { "id": "cu", "name": "Close-up", "prompt": "close-up on the face" },
+    { "id": "ecu", "name": "Insert", "prompt": "extreme close-up insert shot on a telling detail" }
+  ],
+  "angle": [
+    { "id": "eye", "name": "Eye level", "prompt": "eye-level camera" },
+    { "id": "low", "name": "Low angle", "prompt": "low-angle camera looking up, heroic" },
+    { "id": "high", "name": "High angle", "prompt": "high-angle camera looking down" },
+    { "id": "top", "name": "Overhead", "prompt": "top-down overhead camera" },
+    { "id": "dutch", "name": "Dutch tilt", "prompt": "dutch angle, tilted horizon, unease" },
+    { "id": "ots", "name": "Over the shoulder", "prompt": "over-the-shoulder framing" }
+  ],
+  "light": [
+    { "id": "golden", "name": "Golden hour", "prompt": "golden hour sunlight, long warm shadows, backlit rim light", "warm": 0.35 },
+    { "id": "blue", "name": "Blue hour", "prompt": "blue hour twilight, cool ambient light, first city lights", "warm": -0.3 },
+    { "id": "overcast", "name": "Overcast soft", "prompt": "soft overcast daylight, diffuse even light", "warm": -0.05 },
+    { "id": "noon", "name": "Hard noon", "prompt": "harsh midday sun, hard shadows, high contrast", "warm": 0.05 },
+    { "id": "neon", "name": "Neon night", "prompt": "neon-lit night, magenta and cyan signage, wet reflective streets", "warm": -0.1 },
+    { "id": "tungsten", "name": "Tungsten interior", "prompt": "warm tungsten practical lamps, cozy interior pools of light", "warm": 0.3 },
+    { "id": "moon", "name": "Moonlight", "prompt": "moonlit night, cold blue key light, deep shadows", "warm": -0.35 },
+    { "id": "candle", "name": "Candlelight", "prompt": "flickering candlelight, chiaroscuro, faces emerging from darkness", "warm": 0.45 },
+    { "id": "silhouette", "name": "Silhouette", "prompt": "strong backlight, subject in silhouette against a bright sky", "warm": 0.1 },
+    { "id": "haze", "name": "Volumetric haze", "prompt": "volumetric light shafts through haze, atmospheric depth", "warm": 0.05 }
+  ],
+  "stock": [
+    { "id": "clean", "name": "Clean digital", "prompt": "naturalistic color grade", "grade": { "sat": 1.0, "contrast": 1.0, "fade": 0.0, "tealOrange": 0, "mono": 0, "warm": 0 } },
+    { "id": "negative", "name": "Warm color negative", "prompt": "warm color negative film palette, soft pastel highlights", "grade": { "sat": 0.92, "contrast": 0.95, "fade": 0.06, "tealOrange": 0.1, "mono": 0, "warm": 0.15 } },
+    { "id": "bleach", "name": "Bleach bypass", "prompt": "bleach bypass look, desaturated, gritty high contrast", "grade": { "sat": 0.55, "contrast": 1.25, "fade": 0.0, "tealOrange": 0, "mono": 0, "warm": -0.05 } },
+    { "id": "blockbuster", "name": "Teal and orange", "prompt": "teal and orange blockbuster color grade", "grade": { "sat": 1.1, "contrast": 1.1, "fade": 0.0, "tealOrange": 0.6, "mono": 0, "warm": 0 } },
+    { "id": "mono", "name": "Black and white", "prompt": "black and white film, rich silver tones, high contrast", "grade": { "sat": 0, "contrast": 1.2, "fade": 0.02, "tealOrange": 0, "mono": 1, "warm": 0 } },
+    { "id": "slide", "name": "Saturated slide film", "prompt": "saturated slide film colors, deep blues and reds", "grade": { "sat": 1.3, "contrast": 1.12, "fade": 0.0, "tealOrange": 0, "mono": 0, "warm": 0.05 } },
+    { "id": "faded", "name": "Faded 70s print", "prompt": "faded 1970s film print, lifted blacks, yellowed highlights", "grade": { "sat": 0.75, "contrast": 0.88, "fade": 0.16, "tealOrange": 0, "mono": 0, "warm": 0.25 } },
+    { "id": "cross", "name": "Cross-processed", "prompt": "cross-processed film, green-yellow shift, punchy contrast", "grade": { "sat": 1.15, "contrast": 1.15, "fade": 0.04, "tealOrange": -0.3, "mono": 0, "warm": 0.1 } }
+  ],
+  "aspect": [
+    { "id": "239", "name": "2.39:1", "ratio": 2.39, "w": 1344, "h": 560 },
+    { "id": "185", "name": "1.85:1", "ratio": 1.85, "w": 1280, "h": 688 },
+    { "id": "169", "name": "16:9", "ratio": 1.7778, "w": 1280, "h": 720 },
+    { "id": "45", "name": "4:5", "ratio": 0.8, "w": 896, "h": 1120 },
+    { "id": "916", "name": "9:16", "ratio": 0.5625, "w": 720, "h": 1280 },
+    { "id": "11", "name": "1:1", "ratio": 1, "w": 1024, "h": 1024 }
+  ],
+  "presets": [
+    { "name": "Rain-soaked courier", "subject": "a bike courier pausing under a flickering awning, rain bouncing off the street", "rig": { "camera": "35mm", "lens": "anamorphic", "focal": 50, "aperture": "1.4", "shot": "ms", "angle": "eye", "light": "neon", "stock": "blockbuster", "aspect": "239" } },
+    { "name": "Lighthouse keeper", "subject": "an old lighthouse keeper climbing a spiral iron staircase, sea spray on the windows", "rig": { "camera": "16mm", "lens": "vintage", "focal": 24, "aperture": "2.8", "shot": "ws", "angle": "low", "light": "moon", "stock": "faded", "aspect": "185" } },
+    { "name": "Desert convoy", "subject": "a convoy of dusty trucks crossing salt flats toward a storm front", "rig": { "camera": "65mm", "lens": "spherical", "focal": 135, "aperture": "11", "shot": "ews", "angle": "eye", "light": "golden", "stock": "negative", "aspect": "239" } },
+    { "name": "Kitchen at dawn", "subject": "a baker dusting flour over dough on a worn wooden table, steam rising from fresh loaves", "rig": { "camera": "s35-digital", "lens": "vintage", "focal": 85, "aperture": "1.4", "shot": "mcu", "angle": "high", "light": "haze", "stock": "negative", "aspect": "45" } },
+    { "name": "Skate tape", "subject": "a teenager kickflipping over a fire hydrant in a parking lot, friends cheering", "rig": { "camera": "vhs", "lens": "spherical", "focal": 14, "aperture": "5.6", "shot": "ws", "angle": "low", "light": "noon", "stock": "clean", "aspect": "169" } },
+    { "name": "Botanical noir", "subject": "a detective's gloved hand holding a single orchid in a greenhouse, glass fogged with condensation", "rig": { "camera": "35mm", "lens": "macro", "focal": 85, "aperture": "1.4", "shot": "ecu", "angle": "eye", "light": "silhouette", "stock": "mono", "aspect": "11" } }
+  ]
+}

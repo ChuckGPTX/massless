@@ -1,0 +1,48 @@
+{
+  "3": {
+    "class_type": "KSampler",
+    "_meta": { "title": "Sample (FLUX.1 schnell, 4 steps)" },
+    "inputs": {
+      "seed": 7,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["4", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["5", 0]
+    }
+  },
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "FLUX.1 schnell fp8 (Apache-2.0)" },
+    "inputs": { "ckpt_name": "flux1-schnell-fp8.safetensors" }
+  },
+  "5": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": { "title": "Frame size (set from the aspect ratio)" },
+    "inputs": { "width": 1344, "height": 560, "batch_size": 1 }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Compiled shot prompt" },
+    "inputs": { "text": "a lighthouse keeper climbing a spiral staircase, wide shot, low-angle camera, shot on 16mm film, vintage prime lens, 24mm wide-angle lens, aperture f/2.8, moonlit night, faded 1970s film print, cinematic film still", "clip": ["4", 1] }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Negative (ignored by schnell at cfg 1)" },
+    "inputs": { "text": "", "clip": ["4", 1] }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "_meta": { "title": "Decode" },
+    "inputs": { "samples": ["3", 0], "vae": ["4", 2] }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "_meta": { "title": "Hero frame" },
+    "inputs": { "filename_prefix": "massless", "images": ["8", 0] }
+  }
+}

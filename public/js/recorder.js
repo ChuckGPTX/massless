@@ -1,0 +1,90 @@
+// Export a camera move as video.
+// Preferred: WebCodecs H.264 + MP4 muxing, rendered frame by frame (exact timing, faster than real time).
+// Fallback: MediaRecorder on the canvas stream in real time (WebM or MP4, whatever the browser offers).
+
+const AVC_CODECS = ['avc1.640028', 'avc1.4d0028', 'avc1.42002a', 'avc1.42001f'];
+
+async function pickAvc(width, height, fps) {
+  if (typeof VideoEncoder === 'undefined') return null;
+  for (const codec of AVC_CODECS) {
+    try {
+      const cfg = { codec, width, height, bitrate: 10_000_000, framerate: fps, avc: { format: 'avc' } };
+      const s = await VideoEncoder.isConfigSupported(cfg);
+      if (s.supported) return cfg;
+    } catch {
+      /* try next */
+    }
+  }
+  return null;
+}
+
+/**
+ * draw(t, timeSec) must render one frame onto `canvas`.
+ * onProgress(fraction). Returns { blob, ext, mime }.
+ */
+export async function recordMove(canvas, { duration, fps = 24, draw, onProgress = () => {}, signal }) {
+  const width = canvas.width;
+  const height = canvas.height;
+  const frames = Math.max(2, Math.round(duration * fps));
+  const cfg = await pickAvc(width, height, fps);
+
+  if (cfg) {
+    const { Muxer, ArrayBufferTarget } = await import('./vendor/mp4-muxer.mjs');
+    const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: 'avc', width, height, frameRate: fps }, fastStart: 'in-memory' });
+    let encodeError = null;
+    const encoder = new VideoEncoder({
+      output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+      error: (e) => { encodeError = e; },
+    });
+    encoder.configure(cfg);
+    for (let i = 0; i < frames; i++) {
+      if (signal?.aborted) { encoder.close(); throw new Error('Cancelled'); }
+      if (encodeError) throw encodeError;
+      const t = i / (frames - 1);
+      draw(t, i / fps);
+      const frame = new VideoFrame(canvas, { timestamp: Math.round((i * 1e6) / fps), duration: Math.round(1e6 / fps) });
+      encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 });
+      frame.close();
+      if (encoder.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 0));
+      if (i % 4 === 0) {
+        onProgress(i / frames);
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+    }
+    await encoder.flush();
+    if (encodeError) throw encodeError;
+    muxer.finalize();
+    onProgress(1);
+    return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), ext: 'mp4', mime: 'video/mp4' };
+  }
+
+  // Real-time fallback
+  if (typeof MediaRecorder === 'undefined' || !canvas.captureStream) throw new Error('This browser cannot record video. Save frames instead.');
+  const types = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+  const mime = types.find((t) => MediaRecorder.isTypeSupported(t)) || '';
+  const stream = canvas.captureStream(fps);
+  const rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 10_000_000 } : undefined);
+  const chunks = [];
+  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  const done = new Promise((r) => (rec.onstop = r));
+  rec.start();
+  const start = performance.now();
+  await new Promise((resolve, reject) => {
+    const step = (now) => {
+      if (signal?.aborted) { rec.stop(); reject(new Error('Cancelled')); return; }
+      const el = (now - start) / 1000;
+      const t = Math.min(1, el / duration);
+      draw(t, el);
+      onProgress(t);
+      if (t < 1) requestAnimationFrame(step);
+      else resolve();
+    };
+    requestAnimationFrame(step);
+  });
+  await new Promise((r) => setTimeout(r, 120));
+  rec.stop();
+  await done;
+  stream.getTracks().forEach((t) => t.stop());
+  const type = rec.mimeType || mime || 'video/webm';
+  return { blob: new Blob(chunks, { type }), ext: type.includes('mp4') ? 'mp4' : 'webm', mime: type };
+}

@@ -1,0 +1,22 @@
+{
+  // Massless on Cloudflare Workers: static app + /api Worker
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "massless",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "ai": { "binding": "AI" },
+  "kv_namespaces": [
+    { "binding": "MASSLESS_KV", "id": "3535dddb25a642238792cef5f666aff6" }
+  ],
+  "vars": {
+    // FLUX.1 schnell is roughly 50 Neurons per frame; 120 frames stays well inside the 10,000 free Neurons per day.
+    "DAILY_CAP": "120",
+    "PER_VISITOR_CAP": "12"
+  },
+  "observability": { "enabled": true }
+}

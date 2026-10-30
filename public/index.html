@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Massless: a free cinema camera for AI shots</title>
+  <meta name="description" content="Design a shot with real camera, lens and film choices, generate it with free open-weight FLUX, then fly a camera through it: dolly zoom, crash zoom, arcs, rack focus. Every model is free and open.">
+  <meta name="theme-color" content="#1c2129">
+  <meta property="og:title" content="Massless">
+  <meta property="og:description" content="A free cinema camera for AI shots. Open models only. $0.">
+  <meta property="og:image" content="/og.jpg">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/big-shoulders-display-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/instrument-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="Massless home">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="3.2" fill="currentColor"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Massless</span>
+    </a>
+    <p class="tagline">A free cinema camera for AI shots</p>
+    <nav class="topnav">
+      <button type="button" class="linkish" data-dialog="ledger-dialog"><span class="cost">$0.00</span> spent</button>
+      <button type="button" class="linkish" data-dialog="help-dialog">How it works</button>
+      <a class="linkish" href="https://github.com/ChuckGPTX/massless" rel="noopener">Source</a>
+    </nav>
+  </header>
+
+  <main class="studio">
+    <section class="monitor" aria-label="Viewfinder">
+      <div class="viewfinder" id="viewfinder">
+        <canvas id="view" aria-label="Camera preview"></canvas>
+        <div class="frame-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
+        <div class="tally" id="tally" hidden><span class="dot"></span><span id="timecode">00:00:00</span></div>
+        <div class="vf-status" id="vf-status" hidden>
+          <div class="meter"><div class="meter-fill" id="meter-fill"></div></div>
+          <p id="vf-status-text"></p>
+        </div>
+        <div class="drop-hint" id="drop-hint" hidden>Drop the still to load it</div>
+      </div>
+
+      <div class="hud" aria-live="polite">
+        <div class="hud-cell"><span class="hud-num" id="hud-focal">50</span><span class="hud-unit">mm</span></div>
+        <div class="hud-cell"><span class="hud-unit">f/</span><span class="hud-num" id="hud-f">1.4</span></div>
+        <div class="hud-cell"><span class="hud-num" id="hud-aspect">2.39</span><span class="hud-unit" id="hud-aspect-unit">:1</span></div>
+        <div class="hud-cell hud-wide"><span class="hud-small" id="hud-move">Dolly in</span><span class="hud-small muted" id="hud-source">Calibration scene</span></div>
+      </div>
+
+      <div class="lens-ring" id="lens-ring" role="radiogroup" aria-label="Focal length"></div>
+
+      <form class="slate" id="slate">
+        <label class="sr-only" for="subject">What's in the shot</label>
+        <textarea id="subject" rows="2" placeholder="Who or what is in the shot, and where. Example: a bike courier pausing under a flickering awning, rain bouncing off the street"></textarea>
+        <div class="slate-actions">
+          <button type="submit" class="btn primary" id="shoot">Shoot</button>
+          <label class="btn ghost" for="upload">Use my own still</label>
+          <input type="file" id="upload" accept="image/*" hidden>
+          <button type="button" class="btn ghost" id="surprise">Load a preset</button>
+        </div>
+      </form>
+
+      <details class="compiled" id="compiled">
+        <summary>Prompt sent to the model</summary>
+        <textarea id="compiled-text" rows="4" spellcheck="false"></textarea>
+        <p class="fine">Edit freely; Shoot uses this text. Change any rig setting to rebuild it.</p>
+      </details>
+
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Panels">
+      <button role="tab" aria-selected="true" aria-controls="panel-rig" id="tab-rig">Rig</button>
+      <button role="tab" aria-selected="false" aria-controls="panel-move" id="tab-move">Move</button>
+      <button role="tab" aria-selected="false" aria-controls="panel-finish" id="tab-finish">Finish</button>
+    </div>
+
+    <section class="panel rig" id="panel-rig" role="tabpanel" aria-labelledby="tab-rig">
+      <h2>Rig</h2>
+      <fieldset class="group" id="g-camera"><legend>Camera</legend></fieldset>
+      <fieldset class="group" id="g-lens"><legend>Lens</legend></fieldset>
+      <fieldset class="group chips" id="g-aperture"><legend>Aperture</legend></fieldset>
+      <fieldset class="group chips" id="g-shot"><legend>Shot size</legend></fieldset>
+      <fieldset class="group chips" id="g-angle"><legend>Angle</legend></fieldset>
+      <fieldset class="group chips" id="g-light"><legend>Light</legend></fieldset>
+      <fieldset class="group chips" id="g-stock"><legend>Film stock and grade</legend></fieldset>
+      <fieldset class="group chips" id="g-aspect"><legend>Aspect ratio</legend></fieldset>
+      <fieldset class="group" id="g-engine"><legend>Engine</legend>
+        <label class="select">
+          <select id="engine">
+            <option value="auto">Free cloud: Pollinations, then Cloudflare</option>
+            <option value="pollinations">Pollinations only</option>
+            <option value="workers">Cloudflare Workers AI only</option>
+            <option value="comfy">My own ComfyUI (local GPU)</option>
+          </select>
+        </label>
+        <div class="comfy-settings" id="comfy-settings" hidden>
+          <label>ComfyUI address <input id="comfy-url" value="http://127.0.0.1:8188" inputmode="url"></label>
+          <label>Checkpoint <input id="comfy-ckpt" value="flux1-schnell-fp8.safetensors"></label>
+          <p class="fine">Start ComfyUI with <code>--enable-cors-header</code>. Allow local network access if your browser asks. <a href="/comfy/massless_shot_flux_schnell.api.json" download>Download the workflow</a>.</p>
+        </div>
+        <p class="fine">All engines run FLUX.1 schnell, an open-weight model under Apache-2.0.</p>
+      </fieldset>
+    </section>
+
+    <section class="panel moves" id="panel-move" role="tabpanel" aria-labelledby="tab-move">
+      <h2>Camera move</h2>
+      <div class="move-grid" id="move-grid" role="radiogroup" aria-label="Camera move"></div>
+      <div class="sliders">
+        <label class="slider"><span>Duration <output id="o-duration">4.0 s</output></span><input type="range" id="duration" min="2" max="8" step="0.5" value="4"></label>
+        <label class="slider"><span>Intensity <output id="o-intensity">100%</output></span><input type="range" id="intensity" min="0.3" max="1.6" step="0.05" value="1"></label>
+      </div>
+      <div class="row">
+        <label class="select small">Size
+          <select id="out-size">
+            <option value="1280">720p</option>
+            <option value="1920">1080p</option>
+          </select>
+        </label>
+        <label class="select small">Frame rate
+          <select id="out-fps">
+            <option value="24">24 fps</option>
+            <option value="30">30 fps</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="play">Pause preview</button>
+        <button type="button" class="btn record" id="record"><span class="rec-dot" aria-hidden="true"></span>Record clip</button>
+        <button type="button" class="btn ghost" id="still">Save frame</button>
+      </div>
+      <p class="fine">Tap the picture to set the focus point. Depth comes from Depth Anything V2, running on your own device.</p>
+    </section>
+
+    <section class="panel finish" id="panel-finish" role="tabpanel" aria-labelledby="tab-finish">
+      <h2>Finish</h2>
+      <p class="fine">Your camera, lens and stock choices set these. Adjust to taste.</p>
+      <div class="sliders" id="finish-sliders"></div>
+      <button type="button" class="btn ghost" id="finish-reset">Back to the rig's look</button>
+    </section>
+
+    <section class="reel" aria-label="Reel">
+      <h2>Reel</h2>
+      <p class="fine" id="reel-empty">Shots and clips you make appear here. They stay in this browser only.</p>
+      <ul class="reel-list" id="reel-list"></ul>
+      </section>
+  </main>
+
+  <dialog id="ledger-dialog" class="sheet">
+    <form method="dialog" class="sheet-head"><h2>The ledger</h2><button class="close" aria-label="Close">×</button></form>
+    <p>Every model here is free to use and has open weights. Nothing on this page asks for a card, a key or credits.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Job</th><th>Model</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td>Hero frame</td><td>FLUX.1 [schnell], Black Forest Labs</td><td>Apache-2.0</td><td>Pollinations, Cloudflare Workers AI free tier, or your ComfyUI</td><td>$0</td></tr>
+          <tr><td>Depth for camera moves</td><td>Depth Anything V2 Small</td><td>Apache-2.0</td><td>Your browser (WebGPU or WebAssembly)</td><td>$0</td></tr>
+          <tr><td>Camera, lens and film</td><td>Massless renderer</td><td>MIT</td><td>Your browser (WebGL2)</td><td>$0</td></tr>
+          <tr><td>Video encoding</td><td>Your browser's H.264 encoder</td><td>Built in</td><td>Your device</td><td>$0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>What it replaces</h3>
+    <p>Paywalled studios charge credits per shot for this workflow and route it through closed video models. Massless rebuilds the two core features, a camera-and-lens shot designer and one-click camera moves, from their public behavior only. No proprietary code, prompts or assets were used.</p>
+    <p class="fine">Inspired by the Open Source Higgsfield challenge. Source and the ComfyUI workflow are on GitHub under the MIT license.</p>
+  </dialog>
+
+  <dialog id="help-dialog" class="sheet">
+    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="close" aria-label="Close">×</button></form>
+    <ol class="steps">
+      <li><strong>Build the rig.</strong> Pick a camera body, lens, focal length, aperture, light and film stock. These become a precise prompt you can read and edit.</li>
+      <li><strong>Shoot.</strong> A free open-weight model renders the hero frame. You can also bring your own still.</li>
+      <li><strong>Move the camera.</strong> Your device estimates depth, turns the still into 3D, and flies a virtual camera through it: dolly zoom, crash zoom, arcs, rack focus and more.</li>
+      <li><strong>Record.</strong> Export an MP4 at 24 or 30 fps, or save a frame.</li>
+    </ol>
+    <p class="fine">Limits: people in the shot can't act, and big moves stretch the edges behind foreground objects. Keep intensity moderate for clean results.</p>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
