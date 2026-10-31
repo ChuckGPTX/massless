@@ -41,88 +41,162 @@
         <p class="eyebrow">IMAGE WORKROOM / IN YOUR BROWSER</p>
         <h1>A fresh setting.</h1>
         <p>
-          Reframe your image, adjust the finish and assemble a product visual.
-          Save a new take and carry it into motion.
+          Remove a background, upscale, erase what does not belong, then
+          reframe and finish. Everything runs on your device; your images are
+          never uploaded.
         </p>
       </section>
       <div class="workroom">
         <aside class="controls">
-          <label class="btn-accent"
-            >Open image<input
-              id="image-file"
-              type="file"
-              accept="image/*"
-              hidden /></label
-          ><a href="/library/">Choose from library ↗</a
-          ><label
-            >Frame<select id="frame">
-              <option value="square">Square · 1:1</option>
-              <option value="portrait">Portrait · 4:5</option>
-              <option value="wide">Landscape · 16:9</option>
-            </select></label
-          ><label
-            >Backdrop<select id="backdrop">
-              <option value="studio">Studio cream</option>
-              <option value="botanical">Botanical green</option>
-              <option value="neon">Midnight violet</option>
-              <option value="transparent">Transparent</option>
-            </select></label
-          ><label
-            >Image size<input
-              id="scale"
-              type="range"
-              min="20"
-              max="150"
-              value="88" /></label
-          ><label
-            >Horizontal position<input
-              id="x"
-              type="range"
-              min="-50"
-              max="50"
-              value="0" /></label
-          ><label
-            >Vertical position<input
-              id="y"
-              type="range"
-              min="-50"
-              max="50"
-              value="0" /></label
-          ><label
-            >Brightness<input
-              id="brightness"
-              type="range"
-              min="40"
-              max="160"
-              value="100" /></label
-          ><label
-            >Contrast<input
-              id="contrast"
-              type="range"
-              min="50"
-              max="150"
-              value="100" /></label
-          ><label
-            >Color<input
-              id="saturation"
-              type="range"
-              min="0"
-              max="180"
-              value="100" /></label
-          ><label
-            >Headline<input
-              id="headline"
-              maxlength="60"
-              placeholder="Make your mark." /></label
-          ><label class="check"
-            ><input id="original" type="checkbox" />Compare original</label
-          ><button id="save" class="btn-accent">Save new take</button
-          ><button id="download" class="btn-ghost">Download PNG</button>
-          <p>
-            Transparent source images retain their cutout. This local editor
-            reframes and grades; it does not remove backgrounds or generate
-            missing pixels.
-          </p>
+          <div class="source-row">
+            <label class="btn-accent"
+              >Open image<input
+                id="image-file"
+                type="file"
+                accept="image/*"
+                hidden /></label
+            ><a href="/library/">Choose from library ↗</a>
+          </div>
+          <div class="tool-tabs" role="tablist" aria-label="Tools">
+            <button role="tab" id="tab-compose" data-tool="compose" aria-selected="true">Compose</button
+            ><button role="tab" id="tab-remove-bg" data-tool="remove-bg" aria-selected="false">Remove background</button
+            ><button role="tab" id="tab-upscale" data-tool="upscale" aria-selected="false">Upscale</button
+            ><button role="tab" id="tab-erase" data-tool="erase" aria-selected="false">Erase object</button>
+          </div>
+          <div class="panel" data-panel="compose" role="tabpanel" aria-labelledby="tab-compose">
+            <label
+              >Frame<select id="frame">
+                <option value="square">Square · 1:1</option>
+                <option value="portrait">Portrait · 4:5</option>
+                <option value="wide">Landscape · 16:9</option>
+              </select></label
+            ><label
+              >Backdrop<select id="backdrop">
+                <option value="studio">Studio cream</option>
+                <option value="botanical">Botanical green</option>
+                <option value="neon">Midnight violet</option>
+                <option value="transparent">Transparent</option>
+              </select></label
+            ><label
+              >Image size<input
+                id="scale"
+                type="range"
+                min="20"
+                max="150"
+                value="88" /></label
+            ><label
+              >Horizontal position<input
+                id="x"
+                type="range"
+                min="-50"
+                max="50"
+                value="0" /></label
+            ><label
+              >Vertical position<input
+                id="y"
+                type="range"
+                min="-50"
+                max="50"
+                value="0" /></label
+            ><label
+              >Brightness<input
+                id="brightness"
+                type="range"
+                min="40"
+                max="160"
+                value="100" /></label
+            ><label
+              >Contrast<input
+                id="contrast"
+                type="range"
+                min="50"
+                max="150"
+                value="100" /></label
+            ><label
+              >Color<input
+                id="saturation"
+                type="range"
+                min="0"
+                max="180"
+                value="100" /></label
+            ><label
+              >Headline<input
+                id="headline"
+                maxlength="60"
+                placeholder="Make your mark." /></label
+            ><label class="check"
+              ><input id="original" type="checkbox" />Compare original</label
+            ><button id="save" class="btn-accent">Save new take</button
+            ><button id="download" class="btn-ghost">Download PNG</button>
+            <p>
+              Transparent images keep their cutout. Use Remove background first
+              to place any subject on a new backdrop.
+            </p>
+          </div>
+          <div class="panel" data-panel="remove-bg" role="tabpanel" aria-labelledby="tab-remove-bg" hidden>
+            <label
+              >Subject<select id="bg-model">
+                <option value="birefnet">Anything · BiRefNet (best edges)</option>
+                <option value="modnet">People · MODNet (small, fast)</option>
+              </select></label
+            ><button id="bg-run" class="btn-accent">Remove background</button
+            ><label
+              >Replace with<select id="bg-fill">
+                <option value="transparent">Transparent</option>
+                <option value="color">Color</option>
+                <option value="blur">Blurred original</option>
+                <option value="studio">Studio cream</option>
+                <option value="botanical">Botanical green</option>
+                <option value="neon">Midnight violet</option>
+              </select></label
+            ><label id="bg-color-row" hidden
+              >Color<input id="bg-color" type="color" value="#ffffff" /></label
+            ><label
+              >Edge softness<input
+                id="bg-feather"
+                type="range"
+                min="0"
+                max="10"
+                value="1" /></label>
+            <p class="model-note" data-note="remove-bg"></p>
+          </div>
+          <div class="panel" data-panel="upscale" role="tabpanel" aria-labelledby="tab-upscale" hidden>
+            <fieldset class="seg">
+              <legend>Size</legend>
+              <label><input type="radio" name="up-factor" value="2" checked />2×</label
+              ><label><input type="radio" name="up-factor" value="4" />4×</label>
+            </fieldset>
+            <button id="up-run" class="btn-accent">Upscale</button>
+            <p id="up-size" class="hint"></p>
+            <p class="model-note" data-note="upscale"></p>
+          </div>
+          <div class="panel" data-panel="erase" role="tabpanel" aria-labelledby="tab-erase" hidden>
+            <p class="hint">Paint over what you want gone, then press Erase.</p>
+            <label
+              >Brush size<input
+                id="er-brush"
+                type="range"
+                min="4"
+                max="160"
+                value="40" /></label
+            ><label
+              >Fill with<select id="er-method">
+                <option value="migan">Smart fill · MI-GAN</option>
+                <option value="patch">Texture copy · no download</option>
+              </select></label
+            ><button id="er-run" class="btn-accent">Erase</button>
+            <div class="actions">
+              <button id="er-clear" class="btn-ghost">Clear strokes</button
+              ><button id="er-undo" class="btn-ghost" disabled>Undo</button>
+            </div>
+            <p class="model-note" data-note="erase"></p>
+          </div>
+          <div id="result-actions" class="result-actions" hidden>
+            <button id="tool-save" class="btn-accent">Save to library</button
+            ><button id="tool-download" class="btn-ghost">Download PNG</button>
+            <p class="hint">Switch tools to keep working on this result.</p>
+          </div>
+          <button id="clear-models" class="linkish" type="button">Remove downloaded models</button>
         </aside>
         <section class="stage">
           <canvas
@@ -131,6 +205,10 @@
             height="1080"
             aria-label="Edited image preview"
           ></canvas>
+          <label id="compare-row" class="compare" hidden
+            >Before / after<input id="compare" type="range" min="0" max="100" value="50"
+          /></label>
+          <progress id="progress" max="1" value="0" hidden></progress>
           <p id="status" role="status"></p>
           <div id="next" class="actions" hidden></div>
         </section>

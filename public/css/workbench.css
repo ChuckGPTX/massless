@@ -183,6 +183,127 @@
   resize: vertical;
   min-height: 100px;
 }
+/* Image workroom tools */
+.source-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+}
+.source-row a {
+  color: #ffc22e;
+  font-size: 14px;
+}
+.tool-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #0f1011;
+  border: 1px solid #2e2f33;
+}
+.tool-tabs button {
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #c7c7c7;
+  font: 600 13px/1.2 var(--ui, sans-serif);
+  cursor: pointer;
+}
+.tool-tabs button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.tool-tabs button[aria-selected="true"] {
+  background: #ffc22e;
+  color: #1c1400;
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+.hint {
+  font-size: 13px !important;
+  color: #b8b6ae !important;
+  margin: 0;
+}
+.model-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #111214;
+  border: 1px solid #2e2f33;
+  line-height: 1.45;
+}
+.model-note:empty {
+  display: none;
+}
+.seg {
+  display: flex;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.seg legend {
+  color: #c7c7c7;
+  font-size: 13px;
+  margin-bottom: 7px;
+}
+.bench .seg label {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid #454648;
+  border-radius: 9px;
+  color: #eee;
+  font-size: 15px;
+  cursor: pointer;
+}
+.seg label:has(input:checked) {
+  border-color: #ffc22e;
+  background: rgba(255, 194, 46, 0.1);
+}
+.seg input {
+  accent-color: #ffc22e;
+}
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #343539;
+}
+.linkish {
+  align-self: flex-start;
+  padding: 0;
+  min-height: 0 !important;
+  border: 0;
+  background: none;
+  color: #999;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.compare {
+  margin-top: 12px;
+}
+.stage progress {
+  width: 100%;
+  height: 8px;
+  margin-top: 12px;
+  accent-color: #ffc22e;
+}
+.stage canvas.painting {
+  cursor: crosshair;
+  touch-action: none;
+}
 @media (max-width: 800px) {
   .bench {
     padding: 24px 16px;

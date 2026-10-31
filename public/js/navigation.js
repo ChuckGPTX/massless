@@ -24,6 +24,9 @@ const PATHS = {
   window:
     "M3 4h18v16H3z M3 9h18 M6 6.5h.01 M9 6.5h.01 M9 13l-3 2 3 2 M15 13l3 2-3 2",
   pen: "M3 21l2-6L17 3l4 4L9 19z M14 6l4 4 M3 21l6-2",
+  cutout: "M3 7V3h4 M17 3h4v4 M21 17v4h-4 M7 21H3v-4 M12 7a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5 M7 18c1-3 3-4.5 5-4.5s4 1.5 5 4.5",
+  expand: "M3 9V3h6 M3 3l7 7 M21 15v6h-6 M21 21l-7-7 M15 3h6v6 M9 21H3v-6",
+  eraser: "M8 20l-5-5L14 4l7 7-9 9z M20 20H8 M9 9l7 7",
   file: "M5 2h9l5 5v15H5z M14 2v6h5 M8 12h8 M8 16h8",
   arrow: "M5 12h14 M13 6l6 6-6 6",
   chevron: "M6 9l6 6 6-6",
