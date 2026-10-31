@@ -298,7 +298,7 @@ $("#sample").onchange = async (e) => {
   try {
     const path =
       e.target.value === "music"
-        ? "/media/music/showtime-preview.mp4"
+        ? "/media/showcase/glass-tide.mp4"
         : "/media/clips/effect-lidar.mp4";
     const r = await fetch(path);
     if (!r.ok) throw new Error("Could not load this sample.");
