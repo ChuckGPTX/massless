@@ -1,0 +1,371 @@
+{
+  "id": "feature-artist-agreement",
+  "version": 1,
+  "title": "Featured Artist Agreement",
+  "category": "music",
+  "summary": "A guest artist records a verse or feature on another artist's song, for a fee, credit, optional points and an agreed writer share.",
+  "useWhen": "Booking a feature or guest verse.",
+  "watchOuts": [
+    "If the featured artist is signed to a label, the label usually must approve, sometimes with a 'courtesy of' credit and a share of royalties. Get the waiver in writing before release.",
+    "Write the composition split for the feature's lyrics into the split sheet. A paid feature fee doesn't settle writer shares unless you say so.",
+    "SoundExchange treats a featured artist as a featured performer. Agree how SoundExchange royalties are split.",
+    "Limit use of the feature to this song. Reuse in remixes or other songs should need approval."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "main",
+      "label": "Main artist"
+    },
+    {
+      "id": "featured",
+      "label": "Featured artist"
+    }
+  ],
+  "variables": [
+    {
+      "id": "agreement_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date."
+    },
+    {
+      "id": "main_name",
+      "label": "Main artist legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Owner of the song and master."
+    },
+    {
+      "id": "main_alias",
+      "label": "Main artist professional name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Stage name."
+    },
+    {
+      "id": "featured_name",
+      "label": "Featured artist legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Guest."
+    },
+    {
+      "id": "featured_alias",
+      "label": "Featured artist professional name",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "As credited."
+    },
+    {
+      "id": "song_title",
+      "label": "Song title",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Song."
+    },
+    {
+      "id": "contribution",
+      "label": "Contribution",
+      "type": "text",
+      "required": true,
+      "default": "one verse of up to 16 bars and ad-libs",
+      "options": [],
+      "help": "What the guest records."
+    },
+    {
+      "id": "delivery",
+      "label": "Delivery deadline",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "When the vocal files are due."
+    },
+    {
+      "id": "fee",
+      "label": "Feature fee",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Flat fee."
+    },
+    {
+      "id": "royalty",
+      "label": "Featured artist master royalty?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Share of master income."
+    },
+    {
+      "id": "royalty_percent",
+      "label": "Featured royalty (% of net master income)",
+      "type": "percent",
+      "required": false,
+      "default": "5",
+      "options": [],
+      "help": "Percent."
+    },
+    {
+      "id": "writer_share",
+      "label": "Featured artist's share of the composition",
+      "type": "percent",
+      "required": true,
+      "default": "0",
+      "options": [],
+      "help": "Writer share for lyrics the guest writes. Record in the split sheet."
+    },
+    {
+      "id": "credit",
+      "label": "Credit",
+      "type": "text",
+      "required": true,
+      "default": "[Main artist] feat. [Featured artist]",
+      "options": [],
+      "help": "Credit format."
+    },
+    {
+      "id": "signed_to_label",
+      "label": "Is the featured artist signed to a label?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Label waiver needed."
+    },
+    {
+      "id": "label_name",
+      "label": "Featured artist's label",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Label name for 'courtesy of' credit."
+    },
+    {
+      "id": "approval",
+      "label": "Featured artist approves the final mix?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "Approval within 5 days, not unreasonably withheld."
+    },
+    {
+      "id": "promo",
+      "label": "Featured artist will promote the release?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Social posts on release."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and song",
+      "body": "Main artist: {{main_name}} ({{main_alias}}). Featured artist: {{featured_name}} ({{featured_alias}}). Song: \"{{song_title}}\". Date: {{agreement_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Services",
+      "body": "Featured artist will write and record {{contribution}} for the Song, and deliver clean, dry vocal files by {{delivery}}.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Fee",
+      "body": "Main artist will pay {{fee}}: half on signing and half on delivery of the vocals.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Master royalty",
+      "body": "Main artist will pay Featured artist {{royalty_percent}}% of Main artist's net income from the Song's master, accounted twice a year with statements.",
+      "optional": true,
+      "showIf": "royalty == true"
+    },
+    {
+      "id": "s5",
+      "title": "5. Ownership",
+      "body": "Main artist owns the master recording of the Song, including the featured performance. Featured artist keeps their writer share of {{writer_share}}% of the composition, recorded in the Song's split sheet.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Use limits",
+      "body": "The featured performance may be used only in the Song, including its clean, instrumental-plus-feature, sped-up and slowed versions, music videos, lyric videos and promotion, and in official remixes approved by Featured artist. Any other use needs Featured artist's written consent.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Credit and name",
+      "body": "Credit: \"{{credit}}\" on all platforms and metadata. Main artist may use Featured artist's approved name, likeness and biography to promote the Song.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Label clearance",
+      "body": "Featured artist is signed to {{label_name}}. This agreement is conditioned on Main artist receiving a signed waiver from {{label_name}} permitting this feature. Credit will include \"courtesy of {{label_name}}\" if required.",
+      "optional": true,
+      "showIf": "signed_to_label == true"
+    },
+    {
+      "id": "s9",
+      "title": "9. Approval",
+      "body": "Main artist will send Featured artist the final mix before release. Featured artist may request changes to how their performance is presented within 5 days, and approval will not be unreasonably withheld.",
+      "optional": true,
+      "showIf": "approval == true"
+    },
+    {
+      "id": "s10",
+      "title": "10. Promotion",
+      "body": "Featured artist will make at least one post about the Song on their main social channels in the release week.",
+      "optional": true,
+      "showIf": "promo == true"
+    },
+    {
+      "id": "s11",
+      "title": "11. Promises",
+      "body": "Each party promises that its contributions are original or cleared and will not infringe anyone's rights.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Main artist** — {{main_name}}\n\n[[sig:main]]\n\nPrinted name: [[name:main]]\nDate: [[date:main]]\n\n**Featured artist** — {{featured_name}}\n\n[[sig:featured]]\n\nPrinted name: [[name:featured]]\nDate: [[date:featured]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Music rights are split between the composition (song) and the sound recording (master); royalties also depend on PRO, publisher, distributor and label agreements that this template does not change. An entertainment attorney should review deals involving advances, ownership transfers or long terms.",
+  "sources": [
+    {
+      "title": "U.S. Copyright Office Circular 56A: Copyright registration of musical compositions and sound recordings",
+      "url": "https://www.copyright.gov/circs/circ56a.pdf"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    },
+    {
+      "title": "17 U.S.C. §201: ownership of copyright, joint works (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/201"
+    },
+    {
+      "title": "17 U.S.C. §204: execution of transfers of copyright ownership (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/204"
+    },
+    {
+      "title": "ASCAP (performing rights organization)",
+      "url": "https://www.ascap.com/"
+    },
+    {
+      "title": "BMI (performing rights organization)",
+      "url": "https://www.bmi.com/"
+    },
+    {
+      "title": "SESAC (performing rights organization)",
+      "url": "https://www.sesac.com/"
+    },
+    {
+      "title": "Global Music Rights (performing rights organization)",
+      "url": "https://globalmusicrights.com/"
+    },
+    {
+      "title": "SoundExchange: Featured Artist Letters of Direction",
+      "url": "https://www.soundexchange.com/what-we-do/for-artists-labels-and-producers/letters-of-direction/"
+    },
+    {
+      "title": "17 U.S.C. §114: sound recording performance rights, incl. §114(g)(5) producer payments (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/114"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

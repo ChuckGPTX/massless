@@ -1,0 +1,277 @@
+{
+  "id": "proposal-acceptance",
+  "version": 1,
+  "title": "Quote and Proposal Acceptance",
+  "category": "business",
+  "summary": "Turn a quote or proposal into a binding order with a deposit and basic terms.",
+  "useWhen": "You have sent a quote, estimate or proposal and need the customer's signed acceptance before you start work or order materials.",
+  "watchOuts": [
+    "Attach or reference the exact quote version. Price disputes often come from different versions of a quote.",
+    "If the customer is a consumer and you sign the deal at their home, the FTC Cooling-Off Rule may give them three business days to cancel. It applies to many sales of $25 or more, and some states extend it. Include the required notice where it applies.",
+    "Say whether the deposit is refundable. Some states limit non-refundable deposits for home improvement work."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "provider",
+      "label": "Provider"
+    },
+    {
+      "id": "customer",
+      "label": "Customer"
+    }
+  ],
+  "variables": [
+    {
+      "id": "provider_name",
+      "label": "Provider name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Your business name."
+    },
+    {
+      "id": "customer_name",
+      "label": "Customer name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Customer's legal name."
+    },
+    {
+      "id": "customer_address",
+      "label": "Customer address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Billing or service address."
+    },
+    {
+      "id": "quote_number",
+      "label": "Quote or proposal number",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Reference number on the quote."
+    },
+    {
+      "id": "quote_date",
+      "label": "Quote date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of the quote."
+    },
+    {
+      "id": "scope_summary",
+      "label": "Summary of what is included",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Short description. The attached quote controls the details."
+    },
+    {
+      "id": "total_price",
+      "label": "Total price",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total quoted price, including taxes if applicable."
+    },
+    {
+      "id": "deposit",
+      "label": "Deposit due at acceptance",
+      "type": "money",
+      "required": false,
+      "default": "0",
+      "options": [],
+      "help": "Amount due to book the work."
+    },
+    {
+      "id": "deposit_refundable",
+      "label": "Is the deposit refundable?",
+      "type": "select",
+      "required": true,
+      "default": "refundable less costs already incurred",
+      "options": [
+        "refundable",
+        "refundable less costs already incurred",
+        "non-refundable"
+      ],
+      "help": "Check state limits for consumer and home-improvement work."
+    },
+    {
+      "id": "balance_terms",
+      "label": "Balance payment terms",
+      "type": "text",
+      "required": true,
+      "default": "Due on completion",
+      "options": [],
+      "help": "When the rest is paid."
+    },
+    {
+      "id": "start_date",
+      "label": "Estimated start date",
+      "type": "date",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Estimated start."
+    },
+    {
+      "id": "valid_until",
+      "label": "Quote valid until",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "The customer must accept by this date."
+    },
+    {
+      "id": "cooling_off",
+      "label": "Signed at the customer's home or a temporary location (consumer sale)?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "If on, adds the FTC three-day cancellation notice."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Acceptance",
+      "body": "{{customer_name}} (\"Customer\") accepts quote/proposal no. {{quote_number}} dated {{quote_date}} from {{provider_name}} (\"Provider\") for the following:\n\n{{scope_summary}}\n\nThe quote is attached to this acceptance. If the quote and this acceptance conflict, this acceptance controls.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Price and payment",
+      "body": "Total price: {{total_price}}. Deposit due now: {{deposit}} ({{deposit_refundable}}). Balance: {{balance_terms}}. Changes to scope require a signed change order and may change the price.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "Schedule",
+      "body": "Estimated start date: {{start_date}}. Dates are estimates and may be affected by weather, material availability, permits or Customer delays. Provider will keep Customer informed.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "3. Validity",
+      "body": "This quote can be accepted until {{valid_until}}. After that, Provider may revise pricing.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "4. Basic terms",
+      "body": "- Provider will perform the work in a good and workmanlike manner and follow applicable laws.\n- Customer will provide reasonable access and information needed for the work.\n- Provider's liability is limited to the amount paid under this acceptance, except where the law does not allow a limit.\n- Customer service address: {{customer_address}}.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "5. Notice of right to cancel",
+      "body": "**You, the buyer, may cancel this transaction at any time prior to midnight of the third business day after the date of this transaction.** To cancel, send or deliver a signed and dated notice of cancellation, or any other written notice, to {{provider_name}} at the address on the quote before that deadline. If you cancel, any payments you made will be returned within 10 business days. (FTC Cooling-Off Rule, 16 CFR Part 429. A separate cancellation form must also be provided where the rule applies.)",
+      "optional": true,
+      "showIf": "cooling_off == true"
+    },
+    {
+      "id": "s7",
+      "title": "6. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Accepted by Customer** — {{customer_name}}\n\n[[sig:customer]]\n\nPrinted name: [[name:customer]]\nTitle (if signing for a company): [[text:customer:Title]]\nDate: [[date:customer]]\n\n**Provider** — {{provider_name}}\n\n[[sig:provider]]\n\nPrinted name: [[name:provider]]\nTitle (if signing for a company): [[text:provider:Title]]\nDate: [[date:provider]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "FTC: Buyer's remorse and the Cooling-Off Rule",
+      "url": "https://consumer.ftc.gov/articles/buyers-remorse-ftcs-cooling-rule-may-help"
+    },
+    {
+      "title": "16 CFR Part 429: Cooling-off period for sales made at homes or certain other locations (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-16/chapter-I/subchapter-D/part-429"
+    },
+    {
+      "title": "signNow: Top 5 most e-signed documents",
+      "url": "https://www.signnow.com/blog/top-5-most-e-signed-documents-in-2020/"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

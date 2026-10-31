@@ -1,0 +1,357 @@
+from lib import *
+
+TEMPLATES = []
+add = TEMPLATES.append
+
+NOTE_WATCH = [
+    "Usury: every state caps interest on some loans, and penalties can include losing all interest. The cap depends on the state, the loan type and whether the borrower is a consumer or a business. Verify locally before setting the rate.",
+    "E-signatures: the federal E-SIGN Act excludes UCC Article 3 (negotiable instruments). An e-signed note is still an enforceable promise to pay, but it may not qualify as a negotiable instrument that can be transferred to a holder in due course. If you may sell or pledge the note, consider a wet-ink original.",
+    "Family and low-interest loans: for loans over $10,000 charging less than the IRS applicable federal rate, the IRS may impute interest and treat the forgone interest as a gift. Talk to a tax adviser.",
+    "Consumer loans made regularly as a business may need a state lender license and Truth in Lending disclosures.",
+]
+
+# ------------------------------------------------------------------ Bill of sale
+add(T(
+    id="bill-of-sale", title="Bill of Sale", category="everyday",
+    tags=["bill of sale", "vehicle", "personal property", "sale", "most-signed"],
+    summary="Record the sale of a car, boat, equipment or other personal property, with price, condition and title promises.",
+    useWhen="One person sells personal property, not real estate, to another and both want proof of the sale and its terms.",
+    watchOuts=[
+        "Vehicles: the bill of sale does not transfer title. The seller must sign the state title certificate, and most states require an odometer disclosure on the title for vehicles under federal odometer rules. Some states also require a state-specific bill of sale form, a notary or a release of liability filing. Verify with your DMV.",
+        "'As is' sales: for many goods, an 'as is' clause must be conspicuous to disclaim implied warranties under UCC §2-316, and some states limit disclaimers for consumer sales. Used car dealers must use the FTC Buyers Guide.",
+        "Liens: check for loans or liens on the item, for example through a vehicle title search or a UCC filing search, before paying.",
+        "Sales tax may be due when the buyer registers or titles the item.",
+    ],
+    roles=[("seller", "Seller"), ("buyer", "Buyer")],
+    variables=[V("sale_date", "Date of sale", "date", help="Date of sale and delivery.")]
+    + party_vars("seller", "Seller", email=False) + party_vars("buyer", "Buyer", email=False) + [
+        V("item_type", "Type of item", "select", default="vehicle", options=["vehicle", "boat or trailer", "equipment", "other personal property"], help="Vehicle adds VIN and odometer fields."),
+        V("item_description", "Description", "longtext", help="Make, model, year, color, condition, accessories included."),
+        V("serial", "Serial number, VIN or hull ID", "text", False, help="Identifying number."),
+        V("odometer", "Odometer reading", "number", False, help="Miles shown at sale."),
+        V("odometer_status", "Odometer status", "select", False, "actual mileage", ["actual mileage", "exceeds mechanical limits", "not the actual mileage (warning)"], help="Federal law requires an accurate odometer statement for most vehicle transfers."),
+        V("price", "Sale price", "money", help="Total price."),
+        V("payment_method", "Payment method", "text", default="cash", help="Cash, cashier's check, bank transfer, etc."),
+        V("condition_terms", "Condition", "select", default="as is", options=["as is", "with a written seller warranty"], help="Most private sales are as-is."),
+        V("liens", "Liens or claims on the item", "text", False, "None", help="List any loan or lien that will be paid off or remain. 'None' if none."),
+        V("warranty_terms", "Seller's warranty", "longtext", False, help="What the seller promises and for how long."),
+        V("disclosures", "Known defects", "longtext", False, "None known.", help="Seller lists known problems."),
+        state_var("sale_state", "State of sale"),
+    ],
+    sections=[
+        S("Parties", party_line("seller", "Seller", email=False) + "\n\n" + party_line("buyer", "Buyer", email=False)),
+        S("Item sold", "On {{sale_date}}, Seller sells and Buyer buys the following {{item_type}}:\n\n{{item_description}}\n\nIdentification number: {{serial}}"),
+        when("Odometer statement", "Seller states that, to the best of Seller's knowledge, the odometer now reads {{odometer}} miles and this reflects the {{odometer_status}}. Federal law (and state law) requires you to state the mileage upon transfer of ownership. Failure to complete or providing a false statement may result in fines and/or imprisonment. Seller: [[initial:seller]]  Buyer: [[initial:buyer]]", "item_type == 'vehicle'"),
+        S("Price and payment", "Buyer pays Seller {{price}} by {{payment_method}}. Seller acknowledges receiving payment in full."),
+        S("Title", "Seller promises that Seller owns the item, has the right to sell it, and is transferring it free of any liens, security interests or claims of others, except: {{liens}}. Seller will sign any title certificate or other document needed to transfer ownership."),
+        when("Condition: as is", "**The item is sold \"AS IS\" and \"WITH ALL FAULTS.\" Seller makes no warranties, express or implied, including any implied warranty of merchantability or fitness for a particular purpose.** Buyer has had the chance to inspect the item. Buyer: [[initial:buyer]]", "condition_terms == 'as is'"),
+        when("Condition: seller warranty", "Seller gives this warranty: {{warranty_terms}}. Seller makes no other warranties.", "condition_terms == 'with a written seller warranty'"),
+        S("Known defects", "Seller has disclosed these known defects: {{disclosures}}"),
+        S("Delivery and risk", "Buyer takes possession on the date of sale. From then on, Buyer bears the risk of loss and is responsible for registration, insurance, taxes and fees."),
+        S("General", "This bill of sale is governed by the laws of {{sale_state}}. It is the parties' entire agreement about the sale. Electronic signatures are valid."),
+        signatures([("seller", "Seller", "{{seller_name}}"), ("buyer", "Buyer", "{{buyer_name}}")]),
+    ],
+    sources=[SRC["ucc2"], SRC["ucc2_316"], src("NHTSA: Odometer fraud and disclosure requirements", "https://www.nhtsa.gov/odometer-fraud"), src("49 CFR Part 580: Odometer disclosure requirements (eCFR)", "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-580")],
+))
+
+# ------------------------------------------------------------------ Promissory note (unsecured)
+add(T(
+    id="promissory-note-unsecured", title="Promissory Note (Unsecured)", category="everyday",
+    tags=["promissory note", "loan", "iou", "personal loan", "family loan"],
+    summary="A borrower's written promise to repay a loan, with interest, payments, late fees and default terms.",
+    useWhen="Lending money to a person or business without collateral, for example a family loan or a loan to a friend's business.",
+    watchOuts=NOTE_WATCH,
+    roles=[("borrower", "Borrower")],
+    variables=[V("note_date", "Date of note", "date", help="Date the money is lent.")]
+    + party_vars("borrower", "Borrower") + party_vars("lender", "Lender") + [
+        V("principal", "Principal amount", "money", help="Amount borrowed."),
+        V("interest_rate", "Annual interest rate", "percent", default="5", help="Simple interest per year. Check your state's usury limit."),
+        V("repayment", "Repayment plan", "select", default="monthly installments", options=["monthly installments", "single payment on the maturity date", "interest-only payments, principal at maturity"], help="How the loan is repaid."),
+        V("payment_amount", "Monthly payment", "money", False, help="Installment amount including interest. Use an amortization calculator."),
+        V("first_payment", "First payment date", "date", False, help="Date of the first payment."),
+        V("maturity_date", "Maturity date", "date", help="Date everything still owed is due."),
+        V("payment_place", "Payment method or place", "text", default="by bank transfer to an account the Lender designates", help="Where or how to pay."),
+        V("late_days", "Grace period (days)", "number", default="10", help="Days after the due date before a late fee applies."),
+        V("late_fee", "Late fee", "money", False, "25", help="Flat late fee. Some states cap late fees."),
+        V("default_rate", "Default interest rate", "percent", False, "", help="Optional higher rate after default, within the legal limit. Leave blank to keep the regular rate."),
+        V("include_attorney_fees", "Borrower pays collection costs?", "bool", False, "true", help="Borrower pays reasonable collection costs and attorney fees if in default, where the law allows."),
+        state_var(),
+    ],
+    sections=[
+        S("Promise to pay", "For value received, {{borrower_name}} (\"Borrower\"), of {{borrower_address}}, promises to pay {{lender_name}} (\"Lender\"), of {{lender_address}}, the principal sum of {{principal}}, plus interest as described below. Date: {{note_date}}."),
+        S("Interest", "Interest accrues on the unpaid principal at {{interest_rate}}% per year, simple interest, calculated on the basis of a 365-day year, from the date of this note until paid in full. Interest will never exceed the maximum rate allowed by law. Any excess will be applied to principal or refunded."),
+        when("Payments: installments", "Borrower will pay {{payment_amount}} per month, starting {{first_payment}} and on the same day each month after that, until the maturity date of {{maturity_date}}, when all remaining principal and interest is due.", "repayment == 'monthly installments'"),
+        when("Payments: single payment", "Borrower will pay all principal and accrued interest in one payment on {{maturity_date}}.", "repayment == 'single payment on the maturity date'"),
+        when("Payments: interest-only", "Borrower will pay accrued interest monthly starting {{first_payment}}, and all principal and remaining interest on {{maturity_date}}.", "repayment == 'interest-only payments, principal at maturity'"),
+        S("How payments are made and applied", "Payments are made {{payment_place}}. Each payment is applied first to late fees, then to accrued interest, then to principal. Borrower may prepay all or part at any time without penalty. Partial prepayments do not postpone the next scheduled payment."),
+        S("Late payments", "If a payment is more than {{late_days}} days late, Borrower will pay a late fee of {{late_fee}}, to the extent allowed by law."),
+        S("Default", """
+Borrower is in default if (a) any payment is more than 30 days late and Borrower does not pay within 10 days after written notice, (b) Borrower becomes insolvent, makes an assignment for creditors or files bankruptcy, or (c) any statement Borrower made to obtain the loan was materially false. On default, Lender may declare the whole unpaid balance and accrued interest immediately due."""),
+        S("Default interest", "After default and acceleration, the unpaid balance bears interest at {{default_rate}}% per year if a default rate is stated, or otherwise at the regular rate, but never above the legal maximum."),
+        opt("Collection costs", "If Lender has to collect after a default, Borrower will pay Lender's reasonable costs of collection, including reasonable attorney fees, to the extent allowed by law.", "include_attorney_fees"),
+        S("Other terms", "Borrower waives presentment, demand, protest and notice of dishonor, to the extent allowed by law. Lender's delay in enforcing any right is not a waiver. This note is governed by the laws of {{governing_state}}. If any part is unenforceable, the rest stays in effect. Lender may assign this note. Borrower may not assign it without Lender's written consent. Notices go to the addresses above or to {{borrower_email}} and {{lender_email}}."),
+        signatures([("borrower", "Borrower", "{{borrower_name}}", True)], "Borrower signs this note on the date above. (A promissory note is signed by the borrower. The lender keeps the signed original.)"),
+    ],
+    sources=[SRC["esign_exc"], SRC["ucc3"], src("IRS: Applicable federal rates", "https://www.irs.gov/applicable-federal-rates"), src("IRS Topic: Gift tax (below-market loans)", "https://www.irs.gov/businesses/small-businesses-self-employed/frequently-asked-questions-on-gift-taxes")],
+))
+
+# ------------------------------------------------------------------ Loan agreement
+add(T(
+    id="loan-agreement", title="Loan Agreement", category="everyday",
+    tags=["loan", "lending", "business loan", "personal loan", "collateral"],
+    summary="A fuller loan contract than a note: purpose, disbursement, repayment, promises, default, and optional collateral.",
+    useWhen="A person or business lends a meaningful amount and wants promises from the borrower and remedies beyond a simple note. Use with the promissory note template if you want a separate note.",
+    watchOuts=NOTE_WATCH + [
+        "Collateral: to secure personal property collateral against other creditors, the lender usually must 'perfect' a security interest, typically by filing a UCC-1 financing statement with the state. For vehicles, the lien goes on the title. Real estate collateral needs a recorded mortgage or deed of trust.",
+        "Personal guarantees should be in a separate signed guaranty. Spouses' signatures may be needed in community property states.",
+    ],
+    roles=[("lender", "Lender"), ("borrower", "Borrower")],
+    variables=[V("effective_date", "Effective date", "date", help="Date of the agreement.")]
+    + party_vars("lender", "Lender") + party_vars("borrower", "Borrower") + [
+        V("amount", "Loan amount", "money", help="Total principal."),
+        V("purpose", "Purpose of the loan", "text", False, "general business or personal purposes", help="What the money will be used for."),
+        V("disbursement", "Disbursement", "text", default="in one payment within 5 business days after signing", help="How and when the money is delivered."),
+        V("interest_rate", "Annual interest rate", "percent", default="8", help="Within your state's usury limit."),
+        V("term_months", "Term (months)", "number", default="24", help="Months until the final payment."),
+        V("payment_amount", "Monthly payment", "money", help="Fully amortizing payment amount."),
+        V("first_payment", "First payment date", "date", help="First due date."),
+        V("late_fee_percent", "Late fee (% of payment)", "percent", False, "5", help="Charged if a payment is more than 10 days late. Check state caps."),
+        V("secured", "Secured by collateral?", "bool", False, "false", help="Borrower grants a security interest in personal property."),
+        V("collateral", "Collateral description", "longtext", False, help="Describe the collateral specifically, e.g. '2022 Ford F-150, VIN ...' or 'all equipment and inventory of Borrower's bakery business'."),
+        V("financial_reports", "Borrower provides financial updates?", "bool", False, "false", help="Borrower provides annual financial statements or tax returns."),
+        state_var(),
+    ],
+    sections=[
+        S("Parties", party_line("lender", "Lender") + "\n\n" + party_line("borrower", "Borrower") + "\n\nEffective {{effective_date}}."),
+        S("The loan", "Lender will lend Borrower {{amount}} (the \"Loan\") for {{purpose}}. Lender will disburse the Loan {{disbursement}}. Borrower will sign a promissory note for the Loan if Lender asks. If the note and this agreement conflict, this agreement controls."),
+        S("Interest and repayment", "Interest accrues on the unpaid principal at {{interest_rate}}% per year, simple interest on a 365-day year. Borrower will repay the Loan in monthly payments of {{payment_amount}}, starting {{first_payment}}, for {{term_months}} months. Any remaining balance is due with the final payment. Borrower may prepay at any time without penalty. Payments apply to fees, then interest, then principal. A payment more than 10 days late incurs a late fee of {{late_fee_percent}}% of the payment, to the extent allowed by law. Interest will never exceed the legal maximum."),
+        S("Borrower's statements", "Borrower confirms that: (a) Borrower has full power to sign and perform this agreement, and if a business, it is in good standing and this agreement is authorized; (b) the information Borrower gave Lender is true and complete; and (c) no lawsuit or financial condition known to Borrower would materially impair Borrower's ability to repay."),
+        S("Borrower's ongoing promises", "Until the Loan is repaid, Borrower will use the money for the stated purpose, pay its taxes, keep any collateral insured and in good condition, and promptly tell Lender in writing about any event that could materially affect its ability to repay."),
+        opt("Financial updates", "Within 120 days after each year-end, Borrower will give Lender its annual financial statements or federal tax return, and other reasonably requested financial information.", "financial_reports"),
+        opt("Collateral", "To secure the Loan, Borrower grants Lender a security interest in the following collateral and its proceeds:\n\n{{collateral}}\n\nBorrower authorizes Lender to file a UCC financing statement and will sign any document reasonably needed to perfect it, including a lien notation on a title. Borrower will not sell, move or encumber the collateral without Lender's written consent. On default, Lender has the rights of a secured party under Article 9 of the Uniform Commercial Code, including the right to take and sell the collateral after required notices.", "secured"),
+        S("Default and remedies", "An Event of Default occurs if (a) Borrower fails to pay any amount within 10 days after its due date and does not cure within 10 days after written notice, (b) Borrower breaches another promise and does not cure within 30 days after written notice, (c) any statement by Borrower was materially false, or (d) Borrower becomes insolvent or files bankruptcy. After an Event of Default, Lender may declare the entire balance immediately due and use any remedy available by law. Borrower will pay Lender's reasonable collection costs and attorney fees, to the extent allowed by law."),
+        general_terms(),
+        signatures([("lender", "Lender", "{{lender_name}}", True), ("borrower", "Borrower", "{{borrower_name}}", True)]),
+    ],
+    sources=[SRC["esign_exc"], SRC["ucc3"], src("UCC §9-310: when filing is required to perfect a security interest (Cornell LII)", "https://www.law.cornell.edu/ucc/9/9-310"), src("IRS: Applicable federal rates", "https://www.irs.gov/applicable-federal-rates")],
+))
+
+# ------------------------------------------------------------------ Payment plan
+add(T(
+    id="payment-plan-agreement", title="Payment Plan Agreement", category="everyday",
+    tags=["payment plan", "installments", "debt", "past due", "settlement"],
+    summary="Let a customer or debtor pay an existing balance over time, with a schedule and what happens if a payment is missed.",
+    useWhen="Someone owes you money, for example an unpaid invoice, rent arrears or damages, and you agree to accept installments.",
+    watchOuts=[
+        "In many states, a written acknowledgment of a debt or a partial payment can restart the statute of limitations. Debtors should know this. Creditors should not use it to revive time-barred debts in a misleading way.",
+        "Third-party debt collectors are subject to the federal Fair Debt Collection Practices Act and Regulation F, and to state collection laws.",
+        "If you agree to accept less than the full balance, say clearly whether the remainder is forgiven only on full performance. Forgiven debt can be taxable income to the debtor (Form 1099-C rules may apply).",
+        "Autopay authorizations for recurring debits must meet Regulation E and card-network rules.",
+    ],
+    roles=[("creditor", "Creditor"), ("debtor", "Debtor")],
+    variables=[V("agreement_date", "Date", "date", help="Date of this agreement.")]
+    + party_vars("creditor", "Creditor") + party_vars("debtor", "Debtor") + [
+        V("debt_description", "What the balance is for", "longtext", help="Invoice numbers, services, rent period, etc."),
+        V("total_balance", "Total balance owed", "money", help="Full amount owed today."),
+        V("settlement", "Is the creditor accepting less than the full balance?", "bool", False, "false", help="If on, the creditor accepts a reduced amount if every payment is made on time."),
+        V("settlement_amount", "Reduced settlement amount", "money", False, help="Amount accepted in full satisfaction if all payments are made on time."),
+        V("down_payment", "Down payment", "money", False, "0", help="Paid at signing."),
+        V("installment_amount", "Installment amount", "money", help="Each payment."),
+        V("frequency", "Payment frequency", "select", default="monthly", options=["weekly", "every two weeks", "monthly"], help="How often."),
+        V("first_due", "First installment due", "date", help="First due date."),
+        V("number_of_payments", "Number of installments", "number", help="Total installments."),
+        V("payment_method", "Payment method", "text", default="bank transfer or check", help="How to pay."),
+        V("cure_days", "Days to cure a missed payment", "number", default="10", help="Grace period after written notice before the plan is in default."),
+        V("interest_on_plan", "Interest during the plan", "select", default="no interest if paid on schedule", options=["no interest if paid on schedule", "interest at the rate below"], help="Whether interest accrues."),
+        V("plan_rate", "Annual interest rate", "percent", False, help="If interest applies."),
+        state_var(),
+    ],
+    sections=[
+        S("Parties and balance", party_line("creditor", "Creditor") + "\n\n" + party_line("debtor", "Debtor") + "\n\nDebtor owes Creditor {{total_balance}} as of {{agreement_date}} for: {{debt_description}}. Debtor confirms this amount is correct."),
+        S("Payment schedule", "Debtor will pay {{down_payment}} on signing, then {{number_of_payments}} installments of {{installment_amount}}, paid {{frequency}}, starting {{first_due}}, by {{payment_method}}. Debtor may pay more or pay off early at any time."),
+        S("Interest", "During the plan: {{interest_on_plan}}. If interest applies, it is {{plan_rate}}% per year on the unpaid balance, never above the legal maximum."),
+        opt("Reduced settlement", "If Debtor makes every payment on time, Creditor will accept {{settlement_amount}} in full satisfaction of the balance and will confirm in writing that the account is settled. If Debtor defaults, this reduction does not apply and the full balance, minus payments made, is owed.", "settlement"),
+        S("Missed payments", "If a payment is missed, Creditor will give Debtor written notice. If Debtor does not pay the missed amount within {{cure_days}} days after notice, the plan is in default and Creditor may demand the entire remaining balance and pursue any lawful remedy."),
+        S("Creditor's promises", "While Debtor is not in default, Creditor will not start collection action or report the account as delinquent for the period covered by this plan, and will credit every payment promptly. Creditor will provide a payment history on request."),
+        S("No other changes", "This agreement only changes the payment terms for the balance described. It does not waive any other rights."),
+        general_terms(),
+        signatures([("creditor", "Creditor", "{{creditor_name}}", True), ("debtor", "Debtor", "{{debtor_name}}", True)]),
+    ],
+    sources=[SRC["ftc_debt"], src("CFPB Regulation F (debt collection), 12 CFR Part 1006 (eCFR)", "https://www.ecfr.gov/current/title-12/chapter-X/part-1006"), src("IRS Topic 431: Canceled debt, is it taxable or not?", "https://www.irs.gov/taxtopics/tc431")],
+))
+
+# ------------------------------------------------------------------ General release
+add(T(
+    id="general-release", title="General Release of Claims", category="everyday",
+    tags=["release", "waiver", "settlement", "one-way release"],
+    summary="One party gives up claims against another, usually in exchange for a payment.",
+    useWhen="Settling a claim such as a minor accident, property damage or a contract dispute, where only one side is giving up claims. For two-way releases use the mutual release.",
+    watchOuts=[
+        "Personal injury releases should be signed only after the injured person understands the full extent of the injuries. Releasing claims early can waive future medical costs.",
+        "Minors generally cannot release their own claims, and parents' releases on behalf of minors are unenforceable in some states for some claims. Some settlements need court approval.",
+        "Releases of certain claims are restricted or need special steps: federal age-discrimination claims (OWBPA), wage-and-hour claims, workers' compensation, and claims of people receiving Medicare (Medicare secondary payer rules).",
+        "California requires an express waiver of Civil Code §1542 to release unknown claims. The template adds it when California law is chosen.",
+    ],
+    roles=[("releasor", "Releasing party"), ("releasee", "Released party")],
+    variables=[V("effective_date", "Effective date", "date", help="Date signed.")]
+    + party_vars("releasor", "Releasing party") + party_vars("releasee", "Released party") + [
+        V("incident", "Claim or incident being released", "longtext", help="Describe it specifically: date, place, what happened, contract name."),
+        V("consideration", "Payment or other consideration", "text", help="E.g. '$2,500 paid by check'."),
+        V("payment_due", "Payment due", "date", False, help="When the payment will be made."),
+        V("scope", "Scope", "select", default="claims arising from the incident only", options=["claims arising from the incident only", "all claims of any kind up to today"], help="A narrow release is easier to understand and enforce."),
+        state_var(),
+    ],
+    sections=[
+        S("Parties", party_line("releasor", "Releasing party (Releasor)") + "\n\n" + party_line("releasee", "Released party (Releasee)") + "\n\nEffective {{effective_date}}."),
+        S("Payment", "In exchange for this release, Releasee will provide: {{consideration}}, by {{payment_due}}. Releasor confirms this is adequate consideration."),
+        when("Release: incident only", "Releasor, for itself and its heirs, successors and assigns, releases Releasee and its owners, employees, agents, insurers, successors and assigns from all claims, demands, damages and causes of action, known or unknown, arising out of or relating to: {{incident}}.", "scope == 'claims arising from the incident only'"),
+        when("Release: all claims", "Releasor, for itself and its heirs, successors and assigns, releases Releasee and its owners, employees, agents, insurers, successors and assigns from all claims, demands, damages and causes of action of any kind, known or unknown, that exist up to the effective date, including those arising out of or relating to: {{incident}}.", "scope == 'all claims of any kind up to today'"),
+        S("What is not released", "This release does not cover obligations under this document, claims that arise after the effective date, or claims that cannot be released as a matter of law."),
+        when("Waiver of California Civil Code §1542", "Releasor expressly waives the protection of California Civil Code §1542, which says: \"A general release does not extend to claims that the creditor or releasing party does not know or suspect to exist in his or her favor at the time of executing the release and that, if known by him or her, would have materially affected his or her settlement with the debtor or released party.\" Initials: [[initial:releasor]]", "governing_state == 'CA'"),
+        S("No admission", "This release is a compromise and is not an admission of liability by Releasee."),
+        S("Releasor's confirmations", "Releasor confirms that Releasor (a) has not assigned any released claim to anyone, (b) has read and understands this release, (c) had the chance to consult a lawyer, and (d) signs voluntarily. Releasor will be responsible for any liens on the payment, such as medical or attorney liens, unless the parties agree otherwise in writing. Initials: [[initial:releasor]]"),
+        general_terms(),
+        signatures([("releasor", "Releasing party", "{{releasor_name}}", True), ("releasee", "Released party", "{{releasee_name}}", True)]),
+    ],
+    sources=[SRC["cal_1542"], SRC["eeoc_release"], src("CMS: Medicare secondary payer (liability insurance and settlements)", "https://www.cms.gov/medicare/coordination-benefits-recovery/overview"), SRC["esign"]],
+))
+
+# ------------------------------------------------------------------ Media release
+add(T(
+    id="media-release", title="Photo, Video and Likeness Release", category="everyday",
+    tags=["model release", "photo release", "video release", "likeness", "content", "creator"],
+    summary="Permission to photograph or record someone and use their image, voice and name.",
+    useWhen="Shooting photos or video of a person for marketing, social media, a film, a podcast or other content.",
+    watchOuts=[
+        "Right of publicity laws vary by state. Commercial uses, such as ads and endorsements, need clearer consent than editorial or news uses.",
+        "Minors: a parent or legal guardian must sign. Some states limit releases for child performers or require court approval of entertainment contracts. Verify locally.",
+        "If you may use AI to alter, clone or synthesize the person's face or voice, say so expressly. Several states, for example California, New York and Tennessee, now regulate digital replicas.",
+        "Property and trademarks visible in the shot, such as a private home, artwork or logos, may need separate permission.",
+        "Union performers (SAG-AFTRA) work under collective bargaining agreements that override some release terms.",
+    ],
+    roles=[("subject", "Person recorded (or parent/guardian)"), ("producer", "Producer")],
+    variables=[
+        V("release_date", "Date", "date", help="Date signed."),
+        V("subject_name", "Name of person recorded", "party", help="Person whose image or voice is used."),
+        V("subject_address", "Address", "address", False, help="Contact address."),
+        V("subject_email", "Email", "email", False, help="Contact email."),
+        V("producer_name", "Producer or company", "party", help="Who will use the recordings."),
+        V("project", "Project or shoot", "text", help="E.g. 'Spring 2026 product photo shoot' or 'Episode 12 of the podcast'."),
+        V("uses", "Allowed uses", "select", default="any media, including advertising", options=["any media, including advertising", "editorial and social media only", "internal use only"], help="How broadly the producer can use the material."),
+        V("term", "Duration", "select", default="perpetual", options=["perpetual", "5 years", "2 years", "1 year"], help="How long the producer can use it."),
+        V("compensation", "Compensation", "text", default="no payment", help="Fee, product or 'no payment'."),
+        V("digital_replica", "Allow AI or digital alteration of face or voice?", "bool", False, "false", help="Off means only ordinary editing, such as cropping, color and retouching, is allowed."),
+        V("is_minor", "Is the person under 18?", "bool", False, "false", help="If on, a parent or legal guardian signs."),
+        V("guardian_name", "Parent or guardian name", "text", False, help="Who signs for the minor."),
+        state_var(),
+    ],
+    sections=[
+        S("Permission", "{{subject_name}} (\"I\" or \"me\") gives {{producer_name}} and its licensees, successors and assigns (\"Producer\") permission to photograph, film and record me in connection with {{project}}, and to use the resulting photographs, video, audio, my name and my likeness (the \"Materials\") for {{uses}}, worldwide, for a duration of {{term}}."),
+        S("Ownership and editing", "Producer owns the Materials. Producer may crop, edit, retouch, color-correct and combine the Materials with other content, but will not use them in a way that is defamatory or that falsely suggests I endorse a product without my consent."),
+        opt("Digital alteration and AI", "I also allow Producer to digitally alter my image and voice, including with AI tools, to create new content for the uses above. Producer will not create a realistic digital replica of me that says or does things I did not actually say or do without my separate written approval of each use. Initials: [[initial:subject]]", "digital_replica"),
+        S("Compensation", "Compensation: {{compensation}}. I understand I will not receive royalties or other payments unless stated here."),
+        S("Release", "I release Producer from claims for invasion of privacy, right of publicity, defamation and similar claims arising from uses allowed by this release. This does not apply to uses outside this release or to claims that cannot be waived."),
+        S("Revocation", "I may revoke this permission for future uses by written notice. Revocation does not affect Materials already published or distributed, or contractual commitments Producer made before receiving my notice."),
+        when("Parent or guardian consent", "I, {{guardian_name}}, am the parent or legal guardian of the minor named above, have the legal authority to sign this release on the minor's behalf, and agree to its terms for the minor. [[check:subject:I am the parent or legal guardian of the minor named above]]", "is_minor == true"),
+        S("General", "This release is governed by the laws of {{governing_state}}. Contact: {{subject_address}} {{subject_email}}. Date: {{release_date}}. Electronic signatures are valid."),
+        signatures([("subject", "Person recorded (or parent/guardian)", "{{subject_name}}"), ("producer", "Producer", "{{producer_name}}", True)]),
+    ],
+    sources=[src("California Civil Code §3344 (commercial use of name or likeness)", "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=3344"),
+             src("U.S. Copyright Office: Copyright and Artificial Intelligence, Part 1: Digital Replicas (2024)", "https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-1-Digital-Replicas-Report.pdf"),
+             SRC["esign"]],
+))
+
+# ------------------------------------------------------------------ Equipment rental
+add(T(
+    id="equipment-rental-agreement", title="Equipment Rental Agreement", category="everyday",
+    tags=["rental", "equipment", "lease", "gear", "tools"],
+    summary="Rent out equipment, gear or tools with a deposit, condition checks and responsibility for damage.",
+    useWhen="Renting cameras, audio gear, tools, machinery, party equipment or similar items for a set period.",
+    watchOuts=[
+        "Photograph the equipment and record serial numbers at pickup and return. Most disputes are about pre-existing damage.",
+        "Insurance: confirm whether the renter's insurance covers rented equipment (an inland marine or rented-equipment endorsement). Otherwise the renter bears full replacement cost.",
+        "Heavy machinery or vehicles may require operator certification, separate insurance or titled-vehicle rules.",
+        "Security deposits for consumer rentals may be regulated in some states.",
+    ],
+    roles=[("owner", "Owner"), ("renter", "Renter")],
+    variables=[V("agreement_date", "Date", "date", help="Date of agreement.")]
+    + party_vars("owner", "Owner") + party_vars("renter", "Renter") + [
+        V("equipment", "Equipment list", "longtext", help="Each item with make, model, serial number, accessories and replacement value."),
+        V("start", "Rental start (date and time)", "text", help="E.g. 'June 3, 2026 at 9:00 a.m.'."),
+        V("end", "Rental end (date and time)", "text", help="Return deadline."),
+        V("rate", "Rental fee", "money", help="Total fee or rate."),
+        V("rate_basis", "Fee basis", "select", default="total for the rental period", options=["total for the rental period", "per day", "per week"], help="How the fee is calculated."),
+        V("deposit", "Security deposit", "money", False, "0", help="Refundable deposit."),
+        V("delivery", "Pickup or delivery", "text", default="Renter picks up and returns the equipment at Owner's address", help="Logistics."),
+        V("late_fee", "Late return fee per day", "money", False, help="Charge for each day late."),
+        V("location_limit", "Where the equipment may be used", "text", False, "within the United States", help="Location limits."),
+        V("insurance_required", "Renter must insure the equipment?", "bool", False, "false", help="Renter maintains insurance covering loss or damage."),
+        state_var(),
+    ],
+    sections=[
+        S("Parties", party_line("owner", "Owner") + "\n\n" + party_line("renter", "Renter") + "\n\nDate: {{agreement_date}}."),
+        S("Equipment", "Owner rents to Renter the following equipment, including listed accessories (the \"Equipment\"):\n\n{{equipment}}"),
+        S("Rental period", "From {{start}} to {{end}}. {{delivery}}."),
+        S("Fees and deposit", "Renter will pay {{rate}} ({{rate_basis}}) before pickup, plus a refundable security deposit of {{deposit}}. Owner will return the deposit within 7 days after the Equipment is returned, minus documented amounts owed under this agreement, with an itemized statement."),
+        S("Condition", "The parties will inspect the Equipment at pickup and note existing damage, with photos. Renter accepts the Equipment in that condition. Renter must return it clean and in the same condition, except for normal wear and tear. Pre-use condition notes: [[text:renter:Condition notes at pickup]]"),
+        S("Use", "Renter will use the Equipment carefully, only for its intended purpose, in line with the manufacturer's instructions and the law, and only {{location_limit}}. Renter will not sublet, lend or modify the Equipment, and will let only competent, trained people operate it. Renter will not remove serial numbers or labels."),
+        S("Loss and damage", "From pickup until return, Renter is responsible for loss, theft or damage to the Equipment beyond normal wear and tear. Renter will pay the reasonable cost of repair or, if the Equipment cannot be repaired, its replacement value listed above. Renter will report loss, theft or damage to Owner within 24 hours, and theft to the police."),
+        opt("Insurance", "Renter will carry insurance covering the full replacement value of the Equipment while in Renter's care, naming Owner as loss payee, and will provide proof before pickup.", "insurance_required"),
+        S("Late return", "If the Equipment is returned late, Renter will pay {{late_fee}} for each day or part of a day late, in addition to any other amounts owed. If the Equipment is not returned within 7 days after the end date, Owner may treat it as lost or stolen."),
+        S("Owner's limits", "Owner provides the Equipment \"as is\", except that Owner believes it is in working order at pickup. Owner is not liable for indirect losses, such as lost profits or a cancelled shoot, caused by Equipment failure. If Equipment fails through no fault of Renter, Owner's only obligation is to replace it, if available, or refund the fee for the unused period."),
+        S("Responsibility for injuries", "Renter is responsible for, and will indemnify Owner against, claims for injury or property damage arising from Renter's use of the Equipment, except claims caused by Owner's negligence or a defect Owner knew about and did not disclose."),
+        general_terms(),
+        signatures([("owner", "Owner", "{{owner_name}}", True), ("renter", "Renter", "{{renter_name}}", True)]),
+    ],
+    sources=[src("UCC Article 2A (leases), §2A-103 definitions (Cornell LII)", "https://www.law.cornell.edu/ucc/2A/2A-103"), SRC["esign"]],
+))
+
+# ------------------------------------------------------------------ Event / venue booking
+add(T(
+    id="event-venue-booking", title="Event and Venue Booking Agreement", category="everyday",
+    tags=["event", "venue", "booking", "rental", "wedding", "party"],
+    summary="Book a venue or event space with dates, fees, deposits, cancellation and house rules.",
+    useWhen="A venue rents its space to a client for a private event, performance, meeting or party.",
+    watchOuts=[
+        "Alcohol: the venue or a licensed caterer usually must hold the liquor license. Hosts can face liability for serving intoxicated guests (dram shop and social host laws), and venues often require liquor liability insurance.",
+        "Capacity limits come from the fire code and the venue's certificate of occupancy, not the contract.",
+        "Cancellation: courts may refuse to enforce a cancellation fee that is a penalty rather than a reasonable estimate of the venue's loss. Use a graduated schedule.",
+        "Music played at public events may require PRO licenses (ASCAP, BMI, SESAC, GMR). Venues usually hold them, but check.",
+    ],
+    roles=[("venue", "Venue"), ("client", "Client")],
+    variables=[V("agreement_date", "Date", "date", help="Date of agreement.")]
+    + party_vars("venue", "Venue") + party_vars("client", "Client") + [
+        V("space", "Space rented", "text", help="Room or area and venue address."),
+        V("event_type", "Event", "text", help="Type of event."),
+        V("event_date", "Event date", "date", help="Date."),
+        V("access_time", "Access hours (including setup and teardown)", "text", help="E.g. '2:00 p.m. to 11:30 p.m.'."),
+        V("guest_count", "Expected guests", "number", help="Must not exceed the legal capacity."),
+        V("rental_fee", "Rental fee", "money", help="Total fee."),
+        V("included", "What's included", "longtext", False, "Tables, chairs, restrooms, basic lighting and on-site staff contact.", help="Furniture, AV, staff, cleaning."),
+        V("deposit", "Deposit to reserve", "money", help="Due at signing."),
+        V("balance_due", "Balance due by", "date", help="Final payment date."),
+        V("damage_deposit", "Refundable damage deposit", "money", False, "0", help="Returned after inspection."),
+        V("cancel_schedule", "Cancellation schedule", "longtext", default="- More than 90 days before the event: deposit refunded minus $100.\n- 30 to 90 days before: deposit kept.\n- Less than 30 days before: 100% of the rental fee is owed.", help="What the client owes if they cancel."),
+        V("alcohol", "Will alcohol be served?", "bool", False, "false", help="Adds alcohol terms."),
+        V("insurance_required", "Client must carry event insurance?", "bool", False, "false", help="Event liability insurance naming the venue."),
+        V("insurance_amount", "Minimum event insurance", "money", False, "1000000", help="Per occurrence."),
+        V("house_rules", "House rules", "longtext", False, "No confetti, glitter or open flames except candles in enclosed holders. Amplified music ends at 10:00 p.m. All decorations removed by the end of the access period.", help="Venue rules."),
+        state_var(),
+    ],
+    sections=[
+        S("Parties", party_line("venue", "Venue") + "\n\n" + party_line("client", "Client") + "\n\nDate: {{agreement_date}}."),
+        S("Booking", "Venue reserves {{space}} for Client's {{event_type}} on {{event_date}}, with access from {{access_time}}, for up to {{guest_count}} guests. Client will not exceed the lawful capacity of the space."),
+        S("What's included", "{{included}}"),
+        S("Fees and payment", "The rental fee is {{rental_fee}}. Client pays a deposit of {{deposit}} at signing, which is applied to the fee, and the balance by {{balance_due}}. Client also pays a refundable damage deposit of {{damage_deposit}}, returned within 14 days after the event minus documented costs of damage, extra cleaning or overtime. If the balance is not paid on time, Venue may cancel the booking under the cancellation terms."),
+        S("Cancellation by Client", "Client may cancel in writing. The parties agree the following reflects a reasonable estimate of Venue's loss:\n\n{{cancel_schedule}}"),
+        S("Cancellation by Venue and events outside anyone's control", "If Venue cannot provide the space for reasons within its control, it will refund all payments. If fire, severe weather, natural disaster, government order, utility failure or similar events outside either party's control prevent the event, either party may cancel, and Venue will refund payments minus documented, non-recoverable costs it has already incurred, or offer a substitute date."),
+        S("House rules and conduct", "{{house_rules}}\n\nClient is responsible for the conduct of its guests and vendors, and for compliance with Venue's rules and the law. Venue may stop the event or remove people whose conduct is unsafe or unlawful."),
+        S("Vendors", "Client's outside vendors, such as caterers, DJs and decorators, must follow Venue's rules and provide proof of insurance if Venue asks."),
+        opt("Alcohol", "Alcohol may be served only by a licensed bartender or caterer approved by Venue, or by Venue itself, in compliance with all liquor laws. No one under 21 will be served. Venue or its bartender may refuse service to anyone who appears intoxicated. Client will not allow guests to bring their own alcohol unless Venue agrees in writing.", "alcohol"),
+        opt("Insurance", "Client will carry event liability insurance of at least {{insurance_amount}} per occurrence (including liquor liability if alcohol is served), naming Venue as an additional insured, and provide a certificate at least 14 days before the event.", "insurance_required"),
+        S("Damage and liability", "Client will pay for damage to the venue caused by Client, its guests or vendors, beyond normal wear. Client will indemnify Venue against claims arising from the event, except claims caused by Venue's negligence or willful misconduct. Venue is not responsible for items left at the venue."),
+        general_terms(),
+        signatures([("venue", "Venue", "{{venue_name}}", True), ("client", "Client", "{{client_name}}", True)]),
+    ],
+    sources=[SRC["ascap"], SRC["bmi"], src("NFPA 101 Life Safety Code (occupancy limits) overview", "https://www.nfpa.org/codes-and-standards/nfpa-101-standard-development/101"), SRC["esign"]],
+))

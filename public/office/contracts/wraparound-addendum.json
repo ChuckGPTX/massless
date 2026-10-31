@@ -1,0 +1,397 @@
+{
+  "id": "wraparound-addendum",
+  "version": 1,
+  "title": "Wraparound Financing Addendum (AITD)",
+  "category": "creative-finance",
+  "summary": "Seller finances the sale with a new note that 'wraps' the seller's existing mortgage, which the seller keeps paying from the buyer's payments.",
+  "useWhen": "The seller has an existing loan that will stay in place, and the seller will carry a new note for the buyer that includes the existing balance.",
+  "watchOuts": [
+    "Due-on-sale: the existing lender may call the whole loan due when title transfers. Federal law (Garn-St Germain) generally lets it do so, and the transfer exemptions do not cover a sale to an unrelated investor. Have a written plan, and the money, to refinance or pay off the loan if that happens.",
+    "Never misrepresent ownership, occupancy or who is paying to a lender or an insurer. That can be mortgage or insurance fraud.",
+    "Foreclosure rescue and equity purchaser laws: if the seller is behind on payments or in foreclosure, many states impose strict contract language, cancellation rights and prohibitions on buyers. Examples include California Civil Code §1695 et seq., New York Real Property Law §265-a, Maryland, Illinois and Minnesota. Violations can void the deal and create criminal liability.",
+    "Texas: Property Code §5.016 requires a separate seller notice to the buyer and each lienholder at least seven days before contracting or conveying when a lien stays on residential property, unless an exception applies.",
+    "The seller should get independent legal advice. A buyer's attorney or title company does not represent the seller.",
+    "Buyer risk: the buyer depends on the seller to keep paying the underlying loan. Use a third-party servicer that pays the underlying lender first, and give the buyer the right to pay the underlying lender directly if the seller doesn't.",
+    "Texas: wrap mortgage loans on residential property are regulated by Finance Code ch. 159. Unless exempt, the wrap lender must be licensed or registered and give the buyer a disclosure statement at least seven days before closing. Buyers get rescission and offset rights, and the seller holds payments in trust. Property Code §5.016 notice also applies.",
+    "All lending-law issues from the Seller Financing Addendum (Regulation Z exclusions, SAFE Act, state licensing) also apply to wraps.",
+    "Insurance must protect the underlying lender, the seller and the buyer. A loss payout must go first to repairs or the underlying loan."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "buyer",
+      "label": "Buyer (wrap borrower)"
+    },
+    {
+      "id": "seller",
+      "label": "Seller (wrap lender)"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "addendum_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Wrap borrower."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Wrap lender."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Property address."
+    },
+    {
+      "id": "contract_date",
+      "label": "Purchase contract date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Contract this attaches to."
+    },
+    {
+      "id": "underlying",
+      "label": "Underlying loan(s)",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Lender, last 4 digits of the loan number, balance, rate, monthly payment and maturity for each loan that stays in place."
+    },
+    {
+      "id": "price",
+      "label": "Purchase price",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total price."
+    },
+    {
+      "id": "down_payment",
+      "label": "Down payment",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Cash at closing."
+    },
+    {
+      "id": "wrap_amount",
+      "label": "Wrap note principal",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Price minus down payment. Includes the underlying balance."
+    },
+    {
+      "id": "wrap_rate",
+      "label": "Wrap interest rate",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Annual rate on the wrap note."
+    },
+    {
+      "id": "wrap_payment",
+      "label": "Wrap monthly payment",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Buyer's payment, which must be at least the underlying payments."
+    },
+    {
+      "id": "wrap_term_months",
+      "label": "Wrap term (months)",
+      "type": "number",
+      "required": true,
+      "default": "360",
+      "options": [],
+      "help": "Term."
+    },
+    {
+      "id": "balloon_months",
+      "label": "Balloon due after (months, blank if none)",
+      "type": "number",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "If a balloon applies."
+    },
+    {
+      "id": "servicer",
+      "label": "Third-party servicer",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Licensed servicer that collects buyer's payment and pays the underlying lender."
+    },
+    {
+      "id": "escrow",
+      "label": "Taxes and insurance",
+      "type": "select",
+      "required": true,
+      "default": "escrowed by the servicer",
+      "options": [
+        "escrowed by the servicer",
+        "escrowed in the underlying loan",
+        "paid directly by buyer with proof to seller"
+      ],
+      "help": "How taxes and insurance are paid."
+    },
+    {
+      "id": "compliance_path",
+      "label": "Federal lending-law path",
+      "type": "select",
+      "required": true,
+      "default": "one-property seller-financer exclusion",
+      "options": [
+        "one-property seller-financer exclusion",
+        "three-property seller-financer exclusion",
+        "loan originated by a licensed mortgage loan originator",
+        "business-purpose loan (not consumer credit)"
+      ],
+      "help": "Reg Z 12 CFR 1026.36(a)(4)-(5) excludes some seller financers from loan-originator rules if conditions are met. State SAFE Act and licensing laws may still apply. Verify with an attorney."
+    },
+    {
+      "id": "tx_notice_date",
+      "label": "Texas §5.016 notice date (or 'not required: reason')",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Texas only."
+    },
+    {
+      "id": "tx_159_status",
+      "label": "Texas Finance Code ch. 159 status",
+      "type": "select",
+      "required": false,
+      "default": "seller is exempt (verify)",
+      "options": [
+        "seller is exempt (verify)",
+        "seller is licensed or registered and the ch. 159 disclosure was delivered at least 7 days before closing"
+      ],
+      "help": "Texas only."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Addendum",
+      "body": "This addendum, dated {{addendum_date}}, is part of the purchase contract dated {{contract_date}} between {{buyer_name}} (\"Buyer\") and {{seller_name}} (\"Seller\") for {{property_address}}, {{state}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Underlying loans",
+      "body": "The Property is and will remain subject to these loans, which stay in Seller's name (the \"Underlying Loans\"):\n\n{{underlying}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Wrap note",
+      "body": "The purchase price is {{price}}. Buyer pays a down payment of {{down_payment}} at closing, and will sign a wraparound promissory note to Seller for the balance of {{wrap_amount}}, at {{wrap_rate}}% per year, payable at {{wrap_payment}} per month for {{wrap_term_months}} months (balloon after {{balloon_months}} months, if stated). It will be secured by a wraparound mortgage or deed of trust on the Property, junior to the Underlying Loans, drafted for {{state}}, notarized and recorded. The wrap note includes the Underlying Loan balances. Buyer is not assuming the Underlying Loans.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Payment flow",
+      "body": "Buyer will pay {{servicer}} (the \"Servicer\"), not Seller directly. Each month the Servicer will first pay the Underlying Loan payments (and escrow, if applicable), then remit the balance to Seller. Seller instructs the Servicer that this order of payment cannot be changed without Buyer's written consent. Taxes and insurance: {{escrow}}. Both parties will have access to the Servicer's records.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Seller's obligations on the Underlying Loans",
+      "body": "Seller will keep the Underlying Loans current using the funds the Servicer receives, will not modify, extend, refinance or further borrow against the Underlying Loans or the Property, and will forward to Buyer within 5 days any notice from the underlying lenders. Seller's duty to pay the Underlying Loans from Buyer's payments is a trust obligation for Buyer's benefit.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Buyer's protection",
+      "body": "If an Underlying Loan becomes delinquent for any reason other than Buyer's failure to pay the wrap note, Buyer may pay the underlying lender directly to cure it, and deduct those payments, plus costs, from amounts due on the wrap note. Seller: [[initial:seller]]",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Payoff",
+      "body": "When Buyer pays off the wrap note, including by refinancing or selling, the payoff will first pay off the Underlying Loans in full, and Seller will deliver a release of the wraparound security instrument. Seller will cooperate in providing payoff statements.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Due-on-sale",
+      "body": "Most residential mortgages contain a \"due-on-sale\" clause. Federal law (the Garn-St Germain Act, 12 U.S.C. §1701j-3) generally allows the lender to enforce it and demand payment of the entire loan balance when the property, or an interest in it, is transferred without the lender's consent. Transfers to an unrelated buyer, including through a land trust where the buyer becomes a beneficiary, generally are not within the Act's exemptions. Leases longer than three years, or any lease with an option to purchase, are not exempt either.\n\nIf an underlying lender calls its loan due, the parties will cooperate in good faith to refinance or pay it off. Unless they agree otherwise in writing, Buyer will refinance the wrap note within the lender's deadline, and the payoff will retire the Underlying Loans. Buyer: [[initial:buyer]] Seller: [[initial:seller]]",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Insurance",
+      "body": "Buyer will keep the Property insured for full replacement cost, naming the underlying lenders and Seller as mortgagees or loss payees in order of priority. Insurance proceeds will be used for repairs or to pay down the loans in order of priority.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Lending-law compliance",
+      "body": "Federal lending-law path: **{{compliance_path}}**. The parties have had the opportunity to consult counsel about Regulation Z, the SAFE Act and the law of {{state}} on wraparound loans. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Texas: Finance Code ch. 159 (wrap mortgage loans)",
+      "body": "**Texas.** Texas Finance Code chapter 159 regulates wrap mortgage loans on residential property. Unless exempt, the wrap lender must be licensed or registered and must give the buyer a separate written disclosure (including an insurance disclosure) at least seven days before the loan agreement is entered into. The buyer may rescind within seven days after receiving it, or later if it was not given on time. The wrap lender holds the buyer's payments in trust and must use them to pay the underlying debt, taxes and insurance. The buyer may also deduct amounts paid to cure the lender's defaults. Status: {{tx_159_status}}. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "state == 'TX'"
+    },
+    {
+      "id": "s12",
+      "title": "12. Texas: notice of existing lien (Prop. Code §5.016)",
+      "body": "**Texas.** If the property is residential and an existing recorded lien will remain after the sale, Texas Property Code §5.016 requires the seller to give the buyer, and each lienholder, a separate written notice in at least 12-point type. It must be given at least seven days before the earlier of signing a binding contract or conveying the property, and it must contain the statutory warning and loan details. If a contract was signed without the notice, the buyer may terminate it within seven days after receiving the notice. Exceptions exist, for example when the buyer obtains a title insurance policy, or the buyer has bought, sold or contracted for four or more properties in the previous 12 months. The parties confirm that they have determined whether §5.016 applies and, if it does, that the notice was given on: {{tx_notice_date}}. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "state == 'TX'"
+    },
+    {
+      "id": "s13",
+      "title": "13. State-specific requirements",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nDate: [[date:buyer]]\n\n**Seller** — {{seller_name}}\n\n[[sig:seller]]\n\nPrinted name: [[name:seller]]\nDate: [[date:seller]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything. Creative-finance transactions (subject-to, seller financing, wraps, lease-options, contracts for deed) can trigger lender due-on-sale rights, federal and state lending and licensing laws (Truth in Lending/Dodd-Frank, SAFE Act), state executory-contract statutes and consumer-protection claims. Each party, and especially the seller, should have independent legal counsel and a tax adviser before signing.",
+  "sources": [
+    {
+      "title": "Garn-St Germain Act due-on-sale provisions, 12 U.S.C. §1701j-3 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/12/1701j-3"
+    },
+    {
+      "title": "Regulation Z, 12 CFR 1026.36 (loan originator rules, seller-financer exclusions) (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-12/chapter-X/part-1026/subpart-E/section-1026.36"
+    },
+    {
+      "title": "Regulation Z, 12 CFR 1026.43 (ability-to-repay) (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-12/chapter-X/part-1026/subpart-E/section-1026.43"
+    },
+    {
+      "title": "SAFE Act state licensing rules, 12 CFR Part 1008 (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-12/chapter-X/part-1008"
+    },
+    {
+      "title": "Tex. Prop. Code §5.016: conveyance of residential property encumbered by lien",
+      "url": "https://texas.public.law/statutes/tex._prop._code_section_5.016"
+    },
+    {
+      "title": "IRS: FIRPTA withholding",
+      "url": "https://www.irs.gov/individuals/international-taxpayers/firpta-withholding"
+    },
+    {
+      "title": "E-SIGN exceptions, 15 U.S.C. §7003 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7003"
+    },
+    {
+      "title": "Tex. Fin. Code ch. 159: wrap mortgage loan financing",
+      "url": "https://statutes.capitol.texas.gov/Docs/FI/htm/FI.159.htm"
+    },
+    {
+      "title": "Lone Star Land Law: Wraparound regulation in Texas",
+      "url": "https://lonestarlandlaw.com/?p=6868"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

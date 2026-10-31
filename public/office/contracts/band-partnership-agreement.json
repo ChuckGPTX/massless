@@ -1,0 +1,432 @@
+{
+  "id": "band-partnership-agreement",
+  "version": 1,
+  "title": "Band Partnership Agreement",
+  "category": "music",
+  "summary": "Two to four band members agree on the band name, money, decisions, songwriting, gear and what happens when someone leaves.",
+  "useWhen": "A band is earning (or about to earn) money together and wants clear rules before there is a dispute.",
+  "watchOuts": [
+    "A band that shares profits is usually a general partnership by default, so members may be personally liable for band debts. Consider forming an LLC.",
+    "Band names are the most fought-over asset. Decide now who can use the name after a split, and consider a federal trademark registration.",
+    "Songwriting is separate from band income. Use split sheets for each song. Recording and touring income can still be shared by band shares.",
+    "Label deals usually include 'leaving member' clauses that may override this agreement for recording matters."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "memberA",
+      "label": "Member A"
+    },
+    {
+      "id": "memberB",
+      "label": "Member B"
+    },
+    {
+      "id": "memberC",
+      "label": "Member C"
+    },
+    {
+      "id": "memberD",
+      "label": "Member D"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "band_name",
+      "label": "Band name",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Name the band performs under."
+    },
+    {
+      "id": "member_count",
+      "label": "Number of members",
+      "type": "select",
+      "required": true,
+      "default": "2",
+      "options": [
+        "2",
+        "3",
+        "4"
+      ],
+      "help": "Two to four members."
+    },
+    {
+      "id": "ma_name",
+      "label": "Member A: legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Legal name."
+    },
+    {
+      "id": "ma_role",
+      "label": "Member A: role",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Instrument or role."
+    },
+    {
+      "id": "ma_share",
+      "label": "Member A: income share",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Share of band income. All shares should total 100%."
+    },
+    {
+      "id": "ma_email",
+      "label": "Member A: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "mb_name",
+      "label": "Member B: legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Legal name."
+    },
+    {
+      "id": "mb_role",
+      "label": "Member B: role",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Instrument or role."
+    },
+    {
+      "id": "mb_share",
+      "label": "Member B: income share",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Share of band income. All shares should total 100%."
+    },
+    {
+      "id": "mb_email",
+      "label": "Member B: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "mc_name",
+      "label": "Member C: legal name",
+      "type": "party",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Legal name."
+    },
+    {
+      "id": "mc_role",
+      "label": "Member C: role",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Instrument or role."
+    },
+    {
+      "id": "mc_share",
+      "label": "Member C: income share",
+      "type": "percent",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Share of band income. All shares should total 100%."
+    },
+    {
+      "id": "mc_email",
+      "label": "Member C: email",
+      "type": "email",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "md_name",
+      "label": "Member D: legal name",
+      "type": "party",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Legal name."
+    },
+    {
+      "id": "md_role",
+      "label": "Member D: role",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Instrument or role."
+    },
+    {
+      "id": "md_share",
+      "label": "Member D: income share",
+      "type": "percent",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Share of band income. All shares should total 100%."
+    },
+    {
+      "id": "md_email",
+      "label": "Member D: email",
+      "type": "email",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "vote",
+      "label": "Vote for major decisions",
+      "type": "select",
+      "required": true,
+      "default": "unanimous",
+      "options": [
+        "unanimous",
+        "majority",
+        "two-thirds"
+      ],
+      "help": "Major decisions are listed."
+    },
+    {
+      "id": "name_owner",
+      "label": "If the band splits up, the name belongs to",
+      "type": "select",
+      "required": true,
+      "default": "no one may use it without consent of all members",
+      "options": [
+        "no one may use it without consent of all members",
+        "the members who continue, if a majority continue"
+      ],
+      "help": "Band name ownership."
+    },
+    {
+      "id": "entity",
+      "label": "Business form",
+      "type": "select",
+      "required": true,
+      "default": "general partnership",
+      "options": [
+        "general partnership",
+        "LLC (formed separately)"
+      ],
+      "help": "An LLC limits personal liability for band debts."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Band and members",
+      "body": "The members form a band called **{{band_name}}** (the \"Band\"), starting {{effective_date}}, as a {{entity}}:\n\n- **Member A:** {{ma_name}}, {{ma_role}}, {{ma_email}}. Income share: {{ma_share}}%.\n- **Member B:** {{mb_name}}, {{mb_role}}, {{mb_email}}. Income share: {{mb_share}}%.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Member C",
+      "body": "- **Member C:** {{mc_name}}, {{mc_role}}, {{mc_email}}. Income share: {{mc_share}}%.",
+      "optional": true,
+      "showIf": "member_count != '2'"
+    },
+    {
+      "id": "s3",
+      "title": "3. Member D",
+      "body": "- **Member D:** {{md_name}}, {{md_role}}, {{md_email}}. Income share: {{md_share}}%.",
+      "optional": true,
+      "showIf": "member_count == '4'"
+    },
+    {
+      "id": "s4",
+      "title": "4. Band income and expenses",
+      "body": "Band income includes live performance fees, merchandise, recording income from Band masters, sync of Band masters, sponsorships and crowdfunding. Band expenses (rehearsal space, travel, gear bought for the Band, marketing, recording costs) are paid first. Net income is shared by the income shares above. The Band will keep a separate bank account and shared books visible to all members, and will settle accounts monthly.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Songwriting",
+      "body": "Songwriting income belongs to the writers of each song, as recorded in split sheets, and is not Band income unless the writers agree otherwise in writing. Masters of Band recordings are owned by the Band.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Decisions",
+      "body": "Day-to-day decisions are made by majority vote. These need a {{vote}} vote: signing any recording, publishing, management, agency or merchandise deal; spending over $500; borrowing; adding or removing a member; licensing Band masters; and using the Band name in a new way.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Band name",
+      "body": "The Band name and logos are Band property. If the Band breaks up: {{name_owner}}. A departing member may describe themselves as a \"former member of {{band_name}}\" but may not perform under the name.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Gear",
+      "body": "Gear bought with Band money is Band property, listed in a shared inventory. Each member's personal gear stays theirs, even if used for Band work.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Leaving members",
+      "body": "A member may leave with 30 days' written notice. A departing member keeps their income share of Band masters and merchandise designs created while a member, and of income from shows played while a member. They give up any share of future income from new work and any right to the Band name. The remaining members may buy the departing member's share of Band gear and cash at book value. A member may be removed for serious misconduct by the vote above after written notice and a chance to respond.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. New members",
+      "body": "New members join only by the vote above and by signing this agreement. Their income share will be set at that time and other shares reduced proportionally for future income.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Debts and liability",
+      "body": "No member may take on debt or sign contracts for the Band without approval under Decisions. A member who does so without approval is personally responsible.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Disputes",
+      "body": "The members will try to resolve disputes in a band meeting, then by mediation, before going to court.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "Signatures — Members A and B",
+      "body": "**Member A** — {{ma_name}}\n\n[[sig:memberA]]\n\nPrinted name: [[name:memberA]]\nDate: [[date:memberA]]\n\n**Member B** — {{mb_name}}\n\n[[sig:memberB]]\n\nPrinted name: [[name:memberB]]\nDate: [[date:memberB]]",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "Signatures — Member C",
+      "body": "**Member C** — {{mc_name}}\n\n[[sig:memberC]]\n\nPrinted name: [[name:memberC]]\nDate: [[date:memberC]]",
+      "optional": true,
+      "showIf": "member_count != '2'"
+    },
+    {
+      "id": "s16",
+      "title": "Signatures — Member D",
+      "body": "**Member D** — {{md_name}}\n\n[[sig:memberD]]\n\nPrinted name: [[name:memberD]]\nDate: [[date:memberD]]",
+      "optional": true,
+      "showIf": "member_count == '4'"
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Music rights are split between the composition (song) and the sound recording (master); royalties also depend on PRO, publisher, distributor and label agreements that this template does not change. An entertainment attorney should review deals involving advances, ownership transfers or long terms.",
+  "sources": [
+    {
+      "title": "IRS: Partnerships",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/partnerships"
+    },
+    {
+      "title": "SBA: Choose a business structure",
+      "url": "https://www.sba.gov/business-guide/launch-your-business/choose-business-structure"
+    },
+    {
+      "title": "USPTO: Trademark basics",
+      "url": "https://www.uspto.gov/trademarks/basics"
+    },
+    {
+      "title": "U.S. Copyright Office Circular 56A: Copyright registration of musical compositions and sound recordings",
+      "url": "https://www.copyright.gov/circs/circ56a.pdf"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

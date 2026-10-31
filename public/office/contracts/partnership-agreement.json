@@ -1,0 +1,346 @@
+{
+  "id": "partnership-agreement",
+  "version": 1,
+  "title": "Simple General Partnership Agreement",
+  "category": "business",
+  "summary": "Two partners set out contributions, profit split, decisions and what happens if one leaves.",
+  "useWhen": "Two people are running a small business together as a general partnership and want their deal in writing.",
+  "watchOuts": [
+    "In a general partnership each partner is usually personally liable for all partnership debts, including debts caused by the other partner. Many businesses form an LLC instead.",
+    "Register a trade name ('doing business as') if the state or county requires it, and get an EIN. A partnership files Form 1065 and gives each partner a Schedule K-1.",
+    "Without an agreement, state partnership law (often based on the Uniform Partnership Act) supplies default rules, such as equal profit shares regardless of contributions.",
+    "Set a valuation method for buyouts now. Disagreements about value are the most common partnership fight."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "partnerA",
+      "label": "Partner A"
+    },
+    {
+      "id": "partnerB",
+      "label": "Partner B"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "partner_a_name",
+      "label": "Partner A: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "partner_a_address",
+      "label": "Partner A: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "partner_a_email",
+      "label": "Partner A: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "partner_b_name",
+      "label": "Partner B: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "partner_b_address",
+      "label": "Partner B: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "partner_b_email",
+      "label": "Partner B: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "business_name",
+      "label": "Partnership name",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Business name the partnership will use."
+    },
+    {
+      "id": "business_purpose",
+      "label": "Business purpose",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "What the partnership does."
+    },
+    {
+      "id": "principal_office",
+      "label": "Principal office",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Main business address."
+    },
+    {
+      "id": "contribution_a",
+      "label": "Partner A's contribution",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Cash, property or services, with agreed values."
+    },
+    {
+      "id": "contribution_b",
+      "label": "Partner B's contribution",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Cash, property or services, with agreed values."
+    },
+    {
+      "id": "share_a",
+      "label": "Partner A's share of profits and losses",
+      "type": "percent",
+      "required": true,
+      "default": "50",
+      "options": [],
+      "help": "Percent."
+    },
+    {
+      "id": "share_b",
+      "label": "Partner B's share of profits and losses",
+      "type": "percent",
+      "required": true,
+      "default": "50",
+      "options": [],
+      "help": "Percent. The two shares should total 100%."
+    },
+    {
+      "id": "spending_limit",
+      "label": "Spending limit without both partners' approval",
+      "type": "money",
+      "required": true,
+      "default": "2500",
+      "options": [],
+      "help": "Any single expense or commitment above this needs both partners."
+    },
+    {
+      "id": "draws",
+      "label": "How partners are paid",
+      "type": "longtext",
+      "required": false,
+      "default": "Partners receive distributions of available cash quarterly, as agreed by both partners, after reserves for expenses and taxes.",
+      "options": [],
+      "help": "Draws, guaranteed payments or salaries."
+    },
+    {
+      "id": "valuation_method",
+      "label": "Buyout valuation method",
+      "type": "select",
+      "required": true,
+      "default": "appraisal by an independent appraiser",
+      "options": [
+        "appraisal by an independent appraiser",
+        "book value",
+        "agreed value updated each year"
+      ],
+      "help": "How a departing partner's share is valued."
+    },
+    {
+      "id": "buyout_months",
+      "label": "Buyout payment period (months)",
+      "type": "number",
+      "required": true,
+      "default": "24",
+      "options": [],
+      "help": "Remaining partner may pay the buyout over this many months."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Partners and name",
+      "body": "**Partner A:** {{partner_a_name}}, {{partner_a_address}} ({{partner_a_email}})\n\n**Partner B:** {{partner_b_name}}, {{partner_b_address}} ({{partner_b_email}})\n\nThe partners form a general partnership named {{business_name}} (the \"Partnership\"), starting on {{effective_date}}, with its principal office at {{principal_office}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Purpose",
+      "body": "{{business_purpose}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Contributions",
+      "body": "Partner A contributes: {{contribution_a}}\n\nPartner B contributes: {{contribution_b}}\n\nNo partner must contribute more without agreeing in writing. No partner earns interest on contributions.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Profits, losses and pay",
+      "body": "Profits and losses are shared: Partner A {{share_a}}%, Partner B {{share_b}}%.\n\n{{draws}}",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Management and decisions",
+      "body": "Each partner has an equal vote in managing the business. Day-to-day decisions may be made by either partner. These need both partners' written approval:\n- any single expense, loan or commitment over {{spending_limit}};\n- borrowing money, guaranteeing debt or putting liens on partnership property;\n- admitting a new partner;\n- buying or selling real estate or selling substantially all business assets;\n- changing the purpose of the business; and\n- filing for bankruptcy.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Duties",
+      "body": "Each partner will devote the time and effort reasonably needed for the business, act in good faith, and not compete with the Partnership or take its business opportunities for themselves without the other partner's written consent.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Books, bank accounts and taxes",
+      "body": "The Partnership will keep complete books, open accounts in its own name, and file its own tax returns. Each partner may inspect the books at any time. The partners will agree on an accountant.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. A partner leaving",
+      "body": "A partner may withdraw with 90 days' written notice. If a partner withdraws, dies or becomes permanently disabled, the other partner may continue the business and buy the departing partner's interest. The price is the value of the interest determined by {{valuation_method}} as of the departure date. The price may be paid over up to {{buyout_months}} months, with interest at the applicable federal rate. If the remaining partner does not elect to buy within 60 days, the Partnership will be wound up.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Disputes",
+      "body": "The partners will first try to resolve disputes by talking in good faith, then by mediation with a mutually chosen mediator, before going to court.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Dissolution",
+      "body": "If the Partnership dissolves, the partners will collect receivables, sell assets as needed, pay debts and then distribute what is left according to capital accounts and then profit shares.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Partner A** — {{partner_a_name}}\n\n[[sig:partnerA]]\n\nPrinted name: [[name:partnerA]]\nDate: [[date:partnerA]]\n\n**Partner B** — {{partner_b_name}}\n\n[[sig:partnerB]]\n\nPrinted name: [[name:partnerB]]\nDate: [[date:partnerB]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "IRS: Partnerships",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/partnerships"
+    },
+    {
+      "title": "SBA: Choose a business structure",
+      "url": "https://www.sba.gov/business-guide/launch-your-business/choose-business-structure"
+    },
+    {
+      "title": "Uniform Law Commission: Partnership Act",
+      "url": "https://www.uniformlaws.org/committees/community-home?CommunityKey=52456941-7883-47a5-91b6-d2f086d0bb44"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

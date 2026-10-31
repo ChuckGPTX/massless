@@ -1,0 +1,431 @@
+{
+  "id": "independent-contractor-agreement",
+  "version": 1,
+  "title": "Independent Contractor Agreement",
+  "category": "business",
+  "summary": "Hire a freelancer or independent contractor for defined services, with payment, IP and confidentiality terms.",
+  "useWhen": "A business engages an individual or small firm to do work as an independent business, not as an employee.",
+  "watchOuts": [
+    "Calling someone a contractor does not make them one. The IRS, the U.S. Department of Labor and state agencies look at who controls how, when and where the work is done. Some states, for example California, apply a stricter 'ABC' test. Misclassification can mean back taxes, wages and penalties.",
+    "Under U.S. copyright law, work by a non-employee is usually not a 'work made for hire' unless it fits one of nine statutory categories and a signed writing says so. That is why the IP section also includes an assignment.",
+    "Pay attention to when IP transfers. This template transfers it on full payment. Some clients need ownership as soon as work is created.",
+    "Non-compete clauses are void or limited in several states, for example California, Minnesota, North Dakota and Oklahoma. This template leaves them out.",
+    "Collect a Form W-9 before the first payment. You may need to file a Form 1099-NEC for payments to the contractor."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "client",
+      "label": "Client"
+    },
+    {
+      "id": "contractor",
+      "label": "Contractor"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date the engagement starts."
+    },
+    {
+      "id": "client_name",
+      "label": "Client: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "client_address",
+      "label": "Client: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "client_email",
+      "label": "Client: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "contractor_name",
+      "label": "Contractor: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "contractor_address",
+      "label": "Contractor: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "contractor_email",
+      "label": "Contractor: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "services",
+      "label": "Services",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "What the contractor will do and deliver. Be specific about deliverables, quantities and quality standards."
+    },
+    {
+      "id": "end_date",
+      "label": "End date or condition",
+      "type": "text",
+      "required": true,
+      "default": "when the services are complete",
+      "options": [],
+      "help": "A date, or a condition such as 'when the services are complete'."
+    },
+    {
+      "id": "fee_type",
+      "label": "How the contractor is paid",
+      "type": "select",
+      "required": true,
+      "default": "fixed",
+      "options": [
+        "fixed",
+        "hourly",
+        "milestones"
+      ],
+      "help": "Fixed fee, hourly rate, or by milestone."
+    },
+    {
+      "id": "fixed_fee",
+      "label": "Fixed fee",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Total fee for the services. Used when the fee type is fixed."
+    },
+    {
+      "id": "hourly_rate",
+      "label": "Hourly rate",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Rate per hour. Used when the fee type is hourly."
+    },
+    {
+      "id": "hours_cap",
+      "label": "Maximum hours without written approval",
+      "type": "number",
+      "required": false,
+      "default": "40",
+      "options": [],
+      "help": "Contractor needs Client's written approval to bill more than this."
+    },
+    {
+      "id": "milestones",
+      "label": "Milestones and amounts",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "List each milestone, its due date and the amount payable on acceptance."
+    },
+    {
+      "id": "invoice_frequency",
+      "label": "Invoice frequency",
+      "type": "select",
+      "required": true,
+      "default": "monthly",
+      "options": [
+        "weekly",
+        "every two weeks",
+        "monthly",
+        "on completion"
+      ],
+      "help": "How often the contractor invoices."
+    },
+    {
+      "id": "payment_days",
+      "label": "Days to pay invoices",
+      "type": "number",
+      "required": true,
+      "default": "15",
+      "options": [],
+      "help": "Client pays each undisputed invoice within this many days."
+    },
+    {
+      "id": "expenses",
+      "label": "Are pre-approved expenses reimbursed?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "If on, the client reimburses reasonable, pre-approved, documented expenses."
+    },
+    {
+      "id": "ip_model",
+      "label": "Who owns the work product?",
+      "type": "select",
+      "required": true,
+      "default": "client owns",
+      "options": [
+        "client owns",
+        "contractor owns, client licensed"
+      ],
+      "help": "Most clients want to own custom work. Choose a license if the contractor reuses the work."
+    },
+    {
+      "id": "termination_days",
+      "label": "Notice to end without cause (days)",
+      "type": "number",
+      "required": true,
+      "default": "14",
+      "options": [],
+      "help": "Either party may end the agreement with this much written notice."
+    },
+    {
+      "id": "include_insurance",
+      "label": "Require contractor insurance?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Require general liability or professional liability insurance."
+    },
+    {
+      "id": "insurance_amount",
+      "label": "Minimum insurance per occurrence",
+      "type": "money",
+      "required": false,
+      "default": "1000000",
+      "options": [],
+      "help": "Common minimum is $1,000,000 per occurrence."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Client:** {{client_name}}, {{client_address}} ({{client_email}})\n\n**Contractor:** {{contractor_name}}, {{contractor_address}} ({{contractor_email}})\n\nThis agreement starts on {{effective_date}} and continues until {{end_date}}, unless ended earlier under the Ending this agreement section.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Services",
+      "body": "Contractor will perform the following services (the \"Services\"):\n\n{{services}}\n\nContractor will perform the Services professionally, on time and in line with generally accepted industry standards. Any change to the Services must be agreed in writing, for example with a signed change order.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Independent contractor relationship",
+      "body": "- Contractor is an independent business, not Client's employee, partner or agent.\n- Contractor controls how, when and where the Services are performed, and provides its own equipment and tools, except as stated in the Services.\n- Contractor may work for others, as long as it meets its obligations under this agreement.\n- Contractor is responsible for its own taxes, insurance, licenses and benefits. Client will not withhold taxes and will issue any required tax forms (such as Form 1099-NEC).\n- Contractor has no authority to sign contracts or make commitments for Client.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Fees: fixed fee",
+      "body": "Client will pay Contractor a fixed fee of {{fixed_fee}} for the Services. Contractor will invoice {{invoice_frequency}}.",
+      "optional": true,
+      "showIf": "fee_type == 'fixed'"
+    },
+    {
+      "id": "s5",
+      "title": "5. Fees: hourly",
+      "body": "Client will pay Contractor {{hourly_rate}} per hour, invoiced {{invoice_frequency}} with a description of the work and hours. Contractor will not bill more than {{hours_cap}} hours without Client's written approval.",
+      "optional": true,
+      "showIf": "fee_type == 'hourly'"
+    },
+    {
+      "id": "s6",
+      "title": "6. Fees: milestones",
+      "body": "Client will pay Contractor by milestone, as follows:\n\n{{milestones}}\n\nEach payment becomes due when Client accepts the milestone deliverable. Client will accept or give written reasons for rejecting it within 7 days of delivery.",
+      "optional": true,
+      "showIf": "fee_type == 'milestones'"
+    },
+    {
+      "id": "s7",
+      "title": "7. Payment",
+      "body": "Client will pay each undisputed invoice within {{payment_days}} days of receiving it. If Client disputes part of an invoice, it will pay the undisputed part and tell Contractor in writing what it disputes and why. The parties will try in good faith to resolve the dispute promptly.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Expenses",
+      "body": "Client will reimburse reasonable, documented out-of-pocket expenses that Client approved in writing in advance. Contractor will include receipts with its invoice.",
+      "optional": true,
+      "showIf": "expenses == true"
+    },
+    {
+      "id": "s9",
+      "title": "9. Intellectual property: client owns",
+      "body": "**Client owns the deliverables.** When Client has paid in full, Contractor assigns to Client all rights, title and interest, including copyrights, in the work product Contractor creates specifically for Client under this agreement (the \"Deliverables\"). To the extent any Deliverable qualifies as a \"work made for hire\" under U.S. copyright law, it is one. Where it does not, this assignment applies. Contractor will sign any further documents reasonably needed to confirm Client's ownership.\n\n**Contractor's existing materials.** Contractor keeps ownership of tools, templates, code libraries, know-how and materials it owned before this agreement or developed independently (\"Background Materials\"). If Background Materials are built into a Deliverable, Contractor grants Client a non-exclusive, perpetual, royalty-free, worldwide license to use them as part of that Deliverable.\n\n**Portfolio.** Unless the Confidentiality section prevents it, Contractor may show non-confidential Deliverables in its portfolio after they are public.",
+      "optional": true,
+      "showIf": "ip_model == 'client owns'"
+    },
+    {
+      "id": "s10",
+      "title": "10. Intellectual property: contractor owns",
+      "body": "**Contractor keeps ownership.** Contractor owns the work product it creates under this agreement (the \"Deliverables\"), including all copyrights.\n\n**Client's license.** When Client has paid in full, Contractor grants Client a non-exclusive, perpetual, worldwide, royalty-free license to use, copy, modify and display the Deliverables for Client's own business purposes. Client may not resell or sublicense the Deliverables as a standalone product without Contractor's written consent.",
+      "optional": true,
+      "showIf": "ip_model == 'contractor owns, client licensed'"
+    },
+    {
+      "id": "s11",
+      "title": "11. Confidentiality",
+      "body": "Contractor will keep confidential all non-public information it receives from Client, use it only to perform the Services, and return or destroy it when the Services end or when Client asks. This duty continues for three years after this agreement ends, and for trade secrets, for as long as they remain trade secrets.\n\n**Whistleblower immunity notice (18 U.S.C. §1833(b)).** An individual will not be held criminally or civilly liable under any federal or state trade secret law for disclosing a trade secret (a) in confidence to a government official or to an attorney solely for the purpose of reporting or investigating a suspected violation of law, or (b) in a complaint or other document filed under seal in a lawsuit. Nothing in this agreement stops anyone from reporting possible violations of law to a government agency, testifying truthfully, or exercising rights that cannot be waived by law.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Warranties",
+      "body": "Contractor promises that (a) it has the right to enter into this agreement, (b) the Deliverables will be its original work or properly licensed, and to its knowledge will not infringe anyone else's rights, and (c) it will follow applicable laws in performing the Services.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. Liability",
+      "body": "Contractor will defend and indemnify Client against third-party claims that the Deliverables infringe intellectual property rights, or that arise from Contractor's gross negligence or willful misconduct. Except for that indemnity, confidentiality breaches, and amounts owed for Services, neither party is liable for indirect or consequential damages, and each party's total liability is limited to the fees paid or payable under this agreement.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "14. Insurance",
+      "body": "During the agreement, Contractor will keep commercial general liability insurance (and professional liability insurance, if the Services are professional services) of at least {{insurance_amount}} per occurrence, and will provide a certificate of insurance on request.",
+      "optional": true,
+      "showIf": "include_insurance == true"
+    },
+    {
+      "id": "s15",
+      "title": "15. Ending this agreement",
+      "body": "Either party may end this agreement for any reason with {{termination_days}} days' written notice. Either party may end it immediately if the other materially breaches it and does not fix the breach within 10 days after written notice. When it ends, Client will pay for Services performed and approved expenses incurred up to the end date. Contractor will deliver all completed and in-progress work that Client has paid for. The sections on payment, intellectual property, confidentiality and liability continue after the agreement ends.",
+      "optional": false
+    },
+    {
+      "id": "s16",
+      "title": "16. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s17",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Client** — {{client_name}}\n\n[[sig:client]]\n\nPrinted name: [[name:client]]\nTitle (if signing for a company): [[text:client:Title]]\nDate: [[date:client]]\n\n**Contractor** — {{contractor_name}}\n\n[[sig:contractor]]\n\nPrinted name: [[name:contractor]]\nTitle (if signing for a company): [[text:contractor:Title]]\nDate: [[date:contractor]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "IRS: Independent contractor (self-employed) or employee?",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/independent-contractor-self-employed-or-employee"
+    },
+    {
+      "title": "U.S. Department of Labor: Employee or independent contractor classification under the FLSA",
+      "url": "https://www.dol.gov/agencies/whd/flsa/misclassification"
+    },
+    {
+      "title": "U.S. Copyright Office Circular 30: Works Made for Hire",
+      "url": "https://www.copyright.gov/circs/circ30.pdf"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    },
+    {
+      "title": "Defend Trade Secrets Act whistleblower immunity notice, 18 U.S.C. §1833(b) (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/18/1833"
+    },
+    {
+      "title": "signNow: Top 5 most e-signed documents",
+      "url": "https://www.signnow.com/blog/top-5-most-e-signed-documents-in-2020/"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

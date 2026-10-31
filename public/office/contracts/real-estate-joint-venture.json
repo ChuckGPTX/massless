@@ -1,0 +1,390 @@
+{
+  "id": "real-estate-joint-venture",
+  "version": 1,
+  "title": "Real Estate Joint Venture Agreement",
+  "category": "creative-finance",
+  "summary": "A capital partner and an operating partner team up on one property: who funds, who works, how profits are split, and how it ends.",
+  "useWhen": "One party brings the money (or credit) and the other finds, renovates, manages or sells a specific property.",
+  "watchOuts": [
+    "Passive money partners: if one party contributes only money and relies on the other's efforts, the arrangement may be a security (an investment contract) under federal and state law. Many sponsors use an LLC and exemptions with counsel.",
+    "Put title in an entity, or record the JV's interest. A partner holding title alone can sell or mortgage the property without the other's knowledge.",
+    "Renovation work may require a contractor's license. Selling the property for the JV may require a real estate license if a partner is paid a commission.",
+    "Define the budget, overrun funding and the sale or refinance trigger. Most JV disputes come from cost overruns and disagreements about when to sell.",
+    "Tax: an unincorporated JV is usually a partnership for tax purposes (Form 1065). Flips may be taxed as ordinary income."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "capital",
+      "label": "Capital partner"
+    },
+    {
+      "id": "operator",
+      "label": "Operating partner"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "capital_name",
+      "label": "Capital partner: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "capital_address",
+      "label": "Capital partner: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "capital_email",
+      "label": "Capital partner: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "operator_name",
+      "label": "Operating partner: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "operator_address",
+      "label": "Operating partner: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "operator_email",
+      "label": "Operating partner: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Target property."
+    },
+    {
+      "id": "strategy",
+      "label": "Strategy",
+      "type": "select",
+      "required": true,
+      "default": "renovate and sell",
+      "options": [
+        "renovate and sell",
+        "renovate, rent and refinance",
+        "buy and hold rental",
+        "wholesale or assign"
+      ],
+      "help": "Business plan."
+    },
+    {
+      "id": "title_holder",
+      "label": "Title held by",
+      "type": "select",
+      "required": true,
+      "default": "a new LLC owned by both partners",
+      "options": [
+        "a new LLC owned by both partners",
+        "the capital partner, with a recorded memorandum of this agreement",
+        "the operating partner, with a recorded memorandum of this agreement"
+      ],
+      "help": "An LLC is usually safest."
+    },
+    {
+      "id": "capital_amount",
+      "label": "Capital partner contributes",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total committed funds for purchase and renovation."
+    },
+    {
+      "id": "operator_contribution",
+      "label": "Operating partner contributes",
+      "type": "longtext",
+      "required": true,
+      "default": "Finding the property, managing the renovation, contractor oversight, marketing and sale.",
+      "options": [],
+      "help": "Services, cash or both."
+    },
+    {
+      "id": "budget",
+      "label": "Budget",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Purchase price, closing costs, renovation budget, holding costs, contingency."
+    },
+    {
+      "id": "overrun_plan",
+      "label": "Cost overruns are funded by",
+      "type": "select",
+      "required": true,
+      "default": "capital partner as additional capital that is repaid before profits",
+      "options": [
+        "capital partner as additional capital that is repaid before profits",
+        "both partners in proportion to profit shares",
+        "operating partner"
+      ],
+      "help": "Who pays overruns."
+    },
+    {
+      "id": "pref_return",
+      "label": "Preferred return to capital partner (annual %)",
+      "type": "percent",
+      "required": false,
+      "default": "0",
+      "options": [],
+      "help": "Paid before profits are split. 0 for none."
+    },
+    {
+      "id": "split_capital",
+      "label": "Capital partner's share of profits",
+      "type": "percent",
+      "required": true,
+      "default": "50",
+      "options": [],
+      "help": "After return of capital and any preferred return."
+    },
+    {
+      "id": "split_operator",
+      "label": "Operating partner's share of profits",
+      "type": "percent",
+      "required": true,
+      "default": "50",
+      "options": [],
+      "help": "After return of capital and any preferred return."
+    },
+    {
+      "id": "timeline",
+      "label": "Target timeline",
+      "type": "text",
+      "required": true,
+      "default": "Purchase within 30 days, renovation within 120 days, sale within 9 months",
+      "options": [],
+      "help": "Milestones."
+    },
+    {
+      "id": "spend_limit",
+      "label": "Operator may spend without approval up to",
+      "type": "money",
+      "required": true,
+      "default": "2500",
+      "options": [],
+      "help": "Per item, within the budget."
+    },
+    {
+      "id": "exit_trigger",
+      "label": "If not sold or refinanced by",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Deadline after which the capital partner may require a sale."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Partners and property",
+      "body": "**Capital partner:** {{capital_name}}, {{capital_address}} ({{capital_email}})\n\n**Operating partner:** {{operator_name}}, {{operator_address}} ({{operator_email}})\n\nThe partners form a joint venture for the property at {{property_address}} (the \"Property\"). Strategy: {{strategy}}. Effective {{effective_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Title",
+      "body": "The Property will be held by {{title_holder}}. Neither partner may sell, mortgage or lease the Property except as this agreement allows.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Contributions",
+      "body": "Capital partner will contribute up to {{capital_amount}}, deposited in the venture's bank account as needed under the budget. Operating partner will contribute: {{operator_contribution}}\n\nBudget:\n\n{{budget}}\n\nCost overruns will be funded by {{overrun_plan}}.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Management",
+      "body": "Operating partner manages the day-to-day project, hires licensed and insured contractors, obtains permits, and keeps Capital partner informed with weekly updates and photos. Operating partner may spend up to {{spend_limit}} per item within the budget. These need both partners' written approval: changes to the budget or scope over 10%, any loan or lien, the listing price and any sale or lease, any contract with a partner's affiliate, and any decision outside the strategy.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Money and records",
+      "body": "All venture money goes through a separate bank account in the venture's name, with both partners having online access. Each partner may inspect the books at any time. Operating partner will provide a final accounting within 30 days after the sale or refinance.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Distributions",
+      "body": "Net proceeds from sale, refinance or operations will be distributed in this order:\n1. Repay venture debts and costs of sale.\n2. Return each partner's cash capital contributions, including overrun capital.\n3. Pay Capital partner a preferred return of {{pref_return}}% per year on unreturned capital, if stated.\n4. Split the remaining profit: Capital partner {{split_capital}}%, Operating partner {{split_operator}}%.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Timeline and exit",
+      "body": "Target timeline: {{timeline}}. If the Property has not been sold or refinanced by {{exit_trigger}}, Capital partner may require that it be listed for sale with a licensed broker at a price recommended by the broker, or may buy out Operating partner's interest at the value established by an independent appraisal, minus selling costs.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Operating partner's promises",
+      "body": "Operating partner will act in good faith, put the venture's interest first, disclose any relationship with contractors or buyers, and not take any undisclosed fee, kickback or markup. If a partner is a licensed real estate agent and will earn a commission, it must be disclosed and approved in writing.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Insurance and liability",
+      "body": "The venture will carry builder's risk or vacant-property insurance and liability insurance, with both partners or the venture as named insureds. Each partner indemnifies the other for losses caused by its own negligence, fraud or breach.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Default and removal",
+      "body": "If Operating partner abandons the project or materially breaches this agreement and does not cure within 15 days after notice, Capital partner may take over management, hire a replacement, and deduct the cost from Operating partner's share of profits.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Securities and taxes",
+      "body": "The partners intend for both to participate actively in major decisions. They have been advised that if one partner is a passive investor, securities laws may apply. The venture will file any required tax returns. Each partner pays its own income taxes.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Disputes",
+      "body": "The partners will negotiate in good faith, then mediate, before litigation.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Capital partner** — {{capital_name}}\n\n[[sig:capital]]\n\nPrinted name: [[name:capital]]\nTitle (if signing for a company): [[text:capital:Title]]\nDate: [[date:capital]]\n\n**Operating partner** — {{operator_name}}\n\n[[sig:operator]]\n\nPrinted name: [[name:operator]]\nTitle (if signing for a company): [[text:operator:Title]]\nDate: [[date:operator]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything. Creative-finance transactions (subject-to, seller financing, wraps, lease-options, contracts for deed) can trigger lender due-on-sale rights, federal and state lending and licensing laws (Truth in Lending/Dodd-Frank, SAFE Act), state executory-contract statutes and consumer-protection claims. Each party, and especially the seller, should have independent legal counsel and a tax adviser before signing.",
+  "sources": [
+    {
+      "title": "SEC (Investor.gov): What is a security? (investment contracts)",
+      "url": "https://www.investor.gov/introduction-investing/investing-basics/glossary/security"
+    },
+    {
+      "title": "IRS: Partnerships",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/partnerships"
+    },
+    {
+      "title": "SEC v. W.J. Howey Co., 328 U.S. 293 (1946) (Justia)",
+      "url": "https://supreme.justia.com/cases/federal/us/328/293/"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

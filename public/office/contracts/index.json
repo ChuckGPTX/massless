@@ -1,0 +1,786 @@
+[
+  {
+    "id": "bill-of-sale",
+    "title": "Bill of Sale",
+    "category": "everyday",
+    "tags": [
+      "bill of sale",
+      "vehicle",
+      "personal property",
+      "sale",
+      "most-signed"
+    ],
+    "summary": "Record the sale of a car, boat, equipment or other personal property, with price, condition and title promises."
+  },
+  {
+    "id": "equipment-rental-agreement",
+    "title": "Equipment Rental Agreement",
+    "category": "everyday",
+    "tags": [
+      "rental",
+      "equipment",
+      "lease",
+      "gear",
+      "tools"
+    ],
+    "summary": "Rent out equipment, gear or tools with a deposit, condition checks and responsibility for damage."
+  },
+  {
+    "id": "event-venue-booking",
+    "title": "Event and Venue Booking Agreement",
+    "category": "everyday",
+    "tags": [
+      "event",
+      "venue",
+      "booking",
+      "rental",
+      "wedding",
+      "party"
+    ],
+    "summary": "Book a venue or event space with dates, fees, deposits, cancellation and house rules."
+  },
+  {
+    "id": "general-release",
+    "title": "General Release of Claims",
+    "category": "everyday",
+    "tags": [
+      "release",
+      "waiver",
+      "settlement",
+      "one-way release"
+    ],
+    "summary": "One party gives up claims against another, usually in exchange for a payment."
+  },
+  {
+    "id": "loan-agreement",
+    "title": "Loan Agreement",
+    "category": "everyday",
+    "tags": [
+      "loan",
+      "lending",
+      "business loan",
+      "personal loan",
+      "collateral"
+    ],
+    "summary": "A fuller loan contract than a note: purpose, disbursement, repayment, promises, default, and optional collateral."
+  },
+  {
+    "id": "payment-plan-agreement",
+    "title": "Payment Plan Agreement",
+    "category": "everyday",
+    "tags": [
+      "payment plan",
+      "installments",
+      "debt",
+      "past due",
+      "settlement"
+    ],
+    "summary": "Let a customer or debtor pay an existing balance over time, with a schedule and what happens if a payment is missed."
+  },
+  {
+    "id": "media-release",
+    "title": "Photo, Video and Likeness Release",
+    "category": "everyday",
+    "tags": [
+      "model release",
+      "photo release",
+      "video release",
+      "likeness",
+      "content",
+      "creator"
+    ],
+    "summary": "Permission to photograph or record someone and use their image, voice and name."
+  },
+  {
+    "id": "promissory-note-unsecured",
+    "title": "Promissory Note (Unsecured)",
+    "category": "everyday",
+    "tags": [
+      "promissory note",
+      "loan",
+      "iou",
+      "personal loan",
+      "family loan"
+    ],
+    "summary": "A borrower's written promise to repay a loan, with interest, payments, late fees and default terms."
+  },
+  {
+    "id": "change-order",
+    "title": "Change Order",
+    "category": "business",
+    "tags": [
+      "change order",
+      "construction",
+      "project",
+      "scope change"
+    ],
+    "summary": "Document a change to the scope, price or schedule of an existing contract."
+  },
+  {
+    "id": "consulting-agreement",
+    "title": "Consulting Agreement",
+    "category": "business",
+    "tags": [
+      "consulting",
+      "advisor",
+      "retainer",
+      "services"
+    ],
+    "summary": "Engage a consultant or advisor on an hourly, project or monthly-retainer basis."
+  },
+  {
+    "id": "offer-letter",
+    "title": "Employment Offer Letter",
+    "category": "business",
+    "tags": [
+      "employment",
+      "offer",
+      "hiring",
+      "onboarding",
+      "most-signed"
+    ],
+    "summary": "A clear at-will job offer covering role, pay, start date, benefits and conditions."
+  },
+  {
+    "id": "independent-contractor-agreement",
+    "title": "Independent Contractor Agreement",
+    "category": "business",
+    "tags": [
+      "contractor",
+      "freelance",
+      "1099",
+      "services",
+      "most-signed"
+    ],
+    "summary": "Hire a freelancer or independent contractor for defined services, with payment, IP and confidentiality terms."
+  },
+  {
+    "id": "llc-operating-agreement-multi-member",
+    "title": "Multi-Member LLC Operating Agreement",
+    "category": "business",
+    "tags": [
+      "llc",
+      "operating agreement",
+      "multi member",
+      "partners",
+      "company formation"
+    ],
+    "summary": "A plain-English operating agreement for an LLC with two to four members: ownership, votes, money, exits."
+  },
+  {
+    "id": "mutual-nda",
+    "title": "Mutual Non-Disclosure Agreement",
+    "category": "business",
+    "tags": [
+      "nda",
+      "confidentiality",
+      "mutual",
+      "business",
+      "most-signed"
+    ],
+    "summary": "Two parties share confidential information with each other and both agree to protect it."
+  },
+  {
+    "id": "mutual-release",
+    "title": "Mutual Release of Claims",
+    "category": "business",
+    "tags": [
+      "release",
+      "settlement",
+      "mutual",
+      "dispute"
+    ],
+    "summary": "Two parties settle a dispute or end a relationship by releasing each other from claims."
+  },
+  {
+    "id": "one-way-nda",
+    "title": "One-Way Non-Disclosure Agreement",
+    "category": "business",
+    "tags": [
+      "nda",
+      "confidentiality",
+      "unilateral",
+      "business",
+      "most-signed"
+    ],
+    "summary": "One party shares confidential information and the other agrees to protect it."
+  },
+  {
+    "id": "proposal-acceptance",
+    "title": "Quote and Proposal Acceptance",
+    "category": "business",
+    "tags": [
+      "quote",
+      "proposal",
+      "estimate",
+      "acceptance",
+      "sales",
+      "most-signed"
+    ],
+    "summary": "Turn a quote or proposal into a binding order with a deposit and basic terms."
+  },
+  {
+    "id": "referral-agreement",
+    "title": "Referral Agreement",
+    "category": "business",
+    "tags": [
+      "referral",
+      "finder's fee",
+      "partner",
+      "affiliate"
+    ],
+    "summary": "Pay a referral or finder's fee to someone who introduces new customers."
+  },
+  {
+    "id": "commission-agreement",
+    "title": "Sales Commission Agreement",
+    "category": "business",
+    "tags": [
+      "commission",
+      "sales",
+      "compensation",
+      "rep"
+    ],
+    "summary": "Set out how and when a salesperson or sales representative earns commissions."
+  },
+  {
+    "id": "services-agreement",
+    "title": "Services Agreement with Statement of Work",
+    "category": "business",
+    "tags": [
+      "msa",
+      "services",
+      "statement of work",
+      "sow",
+      "vendor",
+      "most-signed"
+    ],
+    "summary": "A master services agreement with general terms, plus a first statement of work for the specific project."
+  },
+  {
+    "id": "partnership-agreement",
+    "title": "Simple General Partnership Agreement",
+    "category": "business",
+    "tags": [
+      "partnership",
+      "co-founder",
+      "business",
+      "general partnership"
+    ],
+    "summary": "Two partners set out contributions, profit split, decisions and what happens if one leaves."
+  },
+  {
+    "id": "llc-operating-agreement-single-member",
+    "title": "Single-Member LLC Operating Agreement",
+    "category": "business",
+    "tags": [
+      "llc",
+      "operating agreement",
+      "single member",
+      "company formation"
+    ],
+    "summary": "A simple operating agreement for an LLC with one owner, supporting liability protection and succession."
+  },
+  {
+    "id": "real-estate-contract-amendment",
+    "title": "Amendment to Real Estate Purchase Contract",
+    "category": "real-estate",
+    "tags": [
+      "amendment",
+      "addendum",
+      "change",
+      "closing date",
+      "price",
+      "repairs"
+    ],
+    "summary": "Change the price, closing date, repairs or other terms of a signed purchase contract."
+  },
+  {
+    "id": "assignment-of-contract",
+    "title": "Assignment of Real Estate Purchase Contract",
+    "category": "real-estate",
+    "tags": [
+      "assignment",
+      "wholesale",
+      "assignment fee",
+      "investor",
+      "state-aware"
+    ],
+    "summary": "Transfer a buyer's rights under a purchase contract to a new buyer for an assignment fee, with the disclosures many states now require."
+  },
+  {
+    "id": "bird-dog-agreement",
+    "title": "Bird Dog (Lead Referral) Agreement",
+    "category": "real-estate",
+    "tags": [
+      "bird dog",
+      "lead",
+      "referral",
+      "investor",
+      "wholesale",
+      "finder"
+    ],
+    "summary": "Pay a 'bird dog' a fee for finding off-market property leads, while limiting their role to providing information."
+  },
+  {
+    "id": "earnest-money-receipt",
+    "title": "Earnest Money Receipt",
+    "category": "real-estate",
+    "tags": [
+      "earnest money",
+      "escrow",
+      "deposit",
+      "receipt"
+    ],
+    "summary": "Acknowledge receipt of an earnest money deposit and state how it will be held and released."
+  },
+  {
+    "id": "lead-based-paint-disclosure",
+    "title": "Lead-Based Paint Disclosure (Sale or Lease)",
+    "category": "real-estate",
+    "tags": [
+      "lead paint",
+      "disclosure",
+      "pre-1978",
+      "federal",
+      "lease",
+      "sale"
+    ],
+    "summary": "The federally required lead-based paint disclosure for selling or renting housing built before 1978, using the exact federal warning statements."
+  },
+  {
+    "id": "property-management-agreement",
+    "title": "Property Management Agreement",
+    "category": "real-estate",
+    "tags": [
+      "property management",
+      "landlord",
+      "rental",
+      "manager",
+      "fees"
+    ],
+    "summary": "Hire a manager to lease, collect rent and maintain rental property, with fees, spending limits and trust-account rules."
+  },
+  {
+    "id": "real-estate-loi",
+    "title": "Real Estate Letter of Intent (Non-Binding)",
+    "category": "real-estate",
+    "tags": [
+      "loi",
+      "letter of intent",
+      "offer",
+      "commercial",
+      "investor"
+    ],
+    "summary": "Outline the key deal terms for a property before negotiating a full purchase contract. Mostly non-binding."
+  },
+  {
+    "id": "residential-lease",
+    "title": "Residential Lease Agreement",
+    "category": "real-estate",
+    "tags": [
+      "lease",
+      "rental",
+      "landlord",
+      "tenant",
+      "apartment",
+      "house",
+      "state-aware",
+      "most-signed"
+    ],
+    "summary": "A plain-English lease for a house, apartment or unit: rent, deposit, maintenance, entry, pets and ending the lease."
+  },
+  {
+    "id": "residential-purchase-agreement",
+    "title": "Residential Purchase Agreement",
+    "category": "real-estate",
+    "tags": [
+      "real estate",
+      "purchase",
+      "home sale",
+      "fsbo",
+      "contract",
+      "state-aware"
+    ],
+    "summary": "A plain-English contract to buy and sell a home, with financing, inspection, title and closing terms, plus hooks for state addenda."
+  },
+  {
+    "id": "room-rental-agreement",
+    "title": "Room Rental and Co-Living Agreement with House Rules",
+    "category": "real-estate",
+    "tags": [
+      "room rental",
+      "roommate",
+      "co-living",
+      "house rules",
+      "lodger",
+      "sublease",
+      "state-aware"
+    ],
+    "summary": "Rent a private room in a shared home, with shared-space rules, utilities, chores, guests and move-out terms."
+  },
+  {
+    "id": "real-estate-contract-termination",
+    "title": "Termination of Purchase Contract and Release of Earnest Money",
+    "category": "real-estate",
+    "tags": [
+      "termination",
+      "cancellation",
+      "earnest money release",
+      "mutual release"
+    ],
+    "summary": "End a purchase contract by agreement and tell the escrow holder how to release the earnest money."
+  },
+  {
+    "id": "contract-for-deed",
+    "title": "Contract for Deed (Installment Land Contract)",
+    "category": "creative-finance",
+    "tags": [
+      "contract for deed",
+      "land contract",
+      "installment sale",
+      "bond for deed",
+      "executory contract",
+      "state-aware"
+    ],
+    "summary": "Seller keeps title while the buyer pays the price in installments, then delivers the deed at payoff. Includes strong state-specific protections."
+  },
+  {
+    "id": "novation-agreement",
+    "title": "Novation Agreement",
+    "category": "creative-finance",
+    "tags": [
+      "novation",
+      "substitution",
+      "assignment",
+      "contract transfer",
+      "three-party"
+    ],
+    "summary": "Replace one party to a contract with a new party, with the other party's consent, releasing the departing party."
+  },
+  {
+    "id": "secured-promissory-note",
+    "title": "Promissory Note Secured by Real Estate",
+    "category": "creative-finance",
+    "tags": [
+      "promissory note",
+      "secured note",
+      "seller financing",
+      "real estate",
+      "balloon"
+    ],
+    "summary": "The buyer's note for a seller-financed sale, secured by a separately recorded mortgage or deed of trust."
+  },
+  {
+    "id": "real-estate-joint-venture",
+    "title": "Real Estate Joint Venture Agreement",
+    "category": "creative-finance",
+    "tags": [
+      "real estate jv",
+      "joint venture",
+      "fix and flip",
+      "capital partner",
+      "operating partner",
+      "buy and hold"
+    ],
+    "summary": "A capital partner and an operating partner team up on one property: who funds, who works, how profits are split, and how it ends."
+  },
+  {
+    "id": "lease-option-agreement",
+    "title": "Residential Lease with Option to Purchase",
+    "category": "creative-finance",
+    "tags": [
+      "lease option",
+      "rent to own",
+      "option to purchase",
+      "lease purchase",
+      "state-aware"
+    ],
+    "summary": "A residential lease paired with a separate, paid option giving the tenant the right (not the obligation) to buy at a set price."
+  },
+  {
+    "id": "seller-acknowledgments-disclosures",
+    "title": "Seller Acknowledgments and Disclosures (Creative Finance)",
+    "category": "creative-finance",
+    "tags": [
+      "seller acknowledgment",
+      "disclosure",
+      "subject to",
+      "seller finance",
+      "consumer protection",
+      "state-aware"
+    ],
+    "summary": "Seller confirms, item by item, that they understand the deal, the equity involved, the risks, and that they were advised to get independent counsel."
+  },
+  {
+    "id": "seller-financing-addendum",
+    "title": "Seller Financing Addendum",
+    "category": "creative-finance",
+    "tags": [
+      "seller financing",
+      "owner financing",
+      "carryback",
+      "promissory note",
+      "deed of trust",
+      "state-aware"
+    ],
+    "summary": "Add owner financing terms to a purchase contract: down payment, rate, amortization, balloon, security, insurance and compliance."
+  },
+  {
+    "id": "subject-to-addendum",
+    "title": "Subject-To Existing Financing Addendum",
+    "category": "creative-finance",
+    "tags": [
+      "subject to",
+      "subto",
+      "existing mortgage",
+      "creative finance",
+      "addendum",
+      "state-aware"
+    ],
+    "summary": "An original addendum for buying a property subject to the seller's existing mortgage, with separately initialed acknowledgments by buyer and seller."
+  },
+  {
+    "id": "wraparound-addendum",
+    "title": "Wraparound Financing Addendum (AITD)",
+    "category": "creative-finance",
+    "tags": [
+      "wraparound",
+      "wrap",
+      "aitd",
+      "all-inclusive trust deed",
+      "seller financing",
+      "state-aware"
+    ],
+    "summary": "Seller finances the sale with a new note that 'wraps' the seller's existing mortgage, which the seller keeps paying from the buyer's payments."
+  },
+  {
+    "id": "artist-management-agreement",
+    "title": "Artist Management Agreement",
+    "category": "music",
+    "tags": [
+      "management",
+      "manager",
+      "commission",
+      "sunset clause",
+      "artist"
+    ],
+    "summary": "Appoint a personal manager, with commission, what income is excluded, term, post-term (sunset) commissions and limits on authority."
+  },
+  {
+    "id": "band-partnership-agreement",
+    "title": "Band Partnership Agreement",
+    "category": "music",
+    "tags": [
+      "band",
+      "partnership",
+      "band name",
+      "leaving member",
+      "income split"
+    ],
+    "summary": "Two to four band members agree on the band name, money, decisions, songwriting, gear and what happens when someone leaves."
+  },
+  {
+    "id": "beat-purchase-receipt",
+    "title": "Beat Purchase Receipt and License Summary",
+    "category": "music",
+    "tags": [
+      "beat",
+      "receipt",
+      "purchase",
+      "license summary",
+      "beat store"
+    ],
+    "summary": "A short signed receipt for a beat purchase that records what was bought, the license type and its main limits."
+  },
+  {
+    "id": "feature-artist-agreement",
+    "title": "Featured Artist Agreement",
+    "category": "music",
+    "tags": [
+      "feature",
+      "guest verse",
+      "collaboration",
+      "featured artist",
+      "label waiver"
+    ],
+    "summary": "A guest artist records a verse or feature on another artist's song, for a fee, credit, optional points and an agreed writer share."
+  },
+  {
+    "id": "master-use-license",
+    "title": "Master Use License (Sound Recording)",
+    "category": "music",
+    "tags": [
+      "master use",
+      "sync",
+      "sound recording",
+      "film",
+      "tv",
+      "label"
+    ],
+    "summary": "License a specific sound recording (master) for use in film, TV, ads, games or online video."
+  },
+  {
+    "id": "music-collaboration-agreement",
+    "title": "Music Collaboration Agreement",
+    "category": "music",
+    "tags": [
+      "collaboration",
+      "joint project",
+      "ep",
+      "masters",
+      "co-owned"
+    ],
+    "summary": "Two artists or producers making a joint project agree on ownership of songs and masters, costs, decisions, income and credit."
+  },
+  {
+    "id": "producer-exclusive-license",
+    "title": "Producer Agreement: Exclusive Beat License",
+    "category": "music",
+    "tags": [
+      "exclusive",
+      "beat",
+      "producer",
+      "points",
+      "royalties",
+      "soundexchange"
+    ],
+    "summary": "An artist gets exclusive rights to use a beat, with no caps. The producer stops licensing it, and may keep ownership, take points and receive a SoundExchange share."
+  },
+  {
+    "id": "producer-beat-lease-nonexclusive",
+    "title": "Producer Agreement: Non-Exclusive Beat Lease",
+    "category": "music",
+    "tags": [
+      "beat lease",
+      "non-exclusive",
+      "producer",
+      "instrumental",
+      "license",
+      "caps"
+    ],
+    "summary": "License a beat non-exclusively for one song, with stream, sales and video caps. The producer keeps ownership and can lease the beat to others."
+  },
+  {
+    "id": "producer-work-for-hire",
+    "title": "Producer Agreement: Work for Hire and Buyout",
+    "category": "music",
+    "tags": [
+      "work for hire",
+      "buyout",
+      "producer",
+      "master ownership",
+      "assignment"
+    ],
+    "summary": "An artist or label commissions a production and owns the resulting beat and master outright, with a fee, optional points and agreed writer credit."
+  },
+  {
+    "id": "publishing-admin-agreement",
+    "title": "Publishing Administration or Co-Publishing Agreement",
+    "category": "music",
+    "tags": [
+      "publishing",
+      "administration",
+      "co-publishing",
+      "admin deal",
+      "royalties",
+      "mlc"
+    ],
+    "summary": "A simple deal where a publisher registers and collects for a songwriter's songs for a fee (admin), or also takes a share of ownership (co-pub)."
+  },
+  {
+    "id": "remix-agreement",
+    "title": "Remix Agreement",
+    "category": "music",
+    "tags": [
+      "remix",
+      "remixer",
+      "stems",
+      "dj",
+      "buyout"
+    ],
+    "summary": "Commission a remix of a track, with stems delivery, fee or royalty, credit, ownership of the remix master and approval."
+  },
+  {
+    "id": "sample-clearance-agreement",
+    "title": "Sample Clearance License",
+    "category": "music",
+    "tags": [
+      "sample",
+      "clearance",
+      "interpolation",
+      "license",
+      "master",
+      "publishing"
+    ],
+    "summary": "License the use of a portion of an existing recording or song (a sample or interpolation) in a new track."
+  },
+  {
+    "id": "session-musician-release",
+    "title": "Session Musician and Vocalist Release",
+    "category": "music",
+    "tags": [
+      "session musician",
+      "session vocalist",
+      "release",
+      "work for hire",
+      "buyout"
+    ],
+    "summary": "Pay a session player or background vocalist a flat fee and get the rights to their recorded performance."
+  },
+  {
+    "id": "split-sheet",
+    "title": "Song Split Sheet",
+    "category": "music",
+    "tags": [
+      "split sheet",
+      "songwriting",
+      "publishing",
+      "splits",
+      "pro",
+      "ipi",
+      "co-write"
+    ],
+    "summary": "Record who wrote a song and each writer's ownership share, PRO, IPI number and publisher, ideally on the day it is written."
+  },
+  {
+    "id": "sync-license",
+    "title": "Synchronization License (Composition)",
+    "category": "music",
+    "tags": [
+      "sync",
+      "synchronization",
+      "film",
+      "tv",
+      "ad",
+      "composition",
+      "publishing"
+    ],
+    "summary": "License a song's composition (music and lyrics) for use in timed relation with video: film, TV, ads, games or online video."
+  },
+  {
+    "id": "joint-venture-agreement",
+    "title": "Joint Venture Agreement",
+    "category": "joint-venture",
+    "tags": [
+      "joint venture",
+      "jv",
+      "collaboration",
+      "profit split",
+      "business"
+    ],
+    "summary": "Two parties team up on a specific project, sharing contributions, control and profits without merging their businesses."
+  },
+  {
+    "id": "profit-share-agreement",
+    "title": "Profit Share Agreement",
+    "category": "joint-venture",
+    "tags": [
+      "profit share",
+      "revenue share",
+      "incentive",
+      "business"
+    ],
+    "summary": "Give someone a share of a business's or project's net profits without giving them ownership."
+  }
+]

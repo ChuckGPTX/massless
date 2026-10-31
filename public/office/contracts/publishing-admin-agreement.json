@@ -1,0 +1,397 @@
+{
+  "id": "publishing-admin-agreement",
+  "version": 1,
+  "title": "Publishing Administration or Co-Publishing Agreement",
+  "category": "music",
+  "summary": "A simple deal where a publisher registers and collects for a songwriter's songs for a fee (admin), or also takes a share of ownership (co-pub).",
+  "useWhen": "A self-published songwriter wants a publisher or administrator to register songs worldwide and collect royalties, with or without giving up ownership.",
+  "watchOuts": [
+    "Admin deals leave ownership with the writer and charge a fee, often 10% to 25%. Co-publishing deals transfer part of the copyright, often 50% of the publisher's share, usually in exchange for an advance. Know which one you are signing.",
+    "Term and retention: many deals let the publisher keep collecting for songs (or keep ownership in co-pub deals) for years after the term ends. Make the retention period clear.",
+    "Advances are recoupable from your royalties, not loans you repay out of pocket, unless the contract says otherwise. Check cross-collateralization.",
+    "The writer's share of performance royalties is paid by PROs directly to the writer and is not usually part of the publisher's collection.",
+    "Sync approvals: decide whether the publisher may license your songs for ads, politics or other sensitive uses without asking."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "writer",
+      "label": "Writer (or writer's publishing company)"
+    },
+    {
+      "id": "publisher",
+      "label": "Publisher / administrator"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "writer_name",
+      "label": "Writer: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "writer_address",
+      "label": "Writer: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "writer_email",
+      "label": "Writer: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "publisher_name",
+      "label": "Publisher: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "publisher_address",
+      "label": "Publisher: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "publisher_email",
+      "label": "Publisher: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "deal_type",
+      "label": "Deal type",
+      "type": "select",
+      "required": true,
+      "default": "administration only",
+      "options": [
+        "administration only",
+        "co-publishing"
+      ],
+      "help": "Admin keeps ownership with the writer. Co-pub transfers part of it."
+    },
+    {
+      "id": "catalog",
+      "label": "Songs covered",
+      "type": "select",
+      "required": true,
+      "default": "all songs written during the term and the existing songs listed below",
+      "options": [
+        "only the songs listed below",
+        "all songs written during the term and the existing songs listed below"
+      ],
+      "help": "Scope."
+    },
+    {
+      "id": "song_list",
+      "label": "Listed songs",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Existing songs with the writer's share of each."
+    },
+    {
+      "id": "term_years",
+      "label": "Term (years)",
+      "type": "number",
+      "required": true,
+      "default": "3",
+      "options": [],
+      "help": "Length."
+    },
+    {
+      "id": "retention_years",
+      "label": "Post-term collection period (years)",
+      "type": "number",
+      "required": true,
+      "default": "1",
+      "options": [],
+      "help": "Publisher may collect income earned during the term, and administer existing licenses, for this long after the term."
+    },
+    {
+      "id": "admin_fee",
+      "label": "Administration fee (% of gross publishing income collected)",
+      "type": "percent",
+      "required": true,
+      "default": "15",
+      "options": [],
+      "help": "Publisher's fee."
+    },
+    {
+      "id": "copub_share",
+      "label": "Publisher's ownership share in co-pub deals (% of the copyright)",
+      "type": "percent",
+      "required": false,
+      "default": "50",
+      "options": [],
+      "help": "Typically half of the writer's ownership share, representing half the publisher's share."
+    },
+    {
+      "id": "copub_income",
+      "label": "Writer's share of net publishing income in co-pub deals",
+      "type": "percent",
+      "required": false,
+      "default": "75",
+      "options": [],
+      "help": "Usually writer's share plus half the publisher's share."
+    },
+    {
+      "id": "advance",
+      "label": "Advance",
+      "type": "money",
+      "required": false,
+      "default": "0",
+      "options": [],
+      "help": "Recoupable from royalties only."
+    },
+    {
+      "id": "sync_approval",
+      "label": "Writer must approve sync licenses?",
+      "type": "select",
+      "required": true,
+      "default": "for ads, political, adult and religious uses",
+      "options": [
+        "for all sync licenses",
+        "for ads, political, adult and religious uses",
+        "no approval needed"
+      ],
+      "help": "Approval rights."
+    },
+    {
+      "id": "territory",
+      "label": "Territory",
+      "type": "text",
+      "required": true,
+      "default": "the world",
+      "options": [],
+      "help": "Where."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Writer:** {{writer_name}}, {{writer_address}} ({{writer_email}})\n\n**Publisher:** {{publisher_name}}, {{publisher_address}} ({{publisher_email}})\n\nDeal type: **{{deal_type}}**. Effective {{effective_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Songs covered",
+      "body": "This agreement covers {{catalog}}:\n\n{{song_list}}\n\n(the \"Songs\"), to the extent of Writer's ownership share.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Term and territory",
+      "body": "The term is {{term_years}} years from the effective date, throughout {{territory}}. After the term, Publisher may collect income earned during the term, and continue to administer licenses it issued during the term, for {{retention_years}} year(s). Then all administration rights revert to Writer.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Administration rights",
+      "body": "Writer keeps 100% ownership of Writer's shares of the Songs. Writer grants Publisher the exclusive right during the term to administer them: register them with PROs, The MLC, mechanical agencies and foreign societies; issue licenses within the approval rules below; and collect all publishing income (except the writer's share of public performance income, which PROs pay directly to Writer). Publisher keeps an administration fee of {{admin_fee}}% of gross publishing income it collects, and pays the rest to Writer.",
+      "optional": true,
+      "showIf": "deal_type == 'administration only'"
+    },
+    {
+      "id": "s5",
+      "title": "5. Co-publishing",
+      "body": "Writer assigns to Publisher {{copub_share}}% of Writer's ownership of each Song, and grants Publisher the exclusive right to administer Writer's remaining share during the term. Publisher will register, license within the approval rules below, and collect all publishing income (except the writer's share of public performance income, which PROs pay directly to Writer). From net publishing income (after an administration fee of {{admin_fee}}% and third-party collection costs), Writer receives {{copub_income}}% and Publisher keeps the rest. The assigned ownership share stays with Publisher after the term unless the parties agree otherwise. Writer: [[initial:writer]]",
+      "optional": true,
+      "showIf": "deal_type == 'co-publishing'"
+    },
+    {
+      "id": "s6",
+      "title": "6. Advance",
+      "body": "Publisher will pay Writer an advance of {{advance}} on signing. It is recoupable only from Writer's royalties under this agreement, not repayable in cash, and not cross-collateralized with any other agreement.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Approvals",
+      "body": "Publisher needs Writer's prior written approval {{sync_approval}}, and in every case for changes to lyrics or title, translations, and uses of the Songs in advertising. Approvals will not be unreasonably delayed.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Registration duties",
+      "body": "Within 60 days after a Song is covered, Publisher will register it, with correct splits, writer IPI numbers and ISRCs where known, with the relevant PROs, The MLC and foreign societies, and give Writer copies of registrations on request.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Accounting and audit",
+      "body": "Publisher will account and pay Writer twice a year, within 90 days after June 30 and December 31, with detailed statements by Song and income type. Writer may audit Publisher's books once a year on 30 days' notice. Statements become binding three years after receipt unless Writer objects in writing.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Writer's promises",
+      "body": "Writer owns or controls the shares of the Songs stated, and the Songs are original or properly cleared. Writer will sign split sheets with co-writers and give Publisher copies.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Ending early",
+      "body": "Either party may end this agreement on 30 days' notice if the other materially breaches it and does not cure. If Publisher fails to account or pay on time twice in a row, Writer may end the term early.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Writer** — {{writer_name}}\n\n[[sig:writer]]\n\nPrinted name: [[name:writer]]\nTitle (if signing for a company): [[text:writer:Title]]\nDate: [[date:writer]]\n\n**Publisher** — {{publisher_name}}\n\n[[sig:publisher]]\n\nPrinted name: [[name:publisher]]\nTitle (if signing for a company): [[text:publisher:Title]]\nDate: [[date:publisher]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Music rights are split between the composition (song) and the sound recording (master); royalties also depend on PRO, publisher, distributor and label agreements that this template does not change. An entertainment attorney should review deals involving advances, ownership transfers or long terms.",
+  "sources": [
+    {
+      "title": "U.S. Copyright Office Circular 56A: Copyright registration of musical compositions and sound recordings",
+      "url": "https://www.copyright.gov/circs/circ56a.pdf"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    },
+    {
+      "title": "17 U.S.C. §201: ownership of copyright, joint works (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/201"
+    },
+    {
+      "title": "17 U.S.C. §204: execution of transfers of copyright ownership (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/204"
+    },
+    {
+      "title": "ASCAP (performing rights organization)",
+      "url": "https://www.ascap.com/"
+    },
+    {
+      "title": "BMI (performing rights organization)",
+      "url": "https://www.bmi.com/"
+    },
+    {
+      "title": "SESAC (performing rights organization)",
+      "url": "https://www.sesac.com/"
+    },
+    {
+      "title": "Global Music Rights (performing rights organization)",
+      "url": "https://globalmusicrights.com/"
+    },
+    {
+      "title": "The MLC: What is a blanket mechanical license?",
+      "url": "https://help.themlc.com/en/support/what-is-a-blanket-mechanical-license"
+    },
+    {
+      "title": "U.S. Copyright Office: The Music Modernization Act",
+      "url": "https://www.copyright.gov/music-modernization/"
+    },
+    {
+      "title": "17 U.S.C. §115: compulsory license for making and distributing phonorecords (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/115"
+    },
+    {
+      "title": "17 U.S.C. §203: termination of transfers (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/203"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

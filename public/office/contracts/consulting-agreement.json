@@ -1,0 +1,381 @@
+{
+  "id": "consulting-agreement",
+  "version": 1,
+  "title": "Consulting Agreement",
+  "category": "business",
+  "summary": "Engage a consultant or advisor on an hourly, project or monthly-retainer basis.",
+  "useWhen": "A business needs expert advice or a defined consulting project from an independent consultant.",
+  "watchOuts": [
+    "Calling someone a contractor does not make them one. The IRS, the U.S. Department of Labor and state agencies look at who controls how, when and where the work is done. Some states, for example California, apply a stricter 'ABC' test. Misclassification can mean back taxes, wages and penalties.",
+    "Under U.S. copyright law, work by a non-employee is usually not a 'work made for hire' unless it fits one of nine statutory categories and a signed writing says so. That is why the IP section also includes an assignment.",
+    "Retainers: say whether unused hours roll over and whether the retainer is earned when paid or as work is done. This affects refunds if the agreement ends early.",
+    "If the consultant also advises your competitors, use the conflicts section and decide what notice you require.",
+    "Advice from a consultant is not a substitute for licensed legal, accounting or investment advice. Some advice may require a license."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "company",
+      "label": "Company"
+    },
+    {
+      "id": "consultant",
+      "label": "Consultant"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "company_name",
+      "label": "Company: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "company_address",
+      "label": "Company: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "company_email",
+      "label": "Company: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "consultant_name",
+      "label": "Consultant: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "consultant_address",
+      "label": "Consultant: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "consultant_email",
+      "label": "Consultant: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "scope",
+      "label": "Consulting services",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Areas of advice, projects and deliverables."
+    },
+    {
+      "id": "term_months",
+      "label": "Initial term (months)",
+      "type": "number",
+      "required": true,
+      "default": "6",
+      "options": [],
+      "help": "Length of the initial term."
+    },
+    {
+      "id": "auto_renew",
+      "label": "Renew month to month after the initial term?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "If on, the agreement continues month to month until either party ends it."
+    },
+    {
+      "id": "comp_type",
+      "label": "Compensation",
+      "type": "select",
+      "required": true,
+      "default": "monthly retainer",
+      "options": [
+        "monthly retainer",
+        "hourly",
+        "project fee"
+      ],
+      "help": "How the consultant is paid."
+    },
+    {
+      "id": "retainer_amount",
+      "label": "Monthly retainer",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Paid in advance each month."
+    },
+    {
+      "id": "retainer_hours",
+      "label": "Hours included in retainer",
+      "type": "number",
+      "required": false,
+      "default": "10",
+      "options": [],
+      "help": "Hours per month covered by the retainer. Extra hours are billed at the hourly rate."
+    },
+    {
+      "id": "hourly_rate",
+      "label": "Hourly rate",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "For hourly work and hours beyond the retainer."
+    },
+    {
+      "id": "project_fee",
+      "label": "Project fee and schedule",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Amount and when each part is paid."
+    },
+    {
+      "id": "payment_days",
+      "label": "Days to pay invoices",
+      "type": "number",
+      "required": true,
+      "default": "15",
+      "options": [],
+      "help": "Net payment terms."
+    },
+    {
+      "id": "work_product_owner",
+      "label": "Who owns work product?",
+      "type": "select",
+      "required": true,
+      "default": "company",
+      "options": [
+        "company",
+        "consultant"
+      ],
+      "help": "Reports, analyses and materials created for the company."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Company:** {{company_name}}, {{company_address}} ({{company_email}})\n\n**Consultant:** {{consultant_name}}, {{consultant_address}} ({{consultant_email}})",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Services",
+      "body": "Consultant will provide the following consulting services:\n\n{{scope}}\n\nConsultant will use professional skill and judgment. The Company makes all final business decisions and is responsible for how it uses Consultant's advice.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Term",
+      "body": "This agreement starts on {{effective_date}} and lasts {{term_months}} months, unless ended earlier under the Ending the agreement section.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Renewal",
+      "body": "After the initial term, this agreement continues month to month until either party gives 30 days' written notice.",
+      "optional": true,
+      "showIf": "auto_renew == true"
+    },
+    {
+      "id": "s5",
+      "title": "5. Compensation: retainer",
+      "body": "The Company will pay a monthly retainer of {{retainer_amount}} in advance on the first business day of each month. It covers up to {{retainer_hours}} hours of services per month. Unused hours do not roll over. Additional hours approved in writing by the Company are billed at {{hourly_rate}} per hour.",
+      "optional": true,
+      "showIf": "comp_type == 'monthly retainer'"
+    },
+    {
+      "id": "s6",
+      "title": "6. Compensation: hourly",
+      "body": "The Company will pay {{hourly_rate}} per hour, billed monthly in increments of no more than 15 minutes, with a summary of work performed.",
+      "optional": true,
+      "showIf": "comp_type == 'hourly'"
+    },
+    {
+      "id": "s7",
+      "title": "7. Compensation: project fee",
+      "body": "The Company will pay the following project fee:\n\n{{project_fee}}",
+      "optional": true,
+      "showIf": "comp_type == 'project fee'"
+    },
+    {
+      "id": "s8",
+      "title": "8. Invoices and expenses",
+      "body": "Invoices are due within {{payment_days}} days. The Company will reimburse reasonable travel and other expenses only if it approved them in writing in advance and receipts are provided.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Independent contractor",
+      "body": "Consultant is an independent contractor and is responsible for its own taxes, insurance and benefits. Consultant controls the manner and means of performing the services, and has no authority to bind the Company or hold itself out as an employee or officer.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Conflicts of interest",
+      "body": "Consultant may advise other clients. Consultant will tell the Company in writing before advising a direct competitor of the Company on the same subject matter during the term, and will never use the Company's confidential information for another client.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Confidentiality",
+      "body": "Consultant will keep the Company's non-public information confidential, use it only to provide the services, and return or destroy it when the agreement ends. This duty lasts three years after the agreement ends, and for trade secrets, as long as they remain trade secrets.\n\n**Whistleblower immunity notice (18 U.S.C. §1833(b)).** An individual will not be held criminally or civilly liable under any federal or state trade secret law for disclosing a trade secret (a) in confidence to a government official or to an attorney solely for the purpose of reporting or investigating a suspected violation of law, or (b) in a complaint or other document filed under seal in a lawsuit. Nothing in this agreement stops anyone from reporting possible violations of law to a government agency, testifying truthfully, or exercising rights that cannot be waived by law.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Work product: company owns",
+      "body": "Reports, analyses, presentations and other materials Consultant prepares specifically for the Company (\"Work Product\") belong to the Company once paid for, and Consultant assigns all rights in them to the Company. Consultant keeps its general know-how, methods and pre-existing materials, and grants the Company a perpetual license to use any built into the Work Product.",
+      "optional": true,
+      "showIf": "work_product_owner == 'company'"
+    },
+    {
+      "id": "s13",
+      "title": "13. Work product: consultant owns",
+      "body": "Consultant owns the materials it prepares and grants the Company a perpetual, non-exclusive, royalty-free license to use them for the Company's internal business purposes.",
+      "optional": true,
+      "showIf": "work_product_owner == 'consultant'"
+    },
+    {
+      "id": "s14",
+      "title": "14. Limitation of liability",
+      "body": "Consultant's total liability under this agreement is limited to the fees paid in the six months before the claim arose, except for breach of confidentiality, gross negligence or willful misconduct. Neither party is liable for indirect or consequential damages.",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "15. Ending the agreement",
+      "body": "Either party may end this agreement with 30 days' written notice, or immediately for a material breach not cured within 10 days after notice. The Company will pay fees earned and approved expenses through the end date. A retainer paid for the final month is prorated.",
+      "optional": false
+    },
+    {
+      "id": "s16",
+      "title": "16. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s17",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Company** — {{company_name}}\n\n[[sig:company]]\n\nPrinted name: [[name:company]]\nTitle (if signing for a company): [[text:company:Title]]\nDate: [[date:company]]\n\n**Consultant** — {{consultant_name}}\n\n[[sig:consultant]]\n\nPrinted name: [[name:consultant]]\nTitle (if signing for a company): [[text:consultant:Title]]\nDate: [[date:consultant]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "IRS: Independent contractor (self-employed) or employee?",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/independent-contractor-self-employed-or-employee"
+    },
+    {
+      "title": "U.S. Department of Labor: Employee or independent contractor classification under the FLSA",
+      "url": "https://www.dol.gov/agencies/whd/flsa/misclassification"
+    },
+    {
+      "title": "Defend Trade Secrets Act whistleblower immunity notice, 18 U.S.C. §1833(b) (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/18/1833"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

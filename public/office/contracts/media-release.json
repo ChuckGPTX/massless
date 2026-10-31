@@ -1,0 +1,282 @@
+{
+  "id": "media-release",
+  "version": 1,
+  "title": "Photo, Video and Likeness Release",
+  "category": "everyday",
+  "summary": "Permission to photograph or record someone and use their image, voice and name.",
+  "useWhen": "Shooting photos or video of a person for marketing, social media, a film, a podcast or other content.",
+  "watchOuts": [
+    "Right of publicity laws vary by state. Commercial uses, such as ads and endorsements, need clearer consent than editorial or news uses.",
+    "Minors: a parent or legal guardian must sign. Some states limit releases for child performers or require court approval of entertainment contracts. Verify locally.",
+    "If you may use AI to alter, clone or synthesize the person's face or voice, say so expressly. Several states, for example California, New York and Tennessee, now regulate digital replicas.",
+    "Property and trademarks visible in the shot, such as a private home, artwork or logos, may need separate permission.",
+    "Union performers (SAG-AFTRA) work under collective bargaining agreements that override some release terms."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "subject",
+      "label": "Person recorded (or parent/guardian)"
+    },
+    {
+      "id": "producer",
+      "label": "Producer"
+    }
+  ],
+  "variables": [
+    {
+      "id": "release_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date signed."
+    },
+    {
+      "id": "subject_name",
+      "label": "Name of person recorded",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Person whose image or voice is used."
+    },
+    {
+      "id": "subject_address",
+      "label": "Address",
+      "type": "address",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Contact address."
+    },
+    {
+      "id": "subject_email",
+      "label": "Email",
+      "type": "email",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Contact email."
+    },
+    {
+      "id": "producer_name",
+      "label": "Producer or company",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Who will use the recordings."
+    },
+    {
+      "id": "project",
+      "label": "Project or shoot",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "E.g. 'Spring 2026 product photo shoot' or 'Episode 12 of the podcast'."
+    },
+    {
+      "id": "uses",
+      "label": "Allowed uses",
+      "type": "select",
+      "required": true,
+      "default": "any media, including advertising",
+      "options": [
+        "any media, including advertising",
+        "editorial and social media only",
+        "internal use only"
+      ],
+      "help": "How broadly the producer can use the material."
+    },
+    {
+      "id": "term",
+      "label": "Duration",
+      "type": "select",
+      "required": true,
+      "default": "perpetual",
+      "options": [
+        "perpetual",
+        "5 years",
+        "2 years",
+        "1 year"
+      ],
+      "help": "How long the producer can use it."
+    },
+    {
+      "id": "compensation",
+      "label": "Compensation",
+      "type": "text",
+      "required": true,
+      "default": "no payment",
+      "options": [],
+      "help": "Fee, product or 'no payment'."
+    },
+    {
+      "id": "digital_replica",
+      "label": "Allow AI or digital alteration of face or voice?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Off means only ordinary editing, such as cropping, color and retouching, is allowed."
+    },
+    {
+      "id": "is_minor",
+      "label": "Is the person under 18?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "If on, a parent or legal guardian signs."
+    },
+    {
+      "id": "guardian_name",
+      "label": "Parent or guardian name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Who signs for the minor."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Permission",
+      "body": "{{subject_name}} (\"I\" or \"me\") gives {{producer_name}} and its licensees, successors and assigns (\"Producer\") permission to photograph, film and record me in connection with {{project}}, and to use the resulting photographs, video, audio, my name and my likeness (the \"Materials\") for {{uses}}, worldwide, for a duration of {{term}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Ownership and editing",
+      "body": "Producer owns the Materials. Producer may crop, edit, retouch, color-correct and combine the Materials with other content, but will not use them in a way that is defamatory or that falsely suggests I endorse a product without my consent.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Digital alteration and AI",
+      "body": "I also allow Producer to digitally alter my image and voice, including with AI tools, to create new content for the uses above. Producer will not create a realistic digital replica of me that says or does things I did not actually say or do without my separate written approval of each use. Initials: [[initial:subject]]",
+      "optional": true,
+      "showIf": "digital_replica == true"
+    },
+    {
+      "id": "s4",
+      "title": "4. Compensation",
+      "body": "Compensation: {{compensation}}. I understand I will not receive royalties or other payments unless stated here.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Release",
+      "body": "I release Producer from claims for invasion of privacy, right of publicity, defamation and similar claims arising from uses allowed by this release. This does not apply to uses outside this release or to claims that cannot be waived.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Revocation",
+      "body": "I may revoke this permission for future uses by written notice. Revocation does not affect Materials already published or distributed, or contractual commitments Producer made before receiving my notice.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Parent or guardian consent",
+      "body": "I, {{guardian_name}}, am the parent or legal guardian of the minor named above, have the legal authority to sign this release on the minor's behalf, and agree to its terms for the minor. [[check:subject:I am the parent or legal guardian of the minor named above]]",
+      "optional": true,
+      "showIf": "is_minor == true"
+    },
+    {
+      "id": "s8",
+      "title": "8. General",
+      "body": "This release is governed by the laws of {{governing_state}}. Contact: {{subject_address}} {{subject_email}}. Date: {{release_date}}. Electronic signatures are valid.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Person recorded (or parent/guardian)** — {{subject_name}}\n\n[[sig:subject]]\n\nPrinted name: [[name:subject]]\nDate: [[date:subject]]\n\n**Producer** — {{producer_name}}\n\n[[sig:producer]]\n\nPrinted name: [[name:producer]]\nTitle (if signing for a company): [[text:producer:Title]]\nDate: [[date:producer]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "California Civil Code §3344 (commercial use of name or likeness)",
+      "url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=3344"
+    },
+    {
+      "title": "U.S. Copyright Office: Copyright and Artificial Intelligence, Part 1: Digital Replicas (2024)",
+      "url": "https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-1-Digital-Replicas-Report.pdf"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

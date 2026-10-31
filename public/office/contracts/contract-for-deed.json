@@ -1,0 +1,475 @@
+{
+  "id": "contract-for-deed",
+  "version": 1,
+  "title": "Contract for Deed (Installment Land Contract)",
+  "category": "creative-finance",
+  "summary": "Seller keeps title while the buyer pays the price in installments, then delivers the deed at payoff. Includes strong state-specific protections.",
+  "useWhen": "Only after both sides have local legal advice. Contracts for deed are heavily regulated in many states and have a history of abuse. A conventional sale with seller financing and a recorded mortgage is often safer for both sides.",
+  "watchOuts": [
+    "Strongly regulated in many states. Examples: Texas (Prop. Code ch. 5, subch. D: disclosures, recording within 30 days, annual statements, cure periods, foreclosure after 40% or 48 payments), Ohio (ORC ch. 5313: required terms, recording within 20 days, foreclosure after five years or 20% paid), Illinois (765 ILCS 67: 3-day attorney general disclosure, recording within 10 business days, 90-day cure), North Carolina (G.S. ch. 47H: required terms, 3-business-day cancellation right, 30-day cure), Minnesota (§559.21 termination; 2024 amendments), Arizona (§33-741 et seq. forfeiture rules), Washington (RCW 61.30) and Iowa (ch. 656).",
+    "Many courts treat a contract for deed like a mortgage. The seller may have to foreclose rather than simply evict, especially after the buyer has built up equity.",
+    "If the seller has a mortgage, a contract for deed can trigger the due-on-sale clause, and the buyer can lose everything if the seller's lender forecloses. Texas generally restricts executory contracts on property with liens.",
+    "Buyers usually take on repairs, taxes and insurance without owning the property. Habitability, code and lead-paint rules may still bind the seller.",
+    "The federal lending laws for seller financing (Regulation Z, SAFE Act) can apply to contracts for deed too."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "seller",
+      "label": "Seller (vendor)"
+    },
+    {
+      "id": "buyer",
+      "label": "Buyer (vendee)"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "contract_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date signed."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Owner who keeps title."
+    },
+    {
+      "id": "seller_address",
+      "label": "Seller address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices and payments."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Buyer."
+    },
+    {
+      "id": "buyer_address",
+      "label": "Buyer address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Street address."
+    },
+    {
+      "id": "legal_description",
+      "label": "Legal description",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "From the deed."
+    },
+    {
+      "id": "price",
+      "label": "Purchase price",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total price."
+    },
+    {
+      "id": "fees",
+      "label": "Other charges included in the contract",
+      "type": "money",
+      "required": false,
+      "default": "0",
+      "options": [],
+      "help": "Some states require these to be stated separately."
+    },
+    {
+      "id": "down_payment",
+      "label": "Down payment",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Paid at signing."
+    },
+    {
+      "id": "balance",
+      "label": "Principal balance",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Price plus included charges, minus the down payment."
+    },
+    {
+      "id": "rate",
+      "label": "Interest rate",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Annual rate, within usury limits."
+    },
+    {
+      "id": "payment",
+      "label": "Monthly payment",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Principal and interest."
+    },
+    {
+      "id": "number_payments",
+      "label": "Number of payments",
+      "type": "number",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total installments."
+    },
+    {
+      "id": "first_payment",
+      "label": "First payment date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "First due date."
+    },
+    {
+      "id": "balloon",
+      "label": "Balloon payment?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Balance due before full amortization."
+    },
+    {
+      "id": "balloon_date",
+      "label": "Balloon due date",
+      "type": "date",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "When the remaining balance is due."
+    },
+    {
+      "id": "escrow",
+      "label": "Taxes and insurance paid through escrow?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "Monthly escrow."
+    },
+    {
+      "id": "liens",
+      "label": "Existing liens on the property",
+      "type": "longtext",
+      "required": true,
+      "default": "None",
+      "options": [],
+      "help": "List every mortgage or lien, with the lender and balance."
+    },
+    {
+      "id": "public_orders",
+      "label": "Pending government orders or code violations",
+      "type": "longtext",
+      "required": true,
+      "default": "None known",
+      "options": [],
+      "help": "Many states require disclosure."
+    },
+    {
+      "id": "record_days",
+      "label": "Seller records the contract within (days)",
+      "type": "number",
+      "required": true,
+      "default": "10",
+      "options": [],
+      "help": "Use the shortest deadline in your state: Illinois 10 business days, Ohio 20 days, Texas 30 days."
+    },
+    {
+      "id": "cure_days",
+      "label": "Buyer's cure period after default notice (days)",
+      "type": "number",
+      "required": true,
+      "default": "60",
+      "options": [],
+      "help": "Never less than the state minimum. Illinois requires 90 days, Texas 30 or 60, North Carolina 30."
+    },
+    {
+      "id": "cancel_days",
+      "label": "Buyer's right to cancel (business days)",
+      "type": "number",
+      "required": true,
+      "default": "3",
+      "options": [],
+      "help": "North Carolina and Illinois require at least 3 business days."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and property",
+      "body": "Seller: {{seller_name}}, {{seller_address}}. Buyer: {{buyer_name}}, {{buyer_address}}. Date: {{contract_date}}.\n\nSeller agrees to sell and Buyer agrees to buy {{property_address}}, {{state}}, legally described as:\n\n{{legal_description}}\n\n(the \"Property\"). Seller keeps legal title as security until Buyer pays the price in full. Then Seller will deliver a deed.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Price and payments",
+      "body": "- Purchase price: {{price}}\n- Other charges included: {{fees}}\n- Down payment: {{down_payment}}\n- Principal balance: {{balance}}\n- Interest: {{rate}}% per year, simple interest on the unpaid balance\n- Payments: {{number_payments}} monthly payments of {{payment}}, starting {{first_payment}}\n- Prepayment: Buyer may prepay all or part at any time without penalty\n- Late charge: no more than 5% of the late payment, and only if more than 15 days late, unless the law of {{state}} sets a lower limit\n\nAn amortization schedule is attached. Buyer: [[initial:buyer]]",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Balloon payment",
+      "body": "**The entire remaining balance is due on {{balloon_date}}. Regular payments will not pay off the contract by then. Seller has no obligation to extend it.** Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "balloon == true"
+    },
+    {
+      "id": "s4",
+      "title": "4. Existing liens and public orders",
+      "body": "Existing liens on the Property: {{liens}}\n\nPending government orders or code violations: {{public_orders}}\n\nSeller will keep every existing lien current, will not place any new mortgage or lien on the Property, and will not let the total of liens exceed the balance Buyer owes. If Seller fails to pay an existing lien, Buyer may pay it directly and deduct the payment from what Buyer owes Seller. Seller will give Buyer copies of any default, foreclosure or tax notice within 5 days. Seller: [[initial:seller]]",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Taxes, insurance and repairs",
+      "body": "From the date of this contract, Buyer is responsible for property taxes and assessments, homeowner's insurance naming both parties as their interests appear, utilities and routine repairs, unless this contract says otherwise. Seller remains responsible for any condition Seller knew about and did not disclose, and for compliance with laws that place obligations on Seller. Insurance proceeds for damage will be used to repair the Property unless both parties agree otherwise in writing.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Escrow",
+      "body": "Buyer will pay one-twelfth of the estimated annual taxes and insurance with each payment, into an escrow account held by a third-party servicer, which will pay those bills and provide annual escrow statements.",
+      "optional": true,
+      "showIf": "escrow == true"
+    },
+    {
+      "id": "s7",
+      "title": "7. Recording",
+      "body": "Seller will record this contract, or a memorandum of it if the law of {{state}} allows, signed and notarized by both parties, in the county records within {{record_days}} days after signing, and give Buyer a recorded copy. Seller pays the recording fee. Buyer may record it if Seller does not.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Annual statement",
+      "body": "Each January, Seller will give Buyer a written statement showing payments received, principal and interest paid, the remaining balance and number of payments, and taxes and insurance paid for the prior year.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Default, cure and remedies",
+      "body": "If Buyer fails to pay or perform, Seller must give Buyer written notice, delivered as the law of {{state}} requires, stating the default and the amount needed to cure. Buyer has {{cure_days}} days after the notice, or any longer period the law requires, to cure. Seller may then use only the remedies the law of {{state}} allows, which may require judicial foreclosure rather than forfeiture or eviction, especially once Buyer has paid a substantial part of the price. Buyer: [[initial:buyer]]",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Deed at payoff",
+      "body": "Within 30 days after Buyer pays in full, Seller will deliver a general warranty deed (or the best deed Seller can lawfully give, if the parties agree in writing) conveying title free of all liens except those Buyer agreed to, and will pay to release any Seller liens.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Buyer's right to cancel",
+      "body": "**Buyer may cancel this contract at any time until midnight of the {{cancel_days}}th business day after signing or receiving a signed copy, whichever is later, by written notice to Seller. If Buyer cancels, Seller will refund all payments within 10 days.** Buyer: [[initial:buyer]]",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Disclosures",
+      "body": "Seller has given Buyer all seller disclosures required by the law of {{state}}, the federal lead-based paint disclosure if the home was built before 1978, any disclosure statement the law requires for contracts for deed, and copies of the most recent tax bill and insurance policy. Buyer had the opportunity to obtain an inspection, appraisal and title search before signing. Buyer: [[initial:buyer]]",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. Texas: executory contract requirements",
+      "body": "**Texas.** Texas Property Code ch. 5, subch. D applies to residential executory contracts longer than 180 days. Among other things: required disclosures before signing (survey or plat, tax certificates, insurance, financing terms); the contract must be in the language of negotiation; recording within 30 days; annual accounting each January; a specific default notice; a 30-day cure period, or 60 days in some cases (for example once 40% of the price or 48 monthly payments have been paid), after which Seller's remedy in those cases is limited to selling the property through a trustee's sale; limits on late fees; a deed within 30 days after final payment; and restrictions on liens. Penalties and Deceptive Trade Practices Act remedies apply. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "state == 'TX'"
+    },
+    {
+      "id": "s14",
+      "title": "14. Ohio: land installment contract requirements",
+      "body": "**Ohio.** Ohio Revised Code ch. 5313 requires specific contract terms (including a provision letting Buyer pay Seller's defaulted mortgage and receive credit), signing in duplicate with the formalities of a deed, recording within 20 days and delivery to the county auditor, review of a metes-and-bounds description by the county engineer, and specific default procedures. After the contract has been in effect for five years, or Buyer has paid 20% or more of the price, Seller must foreclose rather than forfeit. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "state == 'OH'"
+    },
+    {
+      "id": "s15",
+      "title": "15. Illinois: Installment Sales Contract Act",
+      "body": "**Illinois.** The Installment Sales Contract Act (765 ILCS 67) applies to sellers who enter into more than three such contracts in 12 months for residential property. It requires the Attorney General's disclosure and a 3-business-day review period, 28 specified contract terms, recording within 10 business days, a 90-day cure period, and seller repair duties unless shifted in compliance with the Act, among other things. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "state == 'IL'"
+    },
+    {
+      "id": "s16",
+      "title": "16. North Carolina: contracts for deed",
+      "body": "**North Carolina.** N.C. Gen. Stat. ch. 47H requires a written, acknowledged contract with specified terms, a completed residential property disclosure statement, a 14-point bold notice of the buyer's 3-business-day cancellation right above the buyer's signature, recording, and a default notice with a 30-day cure period before forfeiture. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "state == 'NC'"
+    },
+    {
+      "id": "s17",
+      "title": "17. Minnesota: contracts for deed",
+      "body": "**Minnesota.** Termination is governed by Minn. Stat. §559.21, which 2024 amendments changed for residential property, including barring termination where the vendor failed to record as required by §507.235. Additional rules apply to investor sellers. Consult Minnesota counsel. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "state == 'MN'"
+    },
+    {
+      "id": "s18",
+      "title": "18. State-specific requirements",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "optional": false
+    },
+    {
+      "id": "s19",
+      "title": "19. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s20",
+      "title": "Signatures",
+      "body": "**Buyer: read the right-to-cancel section above before signing.** Both parties sign this contract, and must also sign it before a notary for recording.\n\n**Seller** — {{seller_name}}\n\n[[sig:seller]]\n\nPrinted name: [[name:seller]]\nDate: [[date:seller]]\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nDate: [[date:buyer]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything. Creative-finance transactions (subject-to, seller financing, wraps, lease-options, contracts for deed) can trigger lender due-on-sale rights, federal and state lending and licensing laws (Truth in Lending/Dodd-Frank, SAFE Act), state executory-contract statutes and consumer-protection claims. Each party, and especially the seller, should have independent legal counsel and a tax adviser before signing. Contracts for deed are among the most heavily regulated and litigated real estate arrangements. Do not use this template without an attorney licensed in the property's state.",
+  "sources": [
+    {
+      "title": "TexasLawHelp: Executory contracts and lease-to-own real estate (Tex. Prop. Code ch. 5, subch. D)",
+      "url": "https://texaslawhelp.org/article/executory-contracts-and-lease-to-own-real-estate"
+    },
+    {
+      "title": "Ohio Rev. Code ch. 5313: land installment contracts",
+      "url": "https://codes.ohio.gov/ohio-revised-code/chapter-5313"
+    },
+    {
+      "title": "Illinois Installment Sales Contract Act, 765 ILCS 67",
+      "url": "https://ilga.gov/legislation/ilcs/ilcs3.asp?ActID=3813"
+    },
+    {
+      "title": "N.C. Gen. Stat. ch. 47H: contracts for deed",
+      "url": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/ByChapter/Chapter_47H.html"
+    },
+    {
+      "title": "Minn. Stat. §559.21: contract for deed termination",
+      "url": "https://www.revisor.mn.gov/statutes/cite/559.21"
+    },
+    {
+      "title": "Ariz. Rev. Stat. §33-742: forfeiture under real property contracts",
+      "url": "https://www.azleg.gov/ars/33/00742.htm"
+    },
+    {
+      "title": "Wash. Rev. Code ch. 61.30: Real Estate Contract Forfeiture Act",
+      "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=61.30&full=true"
+    },
+    {
+      "title": "Iowa Code ch. 656: forfeiture of real estate contracts",
+      "url": "https://www.legis.iowa.gov/docs/code/656.pdf"
+    },
+    {
+      "title": "Garn-St Germain Act due-on-sale provisions, 12 U.S.C. §1701j-3 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/12/1701j-3"
+    },
+    {
+      "title": "Regulation Z, 12 CFR 1026.36 (loan originator rules, seller-financer exclusions) (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-12/chapter-X/part-1026/subpart-E/section-1026.36"
+    },
+    {
+      "title": "40 CFR 745.113: certification and acknowledgment of disclosure (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.113"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

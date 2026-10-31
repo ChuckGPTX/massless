@@ -344,7 +344,7 @@ export const STUDIOS = [
     subtitle: "Useful tools, with files kept in your browser.",
     href: "/office",
     engineTitle: "Document tools",
-    note: "Editing and conversion stay local. Ask PDF sends selected document text to Cloudflare.",
+    note: "Editing and conversion stay local. Ask PDF sends selected document text to Cloudflare. Sign uploads only encrypted envelopes.",
     features: [
       item(
         "Edit & annotate PDF",
@@ -364,6 +364,19 @@ export const STUDIOS = [
         "/office?tab=ask",
         "text",
         "CLOUD",
+      ),
+      item(
+        "Send for signature",
+        "Contract templates, signers and an audit trail",
+        "/office?tab=sign",
+        "file",
+        "NEW",
+      ),
+      item(
+        "Verify a signed PDF",
+        "Check a Massless Sign certificate",
+        "/sign#verify",
+        "scan",
       ),
       item(
         "Try a sample",

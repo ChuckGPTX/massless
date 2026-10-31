@@ -1,0 +1,199 @@
+{
+  "id": "real-estate-contract-termination",
+  "version": 1,
+  "title": "Termination of Purchase Contract and Release of Earnest Money",
+  "category": "real-estate",
+  "summary": "End a purchase contract by agreement and tell the escrow holder how to release the earnest money.",
+  "useWhen": "Buyer and seller agree to cancel a purchase contract, for example after an inspection or financing contingency, or by mutual agreement.",
+  "watchOuts": [
+    "A unilateral termination notice under a contingency is different from a mutual cancellation. If you have a contractual right to terminate, exercise it in writing before the deadline, then use this form for the release.",
+    "Escrow holders usually require both signatures, or a court order, to release disputed earnest money.",
+    "If a licensee is involved, use the state-required release form where one exists (for example Colorado's Earnest Money Release)."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "buyer",
+      "label": "Buyer"
+    },
+    {
+      "id": "seller",
+      "label": "Seller"
+    }
+  ],
+  "variables": [
+    {
+      "id": "termination_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of termination."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Buyer."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Seller."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Property address."
+    },
+    {
+      "id": "contract_date",
+      "label": "Contract date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Effective date of the contract."
+    },
+    {
+      "id": "reason",
+      "label": "Reason",
+      "type": "select",
+      "required": true,
+      "default": "mutual agreement",
+      "options": [
+        "mutual agreement",
+        "inspection contingency",
+        "financing contingency",
+        "appraisal contingency",
+        "title objection",
+        "other contingency"
+      ],
+      "help": "Basis for ending the contract."
+    },
+    {
+      "id": "escrow_holder",
+      "label": "Earnest money holder",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Who holds the deposit."
+    },
+    {
+      "id": "earnest_amount",
+      "label": "Earnest money amount",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Amount held."
+    },
+    {
+      "id": "disbursement",
+      "label": "Release earnest money",
+      "type": "select",
+      "required": true,
+      "default": "all to buyer",
+      "options": [
+        "all to buyer",
+        "all to seller",
+        "split as stated"
+      ],
+      "help": "Who receives the deposit."
+    },
+    {
+      "id": "buyer_share",
+      "label": "Amount to buyer",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "If split."
+    },
+    {
+      "id": "seller_share",
+      "label": "Amount to seller",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "If split."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Termination",
+      "body": "{{buyer_name}} (\"Buyer\") and {{seller_name}} (\"Seller\") terminate the purchase contract dated {{contract_date}} for {{property_address}} (the \"Contract\"), effective {{termination_date}}. Reason: {{reason}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Earnest money",
+      "body": "The parties instruct {{escrow_holder}} to release the earnest money of {{earnest_amount}}, minus any fees the Contract allows the holder to deduct, as follows: {{disbursement}}.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Split",
+      "body": "Buyer receives {{buyer_share}} and Seller receives {{seller_share}}.",
+      "optional": true,
+      "showIf": "disbursement == 'split as stated'"
+    },
+    {
+      "id": "s4",
+      "title": "4. Mutual release",
+      "body": "Once the earnest money is released as instructed, Buyer and Seller release each other, and the escrow holder, from all claims and obligations under the Contract, except obligations the Contract says survive termination (for example repairing inspection damage) and any claim for fraud.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Property",
+      "body": "Buyer will return any keys, access devices and Seller documents, and Seller may market the property again immediately.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. General",
+      "body": "This termination may be signed electronically and in counterparts, and the escrow holder may rely on it.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nDate: [[date:buyer]]\n\n**Seller** — {{seller_name}}\n\n[[sig:seller]]\n\nPrinted name: [[name:seller]]\nDate: [[date:seller]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "Colorado Division of Real Estate: real estate broker contracts and forms",
+      "url": "https://dre.colorado.gov/real-estate-broker-contracts-and-forms"
+    },
+    {
+      "title": "Texas Real Estate Commission: contract forms",
+      "url": "https://www.trec.texas.gov/agency-information/contracts"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

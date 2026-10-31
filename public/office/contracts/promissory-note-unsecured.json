@@ -1,0 +1,350 @@
+{
+  "id": "promissory-note-unsecured",
+  "version": 1,
+  "title": "Promissory Note (Unsecured)",
+  "category": "everyday",
+  "summary": "A borrower's written promise to repay a loan, with interest, payments, late fees and default terms.",
+  "useWhen": "Lending money to a person or business without collateral, for example a family loan or a loan to a friend's business.",
+  "watchOuts": [
+    "Usury: every state caps interest on some loans, and penalties can include losing all interest. The cap depends on the state, the loan type and whether the borrower is a consumer or a business. Verify locally before setting the rate.",
+    "E-signatures: the federal E-SIGN Act excludes UCC Article 3 (negotiable instruments). An e-signed note is still an enforceable promise to pay, but it may not qualify as a negotiable instrument that can be transferred to a holder in due course. If you may sell or pledge the note, consider a wet-ink original.",
+    "Family and low-interest loans: for loans over $10,000 charging less than the IRS applicable federal rate, the IRS may impute interest and treat the forgone interest as a gift. Talk to a tax adviser.",
+    "Consumer loans made regularly as a business may need a state lender license and Truth in Lending disclosures."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "borrower",
+      "label": "Borrower"
+    }
+  ],
+  "variables": [
+    {
+      "id": "note_date",
+      "label": "Date of note",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date the money is lent."
+    },
+    {
+      "id": "borrower_name",
+      "label": "Borrower: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "borrower_address",
+      "label": "Borrower: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "borrower_email",
+      "label": "Borrower: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "lender_name",
+      "label": "Lender: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "lender_address",
+      "label": "Lender: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "lender_email",
+      "label": "Lender: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "principal",
+      "label": "Principal amount",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Amount borrowed."
+    },
+    {
+      "id": "interest_rate",
+      "label": "Annual interest rate",
+      "type": "percent",
+      "required": true,
+      "default": "5",
+      "options": [],
+      "help": "Simple interest per year. Check your state's usury limit."
+    },
+    {
+      "id": "repayment",
+      "label": "Repayment plan",
+      "type": "select",
+      "required": true,
+      "default": "monthly installments",
+      "options": [
+        "monthly installments",
+        "single payment on the maturity date",
+        "interest-only payments, principal at maturity"
+      ],
+      "help": "How the loan is repaid."
+    },
+    {
+      "id": "payment_amount",
+      "label": "Monthly payment",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Installment amount including interest. Use an amortization calculator."
+    },
+    {
+      "id": "first_payment",
+      "label": "First payment date",
+      "type": "date",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Date of the first payment."
+    },
+    {
+      "id": "maturity_date",
+      "label": "Maturity date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date everything still owed is due."
+    },
+    {
+      "id": "payment_place",
+      "label": "Payment method or place",
+      "type": "text",
+      "required": true,
+      "default": "by bank transfer to an account the Lender designates",
+      "options": [],
+      "help": "Where or how to pay."
+    },
+    {
+      "id": "late_days",
+      "label": "Grace period (days)",
+      "type": "number",
+      "required": true,
+      "default": "10",
+      "options": [],
+      "help": "Days after the due date before a late fee applies."
+    },
+    {
+      "id": "late_fee",
+      "label": "Late fee",
+      "type": "money",
+      "required": false,
+      "default": "25",
+      "options": [],
+      "help": "Flat late fee. Some states cap late fees."
+    },
+    {
+      "id": "default_rate",
+      "label": "Default interest rate",
+      "type": "percent",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Optional higher rate after default, within the legal limit. Leave blank to keep the regular rate."
+    },
+    {
+      "id": "include_attorney_fees",
+      "label": "Borrower pays collection costs?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "Borrower pays reasonable collection costs and attorney fees if in default, where the law allows."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Promise to pay",
+      "body": "For value received, {{borrower_name}} (\"Borrower\"), of {{borrower_address}}, promises to pay {{lender_name}} (\"Lender\"), of {{lender_address}}, the principal sum of {{principal}}, plus interest as described below. Date: {{note_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Interest",
+      "body": "Interest accrues on the unpaid principal at {{interest_rate}}% per year, simple interest, calculated on the basis of a 365-day year, from the date of this note until paid in full. Interest will never exceed the maximum rate allowed by law. Any excess will be applied to principal or refunded.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Payments: installments",
+      "body": "Borrower will pay {{payment_amount}} per month, starting {{first_payment}} and on the same day each month after that, until the maturity date of {{maturity_date}}, when all remaining principal and interest is due.",
+      "optional": true,
+      "showIf": "repayment == 'monthly installments'"
+    },
+    {
+      "id": "s4",
+      "title": "4. Payments: single payment",
+      "body": "Borrower will pay all principal and accrued interest in one payment on {{maturity_date}}.",
+      "optional": true,
+      "showIf": "repayment == 'single payment on the maturity date'"
+    },
+    {
+      "id": "s5",
+      "title": "5. Payments: interest-only",
+      "body": "Borrower will pay accrued interest monthly starting {{first_payment}}, and all principal and remaining interest on {{maturity_date}}.",
+      "optional": true,
+      "showIf": "repayment == 'interest-only payments, principal at maturity'"
+    },
+    {
+      "id": "s6",
+      "title": "6. How payments are made and applied",
+      "body": "Payments are made {{payment_place}}. Each payment is applied first to late fees, then to accrued interest, then to principal. Borrower may prepay all or part at any time without penalty. Partial prepayments do not postpone the next scheduled payment.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Late payments",
+      "body": "If a payment is more than {{late_days}} days late, Borrower will pay a late fee of {{late_fee}}, to the extent allowed by law.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Default",
+      "body": "Borrower is in default if (a) any payment is more than 30 days late and Borrower does not pay within 10 days after written notice, (b) Borrower becomes insolvent, makes an assignment for creditors or files bankruptcy, or (c) any statement Borrower made to obtain the loan was materially false. On default, Lender may declare the whole unpaid balance and accrued interest immediately due.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Default interest",
+      "body": "After default and acceleration, the unpaid balance bears interest at {{default_rate}}% per year if a default rate is stated, or otherwise at the regular rate, but never above the legal maximum.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Collection costs",
+      "body": "If Lender has to collect after a default, Borrower will pay Lender's reasonable costs of collection, including reasonable attorney fees, to the extent allowed by law.",
+      "optional": true,
+      "showIf": "include_attorney_fees == true"
+    },
+    {
+      "id": "s11",
+      "title": "11. Other terms",
+      "body": "Borrower waives presentment, demand, protest and notice of dishonor, to the extent allowed by law. Lender's delay in enforcing any right is not a waiver. This note is governed by the laws of {{governing_state}}. If any part is unenforceable, the rest stays in effect. Lender may assign this note. Borrower may not assign it without Lender's written consent. Notices go to the addresses above or to {{borrower_email}} and {{lender_email}}.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "Signatures",
+      "body": "Borrower signs this note on the date above. (A promissory note is signed by the borrower. The lender keeps the signed original.)\n\n**Borrower** — {{borrower_name}}\n\n[[sig:borrower]]\n\nPrinted name: [[name:borrower]]\nTitle (if signing for a company): [[text:borrower:Title]]\nDate: [[date:borrower]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "E-SIGN exceptions, 15 U.S.C. §7003 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7003"
+    },
+    {
+      "title": "UCC Article 3 (Negotiable Instruments), §3-104 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/ucc/3/3-104"
+    },
+    {
+      "title": "IRS: Applicable federal rates",
+      "url": "https://www.irs.gov/applicable-federal-rates"
+    },
+    {
+      "title": "IRS Topic: Gift tax (below-market loans)",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/frequently-asked-questions-on-gift-taxes"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

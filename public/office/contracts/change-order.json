@@ -1,0 +1,217 @@
+{
+  "id": "change-order",
+  "version": 1,
+  "title": "Change Order",
+  "category": "business",
+  "summary": "Document a change to the scope, price or schedule of an existing contract.",
+  "useWhen": "A project needs more or different work after the original contract was signed, for example in construction, remodeling, software or creative work.",
+  "watchOuts": [
+    "Sign the change order before the extra work starts. Many contracts and some state home-improvement laws require written change orders, and unsigned extras can be hard to collect.",
+    "For home improvement work, some states require specific content in contracts and change orders, and may require the contractor to hold a license. Verify locally.",
+    "State the new contract total so everyone knows the running price."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "client",
+      "label": "Client / owner"
+    },
+    {
+      "id": "contractor",
+      "label": "Contractor / provider"
+    }
+  ],
+  "variables": [
+    {
+      "id": "change_order_number",
+      "label": "Change order number",
+      "type": "text",
+      "required": true,
+      "default": "1",
+      "options": [],
+      "help": "Sequential number."
+    },
+    {
+      "id": "change_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of this change order."
+    },
+    {
+      "id": "client_name",
+      "label": "Client name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Owner or client."
+    },
+    {
+      "id": "contractor_name",
+      "label": "Contractor name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Contractor or service provider."
+    },
+    {
+      "id": "original_contract",
+      "label": "Original contract",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Name and date of the original contract, e.g. 'Kitchen remodel contract dated March 1, 2026'."
+    },
+    {
+      "id": "project_address",
+      "label": "Project or job site",
+      "type": "address",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Address or project name."
+    },
+    {
+      "id": "change_description",
+      "label": "Description of the change",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Exactly what is added, removed or changed. Include materials, specifications and allowances."
+    },
+    {
+      "id": "reason",
+      "label": "Reason for change",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "E.g. owner request, unforeseen conditions, code requirement."
+    },
+    {
+      "id": "price_change_type",
+      "label": "Price effect",
+      "type": "select",
+      "required": true,
+      "default": "increase",
+      "options": [
+        "increase",
+        "decrease",
+        "no change"
+      ],
+      "help": "Effect on the contract price."
+    },
+    {
+      "id": "price_change",
+      "label": "Price change amount",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Amount of the increase or decrease."
+    },
+    {
+      "id": "prior_total",
+      "label": "Contract total before this change",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Original price plus earlier approved changes."
+    },
+    {
+      "id": "new_total",
+      "label": "New contract total",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total after this change."
+    },
+    {
+      "id": "schedule_change_days",
+      "label": "Schedule change (days)",
+      "type": "number",
+      "required": true,
+      "default": "0",
+      "options": [],
+      "help": "Days added to (or removed from) the completion date. Enter 0 for no change."
+    },
+    {
+      "id": "new_completion",
+      "label": "New completion date",
+      "type": "date",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "If the completion date changes."
+    },
+    {
+      "id": "payment_terms",
+      "label": "Payment for this change",
+      "type": "text",
+      "required": true,
+      "default": "Paid with the next progress payment",
+      "options": [],
+      "help": "When the change is paid."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Change order details",
+      "body": "**Change order no.:** {{change_order_number}}\n**Date:** {{change_date}}\n**Client:** {{client_name}}\n**Contractor:** {{contractor_name}}\n**Original contract:** {{original_contract}}\n**Project:** {{project_address}}",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Change",
+      "body": "{{change_description}}\n\nReason: {{reason}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Price",
+      "body": "Effect on price: {{price_change_type}} of {{price_change}}.\n\nContract total before this change: {{prior_total}}\nNew contract total: {{new_total}}\n\nPayment: {{payment_terms}}.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "Schedule",
+      "body": "Change to the schedule: {{schedule_change_days}} days. New completion date (if changed): {{new_completion}}.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "4. Effect",
+      "body": "This change order is part of the original contract. Except as changed here, all terms of the original contract stay in effect. Contractor will not start the changed work until both parties have signed. This change order includes all costs and time for the described change, unless it states otherwise.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Client / owner** — {{client_name}}\n\n[[sig:client]]\n\nPrinted name: [[name:client]]\nDate: [[date:client]]\n\n**Contractor** — {{contractor_name}}\n\n[[sig:contractor]]\n\nPrinted name: [[name:contractor]]\nTitle (if signing for a company): [[text:contractor:Title]]\nDate: [[date:contractor]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "Federal Trade Commission: Hiring a contractor",
+      "url": "https://consumer.ftc.gov/articles/hiring-contractor"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

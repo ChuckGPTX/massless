@@ -1,6 +1,7 @@
 import * as T from '../pdf-tools.js';
 import { bindDialogs, toast, el, download } from '../ui.js';
 import { apiFetch, warmHuman } from '../human.js';
+import { initSign } from '../sign/prepare.js';
 
 const $ = (s) => document.querySelector(s);
 const svg = (paths, cls = '') => `<svg viewBox="0 0 16 16" aria-hidden="true"${cls ? ` class="${cls}"` : ''}>${paths}</svg>`;
@@ -32,7 +33,10 @@ const COPY = {
   edit: ['Edit any<br>PDF', 'Highlight, write, draw, sign and leave notes, then save a real PDF. Your file stays in this browser; nothing is uploaded.'],
   convert: ['Convert and<br>combine', 'Images to PDF, PDF to images, merge, split, rotate, compress and pull out text. All of it runs on your device.'],
   ask: ['Ask your<br>PDF', 'Ask a question about the PDF open in Edit. Only its text, up to 12,000 characters, is sent to an open model to answer.'],
+  sign: ['Send for<br>signature', 'Start from a contract template or your own PDF, place fields for each signer, then send. Everything is encrypted in this browser before it is uploaded.'],
 };
+const TABS = ['edit', 'convert', 'ask', 'sign'];
+let sign = null;
 
 const state = {
   tab: 'edit', tool: 'select', hl: 'amber', ink: 'black', size: 14, pen: 2,
@@ -45,7 +49,7 @@ const nid = (p) => `${p}${Date.now().toString(36)}${(uid++).toString(36)}`;
 // ---------- tabs ----------
 function showTab(which) {
   state.tab = which;
-  for (const t of ['edit', 'convert', 'ask']) {
+  for (const t of TABS) {
     const on = t === which;
     $(`#t-${t}`).setAttribute('aria-selected', String(on));
     $(`#tab-${t}`).hidden = !on;
@@ -56,6 +60,7 @@ function showTab(which) {
   $('#stage-title').innerHTML = COPY[which][0];
   $('#stage-sub').textContent = COPY[which][1];
   if (which === 'ask') { syncAskDoc(); warmHuman(); }
+  if (which === 'sign') { sign.onShow(); warmHuman(); }
   if (which === 'edit' && state.doc) requestAnimationFrame(() => (state.fit ? fitZoom() : renderVisible()));
 }
 
@@ -850,6 +855,7 @@ function handleFiles(files) {
   const list = [...files];
   if (!list.length) return;
   if (state.tab === 'convert') { addToQueue(list); return; }
+  if (state.tab === 'sign') { sign.handleFiles(list); return; }
   const pdf = list.find(T.isPdf);
   if (pdf) { openFile(pdf); return; }
   if (list.some(T.isImage)) {
@@ -910,7 +916,8 @@ function init() {
   bindPad();
   bindDrop();
 
-  for (const t of ['edit', 'convert', 'ask']) {
+  sign = initSign({ tab: () => state.tab, setSrc, setStage: (t, s) => { if (state.tab !== 'sign') return; $('#stage-title').innerHTML = t; $('#stage-sub').textContent = s; } });
+  for (const t of TABS) {
     $(`#t-${t}`).addEventListener('click', () => showTab(t));
     $(`#p-${t}`).addEventListener('click', () => showTab(t));
   }
@@ -957,11 +964,11 @@ function init() {
 
   const p = new URLSearchParams(location.search);
   const tab = p.get('tab') || location.hash.slice(1);
-  if (['convert', 'ask'].includes(tab)) showTab(tab);
+  if (['convert', 'ask', 'sign'].includes(tab)) showTab(tab);
   if (p.get('op') && OPS.some((o) => o.id === p.get('op'))) selectOp(p.get('op'));
   if (p.has('sample')) openSample();
 
-  window.massless = { state: { ...state, recording: false }, live: state, T, openBytes, makeSample, editedBytes, runConvert, setTool, selectOp, showTab, addToQueue, ask };
+  window.massless = { state: { ...state, recording: false }, live: state, T, openBytes, makeSample, editedBytes, runConvert, setTool, selectOp, showTab, addToQueue, ask, sign };
 }
 
 init();
