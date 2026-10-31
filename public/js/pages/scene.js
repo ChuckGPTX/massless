@@ -202,11 +202,25 @@ $("#restore").onchange = async (e) => {
       )
         throw new Error("Invalid scene object.");
     }
+    if (s.camera)
+      for (const v of [s.camera.position, s.camera.target]) {
+        if (
+          !Array.isArray(v) ||
+          v.length !== 3 ||
+          v.some((n) => !Number.isFinite(n) || Math.abs(n) > 100)
+        )
+          throw new Error("Invalid scene camera.");
+      }
     objects.slice().forEach(remove);
     for (const o of s.objects)
       add(o.shape, o.color, o.position, o.scale, o.rotation);
     light.intensity = Math.max(0, Math.min(8, Number(s.light) || 4));
     $("#light").value = light.intensity;
+    if (s.camera) {
+      camera.position.fromArray(s.camera.position);
+      controls.target.fromArray(s.camera.target);
+      controls.update();
+    }
     message("Scene restored.");
   } catch (e) {
     message(e.message);

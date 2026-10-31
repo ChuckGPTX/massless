@@ -1,6 +1,6 @@
 import * as T from "../transcribe.js";
 import { parseCaptions, activeCaption, validateTrim } from "../captions.js";
-import { saveAsset, selectedAsset, downloadBlob } from "../assets.js";
+import { retainExport, selectedAsset, downloadBlob } from "../assets.js";
 const $ = (s) => document.querySelector(s),
   video = $("#source"),
   canvas = $("#caption-canvas"),
@@ -210,7 +210,7 @@ $("#export").onclick = async () => {
     if (controller.signal.aborted) throw new Error("Export cancelled.");
     const blob = new Blob(chunks, { type: mime.split(";")[0] }),
       ext = mime.includes("mp4") ? "mp4" : "webm";
-    const item = await saveAsset(blob, {
+    const { item, saved } = await retainExport(blob, {
       name: "Captioned clip." + ext,
       engine: "local-caption-render",
       sourceId,
@@ -230,8 +230,13 @@ $("#export").onclick = async () => {
     const a = document.createElement("a");
     a.href = "/library/";
     a.textContent = "Open saved clip in library ↗";
-    result.append(button, a);
-    message("Finished and saved to your local library.");
+    result.append(button);
+    if (saved) result.append(a);
+    message(
+      saved
+        ? "Finished and saved to your local library."
+        : "Clip ready. Browser storage could not save it. Download before leaving.",
+    );
   } catch (e) {
     message(e.message);
   } finally {
