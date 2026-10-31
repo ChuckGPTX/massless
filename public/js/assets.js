@@ -50,3 +50,12 @@ export function downloadBlob(blob, name) {
 }
 export const selectedAsset = () =>
   store.get(new URLSearchParams(location.search).get("shot") || "");
+
+// A finished export must remain usable when a browser quota prevents saving it.
+export async function retainExport(blob, meta, saver = saveAsset) {
+  try {
+    return { item: await saver(blob, meta), saved: true };
+  } catch {
+    return { item: { ...meta, blob }, saved: false };
+  }
+}

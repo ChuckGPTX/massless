@@ -6,7 +6,12 @@ import {
   validateTrim,
 } from "../public/js/captions.js";
 import { renderTemplate, templateSettings } from "../public/js/templates.js";
-import { assetURL, recipeFor, saveAsset } from "../public/js/assets.js";
+import {
+  assetURL,
+  recipeFor,
+  saveAsset,
+  retainExport,
+} from "../public/js/assets.js";
 import { get, all } from "../public/js/store.js";
 import "fake-indexeddb/auto";
 test("caption cues retain fractional timing and exclude the end boundary", () => {
@@ -72,4 +77,18 @@ test("shared media keeps original bytes and a recipe links to its source", async
     "A&B <new>",
   );
   await assert.rejects(saveAsset(new Blob()));
+});
+
+test("an export stays downloadable when storage quota is exhausted", async () => {
+  const blob = new Blob(["rendered output"], { type: "video/mp4" });
+  const result = await retainExport(
+    blob,
+    { name: "Finished.mp4" },
+    async () => {
+      throw new DOMException("Full", "QuotaExceededError");
+    },
+  );
+  assert.equal(result.saved, false);
+  assert.equal(result.item.name, "Finished.mp4");
+  assert.equal(await result.item.blob.text(), "rendered output");
 });
