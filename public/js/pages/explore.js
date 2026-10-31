@@ -51,7 +51,6 @@ const studies = [
 // Publish only downloaded and verified outputs. Pending provider jobs stay off the page.
 const published = new Set([
   "showtime-animated",
-  "glass-tide",
   "paper-city",
   "clay-garden",
   "frost-bloom",
@@ -79,12 +78,12 @@ for (const [id, title, model, category, description] of studies) {
   });
   $("#reference-grid").append(card);
 }
-$("#showtime-play").addEventListener("click", () => {
-  $("#reference-dialog-title").textContent = "Tone Da Boss · Showtime";
+$("#featured-film-play").addEventListener("click", () => {
+  $("#reference-dialog-title").textContent = "Glass tide";
   $("#reference-provider-note").hidden = true;
   $("#character-reference").hidden = true;
-  $("#reference-credit").textContent = "Made in Massless Music Preview · original demo instrumental, no artist vocals.";
-  $("#reference-player").src = "/media/music/showtime-preview.mp4";
+  $("#reference-credit").textContent = "Kling 4.0 · cinematic film study. Massless’s browser tools provide camera motion and visual effects.";
+  $("#reference-player").src = "/media/showcase/glass-tide.mp4";
   $("#reference-dialog").showModal();
   $("#reference-player").play().catch(() => {});
 });

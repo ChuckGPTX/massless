@@ -24,20 +24,6 @@
       "input": "User-supplied Tone Da Boss Showtime photo plus the animated clip as the motion source"
     }
   ],
-  "local_preview": {
-    "name": "showtime-preview",
-    "renderer": "Massless Music Preview (Canvas + WebCodecs)",
-    "score": {
-      "style": "trap",
-      "bpm": 120,
-      "beats": 32,
-      "dropBeat": 8,
-      "endBeat": 28,
-      "seed": 410041
-    },
-    "duration_seconds": 16,
-    "artwork": "Poster from the generated animated Showtime clip; original supplied photo is not published."
-  },
   "files": [
     {
       "path": "media/music/demo-instrumental.mp3",
@@ -53,16 +39,6 @@
       "path": "media/music/showtime-animated.mp4",
       "bytes": 904382,
       "sha256": "e8f782fc70b9e80d8421c23513d6bc06a06d42301b1f4d5a9d5a664ed7611052"
-    },
-    {
-      "path": "media/music/showtime-preview.jpg",
-      "bytes": 59980,
-      "sha256": "1a1dbb54391179c5fe33af4121157ce2cf043fcaf51065f868e8da263e411a0d"
-    },
-    {
-      "path": "media/music/showtime-preview.mp4",
-      "bytes": 1043043,
-      "sha256": "9ca5b71f964314b1efa9329583340dc589016d428e6dff785416ce17cb745adc"
     },
     {
       "path": "media/music/showtime-transfer.jpg",

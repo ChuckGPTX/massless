@@ -7,7 +7,7 @@ export const WORKFLOWS = [
     id: "release-teaser",
     name: "Artwork to release teaser",
     tag: "IMAGE + AUDIO + VIDEO",
-    image: "/media/music/showtime-preview.jpg",
+    image: "/media/art/jellyfish.jpg",
     description:
       "Turn cover artwork and your own track into a beat-synced music video preview.",
     output: "MP4 with audio",
