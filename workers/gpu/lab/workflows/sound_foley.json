@@ -1,0 +1,46 @@
+{
+  "video_in": {
+    "class_type": "LoadVideo",
+    "_meta": { "title": "INPUT video (the handler uploads it re-timed to 25 fps, short side at most 512 px)" },
+    "inputs": { "file": "massless_input.mp4" }
+  },
+  "frames": {
+    "class_type": "GetVideoComponents",
+    "_meta": { "title": "Frames" },
+    "inputs": { "video": ["video_in", 0] }
+  },
+  "model": {
+    "class_type": "HunyuanModelLoader",
+    "_meta": { "title": "HunyuanVideo-Foley XXL, fp8 weights, bf16 compute (Tencent Hunyuan Community License)" },
+    "inputs": { "model_name": "hunyuanvideo_foley_fp8_e4m3fn.safetensors", "precision": "bf16", "quantization": "fp8_e4m3fn" }
+  },
+  "deps": {
+    "class_type": "HunyuanDependenciesLoader",
+    "_meta": { "title": "DAC VAE and Synchformer (SigLIP2 and CLAP come from the offline Hugging Face cache)" },
+    "inputs": { "vae_name": "vae_128d_48k_fp16.safetensors", "synchformer_name": "synchformer_state_dict_fp16.safetensors" }
+  },
+  "sampler": {
+    "class_type": "HunyuanFoleySampler",
+    "_meta": { "title": "INPUT duration, steps, seed, prompt, negative_prompt (frames arrive at 25 fps)" },
+    "inputs": {
+      "hunyuan_model": ["model", 0],
+      "hunyuan_deps": ["deps", 0],
+      "frame_rate": 25.0,
+      "duration": 5.0,
+      "prompt": "",
+      "negative_prompt": "noisy, harsh, distorted",
+      "cfg_scale": 4.5,
+      "steps": 50,
+      "sampler": "euler",
+      "batch_size": 1,
+      "seed": 0,
+      "force_offload": true,
+      "image": ["frames", 0]
+    }
+  },
+  "save": {
+    "class_type": "SaveAudioAdvanced",
+    "_meta": { "title": "OUTPUT: FLAC (the handler muxes it into the original clip as AAC)" },
+    "inputs": { "audio": ["sampler", 0], "filename_prefix": "massless/sound", "format": "flac" }
+  }
+}

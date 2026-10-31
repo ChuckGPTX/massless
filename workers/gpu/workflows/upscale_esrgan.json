@@ -1,0 +1,27 @@
+{
+  "model": {
+    "class_type": "UpscaleModelLoader",
+    "_meta": { "title": "Real-ESRGAN x4plus (BSD-3-Clause)" },
+    "inputs": { "model_name": "RealESRGAN_x4plus.safetensors" }
+  },
+  "image_in": {
+    "class_type": "LoadImage",
+    "_meta": { "title": "INPUT image (uploaded by the handler)" },
+    "inputs": { "image": "massless_input.png" }
+  },
+  "upscale": {
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": { "title": "4x with the model (tiled automatically when VRAM is short)" },
+    "inputs": { "upscale_model": ["model", 0], "image": ["image_in", 0] }
+  },
+  "resize": {
+    "class_type": "ImageScale",
+    "_meta": { "title": "INPUT width, height: 2x or 4x of the input, long side capped at 4096" },
+    "inputs": { "image": ["upscale", 0], "upscale_method": "lanczos", "width": 2048, "height": 2048, "crop": "disabled" }
+  },
+  "save": {
+    "class_type": "SaveImage",
+    "_meta": { "title": "OUTPUT: PNG (the handler re-encodes JPEG or WebP at q92)" },
+    "inputs": { "images": ["resize", 0], "filename_prefix": "massless/upscale" }
+  }
+}

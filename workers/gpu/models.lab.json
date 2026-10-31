@@ -1,0 +1,371 @@
+{
+  "about": "Model files baked into the Massless Lab GPU worker image (gpu/Dockerfile.lab): research and non-commercial licenses, deployed as a separate endpoint so the main image stays commercial-clean. Same rules as gpu/models.json. root is models (/models, linked to ComfyUI/models) or hf (/hf, the Hugging Face cache the Foley node reads offline). implicit files are loaded by a custom node from a fixed path, not named in a workflow.",
+  "image": "lab",
+  "comfyui": {
+    "version": "v0.43.1",
+    "commit": "086099f5d8886163ef77dc354f8382cb7431582a",
+    "repo": "https://github.com/comfyanonymous/ComfyUI",
+    "license": "GPL-3.0",
+    "why": "Fibo 2.0 (TextEncodeFibo2) first shipped in v0.43.0."
+  },
+  "custom_nodes": [
+    {
+      "name": "ComfyUI-MMAudio",
+      "repo": "https://github.com/kijai/ComfyUI-MMAudio",
+      "commit": "8eaeb72edc3aaf2059b57f2d96a1f6f689f19ae2",
+      "license": "MIT"
+    },
+    {
+      "name": "ComfyUI-HunyuanVideo-Foley",
+      "repo": "https://github.com/phazei/ComfyUI-HunyuanVideo-Foley",
+      "commit": "afd2960b8ad9036a9f55a15daf514112ff68e010",
+      "license": "Tencent-Hunyuan-Community",
+      "notes": "Contains Tencent code, so its LICENSE is the Tencent Hunyuan Community License (not in the EU, UK or South Korea)."
+    }
+  ],
+  "hf_refs": [
+    {
+      "repo": "google/siglip2-base-patch16-512",
+      "revision": "a89f5c5093f902bf39d3cd4d81d2c09867f0724b"
+    },
+    {
+      "repo": "laion/larger_clap_general",
+      "revision": "ada0c23a36c4e8582805bb38fec3905903f18b41"
+    }
+  ],
+  "models": [
+    {
+      "id": "fibo2_edit_turbo",
+      "jobs": [
+        "fibo"
+      ],
+      "name": "Fibo 2.0 edit turbo (8B, 4 steps, text-to-image and edit), bf16",
+      "url": "https://huggingface.co/Comfy-Org/Fibo-2.0/resolve/4742d4bec410034142c8e65559e5f00c6f29eccb/diffusion_models/fibo2_edit_turbo_bf16.safetensors",
+      "sha256": "028f6cf13af75840d7cc7346a5784fe55887c6b9299d173c8271161ba5ccf7d0",
+      "size": 16452934194,
+      "root": "models",
+      "target": "diffusion_models/fibo2_edit_turbo_bf16.safetensors",
+      "license": "CC-BY-NC-4.0",
+      "commercial": false,
+      "card": "https://huggingface.co/Comfy-Org/Fibo-2.0",
+      "notes": "Bria AI's weights, repackaged for ComfyUI by Comfy-Org; the card states CC BY-NC 4.0 and that commercial use needs a separate agreement with Bria. Bria's own gated cards (briaai/Fibo-2.0-edit-turbo) use the bria-fibo license. bf16 rather than int8-convrot: ComfyUI's int8 kernels need CUDA 13 builds of PyTorch."
+    },
+    {
+      "id": "fibo2_qwen3vl_4b",
+      "jobs": [
+        "fibo"
+      ],
+      "name": "Qwen3-VL-4B text encoder for Fibo 2.0, bf16",
+      "url": "https://huggingface.co/Comfy-Org/Fibo-2.0/resolve/4742d4bec410034142c8e65559e5f00c6f29eccb/text_encoders/qwen3vl_4b_bf16.safetensors",
+      "sha256": "36f3ff447ef59201722e8f9ce6020c9819fdcfba6aa2608c4e09b1c0ce114e34",
+      "size": 8875719384,
+      "root": "models",
+      "target": "text_encoders/qwen3vl_4b_bf16.safetensors",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "card": "https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct",
+      "notes": "Qwen3-VL-4B is Apache-2.0 (Qwen card); shipped inside the CC BY-NC Fibo-2.0 repack, and only used here for Fibo, so the job is non-commercial."
+    },
+    {
+      "id": "flux2_vae",
+      "jobs": [
+        "fibo"
+      ],
+      "name": "FLUX.2 VAE",
+      "url": "https://huggingface.co/Comfy-Org/Fibo-2.0/resolve/4742d4bec410034142c8e65559e5f00c6f29eccb/vae/flux2-vae.safetensors",
+      "sha256": "868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3",
+      "size": 336211292,
+      "root": "models",
+      "target": "vae/flux2-vae.safetensors",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "card": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
+      "notes": "Black Forest Labs' FLUX.2 VAE, Apache-2.0 (as released with FLUX.2 [klein] 4B)."
+    },
+    {
+      "id": "mmaudio_large_44k_v2",
+      "jobs": [
+        "sound"
+      ],
+      "name": "MMAudio large 44.1 kHz v2, fp16",
+      "url": "https://huggingface.co/Kijai/MMAudio_safetensors/resolve/5984623e6b436818c6ff287ef6eec93e3e05aa3f/mmaudio_large_44k_v2_fp16.safetensors",
+      "sha256": "a61378951ba4e8bfde2e977c0ad8211a7e02e1e92fd6a5b1c258a6464c1d102f",
+      "size": 2061198424,
+      "root": "models",
+      "target": "mmaudio/mmaudio_large_44k_v2_fp16.safetensors",
+      "license": "CC-BY-NC-4.0",
+      "commercial": false,
+      "card": "https://huggingface.co/hkchengrex/MMAudio",
+      "notes": "hkchengrex's MMAudio weights (CC BY-NC 4.0; the code is MIT) converted to fp16 safetensors by Kijai. The mirror's card says MIT, but a format conversion does not change the weights' license."
+    },
+    {
+      "id": "mmaudio_vae_44k",
+      "jobs": [
+        "sound"
+      ],
+      "name": "MMAudio VAE 44.1 kHz, fp16",
+      "url": "https://huggingface.co/Kijai/MMAudio_safetensors/resolve/5984623e6b436818c6ff287ef6eec93e3e05aa3f/mmaudio_vae_44k_fp16.safetensors",
+      "sha256": "2598189f081bd10c86975106e5b6e2490168667429a75b52d77671283f245649",
+      "size": 610966060,
+      "root": "models",
+      "target": "mmaudio/mmaudio_vae_44k_fp16.safetensors",
+      "license": "CC-BY-NC-4.0",
+      "commercial": false,
+      "card": "https://huggingface.co/hkchengrex/MMAudio"
+    },
+    {
+      "id": "mmaudio_synchformer",
+      "jobs": [
+        "sound"
+      ],
+      "name": "MMAudio Synchformer, fp16",
+      "url": "https://huggingface.co/Kijai/MMAudio_safetensors/resolve/5984623e6b436818c6ff287ef6eec93e3e05aa3f/mmaudio_synchformer_fp16.safetensors",
+      "sha256": "b8d05128c76da6ee88720a89d25a5f86c603589883d02b53f563c3c66afe3581",
+      "size": 474981098,
+      "root": "models",
+      "target": "mmaudio/mmaudio_synchformer_fp16.safetensors",
+      "license": "CC-BY-NC-4.0",
+      "commercial": false,
+      "card": "https://huggingface.co/hkchengrex/MMAudio"
+    },
+    {
+      "id": "dfn5b_clip",
+      "jobs": [
+        "sound"
+      ],
+      "name": "Apple DFN5B CLIP ViT-H-14-384, fp16 (MMAudio visual encoder)",
+      "url": "https://huggingface.co/Kijai/MMAudio_safetensors/resolve/5984623e6b436818c6ff287ef6eec93e3e05aa3f/apple_DFN5B-CLIP-ViT-H-14-384_fp16.safetensors",
+      "sha256": "d8ad903a79adc2b29bacfeedabfa3d78b03d36d3b4dcb885c0649fe8c5d763cb",
+      "size": 1973509450,
+      "root": "models",
+      "target": "mmaudio/apple_DFN5B-CLIP-ViT-H-14-384_fp16.safetensors",
+      "license": "Apple-AMLR",
+      "commercial": false,
+      "card": "https://huggingface.co/apple/DFN5B-CLIP-ViT-H-14-378",
+      "notes": "Apple Machine Learning Research Model license (apple-amlr): research use only."
+    },
+    {
+      "id": "bigvgan_v2_44k",
+      "jobs": [
+        "sound"
+      ],
+      "name": "NVIDIA BigVGAN v2 44 kHz vocoder (MMAudio 44k mode)",
+      "url": "https://huggingface.co/nvidia/bigvgan_v2_44khz_128band_512x/resolve/95a9d1dcb12906c03edd938d77b9333d6ded7dfb/bigvgan_generator.pt",
+      "sha256": "d9fe7ec6bd0b44ed9d66973d5012d8181c1570b01e5c72df51973e241dccd357",
+      "size": 489041291,
+      "root": "models",
+      "target": "mmaudio/nvidia/bigvgan_v2_44khz_128band_512x/bigvgan_generator.pt",
+      "license": "MIT",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/nvidia/bigvgan_v2_44khz_128band_512x",
+      "notes": "Loaded by the MMAudio node from this fixed path (it would otherwise download it at run time)."
+    },
+    {
+      "id": "bigvgan_v2_44k_config",
+      "jobs": [
+        "sound"
+      ],
+      "name": "BigVGAN v2 44 kHz config",
+      "url": "https://huggingface.co/nvidia/bigvgan_v2_44khz_128band_512x/resolve/95a9d1dcb12906c03edd938d77b9333d6ded7dfb/config.json",
+      "sha256": "65b7f487bfaf15256056a75f6667ef5f640214c981922a111927873705ea4ddb",
+      "size": 1403,
+      "root": "models",
+      "target": "mmaudio/nvidia/bigvgan_v2_44khz_128band_512x/config.json",
+      "license": "MIT",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/nvidia/bigvgan_v2_44khz_128band_512x"
+    },
+    {
+      "id": "foley_xxl_fp8",
+      "jobs": [
+        "sound"
+      ],
+      "name": "HunyuanVideo-Foley XXL, fp8 e4m3fn weights",
+      "url": "https://huggingface.co/phazei/HunyuanVideo-Foley/resolve/f94bbf32576f02b37715f54cdba3a5e82910dde7/hunyuanvideo_foley_fp8_e4m3fn.safetensors",
+      "sha256": "1b2fa56b9d9bd0c89f3d7e486f9f00032f247cf10dd860cc6d7f0b734bca8a31",
+      "size": 5341941120,
+      "root": "models",
+      "target": "foley/hunyuanvideo_foley_fp8_e4m3fn.safetensors",
+      "license": "Tencent-Hunyuan-Community",
+      "commercial": false,
+      "card": "https://huggingface.co/tencent/HunyuanVideo-Foley",
+      "notes": "Tencent's weights as safetensors by phazei (LICENSE.txt in that repo is the Tencent Hunyuan Community License). The license does not apply in the EU, the UK or South Korea; the Worker refuses Foley there. fp8 weight-only storage, computed in bf16, so it also runs on Ampere (3090, A5000): about 6-8 GB of VRAM for 5 s."
+    },
+    {
+      "id": "foley_synchformer",
+      "jobs": [
+        "sound"
+      ],
+      "name": "HunyuanVideo-Foley Synchformer, fp16",
+      "url": "https://huggingface.co/phazei/HunyuanVideo-Foley/resolve/f94bbf32576f02b37715f54cdba3a5e82910dde7/synchformer_state_dict_fp16.safetensors",
+      "sha256": "4876e7dc86cd255bcf79540d93838362aed2e8a9d6f4574a92728c9fc699f511",
+      "size": 474981066,
+      "root": "models",
+      "target": "foley/synchformer_state_dict_fp16.safetensors",
+      "license": "Tencent-Hunyuan-Community",
+      "commercial": false,
+      "card": "https://huggingface.co/tencent/HunyuanVideo-Foley"
+    },
+    {
+      "id": "foley_dac_vae",
+      "jobs": [
+        "sound"
+      ],
+      "name": "HunyuanVideo-Foley DAC VAE 48 kHz, fp16",
+      "url": "https://huggingface.co/phazei/HunyuanVideo-Foley/resolve/f94bbf32576f02b37715f54cdba3a5e82910dde7/vae_128d_48k_fp16.safetensors",
+      "sha256": "216fdd5a4c9774417b209a5d1754db5326c9f47375b232cce1333c13b3f239ab",
+      "size": 743210820,
+      "root": "models",
+      "target": "foley/vae_128d_48k_fp16.safetensors",
+      "license": "Tencent-Hunyuan-Community",
+      "commercial": false,
+      "card": "https://huggingface.co/tencent/HunyuanVideo-Foley"
+    },
+    {
+      "id": "siglip2_config",
+      "jobs": [
+        "sound"
+      ],
+      "name": "SigLIP2 base patch16-512 config.json (Foley visual encoder)",
+      "url": "https://huggingface.co/google/siglip2-base-patch16-512/resolve/a89f5c5093f902bf39d3cd4d81d2c09867f0724b/config.json",
+      "sha256": "a15bc39fbcd92498dea6d5d3cb2b0d8b9ba389d6a3f2b565ea66128a2d141934",
+      "size": 276,
+      "root": "hf",
+      "target": "hub/models--google--siglip2-base-patch16-512/snapshots/a89f5c5093f902bf39d3cd4d81d2c09867f0724b/config.json",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/google/siglip2-base-patch16-512"
+    },
+    {
+      "id": "siglip2_model",
+      "jobs": [
+        "sound"
+      ],
+      "name": "SigLIP2 base patch16-512 model.safetensors (Foley visual encoder)",
+      "url": "https://huggingface.co/google/siglip2-base-patch16-512/resolve/a89f5c5093f902bf39d3cd4d81d2c09867f0724b/model.safetensors",
+      "sha256": "fe0e601c625e69eed8e73500d39e9b6164403fe03db8048e87913c3cefbbb3fe",
+      "size": 1503344520,
+      "root": "hf",
+      "target": "hub/models--google--siglip2-base-patch16-512/snapshots/a89f5c5093f902bf39d3cd4d81d2c09867f0724b/model.safetensors",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/google/siglip2-base-patch16-512"
+    },
+    {
+      "id": "clap_config_json",
+      "jobs": [
+        "sound"
+      ],
+      "name": "LAION CLAP larger_clap_general config.json (Foley text encoder)",
+      "url": "https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/config.json",
+      "sha256": "6268f76a067e3104bf9001e97d7dcc0fcfb16f3086cfb478ee72d95900d7fc1d",
+      "size": 643,
+      "root": "hf",
+      "target": "hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/config.json",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/laion/larger_clap_general"
+    },
+    {
+      "id": "clap_merges_txt",
+      "jobs": [
+        "sound"
+      ],
+      "name": "LAION CLAP larger_clap_general merges.txt (Foley text encoder)",
+      "url": "https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/merges.txt",
+      "sha256": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+      "size": 456318,
+      "root": "hf",
+      "target": "hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/merges.txt",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/laion/larger_clap_general"
+    },
+    {
+      "id": "clap_special_tokens_map_json",
+      "jobs": [
+        "sound"
+      ],
+      "name": "LAION CLAP larger_clap_general special_tokens_map.json (Foley text encoder)",
+      "url": "https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/special_tokens_map.json",
+      "sha256": "06e405a36dfe4b9604f484f6a1e619af1a7f7d09e34a8555eb0b77b66318067f",
+      "size": 280,
+      "root": "hf",
+      "target": "hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/special_tokens_map.json",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/laion/larger_clap_general"
+    },
+    {
+      "id": "clap_tokenizer_json",
+      "jobs": [
+        "sound"
+      ],
+      "name": "LAION CLAP larger_clap_general tokenizer.json (Foley text encoder)",
+      "url": "https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/tokenizer.json",
+      "sha256": "dc239041d98de27ffc3975473a1a23e3db4c937b23c138c38bbc66588bd247e5",
+      "size": 2108774,
+      "root": "hf",
+      "target": "hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/tokenizer.json",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/laion/larger_clap_general"
+    },
+    {
+      "id": "clap_tokenizer_config_json",
+      "jobs": [
+        "sound"
+      ],
+      "name": "LAION CLAP larger_clap_general tokenizer_config.json (Foley text encoder)",
+      "url": "https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/tokenizer_config.json",
+      "sha256": "e2eb445cfdbf4711de620cbdf10478b0423950799e85652d9f28da47066ab86d",
+      "size": 1362,
+      "root": "hf",
+      "target": "hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/tokenizer_config.json",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/laion/larger_clap_general"
+    },
+    {
+      "id": "clap_vocab_json",
+      "jobs": [
+        "sound"
+      ],
+      "name": "LAION CLAP larger_clap_general vocab.json (Foley text encoder)",
+      "url": "https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/vocab.json",
+      "sha256": "ed19656ea1707df69134c4af35c8ceda2cc9860bf2c3495026153a133670ab5e",
+      "size": 798293,
+      "root": "hf",
+      "target": "hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/vocab.json",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/laion/larger_clap_general"
+    },
+    {
+      "id": "clap_pytorch_model_bin",
+      "jobs": [
+        "sound"
+      ],
+      "name": "LAION CLAP larger_clap_general pytorch_model.bin (Foley text encoder)",
+      "url": "https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/pytorch_model.bin",
+      "sha256": "314eb00cce6ad68d25237b8446b659ccdb136ed4672c1bca470f142f72455026",
+      "size": 776444665,
+      "root": "hf",
+      "target": "hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/pytorch_model.bin",
+      "license": "Apache-2.0",
+      "commercial": false,
+      "implicit": true,
+      "card": "https://huggingface.co/laion/larger_clap_general"
+    }
+  ]
+}

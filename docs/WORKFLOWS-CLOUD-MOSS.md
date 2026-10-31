@@ -54,3 +54,17 @@ Worker source must be bundled because it now imports `src/generations.js`; Wrang
 - Original scroll-driven website scenes inspired by the Scrolltide bookmark. Do not redistribute a commercial prompt library without a license.
 
 Prioritize the canvas and transcript-editing workflows after the sign-in and MOSS path have real user acceptance coverage.
+
+## GPU worker jobs (Video, Music, Upscale, Lab)
+
+`workers/gpu/` (see its README) adds a second RunPod worker on an 80 GB GPU (A100 80GB, H100 80GB PRO as
+fallback) whose weights live on a RunPod network volume: Wan 2.2 A14B image/text to video (Quick with the
+Wan2.2-Lightning LoRA, or Best), Wan-Animate-2 motion transfer, Wan 2.2 S2V lip sync, SeedVR2 7B video upscale,
+ACE-Step 1.5 music and Real-ESRGAN image upscale, and a separate Lab image (MMAudio, HunyuanVideo-Foley,
+Fibo 2.0; non-commercial licenses, off unless `LAB_ENABLED=true`). They go through the same `GenerationLedger`:
+`src/gpu-jobs.js` validates each job and prices it from GPU-seconds at `GPU_CENTS_PER_HOUR` (539, the H100 rate,
+so an A100 run is overstated about 2x), `GPU_DAILY_BUDGET_CENTS` (500) is one daily budget for every hosted job
+(MOSS included, settled to its real cost; the MOSS lifetime cap still applies), and `GPU_PER_USER_DAILY` (10)
+limits each signed-in user. The Video page's GPU panel (`public/js/gpu-panel.js`) has Animate, Motion, Lip sync
+and Upscale video modes; the Music page has Compose. Both show the remaining daily budget, the queue and each
+job's expected cost before it is sent.

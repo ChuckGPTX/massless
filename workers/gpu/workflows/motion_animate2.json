@@ -1,0 +1,396 @@
+{
+  "unet": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Wan-Animate-2 14B distilled, bf16 (Apache-2.0)"
+    },
+    "inputs": {
+      "unet_name": "wan_animate_2_distill_bf16.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "windows": {
+    "class_type": "ContextWindowsManual",
+    "_meta": {
+      "title": "Context windows of 21 latent frames, 8 overlap (as ComfyUI's template): clips longer than 5 s in one pass"
+    },
+    "inputs": {
+      "model": [
+        "unet",
+        0
+      ],
+      "context_length": 21,
+      "context_overlap": 8,
+      "context_schedule": "standard_static",
+      "context_stride": 1,
+      "closed_loop": false,
+      "fuse_method": "pyramid",
+      "dim": 2,
+      "freenoise": true,
+      "cond_retain_index_list": "0",
+      "split_conds_to_windows": false,
+      "latent_retain_index_list": "",
+      "causal_window_fix": true
+    }
+  },
+  "cache": {
+    "class_type": "WanAnimate2Cache",
+    "_meta": {
+      "title": "Cache the pose branch on the GPU (int8): about half the time"
+    },
+    "inputs": {
+      "model": [
+        "windows",
+        0
+      ],
+      "device": "gpu",
+      "dtype": "int8"
+    }
+  },
+  "shift": {
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "Flow shift 5"
+    },
+    "inputs": {
+      "model": [
+        "cache",
+        0
+      ],
+      "shift": 5.0
+    }
+  },
+  "clip": {
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "umT5-XXL fp8 (Apache-2.0)"
+    },
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    }
+  },
+  "vae": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Wan 2.1 VAE"
+    },
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    }
+  },
+  "clip_vision": {
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "CLIP ViT-H (MIT)"
+    },
+    "inputs": {
+      "clip_name": "clip_vision_h.safetensors"
+    }
+  },
+  "image_in": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "INPUT reference image: who (uploaded, already cropped to width x height)"
+    },
+    "inputs": {
+      "image": "massless_input.png"
+    }
+  },
+  "video_in": {
+    "class_type": "LoadVideo",
+    "_meta": {
+      "title": "INPUT driving clip: what motion (re-timed to 16 fps and trimmed to <= 10 s by the handler, no audio)"
+    },
+    "inputs": {
+      "file": "massless_drive.mp4"
+    }
+  },
+  "frames": {
+    "class_type": "GetVideoComponents",
+    "_meta": {
+      "title": "Driving frames"
+    },
+    "inputs": {
+      "video": [
+        "video_in",
+        0
+      ]
+    }
+  },
+  "pose": {
+    "class_type": "ResizeImageMaskNode",
+    "_meta": {
+      "title": "INPUT driving frames to the output size (center crop)"
+    },
+    "inputs": {
+      "input": [
+        "frames",
+        0
+      ],
+      "resize_type": "scale dimensions",
+      "resize_type.width": 832,
+      "resize_type.height": 480,
+      "resize_type.crop": "center",
+      "scale_method": "area"
+    }
+  },
+  "pose_first": {
+    "class_type": "ImageFromBatch",
+    "_meta": {
+      "title": "First driving frame"
+    },
+    "inputs": {
+      "image": [
+        "pose",
+        0
+      ],
+      "batch_index": 0,
+      "length": 1
+    }
+  },
+  "see_ref": {
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIP vision of the reference"
+    },
+    "inputs": {
+      "clip_vision": [
+        "clip_vision",
+        0
+      ],
+      "image": [
+        "image_in",
+        0
+      ],
+      "crop": "none"
+    }
+  },
+  "see_pose": {
+    "class_type": "CLIPVisionEncode",
+    "_meta": {
+      "title": "CLIP vision of the first driving frame"
+    },
+    "inputs": {
+      "clip_vision": [
+        "clip_vision",
+        0
+      ],
+      "image": [
+        "pose_first",
+        0
+      ],
+      "crop": "none"
+    }
+  },
+  "prompt": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "INPUT prompt: character and background description"
+    },
+    "inputs": {
+      "text": "Character description: the person in the reference image\nBackground description: the same place as the reference image",
+      "clip": [
+        "clip",
+        0
+      ]
+    }
+  },
+  "pose_prompt": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Prompt for the pose branch (describes the motion, not the character)"
+    },
+    "inputs": {
+      "text": "a reference video of a person moving",
+      "clip": [
+        "clip",
+        0
+      ]
+    }
+  },
+  "negative": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Wan's stock negative prompt"
+    },
+    "inputs": {
+      "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走",
+      "clip": [
+        "clip",
+        0
+      ]
+    }
+  },
+  "animate": {
+    "class_type": "WanAnimate2ToVideo",
+    "_meta": {
+      "title": "INPUT width, height, length (4n+1 frames of the driving clip)"
+    },
+    "inputs": {
+      "positive": [
+        "prompt",
+        0
+      ],
+      "negative": [
+        "negative",
+        0
+      ],
+      "vae": [
+        "vae",
+        0
+      ],
+      "width": 832,
+      "height": 480,
+      "length": 81,
+      "batch_size": 1,
+      "reference_image": [
+        "image_in",
+        0
+      ],
+      "pose_video": [
+        "pose",
+        0
+      ],
+      "clip_vision_output": [
+        "see_ref",
+        0
+      ],
+      "positive_pose": [
+        "pose_prompt",
+        0
+      ],
+      "clip_vision_output_pose": [
+        "see_pose",
+        0
+      ],
+      "video_frame_offset": 0,
+      "pose_strength": 1.0,
+      "pose_start_percent": 0.0,
+      "pose_end_percent": 1.0,
+      "reference_image_strength": 1.0
+    }
+  },
+  "sigmas": {
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "INPUT steps (10, as in the distilled template)"
+    },
+    "inputs": {
+      "model": [
+        "cache",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 10,
+      "denoise": 1.0
+    }
+  },
+  "sampler_pick": {
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "LCM"
+    },
+    "inputs": {
+      "sampler_name": "lcm"
+    }
+  },
+  "sampler": {
+    "class_type": "SamplerCustom",
+    "_meta": {
+      "title": "INPUT seed (cfg 1: the distilled model needs no guidance)"
+    },
+    "inputs": {
+      "model": [
+        "shift",
+        0
+      ],
+      "add_noise": true,
+      "noise_seed": 0,
+      "cfg": 1.0,
+      "positive": [
+        "animate",
+        0
+      ],
+      "negative": [
+        "animate",
+        1
+      ],
+      "sampler": [
+        "sampler_pick",
+        0
+      ],
+      "sigmas": [
+        "sigmas",
+        0
+      ],
+      "latent_image": [
+        "animate",
+        2
+      ]
+    }
+  },
+  "trim": {
+    "class_type": "TrimVideoLatent",
+    "_meta": {
+      "title": "Drop the reference frame"
+    },
+    "inputs": {
+      "samples": [
+        "sampler",
+        0
+      ],
+      "trim_amount": [
+        "animate",
+        3
+      ]
+    }
+  },
+  "decode": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode frames"
+    },
+    "inputs": {
+      "samples": [
+        "trim",
+        0
+      ],
+      "vae": [
+        "vae",
+        0
+      ]
+    }
+  },
+  "video": {
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "16 fps (the driving clip was re-timed to it)"
+    },
+    "inputs": {
+      "images": [
+        "decode",
+        0
+      ],
+      "fps": 16.0
+    }
+  },
+  "save": {
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "OUTPUT: H.264 MP4 (the driving clip's sound is added back by the handler)"
+    },
+    "inputs": {
+      "video": [
+        "video",
+        0
+      ],
+      "filename_prefix": "massless/motion",
+      "format": "mp4",
+      "format.codec": "h264",
+      "format.codec.encoding": "re-encode",
+      "format.codec.encoding.crf": 19.0
+    }
+  }
+}

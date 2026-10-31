@@ -288,3 +288,60 @@ export const workflowRun = (id) =>
       encodeURIComponent(id) +
       "&limit=1",
   );
+
+// ---- GPU worker jobs (Animate, Music, Upscale; Lab jobs when the site enables them) ----
+// Signed-in users only; the Worker's ledger enforces one daily budget and a per-user daily limit.
+export async function gpuBudget() {
+  const c = await cloudConfig();
+  if (!c.gpu?.on) return { on: false };
+  if (!session()) return { on: true, signedIn: false };
+  const r = await fetch("/api/generations/budget", {
+    headers: { Authorization: "Bearer " + (await accessToken()) },
+  });
+  const j = await r.json().catch(() => ({}));
+  return r.ok ? { ...j, signedIn: true } : { on: true, signedIn: r.status !== 401, error: j.error };
+}
+/** Run one GPU job; resolves { blob, audio?, output, costCents }. onProgress({ status, message, percent }). */
+export async function gpuJob({ job, input, lab = false, signal, onProgress }) {
+  const token = await accessToken();
+  let r = await fetch("/api/generations", {
+    method: "POST",
+    signal,
+    headers: { Authorization: "Bearer " + token, "content-type": "application/json" },
+    body: JSON.stringify({ job, input, ...(lab ? { lab: true } : {}), idempotencyKey: crypto.randomUUID() }),
+  });
+  let j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error || "The GPU job could not start."), { status: r.status, budget: !!j.budget });
+  const id = j.id,
+    deadline = Date.now() + (j.timeoutSec || 1500) * 1000,
+    auth = async () => ({ Authorization: "Bearer " + (await accessToken()) });
+  const cancel = async () => fetch("/api/generations/" + id + "/cancel", { method: "POST", headers: await auth() }).catch(() => {});
+  signal?.addEventListener("abort", cancel, { once: true });
+  let delay = 2000;
+  try {
+    while (!["COMPLETED", "FAILED", "CANCELLED", "TIMED_OUT", "SUBMISSION_UNKNOWN"].includes(j.status)) {
+      onProgress?.({ status: j.status, message: j.message || (j.status === "IN_QUEUE" ? "Waiting for the GPU…" : "Starting…"), percent: j.percent ?? null });
+      if (Date.now() > deadline) {
+        await cancel();
+        throw new Error("The GPU job took too long and was stopped.");
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
+      delay = j.status === "IN_PROGRESS" ? 2500 : Math.min(8000, delay * 1.4);
+      r = await fetch("/api/generations/" + id, { signal, headers: await auth() });
+      j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || "Could not check the GPU job.");
+    }
+    if (j.status !== "COMPLETED") throw new Error(j.error || "The GPU job " + j.status.toLowerCase().replace("_", " ") + ".");
+    onProgress?.({ status: "COMPLETED", message: "Done", percent: 100 });
+    const get = async (part) => {
+      const f = await fetch("/api/generations/" + id + "/" + part, { signal, headers: await auth() });
+      if (!f.ok) throw new Error("The result could not be downloaded.");
+      return f.blob();
+    };
+    return { blob: await get("file"), audio: j.output?.audio ? await get("audio") : undefined, output: j.output, costCents: j.costCents, id };
+  } finally {
+    signal?.removeEventListener("abort", cancel);
+    window.dispatchEvent(new Event("massless-gpu"));
+  }
+}

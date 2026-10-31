@@ -1,0 +1,10 @@
+# Used by BuildKit when building workers/gpu/Dockerfile.lab from the repository root: send only the files the Lab
+# image copies.
+*
+!workers/gpu/fetch_model.py
+!workers/gpu/handler.py
+!workers/gpu/volume.py
+!workers/gpu/models.lab.json
+!workers/gpu/LICENSE
+!workers/gpu/lab/
+!public/data/rig.json

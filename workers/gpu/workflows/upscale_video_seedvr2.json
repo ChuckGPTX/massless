@@ -1,0 +1,241 @@
+{
+  "unet": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "SeedVR2 7B fp16 (Apache-2.0)"
+    },
+    "inputs": {
+      "unet_name": "seedvr2_7b_fp16.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "vae": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "SeedVR2 EMA VAE"
+    },
+    "inputs": {
+      "vae_name": "seedvr2_ema_vae_fp16.safetensors"
+    }
+  },
+  "video_in": {
+    "class_type": "LoadVideo",
+    "_meta": {
+      "title": "INPUT clip (<= 10 s, <= 30 fps, prepared by the handler)"
+    },
+    "inputs": {
+      "file": "massless_clip.mp4"
+    }
+  },
+  "frames": {
+    "class_type": "GetVideoComponents",
+    "_meta": {
+      "title": "Frames, sound, fps"
+    },
+    "inputs": {
+      "video": [
+        "video_in",
+        0
+      ]
+    }
+  },
+  "resize": {
+    "class_type": "ResizeImageMaskNode",
+    "_meta": {
+      "title": "INPUT target size (lanczos), at most 1920 x 1080"
+    },
+    "inputs": {
+      "input": [
+        "frames",
+        0
+      ],
+      "resize_type": "scale dimensions",
+      "resize_type.width": 1280,
+      "resize_type.height": 720,
+      "resize_type.crop": "disabled",
+      "scale_method": "lanczos"
+    }
+  },
+  "prep": {
+    "class_type": "SeedVR2Preprocess",
+    "_meta": {
+      "title": "Pad for the VAE"
+    },
+    "inputs": {
+      "resized_images": [
+        "resize",
+        0
+      ]
+    }
+  },
+  "encode": {
+    "class_type": "VAEEncodeTiled",
+    "_meta": {
+      "title": "Encode (tiled, as the template)"
+    },
+    "inputs": {
+      "pixels": [
+        "prep",
+        0
+      ],
+      "vae": [
+        "vae",
+        0
+      ],
+      "tile_size": 512,
+      "overlap": 128,
+      "temporal_size": 64,
+      "temporal_overlap": 8
+    }
+  },
+  "chunks": {
+    "class_type": "SeedVR2TemporalChunk",
+    "_meta": {
+      "title": "Split into chunks that fit the free VRAM"
+    },
+    "inputs": {
+      "latent": [
+        "encode",
+        0
+      ],
+      "temporal_overlap": 2,
+      "chunking_mode": "auto"
+    }
+  },
+  "cond": {
+    "class_type": "SeedVR2Conditioning",
+    "_meta": {
+      "title": "Conditioning from the low-res latent"
+    },
+    "inputs": {
+      "model": [
+        "unet",
+        0
+      ],
+      "vae_conditioning": [
+        "chunks",
+        0
+      ]
+    }
+  },
+  "sampler": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "INPUT seed (one step, euler, denoise 1: full restore)"
+    },
+    "inputs": {
+      "model": [
+        "unet",
+        0
+      ],
+      "seed": 0,
+      "steps": 1,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "positive": [
+        "cond",
+        0
+      ],
+      "negative": [
+        "cond",
+        1
+      ],
+      "latent_image": [
+        "chunks",
+        0
+      ],
+      "denoise": 1.0
+    }
+  },
+  "merge": {
+    "class_type": "SeedVR2TemporalMerge",
+    "_meta": {
+      "title": "Join the chunks (crossfading the overlap)"
+    },
+    "inputs": {
+      "latents": [
+        "sampler",
+        0
+      ],
+      "temporal_overlap": [
+        "chunks",
+        1
+      ]
+    }
+  },
+  "decode": {
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "Decode (tiled)"
+    },
+    "inputs": {
+      "samples": [
+        "merge",
+        0
+      ],
+      "vae": [
+        "vae",
+        0
+      ],
+      "tile_size": 512,
+      "overlap": 128,
+      "temporal_size": 64,
+      "temporal_overlap": 8
+    }
+  },
+  "post": {
+    "class_type": "SeedVR2PostProcessing",
+    "_meta": {
+      "title": "Crop the padding; match colors to the source (lab)"
+    },
+    "inputs": {
+      "images": [
+        "decode",
+        0
+      ],
+      "original_resized_images": [
+        "resize",
+        0
+      ],
+      "color_correction_method": "lab"
+    }
+  },
+  "video": {
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Same fps and sound as the source"
+    },
+    "inputs": {
+      "images": [
+        "post",
+        0
+      ],
+      "fps": [
+        "frames",
+        2
+      ],
+      "audio": [
+        "frames",
+        1
+      ]
+    }
+  },
+  "save": {
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "OUTPUT: H.264 MP4"
+    },
+    "inputs": {
+      "video": [
+        "video",
+        0
+      ],
+      "filename_prefix": "massless/upscale_video",
+      "format": "mp4",
+      "format.codec": "h264",
+      "format.codec.encoding": "re-encode",
+      "format.codec.encoding.crf": 18.0
+    }
+  }
+}
