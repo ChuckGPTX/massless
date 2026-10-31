@@ -20,7 +20,9 @@ Five showcase pages introduce the tools: `/studios/image/`, `/studios/video/`, `
 | **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
 | **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
 | **Sign** (`/office?tab=sign`, `/sign`) | Send a contract or your own PDF for signature, DocuSign-style: 59 open (CC0) templates for real estate, creative finance (Subto, wraps, novation, lease-option, contract for deed), music (split sheets, beat leases, producer, sync) and joint ventures, with notes for all 50 states and DC. Signers sign on any phone with no account. Documents are encrypted in the browser; the server only holds ciphertext and a signed audit trail. Templates, not legal advice. |
-| **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Extract audio: drop a video or audio file you have the rights to and get MP3 (128–320 kbps), M4A or WAV, with trim, fades and loudness levelling, all in the browser. Deep links: `/audio?tab=captions`, `/audio?tab=extract`, `/audio?engine=melo&lang=es`. |
+| **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Extract audio: drop a video or audio file you have the rights to and get MP3 (128–320 kbps), M4A or WAV, with trim, fades and loudness levelling, all in the browser. Master: see below. Deep links: `/audio?tab=captions`, `/audio?tab=extract`, `/audio?tab=master`, `/audio?engine=melo&lang=es`. |
+| **Edit by text** (`/cut/`) | On the Cut page (Clip workroom): open audio or video, transcribe it with Whisper, then cut the media by striking words in the transcript. Remove fillers, repeats and long pauses in one tap each, with a review list; undo and redo; play the edit with the current word lit, click a word to jump there. Export the edited MP3 or WAV, the edited video as MP4 (with captions burned in), re-timed `.srt`/`.vtt`, and a CMX 3600 edit list. Only the sound, as 16 kHz mono, leaves the device, and only when you press Transcribe. |
+| **Master** (`/audio?tab=master`) | Drop a finished mix and read a plain-words report: loudness (LUFS), true peak, loudness range, tone against a typical mastered mix, stereo width, clipping. Pick a character (Warm, Balanced, Bright) and a destination (Streaming −14, Podcast −16, Broadcast −23, Loud −9 LUFS, all −1 dBTP), A/B against the original at the same loudness, and export 24-bit WAV or MP3 320, measured again on the file itself. Saves to the library. Nothing is uploaded. |
 
 Saved shots and audio live in the visitor's browser (IndexedDB). New saves never automatically delete older originals. The Image page loads older shots in batches of 24. If a save fails, the result stays available for download in that session and is visibly marked as unsaved. There are no accounts or cloud backups; browser data can still be cleared or evicted, so download work you want to keep.
 
@@ -39,6 +41,8 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 | Captions | Whisper large-v3-turbo | MIT | Cloudflare Workers AI free daily allocation (`/api/transcribe`, capped); audio is downmixed to 16 kHz mono in the browser first |
 | Sound beds | Massless synth (Web Audio) | MIT | The visitor's browser |
 | Video to MP3 | LAME 3.100 via wasm-media-encoders 0.7.0 (MP3), WebCodecs + mp4-muxer (M4A) | LGPL-2.0 / MIT | The visitor's browser; the encoder is loaded unmodified from jsDelivr and checked by SHA-256 |
+| Edit by text | Whisper large-v3-turbo for the words; Massless edit engine (`textedit.js`) for cuts, crossfades and captions | MIT | Whisper: Cloudflare Workers AI (`/api/transcribe`, capped); everything else in the visitor's browser |
+| Mastering | Massless mastering chain (`master.js`, `loudness.js`), encoders as Video to MP3 | MIT | The visitor's browser |
 | 3D, in the browser | Depth Anything V2 + Massless splat builder, rendered with Spark | Apache-2.0 / MIT | The visitor's browser |
 | 3D, full object | Idol (speridlabs) | Apache-2.0 | Your own NVIDIA GPU, through `comfy/idol_server.py` |
 
@@ -48,6 +52,21 @@ Every endpoint that spends the free allowance (`/api/shot`, `/api/beats`, `/api/
 
 - **Turnstile.** Once every six hours a visitor's browser passes a Cloudflare Turnstile check (`public/js/human.js`), trades the token at `/api/human` for a signed cookie, and retries the request. This helps reduce automated abuse; it does not guarantee a spending ceiling. Set `TURNSTILE_SITEKEY` and the secrets `TURNSTILE_SECRET` and `PASS_KEY` to turn it on; without them the check is off.
 - **AI Gateway.** Model calls go through the `massless` gateway (`AI_GATEWAY`) for request analytics and a burst rate limit. Logging and caching are off on that gateway, so scripts, documents and audio are not kept there.
+
+## How Edit by text works
+
+1. **Words.** The Cut page decodes the file in the tab and sends only the sound, as 16 kHz mono WAV, to `/api/transcribe` (Whisper large-v3-turbo on Workers AI, capped). It asks with a short disfluent `initial_prompt` in the chosen language ("Umm, so, uh, I was like…"), which makes Whisper write fillers down instead of dropping them, and keeps Whisper's per-word timings and segment confidence.
+2. **The edit is data.** Striking words and capping pauses only changes a small state (`struck` word indexes, `caps` per gap). `compile()` turns words + state into keep ranges: struck words go together with the silences around them except the longer of the two that touch the kept neighbours, so a deletion never leaves a rushed join; a capped pause is shortened from its middle.
+3. **Clean-up tools.** Fillers come from a per-language list: sounds like "um", "uh", "erm" always count; real words like "like" or "you know" only when a comma or a pause of 150 ms or more sets them off on both sides. Repeats are doubled words or phrases and cut-off words ("th- the"). Pauses are gaps longer than the cap. An energy check on the sound marks fillers with no quiet moment near their edges (left unticked) and pauses that hold sound Whisper did not write down (also left unticked).
+4. **Clean cuts.** Every cut edge moves to the quietest 20 ms moment within 80 ms of it, then each join gets an 8 ms equal-power crossfade centred on the cut, so the edit is exactly as long as the kept ranges and nothing clicks.
+5. **Out.** Playback renders the edit in half-second blocks scheduled back to back in Web Audio; the video follows the sound. Exports share Extract's encoders (LAME MP3, WAV), video export draws every frame of the edit (H.264 with WebCodecs, sound as AAC or Opus, mp4-muxer) with captions built from the edited transcript, and `.srt`/`.vtt` and the EDL come from the same keep ranges, so they always agree.
+
+## How mastering works
+
+1. **Report.** The mix is decoded in the tab and measured in a worker: integrated loudness (ITU-R BS.1770, gated), loudness range (EBU Tech 3342), true peak (4x oversampled, 24-tap interpolators), an octave-band spectrum compared with a typical mastered mix, side-to-mid width, correlation and bass width, and flat-topped clipping. Under −55 LUFS it says "Too quiet to master".
+2. **Chain.** 25 Hz high-pass and 19.5 kHz low-pass; a tilt EQ that corrects about half of what is off and adds the character's lean (Warm: rounder lows, softer highs; Balanced: neutral; Bright: tighter lows, open highs, presence); a slow, stereo-linked, soft-knee glue compressor; optional width on the sides above 150 Hz with the bass kept in the middle (skipped when the mix is already very wide).
+3. **Loudness and true peak.** Gain to the destination, then a look-ahead limiter whose detector watches the peaks between samples (8x oversampled). The gain is corrected (secant steps on the measured result) until the limited output is within 0.15 LU of the target, and the true peak of the actual output is checked; if any in-between peak got through, the ceiling drops and it runs again. MP3 gets its own pass with 1 dB more headroom, because encoders overshoot.
+4. **Fair A/B.** Original and master play in sync and switch by gain, turned to the same loudness unless you untick it, so louder never wins by default. Exports are measured again from the written file (the WAV read back, the MP3 decoded).
 
 ## How the camera moves work
 
@@ -125,7 +144,7 @@ Setup: an R2 bucket (`SIGN_BUCKET`), a D1 database (`SIGN_DB`, schema in `migrat
 
 ```bash
 npm ci --ignore-scripts
-npm test                            # saved-library retention, isolation, failures and connection cleanup
+npm test                            # saved-library retention, isolation, failures and connection cleanup; edit-by-text and mastering logic
 pip install playwright && python -m playwright install chromium
 python3 tests/render_test.py          # every move: first, middle and last frame, motion and edge checks
 python3 tests/effects_test.py         # every effect and look: contact sheets, photo in and out, Vanish reveal, MP4 export
@@ -134,6 +153,8 @@ python3 tests/pages_test.py voice audio   # also generates a Kokoro voiceover (d
 python3 tests/audio_test.py           # audio engine: every voice and every bed
 python3 tests/audio_page_test.py      # Audio page: MeloTTS chunking, Captions (short, CJK, 10-minute split) against mocks
 python3 tests/extract_audio_test.py   # Extract audio: MP3, WAV and M4A out, trim, fades, loudness, a queue, unreadable files
+python3 tests/cut_edit_test.py       # Edit by text: strike/undo, fillers, repeats, pauses, WAV/MP3/MP4 lengths, SRT/VTT timing, no clicks
+python3 tests/master_test.py         # Master: report, four destinations checked with ffmpeg ebur128, 24-bit WAV, MP3, fair A/B
 python3 tests/office_test.py          # Office: every convert operation, edit and save, and Ask against a mock
 python3 tests/human_test.py           # the Turnstile human check: one check for concurrent calls, retries, readable failures
 python3 tests/three_d_test.py         # 3D: depth splat from a sample, then the Idol path against a mock server
@@ -157,7 +178,7 @@ The sample stills in `public/media/art` were generated for the launch page with 
 ## Roadmap
 
 - Shared project and asset library, exportable backups and resumable jobs
-- Transcript-based editing, speech cleanup, beat-aligned cuts and measured mastering
+- Speech cleanup (noise removal), beat-aligned cuts, reference mastering and album mode
 - A versioned model/workflow catalog with license, capability and measured cost information
 - Open video models in ComfyUI for true in-scene motion
 - Shared reels stored in R2 with a D1 index

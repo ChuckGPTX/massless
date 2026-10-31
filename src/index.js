@@ -294,9 +294,26 @@ async function transcribe(request, env) {
   b64 = btoa(b64);
   const input = { audio: b64, task: q.get('task') === 'translate' ? 'translate' : 'transcribe', vad_filter: true };
   if (/^[a-z]{2}$/.test(q.get('lang') || '')) input.language = q.get('lang');
+  // ?prompt= becomes Whisper's initial_prompt (Edit by text sends a short disfluent sentence so "um" and "uh"
+  // are written down instead of dropped). Plain text only, at most 240 characters.
+  const prompt = String(q.get('prompt') || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 240);
+  if (prompt) input.initial_prompt = prompt;
   let result;
   try { result = await ai(env, '@cf/openai/whisper-large-v3-turbo', input); } catch (e) { return json({ error: `Workers AI could not transcribe this: ${e.message || e}` }, 502); }
-  return json({ text: result.text || '', vtt: result.vtt || '', segments: (result.segments || []).map((s) => ({ start: s.start, end: s.end, text: s.text })), language: result.transcription_info?.language || input.language || '', duration: result.transcription_info?.duration || null, model: '@cf/openai/whisper-large-v3-turbo' });
+  return json({ text: result.text || '', vtt: result.vtt || '', segments: (result.segments || []).map(segmentOut), language: result.transcription_info?.language || input.language || '', duration: result.transcription_info?.duration || null, model: '@cf/openai/whisper-large-v3-turbo' });
+}
+
+// One Whisper segment for the page: its times and text as before, plus word timings and the confidence numbers
+// when Workers AI sends them (extra fields; older pages ignore them).
+const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : null);
+function segmentOut(s) {
+  const out = { start: s.start, end: s.end, text: s.text };
+  if (Array.isArray(s.words) && s.words.length) {
+    const words = s.words.map((w) => ({ word: String(w.word ?? w.text ?? ''), start: num(w.start), end: num(w.end) })).filter((w) => w.word.trim() && w.start !== null && w.end !== null);
+    if (words.length) out.words = words;
+  }
+  for (const k of ['avg_logprob', 'no_speech_prob', 'compression_ratio']) if (num(s[k]) !== null) out[k] = num(s[k]);
+  return out;
 }
 
 // Daily caps per feature and per visitor keep every endpoint inside the free Workers AI allowance.

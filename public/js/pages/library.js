@@ -66,7 +66,7 @@ function render() {
       node("h2", title),
       node(
         "p",
-        `${kind.toUpperCase()} · ${new Date(item.created).toLocaleDateString()} · ${item.model || { "local-composite": "Image workroom", "camera-effects": "Camera & effects", "film-composer": "Launch film", "music-visualizer": "Music preview", "local-caption-render": "Caption & trim", "three-scene": "Scene studio", upload: "Your media" }[item.engine] || "Your media"}`,
+        `${kind.toUpperCase()} · ${new Date(item.created).toLocaleDateString()} · ${item.model || { "local-composite": "Image workroom", "camera-effects": "Camera & effects", "film-composer": "Launch film", "music-visualizer": "Music preview", "local-caption-render": "Caption & trim", "local-text-edit": "Edit by text", "local-master": "Master", "three-scene": "Scene studio", upload: "Your media" }[item.engine] || "Your media"}`,
       ),
     );
     const link = (label, path) => {
@@ -82,6 +82,8 @@ function render() {
       link("Launch film", "/film");
     }
     if (kind === "video") link("Caption & trim", "/cut/");
+    if (kind === "audio") link("Edit by text", "/cut/");
+    if (kind === "audio") link("Master", "/audio?tab=master");
     if (kind === "video" || kind === "audio")
       link("Transcribe", "/audio?tab=captions");
     const button = (label, fn) => {

@@ -112,7 +112,7 @@ export function warmHuman() {
     .then((s) => (s && s.on && !s.passed && s.sitekey ? pass(s.sitekey) : null))
     .catch(() => { warmed = false; /* the check runs again on the first real call */ });
 }
-if (document.body?.dataset.human !== 'lazy') {
+if (typeof document !== 'undefined' && document.body?.dataset.human !== 'lazy') {
   if (document.readyState === 'complete') setTimeout(warmHuman, 800);
   else window.addEventListener('load', () => setTimeout(warmHuman, 800), { once: true });
 }

@@ -4,7 +4,7 @@
 //   MP3: LAME 3.100 (LGPL) compiled to WebAssembly by wasm-media-encoders 0.7.0 (MIT), fetched unmodified
 //        from jsDelivr at that exact version and checked against a SHA-256 before it runs.
 //   M4A: the browser's own AAC encoder (WebCodecs AudioEncoder) and mp4-muxer (MIT, vendored).
-//   WAV: 16-bit PCM.
+//   WAV: 16-bit PCM (24-bit for masters).
 // "Even out loudness" measures integrated loudness (ITU-R BS.1770, gated), sets the gain for -14 LUFS and holds
 // peaks under the ceiling with the same look-ahead limiter the sound beds use, here in a streaming form.
 
@@ -18,167 +18,9 @@ export const MP3_DELAY = 576; // LAME's encoder delay in samples (the decoder ad
 const CEILING = { wav: 10 ** (-1.05 / 20), lossy: 10 ** (-1.6 / 20) }; // lossy codecs overshoot a little
 const MAX_GAIN_DB = 30; // never lift a near-silent file by more than this
 
-// ---------------------------------------------------------------------------------------------
-// Loudness: ITU-R BS.1770-4 K-weighting, 400 ms blocks every 100 ms, absolute and relative gates
-// ---------------------------------------------------------------------------------------------
-
-/** K-weighting biquads for any sample rate (the pre-filter shelf and the RLB high-pass), as libebur128 derives them. */
-export function kWeights(fs) {
-  let f0 = 1681.974450955533;
-  let Q = 0.7071752369554196;
-  let K = Math.tan((Math.PI * f0) / fs);
-  const Vh = 10 ** (3.999843853973347 / 20);
-  const Vb = Vh ** 0.4996667741545416;
-  const a0 = 1 + K / Q + K * K;
-  const shelf = { b: [(Vh + (Vb * K) / Q + K * K) / a0, (2 * (K * K - Vh)) / a0, (Vh - (Vb * K) / Q + K * K) / a0], a: [(2 * (K * K - 1)) / a0, (1 - K / Q + K * K) / a0] };
-  f0 = 38.13547087602444;
-  Q = 0.5003270373238773;
-  K = Math.tan((Math.PI * f0) / fs);
-  const d = 1 + K / Q + K * K;
-  const hp = { b: [1, -2, 1], a: [(2 * (K * K - 1)) / d, (1 - K / Q + K * K) / d] };
-  return [shelf, hp];
-}
-
-/** Streaming integrated-loudness meter. push() planar channels; integrated() gives LUFS (-Infinity for silence). */
-export class LoudnessMeter {
-  constructor(rate, channels, frames) {
-    this.sub = Math.max(1, Math.round(rate / 10)); // 100 ms
-    this.bins = new Float64Array(Math.ceil((frames + 1) / this.sub) + 2);
-    this.n = 0;
-    this.f = kWeights(rate);
-    this.s = new Float64Array(channels * 4); // two transposed direct-form II states per biquad, per channel
-    this.peak = 0;
-  }
-
-  push(chs, len) {
-    const [{ b: pb, a: pa }, { b: rb, a: ra }] = this.f;
-    const { bins, sub, s } = this;
-    let peak = this.peak;
-    for (let c = 0; c < chs.length; c++) {
-      const x = chs[c];
-      let s1 = s[c * 4];
-      let s2 = s[c * 4 + 1];
-      let s3 = s[c * 4 + 2];
-      let s4 = s[c * 4 + 3];
-      let bin = Math.floor(this.n / sub);
-      let left = sub - (this.n % sub);
-      let acc = 0;
-      for (let i = 0; i < len; i++) {
-        const v = x[i];
-        const av = v < 0 ? -v : v;
-        if (av > peak) peak = av;
-        const y = pb[0] * v + s1;
-        s1 = pb[1] * v - pa[0] * y + s2;
-        s2 = pb[2] * v - pa[1] * y;
-        const z = rb[0] * y + s3;
-        s3 = rb[1] * y - ra[0] * z + s4;
-        s4 = rb[2] * y - ra[1] * z;
-        acc += z * z;
-        if (--left === 0) {
-          bins[bin++] += acc;
-          acc = 0;
-          left = sub;
-        }
-      }
-      if (acc) bins[bin] += acc;
-      s[c * 4] = s1;
-      s[c * 4 + 1] = s2;
-      s[c * 4 + 2] = s3;
-      s[c * 4 + 3] = s4;
-    }
-    this.peak = peak;
-    this.n += len;
-  }
-
-  integrated() {
-    const done = Math.floor(this.n / this.sub);
-    const z = [];
-    for (let j = 0; j + 4 <= done; j++) z.push((this.bins[j] + this.bins[j + 1] + this.bins[j + 2] + this.bins[j + 3]) / (4 * this.sub));
-    if (!z.length && this.n) z.push(this.bins.slice(0, done + 1).reduce((a, b) => a + b, 0) / this.n); // under 400 ms: one block
-    const lufs = (e) => -0.691 + 10 * Math.log10(e);
-    const above = z.filter((e) => e > 0 && lufs(e) > -70);
-    if (!above.length) return -Infinity;
-    const rel = lufs(above.reduce((a, b) => a + b, 0) / above.length) - 10;
-    const gated = above.filter((e) => lufs(e) > rel);
-    return lufs(gated.reduce((a, b) => a + b, 0) / gated.length);
-  }
-}
-
-// ---------------------------------------------------------------------------------------------
-// Limiter: the bed limiter from audio-engine.js (linked channels, 2 ms look-ahead, ~80 ms release),
-// made streaming. Output lags input by `look` frames; flush() pushes the tail out.
-// ---------------------------------------------------------------------------------------------
-
-export class Limiter {
-  constructor(channels, rate, ceiling, gain = 1) {
-    this.ch = channels;
-    this.ceil = ceiling;
-    this.g = gain;
-    const W = (this.W = Math.max(1, Math.round(0.002 * rate)));
-    this.rel = 1 - Math.exp(-1 / (0.08 * rate));
-    this.x = Array.from({ length: channels }, () => new Float32Array(W + 1)); // delay line
-    this.lim = new Float32Array(W + 1).fill(1); // the last W + 1 windowed minimums
-    this.qi = new Float64Array(W + 3); // monotonic deque of (index, need) for the sliding minimum: up to W + 2 entries
-    this.qv = new Float32Array(W + 3);
-    this.qh = 0;
-    this.qt = 0;
-    this.box = W + 1; // as if preceded by unity gain
-    this.gain = 1;
-    this.k = 0; // input frames seen
-    // Pre-roll W silent frames and drop their output: the gain can then ramp down ahead of a peak in the very
-    // first frame too (the beds never needed this, they fade in from silence).
-    this.drop = 0;
-    this.process(null, W);
-    this.drop = W;
-  }
-
-  /** Feed len frames (planar); returns planar output, len frames long except at the very start. */
-  process(chs, len) {
-    const { ch, W, x, lim, qi, qv, ceil, g, rel } = this;
-    const cap = W + 3;
-    const out = Array.from({ length: ch }, () => new Float32Array(len));
-    let o = 0;
-    for (let i = 0; i < len; i++) {
-      const k = this.k++;
-      let p = 0;
-      for (let c = 0; c < ch; c++) {
-        const v = chs ? chs[c][i] : 0;
-        x[c][k % (W + 1)] = v;
-        const a = v < 0 ? -v : v;
-        if (a > p) p = a;
-      }
-      p *= g;
-      const need = p > ceil ? ceil / p : 1;
-      // push need[k]; keep the deque increasing; drop indexes older than k - W
-      while (this.qt !== this.qh && qv[(this.qt - 1 + cap) % cap] >= need) this.qt = (this.qt - 1 + cap) % cap;
-      qi[this.qt] = k;
-      qv[this.qt] = need;
-      this.qt = (this.qt + 1) % cap;
-      while (qi[this.qh] < k - W) this.qh = (this.qh + 1) % cap;
-      const m = k - W; // the frame whose look-ahead window is now complete
-      if (m < 0) continue;
-      const l = qv[this.qh];
-      const slot = m % (W + 1);
-      this.box += l - lim[slot];
-      lim[slot] = l;
-      this.gain = Math.min(this.box / (W + 1), this.gain + (1 - this.gain) * rel);
-      if (this.drop) {
-        this.drop--;
-        continue;
-      }
-      const v = g * this.gain;
-      const src = (k + 1) % (W + 1); // where x[m] sits in the delay line
-      for (let c = 0; c < ch; c++) out[c][o] = x[c][src] * v;
-      o++;
-    }
-    return o === len ? out : out.map((a) => a.subarray(0, o));
-  }
-
-  /** The last W frames. */
-  flush() {
-    return this.process(null, this.W);
-  }
-}
+// The loudness meter (ITU-R BS.1770, gated) and the look-ahead limiter live in loudness.js, shared with Master.
+import { kWeights, LoudnessMeter, Limiter } from './loudness.js';
+export { kWeights, LoudnessMeter, Limiter };
 
 // ---------------------------------------------------------------------------------------------
 // Encoders
@@ -344,9 +186,10 @@ export function infoFrame(data, samples, kbps) {
 }
 
 class WavWriter {
-  init({ rate, outChannels }) {
+  init({ rate, outChannels, bits = 16 }) {
     this.rate = rate;
     this.ch = outChannels;
+    this.bits = bits === 24 ? 24 : 16;
     this.parts = [];
     this.frames = 0;
   }
@@ -354,6 +197,23 @@ class WavWriter {
   write(chs, len) {
     if (!len) return;
     const { ch } = this;
+    if (this.bits === 24) {
+      // 24-bit little-endian PCM, for masters
+      const out = new Uint8Array(len * ch * 3);
+      for (let c = 0; c < ch; c++) {
+        const x = chs[c];
+        for (let i = 0, o = c * 3; i < len; i++, o += ch * 3) {
+          const s = x[i];
+          const v = s < 0 ? Math.round((s < -1 ? -1 : s) * 8388608) : Math.round((s > 1 ? 1 : s) * 8388607);
+          out[o] = v & 0xff;
+          out[o + 1] = (v >> 8) & 0xff;
+          out[o + 2] = (v >> 16) & 0xff;
+        }
+      }
+      this.parts.push(out);
+      this.frames += len;
+      return;
+    }
     const out = new Int16Array(len * ch);
     for (let c = 0; c < ch; c++) {
       const x = chs[c];
@@ -368,7 +228,8 @@ class WavWriter {
 
   finish() {
     const { ch, rate } = this;
-    const dataSize = this.frames * ch * 2;
+    const bytes = this.bits / 8;
+    const dataSize = this.frames * ch * bytes;
     const head = new DataView(new ArrayBuffer(44));
     const str = (o, s) => { for (let i = 0; i < 4; i++) head.setUint8(o + i, s.charCodeAt(i)); };
     str(0, 'RIFF');
@@ -379,9 +240,9 @@ class WavWriter {
     head.setUint16(20, 1, true); // PCM
     head.setUint16(22, ch, true);
     head.setUint32(24, rate, true);
-    head.setUint32(28, rate * ch * 2, true);
-    head.setUint16(32, ch * 2, true);
-    head.setUint16(34, 16, true);
+    head.setUint32(28, rate * ch * bytes, true);
+    head.setUint16(32, ch * bytes, true);
+    head.setUint16(34, this.bits, true);
     str(36, 'data');
     head.setUint32(40, dataSize, true);
     return new Blob([head.buffer, ...this.parts], { type: 'audio/wav' });
