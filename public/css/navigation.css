@@ -383,3 +383,5 @@
     display: block;
   }
 }
+
+.mobile-projects{display:none}@media(max-width:1080px){.mobile-projects{display:flex}}

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Workflows — Massless studio</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <link rel="stylesheet" href="/css/hubs.css" />
+    <script type="module" src="/js/navigation.js"></script>
+    <script type="module" src="/js/pages/workflows.js"></script>
+  </head>
+  <body class="hub">
+    <header class="nav">
+      <a class="nav-logo" href="/" aria-label="Massless home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle
+            cx="16"
+            cy="16"
+            r="11.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+          <path
+            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
+            stroke="currentColor"
+            stroke-width="3"
+          /></svg
+      ></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/">Explore</a><a href="/studios/image/">Image</a
+        ><a href="/studios/video/">Video</a><a href="/studios/audio/">Audio</a
+        ><a href="/studios/3d/">3D</a><a href="/studios/office/">Office</a>
+      </nav>
+      <div class="nav-right">
+        <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless"
+          >GitHub</a
+        ><a class="btn-accent" href="/image">Create an image ↗</a>
+      </div>
+    </header>
+    <main class="hub-main">
+      <section class="hub-intro workflow-intro">
+        <div>
+          <p class="eyebrow">FROM AN IDEA TO AN EXPORT</p>
+          <h1>Make something.<br /><em>Finish something.</em></h1>
+          <p>
+            Practical steps, connected tools and reusable presets. Start with
+            your own material and leave with a file you can use.
+          </p>
+          <a class="btn-accent" href="#workflow-cards">Find your workflow ↓</a>
+        </div>
+        <a class="workflow-demo" href="/video/?effect=lidar"
+          ><video
+            muted
+            loop
+            playsinline
+            poster="/media/clips/effect-lidar-active.jpg"
+            data-src="/media/clips/effect-lidar.mp4"
+          ></video
+          ><span>STILL → LiDAR SCAN → CLIP ↗</span></a
+        >
+      </section>
+      <div id="workflow-cards" class="hub-grid"></div>
+      <section class="hub-panel" id="run-panel" hidden>
+        <p class="eyebrow">YOUR WORKFLOW PLAN</p>
+        <h2 id="run-title"></h2>
+        <label
+          >Project brief<textarea
+            id="run-brief"
+            rows="3"
+            maxlength="4000"
+            placeholder="What are you making, and for whom?"
+          ></textarea></label
+        ><label>Choose a saved image<select id="shot-list"></select></label>
+        <div id="run-steps"></div>
+        <div class="hub-actions">
+          <button id="export-run" class="btn-accent">
+            Download workflow plan</button
+          ><button id="save-run" class="btn-ghost">
+            Save plan to a private project</button
+          ><label class="btn-ghost"
+            >Import a plan<input
+              id="import-run"
+              type="file"
+              accept="application/json"
+              hidden
+          /></label>
+        </div>
+        <p id="run-status" role="status">Progress saves in this browser.</p>
+      </section>
+      <section class="hub-panel" id="flux3">
+        <p class="eyebrow">MODEL WORKFLOW / BLACK FOREST LABS</p>
+        <h2>FLUX 3 Image Klein</h2>
+        <p>
+          Download ComfyUI’s official distilled workflow with prompt expansion.
+          Install the listed weights in your own ComfyUI before running it. This
+          model uses the FLUX Kommunity License and may require Hugging Face
+          access approval.
+        </p>
+        <div class="hub-actions">
+          <a class="btn-accent" href="/comfy/flux3-klein-official.json" download
+            >Download official workflow</a
+          ><a
+            class="btn-ghost"
+            href="https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy"
+            target="_blank"
+            rel="noopener"
+            >Model files and terms ↗</a
+          >
+        </div>
+        <p class="quiet-note">
+          This download prepares a connected workflow. Hosted FLUX 3 generation
+          is not enabled.
+        </p>
+      </section>
+      <section class="hub-section">
+        <p class="eyebrow">COMMUNITY WORKFLOWS</p>
+        <h2>Give the image a new life.</h2>
+        <p>
+          Curated VFX4All presets by Noma Studio. Download the open workflow or
+          open its Comfy Cloud app. These require their own model installation
+          or Comfy Cloud account and credits.
+        </p>
+        <div id="preset-cards" class="hub-grid"></div>
+        <p class="quiet-note">
+          Workflow code: MIT. LTX model weights use separate community terms.
+          Check the included notices before installing.
+          <a href="/comfy/vfx4all/THIRD_PARTY_NOTICES.md"
+            >Read model notices ↗</a
+          >
+        </p>
+      </section>
+    </main>
+    <footer class="hub-footer">
+      <a href="/">MASSLESS / OPEN CREATIVE TOOLS</a
+      ><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
+    </footer>
+  </body>
+</html>

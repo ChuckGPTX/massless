@@ -1,3 +1,4 @@
+import { hostedImage } from './cloud.js';
 // Where hero frames come from. Every model here has open weights and costs $0 to run.
 //  1. Cloudflare Workers AI through our own /api/shot: FLUX.1 schnell, SDXL-Lightning, DreamShaper 8, SDXL 1.0.
 //     Free daily allocation, capped server-side.
@@ -196,6 +197,7 @@ export async function viaComfy({ prompt, w, h, seed, signal, comfyUrl, ckpt, onW
 export async function shoot(opts) {
   const m = MODELS[opts.model];
   const engine = m ? m.engine : opts.engine || 'auto';
+  if (engine === 'hosted') return hostedImage(opts);
   if (engine === 'pollinations') return viaPollinations(opts);
   if (engine === 'workers') return viaWorkers({ ...opts, model: m ? opts.model : DEFAULT_MODEL });
   if (engine === 'comfy') return viaComfy(opts);

@@ -1,3 +1,4 @@
+import {get} from "../store.js";
 import { analyzeTrack, drawMusicFrame } from "../music-visualizer.js";
 import { exportMusic } from "../music-export.js";
 
@@ -280,7 +281,10 @@ requestAnimationFrame(tick);
 async function init() {
   try {
     artwork = new Image();
-    artwork.src = "/media/music/showtime-animated.jpg";
+    const shotId = new URLSearchParams(location.search).get('shot');
+    const shot = shotId ? await get(shotId) : null;
+    if(shot?.blob?.type.startsWith('image/')) { artURL=URL.createObjectURL(shot.blob); artwork.src=artURL; $("#artist").value="Your artist"; $("#track-title").value="Your release"; }
+    else artwork.src = "/media/music/showtime-animated.jpg";
     await Promise.all([artwork.decode(), document.fonts.ready]);
     draw();
     await makeDemo();

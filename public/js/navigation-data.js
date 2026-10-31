@@ -50,15 +50,30 @@ export const STUDIOS = [
         "play",
       ),
     ],
-    engines: Object.entries(MODELS).map(([id, m]) =>
-      item(
-        m.name,
-        id === "comfy" ? "Connect a custom image workflow" : m.note,
-        `/image?model=${id}`,
-        id === "comfy" ? "chip" : "spark",
-        id === "comfy" ? "CONNECT" : id === "sana" ? "COMMUNITY" : "CLOUD",
+    engines: [
+      ...Object.entries(MODELS).map(([id, m]) =>
+        item(
+          m.name,
+          id === "comfy" ? "Connect a custom image workflow" : m.note,
+          `/image?model=${id}`,
+          id === "comfy" ? "chip" : "spark",
+          id === "comfy"
+            ? "CONNECT"
+            : id === "sana"
+              ? "COMMUNITY"
+              : id === "moss-image-sft"
+                ? "SIGN IN"
+                : "CLOUD",
+        ),
       ),
-    ),
+      item(
+        "FLUX 3 Image Klein",
+        "Official ComfyUI workflow and model setup",
+        "/workflows/#flux3",
+        "layers",
+        "CONNECT",
+      ),
+    ],
     feature: item(
       "Find your next shot",
       "Browse original motion and character studies",

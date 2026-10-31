@@ -3,4 +3,7 @@ node_modules/
 .dev.vars
 tests/out/
 .DS_Store
+
+# Local worker caches
 __pycache__/
+*.pyc

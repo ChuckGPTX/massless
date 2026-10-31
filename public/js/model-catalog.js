@@ -2,6 +2,7 @@
 
 /** Every model the Image page offers, keyed by id. `server` is the /api/shot model name. */
 export const MODELS = {
+  "moss-image-sft": { engine: "hosted", family: "moss", group: "hosted", name: "MOSS Image SFT", short: "MOSS Image", note: "Detailed images, typography and layouts · sign in", licence: "Apache-2.0" },
   "flux-1-schnell": {
     engine: "workers",
     server: "flux-1-schnell",
@@ -68,6 +69,7 @@ export const MODELS = {
 
 export const MODEL_GROUPS = [
   { id: "cloudflare", name: "Free on Cloudflare" },
+  {id:"hosted",name:"Connected models"},
   { id: "community", name: "Community" },
   { id: "gpu", name: "Connected workflows" },
 ];

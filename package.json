@@ -9,7 +9,8 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "test:render": "python3 tests/render_test.py",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "test:runtime": "node tests/ledger-runtime.mjs"
   },
   "devDependencies": {
     "fake-indexeddb": "6.2.4",
