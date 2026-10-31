@@ -160,12 +160,13 @@ RUN fetch() { git init -q "$1" && git -C "$1" fetch -q --depth 1 "$2" "$3" && gi
  && cd /opt/ComfyUI && rm -rf models && mkdir -p /models /hf input output temp user && ln -s /models models
 
 # ---- our code (MIT) ----
-COPY workers/gpu/handler.py /opt/massless/handler.py
+COPY workers/gpu/handler.py workers/gpu/volume.py /opt/massless/
 COPY workers/gpu/lab/workflows /opt/massless/lab/workflows
 COPY workers/gpu/models.lab.json workers/gpu/LICENSE /opt/massless/
 COPY public/data/rig.json /opt/massless/rig.json
 ENV COMFY_DIR=/opt/ComfyUI \
     MASSLESS_IMAGE=lab \
+    MASSLESS_VOLUME=off \
     MASSLESS_WORKFLOWS=/opt/massless/lab/workflows \
     MASSLESS_RIG=/opt/massless/rig.json \
     HF_HOME=/hf \

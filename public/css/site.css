@@ -164,3 +164,7 @@ button { cursor: pointer; }
 .gpu-form textarea { min-width: 260px; }
 .gpu-result { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
 .gpu-result video { max-width: 100%; border-radius: 10px; }
+.gpu-modes { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.gpu-modes [aria-selected="true"] { border-color: rgba(255, 191, 47, 0.8); color: inherit; }
+.gpu-panel .gpu-cost { font-size: 0.85em; opacity: 0.75; margin: 8px 0 0; }
+.gpu-form select[name$="_library"] { max-width: 260px; }

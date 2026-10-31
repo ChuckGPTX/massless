@@ -72,7 +72,7 @@ def load_json(path):
 # =============================================================================================
 
 WS_GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
-SAMPLING = {'KSampler', 'SamplerCustomAdvanced', 'TextEncodeAceStepAudio1.5', 'ImageUpscaleWithModel', 'MMAudioSampler', 'HunyuanFoleySampler'}
+SAMPLING = {'KSampler', 'KSamplerAdvanced', 'SamplerCustom', 'SamplerCustomAdvanced', 'TextEncodeAceStepAudio1.5', 'ImageUpscaleWithModel', 'MMAudioSampler', 'HunyuanFoleySampler'}
 
 
 def ws_frame(text):
@@ -85,6 +85,22 @@ def ws_frame(text):
     else:
         head = struct.pack('!BBQ', 0x81, 127, n)
     return head + data
+
+
+_mp4_cache = {}
+
+
+def fake_mp4(seconds=1, size='128x72', crf=30):
+    """A real (small) H.264 MP4 when ffmpeg is here, so the handler's ffmpeg steps can read it; else just the header."""
+    key = (seconds, size, crf)
+    if key not in _mp4_cache:
+        if shutil.which('ffmpeg'):
+            _mp4_cache[key] = subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i', f'testsrc2=size={size}:rate=16:duration={seconds}', '-vf', 'noise=alls=40:allf=t',
+                                              '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', str(crf), '-pix_fmt', 'yuv420p', '-movflags', 'frag_keyframe+empty_moov',
+                                              '-f', 'mp4', '-'], capture_output=True, check=True).stdout
+        else:
+            _mp4_cache[key] = b'\x00\x00\x00\x20ftypisom' + os.urandom(3000)
+    return _mp4_cache[key]
 
 
 class FakeComfy:
@@ -275,7 +291,8 @@ class FakeComfy:
         sub, base = os.path.split(prefix)
         os.makedirs(os.path.join(self.root, 'output', sub), exist_ok=True)
         if ct == 'SaveVideo':
-            name, data, key = f'{base}_00001_.mp4', b'\x00\x00\x00\x20ftypisom' + os.urandom(3000), 'images'
+            name, key = f'{base}_00001_.mp4', 'images'
+            data = fake_mp4(self.scenario.get('video_seconds', 1), self.scenario.get('video_size', '128x72'), self.scenario.get('video_crf', 30))
         elif ct in ('SaveAudioAdvanced', 'SaveAudioMP3') and node['inputs'].get('format') == 'flac':
             secs = graph.get('sampler', {}).get('inputs', {}).get('duration', 3)
             data = subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i', f'sine=frequency=440:duration={secs}:sample_rate=44100',
@@ -698,7 +715,8 @@ def validate_workflow(name, graph, index, targets):
                     errs.append(f'{nid}.{iname}: {graph[v[0]]["class_type"]} has no output {v[1]}')
                     continue
                 st = src.outputs[v[1]]
-                if iname == root and spec.type not in ('*', 'COMBO') and st != '*' and st != spec.type:
+                wild = ('*', 'COMBO', 'COMFY_MATCHTYPE_V3')  # MatchType: the type of whatever is connected (ResizeImageMaskNode)
+                if iname == root and spec.type not in wild and st not in wild and st != spec.type:
                     errs.append(f'{nid}.{iname}: expects {spec.type}, gets {st} from {v[0]}')
             elif iname == root:
                 if not literal_ok(spec, v):
@@ -781,7 +799,7 @@ def test_validator_catches_mistakes(index, wf_path, targets):
     """The checker itself: each broken copy of a good workflow must be reported."""
     good = load_json(wf_path)
     loader = next(n for n, v in good.items() if v['class_type'] == 'UNETLoader')
-    sampler = next(n for n, v in good.items() if v['class_type'] in ('KSampler', 'SamplerCustomAdvanced'))
+    sampler = next(n for n, v in good.items() if v['class_type'] in ('KSampler', 'KSamplerAdvanced', 'SamplerCustomAdvanced'))
     first_link = next(k for k, v in good[sampler]['inputs'].items() if isinstance(v, list))
     cases = {
         'an unknown node class': lambda g: g[loader].update(class_type='UNETLoaderPlus'),
@@ -794,7 +812,7 @@ def test_validator_catches_mistakes(index, wf_path, targets):
         'a link of the wrong type': lambda g: g[sampler]['inputs'].update({first_link: ['vae', 0]}),
         'a literal where a link is needed': lambda g: g[sampler]['inputs'].update({first_link: 'MODEL'}),
         'a string where an INT goes': lambda g: g['latent']['inputs'].update(width='832'),
-        'a node feeding nothing': lambda g: g.update(stray={'class_type': 'VAELoader', 'inputs': {'vae_name': 'wan2.2_vae.safetensors'}}),
+        'a node feeding nothing': lambda g: g.update(stray={'class_type': 'VAELoader', 'inputs': {'vae_name': 'wan_2.1_vae.safetensors'}}),
     }
     for what, mutate in cases.items():
         g = json.loads(json.dumps(good))
@@ -820,7 +838,7 @@ def dockerfile_fetches(path):
     return text, rows
 
 
-def test_manifest(manifest_path, dockerfile, commercial):
+def test_manifest(manifest_path, dockerfile, commercial, baked=True):
     m = load_json(manifest_path)
     name = os.path.basename(manifest_path)
     ids = [e['id'] for e in m['models']]
@@ -833,13 +851,20 @@ def test_manifest(manifest_path, dockerfile, commercial):
         if commercial:
             check(e['license'] in LICENSES_OK, f"{name}: {e['id']}: license {e['license']} allows commercial use")
     text, rows = dockerfile_fetches(dockerfile)
-    by_dest = {r[3]: r for r in rows if len(r) >= 4}
-    for e in m['models']:
-        dest = f"/{e.get('root', 'models')}/{e['target']}"
-        r = by_dest.get(dest)
-        want = [e['url'], e['sha256'], str(e['size']), dest] + (['--convert', e['convert']] if e.get('convert') else [])
-        check(r == want, f"{os.path.basename(dockerfile)}: layer for {e['id']} matches the manifest exactly")
-    check(len(rows) == len(m['models']), f'{os.path.basename(dockerfile)}: one fetch layer per model ({len(rows)} layers, {len(m["models"])} models)')
+    if baked:
+        by_dest = {r[3]: r for r in rows if len(r) >= 4}
+        for e in m['models']:
+            dest = f"/{e.get('root', 'models')}/{e['target']}"
+            check(by_dest.get(dest) == [e['url'], e['sha256'], str(e['size']), dest], f"{os.path.basename(dockerfile)}: layer for {e['id']} matches the manifest exactly")
+        check(len(rows) == len(m['models']), f'{os.path.basename(dockerfile)}: one fetch layer per model ({len(rows)} layers, {len(m["models"])} models)')
+    else:
+        check(not rows and 'volume.py' in text and 'MASSLESS_VOLUME=/runpod-volume/massless' in text and 'ffmpeg' in text,
+              f'{os.path.basename(dockerfile)}: no weights in the image; it ships volume.py and points at /runpod-volume (and has ffmpeg)')
+        folders = {e['target'].split('/')[0] for e in m['models']}
+        check(all(e['target'].count('/') == 1 for e in m['models']) and folders <= {'diffusion_models', 'loras', 'text_encoders', 'vae', 'clip_vision', 'audio_encoders', 'upscale_models'},
+              f'{name}: every target is <ComfyUI model folder>/<file> ({sorted(folders)})')
+        lic = {e['license'] for e in m['models']}
+        check(lic <= LICENSES_OK, f'{name}: licenses {sorted(lic)} (Apache-2.0/MIT/BSD only on the main endpoint)')
     check(m['comfyui']['commit'] in text, f'{os.path.basename(dockerfile)}: installs ComfyUI at the pinned commit {m["comfyui"]["commit"][:12]}')
     for n in m.get('custom_nodes', []):
         check(n['commit'] in text and n['repo'] in text, f"{os.path.basename(dockerfile)}: installs {n['name']} at the pinned commit {n['commit'][:12]}")
@@ -890,106 +915,294 @@ def test_urls(m):
                   f"HEAD {e['id']}: {status}, {size} bytes" + (', sha256 matches' if etag == e['sha256'] else ''))
 
 
-def range_get(url, a, b):
-    req = urllib.request.Request(url, headers={'Range': f'bytes={a}-{b}', 'user-agent': 'massless-tests'})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return r.read()
+# =============================================================================================
+# 2b. the model volume: download, verify, resume, lock (workers/gpu/volume.py) against a fake Hugging Face
+# =============================================================================================
+
+class FakeHF:
+    """Serves model files with Range support. Per file: corrupt (wrong bytes, same size), drop (close after N bytes
+    once), slow (seconds per 64 KB), no_range (ignore Range, always 200), extra (serve more bytes than recorded)."""
+
+    def __init__(self, files):
+        self.files = dict(files)  # name -> bytes
+        self.gets, self.ranges, self.rules = {}, {}, {}
+        self.lock = threading.Lock()
+        fake = self
+
+        class H(BaseHTTPRequestHandler):
+            protocol_version = 'HTTP/1.1'
+
+            def log_message(self, *a):
+                pass
+
+            def do_GET(self):
+                name = self.path.lstrip('/')
+                data = fake.files.get(name)
+                with fake.lock:
+                    fake.gets[name] = fake.gets.get(name, 0) + 1
+                    fake.ranges.setdefault(name, []).append(self.headers.get('Range'))
+                    rule = dict(fake.rules.get(name, {}))
+                if data is None:
+                    self.send_response(404)
+                    self.send_header('content-length', '0')
+                    self.end_headers()
+                    return
+                if rule.get('corrupt'):
+                    data = bytes(b ^ 0x55 for b in data)
+                if rule.get('extra'):
+                    data = data + b'x' * 1000
+                start = 0
+                rng = self.headers.get('Range')
+                if rng and not rule.get('no_range'):
+                    start = int(rng.split('=')[1].split('-')[0])
+                    body = data[start:]
+                    self.send_response(206)
+                    self.send_header('content-range', f'bytes {start}-{len(data) - 1}/{len(data)}')
+                else:
+                    body = data
+                    self.send_response(200)
+                self.send_header('content-length', str(len(body)))
+                self.end_headers()
+                drop = rule.get('drop')
+                if drop and fake.gets[name] == 1:
+                    self.wfile.write(body[:drop])
+                    self.wfile.flush()
+                    self.close_connection = True
+                    try:
+                        self.connection.shutdown(socket.SHUT_RDWR)
+                    except OSError:
+                        pass
+                    return
+                for i in range(0, len(body), 65536):
+                    if rule.get('slow'):
+                        time.sleep(rule['slow'])
+                    self.wfile.write(body[i:i + 65536])
+
+        self.server = ThreadingHTTPServer(('127.0.0.1', 0), H)
+        self.server.daemon_threads = True
+        self.base = f'http://127.0.0.1:{self.server.server_address[1]}'
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def stop(self):
+        self.server.shutdown()
 
 
-def remote_header(url):
-    n = struct.unpack('<Q', range_get(url, 0, 7))[0]
-    h = json.loads(range_get(url, 8, 8 + n - 1))
-    h.pop('__metadata__', None)
-    return h
+def tiny_manifest(real, base, size=120_000):
+    """The real manifest's ids, jobs and targets, with small deterministic files served by FakeHF."""
+    files, models = {}, []
+    for i, e in enumerate(real['models']):
+        data = hashlib.sha256(e['id'].encode()).digest() * (size // 32 + i)
+        files[e['id']] = data
+        models.append(dict(e, url=f"{base}/{e['id']}", size=len(data), sha256=hashlib.sha256(data).hexdigest()))
+    return dict(real, models=models), files
 
 
-def write_safetensors(path, tensors, meta=None):
-    header, blob, off = {}, b'', 0
-    for k, (dtype, shape, data) in tensors.items():
-        header[k] = {'dtype': dtype, 'shape': shape, 'data_offsets': [off, off + len(data)]}
-        blob += data
-        off += len(data)
-    if meta:
-        header['__metadata__'] = meta
-    hb = json.dumps(header).encode()
-    hb += b' ' * (-len(hb) % 8)
-    with open(path, 'wb') as f:
-        f.write(struct.pack('<Q', len(hb)) + hb + blob)
-
-
-def read_safetensors(path):
-    with open(path, 'rb') as f:
-        n = struct.unpack('<Q', f.read(8))[0]
-        h = json.loads(f.read(n))
-        data = f.read()
-    h.pop('__metadata__', None)
-    return {k: data[v['data_offsets'][0]:v['data_offsets'][1]] for k, v in h.items()}, h
-
-
-def test_rekey(fetch_model):
-    tmp = tempfile.mkdtemp()
+def test_volume():
+    sys.path.insert(0, GPU)
+    import volume as V
+    sys.path.remove(GPU)
+    real = load_json(os.path.join(GPU, 'models.json'))
+    hf = FakeHF({})
+    m, files = tiny_manifest(real, hf.base)
+    hf.files.update(files)
+    root = tempfile.mkdtemp()
+    logs = []
+    mk = lambda **kw: V.Volume(root, m, log=logs.append, downloader='python', **kw)  # noqa: E731
     try:
-        p = os.path.join(tmp, 'm.safetensors')
-        tensors = {
-            'blocks.0.attn1.to_q.weight': ('F16', [2, 2], b'\x01' * 8),
-            'blocks.0.ffn.net.0.proj.bias': ('F16', [2], b'\x02' * 4),
-            'blocks.12.norm2.weight': ('F16', [2], b'\x03' * 4),
-            'blocks.12.scale_shift_table': ('F16', [1, 6, 2], b'\x04' * 24),
-            'condition_embedder.time_proj.weight': ('F16', [2, 2], b'\x05' * 8),
-            'proj_out.bias': ('F16', [2], b'\x06' * 4),
-            'scale_shift_table': ('F16', [1, 2, 2], b'\x07' * 8),
-        }
-        write_safetensors(p, tensors, {'format': 'pt'})
-        size = os.path.getsize(p)
-        fetch_model.rekey_safetensors(p, fetch_model.wan_diffusers_to_comfy)
-        got, h = read_safetensors(p)
-        want = {'blocks.0.self_attn.q.weight': b'\x01' * 8, 'blocks.0.ffn.0.bias': b'\x02' * 4, 'blocks.12.norm3.weight': b'\x03' * 4,
-                'blocks.12.modulation': b'\x04' * 24, 'time_projection.1.weight': b'\x05' * 8, 'head.head.bias': b'\x06' * 4,
-                'head.modulation': b'\x07' * 8}
-        check(got == want and os.path.getsize(p) == size, 'fetch_model: diffusers->ComfyUI Wan rename in place keeps every tensor byte')
-        write_safetensors(p, {'a': ('F32', [1], b'\x00' * 4)})
-        fetch_model.rekey_safetensors(p, lambda k: 'a_much_longer_name_than_the_padding_allows_' * 3)
-        got, _ = read_safetensors(p)
-        check(list(got.values()) == [b'\x00' * 4] and len(list(got)[0]) > 100, 'fetch_model: a longer header is written to a copy')
-        write_safetensors(p, {'unknown.weight': ('F32', [1], b'\x00' * 4)})
+        v = mk()
+        failed = v.ensure_all()
+        ok = not failed and all(os.path.getsize(os.path.join(root, 'models', e['target'])) == e['size'] for e in m['models'])
+        check(ok and all(hf.gets[e['id']] == 1 for e in m['models']), f"volume: a fresh volume gets all {len(m['models'])} files, one download each, verified by sha256")
+        check(all(os.path.exists(os.path.join(root, '.verified', e['id'] + '.json')) for e in m['models']) and not os.listdir(os.path.join(root, '.incoming')),
+              'volume: a marker per verified file; no .part or .lock left behind')
+        st = v.status()
+        check(st['ready'] and st['bytes_ready'] == st['bytes'] == sum(e['size'] for e in m['models']), f"volume: status reports {st['files_ready']}/{st['files']} files ready")
+
+        # a second boot: stat + marker only, nothing downloaded or hashed again
+        hashed = []
+        real_sha = V.sha256_file
+        V.sha256_file = lambda p, progress=None: hashed.append(p) or real_sha(p)
+        before = dict(hf.gets)
+        failed = mk().ensure_all()
+        V.sha256_file = real_sha
+        check(not failed and hf.gets == before and not hashed, 'volume: the next worker start downloads and hashes nothing (size + marker)')
+
+        # a file changed on the volume after it was verified: hashed again, replaced when wrong
+        e = m['models'][0]
+        p = os.path.join(root, 'models', e['target'])
+        with open(p, 'r+b') as f:
+            f.write(b'\0' * 64)
+        check(not mk().ready(e), 'volume: a file whose mtime no longer matches its marker is not trusted')
+        mk().ensure(e)
+        with open(p, 'rb') as f:
+            check(hashlib.sha256(f.read()).hexdigest() == e['sha256'] and hf.gets[e['id']] == 2, 'volume: a damaged file is hashed, removed and fetched again')
+
+        # a correct file copied in by hand (no marker): adopted after one hash, no download
+        e = m['models'][1]
+        os.remove(os.path.join(root, '.verified', e['id'] + '.json'))
+        n = hf.gets[e['id']]
+        mk().ensure(e)
+        check(hf.gets[e['id']] == n and os.path.exists(os.path.join(root, '.verified', e['id'] + '.json')), 'volume: a right file without a marker is kept after one hash')
+
+        def reset(e):
+            for q in (os.path.join(root, 'models', e['target']), os.path.join(root, '.verified', e['id'] + '.json')):
+                if os.path.exists(q):
+                    os.remove(q)
+
+        # resume: a partial .part continues with a Range request
+        e = m['models'][2]
+        reset(e)
+        os.makedirs(os.path.join(root, '.incoming'), exist_ok=True)
+        with open(os.path.join(root, '.incoming', e['id'] + '.part'), 'wb') as f:
+            f.write(files[e['id']][:50_000])
+        mk().ensure(e)
+        check(hf.ranges[e['id']][-1] == 'bytes=50000-' and mk().ready(e), 'volume: a partial download resumes from where it stopped (Range: bytes=50000-)')
+
+        # a server that ignores Range: starts over, still right
+        e = m['models'][3]
+        reset(e)
+        with open(os.path.join(root, '.incoming', e['id'] + '.part'), 'wb') as f:
+            f.write(b'junk' * 1000)
+        hf.rules[e['id']] = {'no_range': True}
+        mk().ensure(e)
+        check(mk().ready(e), 'volume: when the server ignores Range, the download starts over and verifies')
+
+        # the connection drops mid-file: retried, resumed, verified
+        e = m['models'][4]
+        reset(e)
+        hf.gets[e['id']] = 0
+        hf.rules[e['id']] = {'drop': 30_000}
+        V.NET_CHUNK, real_sleep = 16384, V.time.sleep
+        V.time.sleep = lambda s: None
         try:
-            fetch_model.rekey_safetensors(p, fetch_model.wan_diffusers_to_comfy)
-            check(False, 'fetch_model: unknown tensor names are refused')
-        except ValueError:
-            check(True, 'fetch_model: unknown tensor names are refused')
-        # verification refuses a corrupt download
-        src = os.path.join(tmp, 'src.bin')
-        with open(src, 'wb') as f:
-            f.write(b'hello')
-        os.environ.pop('MASSLESS_SKIP_MODELS', None)
+            mk().ensure(e)
+        finally:
+            V.time.sleep, V.NET_CHUNK = real_sleep, 1024 * 1024
+        check(mk().ready(e) and hf.gets[e['id']] == 2 and (hf.ranges[e['id']][-1] or '').startswith('bytes=') and hf.ranges[e['id']][-1] != 'bytes=0-',
+              f"volume: a dropped connection is retried and resumed ({hf.ranges[e['id']][-1]})")
+
+        # wrong bytes: never kept, never resumed from, refused after a second try
+        e = m['models'][5]
+        reset(e)
+        hf.gets[e['id']] = 0
+        hf.rules[e['id']] = {'corrupt': True}
         try:
-            fetch_model.fetch('file://' + src, '0' * 64, 5, os.path.join(tmp, 'out', 'x.bin'))
-            check(False, 'fetch_model: a sha256 mismatch fails the build')
-        except SystemExit as e:
-            check('sha256 mismatch' in str(e) and not os.path.exists(os.path.join(tmp, 'out', 'x.bin')), 'fetch_model: a sha256 mismatch fails the build and keeps nothing')
+            mk().ensure(e)
+            got = None
+        except V.VolumeError as ex:
+            got = str(ex)
+        check(got and 'does not match the pinned sha256' in got and hf.gets[e['id']] == 2 and not os.path.exists(os.path.join(root, '.incoming', e['id'] + '.part'))
+              and not os.path.exists(os.path.join(root, 'models', e['target'])), f'volume: a hash mismatch is downloaded once more, then refused: "{got}"')
+        check(not os.path.exists(os.path.join(root, '.incoming', e['id'] + '.lock')), 'volume: the lock is released after a failure')
+        hf.rules[e['id']] = {'extra': True}
         try:
-            fetch_model.fetch('file://' + src, hashlib.sha256(b'hello').hexdigest(), 6, os.path.join(tmp, 'out', 'y.bin'))
-            check(False, 'fetch_model: a size mismatch fails the build')
-        except SystemExit as e:
-            check('expected 6 bytes' in str(e), 'fetch_model: a size mismatch fails the build')
-        fetch_model.fetch('file://' + src, hashlib.sha256(b'hello').hexdigest(), 5, os.path.join(tmp, 'out', 'z.bin'))
-        check(open(os.path.join(tmp, 'out', 'z.bin'), 'rb').read() == b'hello', 'fetch_model: a verified file lands at its target')
+            mk().ensure(e)
+            got = None
+        except V.VolumeError as ex:
+            got = str(ex)
+        check(got and 'larger than' in got, 'volume: a download longer than the recorded size is refused')
+        hf.rules.pop(e['id'])
+        mk().ensure(e)
+
+        # two workers want the same file: one downloads, the other waits for it
+        e = m['models'][6]
+        reset(e)
+        hf.gets[e['id']] = 0
+        hf.rules[e['id']] = {'slow': 0.4}
+        la, lb = [], []
+        a = V.Volume(root, m, log=la.append, downloader='python', heartbeat=0.05)
+        b = V.Volume(root, m, log=lb.append, downloader='python', heartbeat=0.05)
+        errs = []
+
+        def go(v):
+            try:
+                v.ensure(e, poll=0.05)
+            except Exception as ex:  # pragma: no cover
+                errs.append(ex)
+        ta, tb = threading.Thread(target=go, args=(a,)), threading.Thread(target=go, args=(b,))
+        ta.start()
+        time.sleep(0.1)
+        tb.start()
+        ta.join(30)
+        tb.join(30)
+        check(not errs and hf.gets[e['id']] == 1 and a.ready(e) and b.state[e['id']]['state'] == 'ready'
+              and any('downloading' in x for x in la) and not any('downloading' in x for x in lb),
+              f"volume: two workers, one file: one download, the other waited on the lock ({hf.gets[e['id']]} GET)")
+        hf.rules.pop(e['id'])
+
+        # a fresh lock held by someone else: wait, then NotReady; a stale one is taken over
+        e = m['models'][7]
+        reset(e)
+        lf = os.path.join(root, '.incoming', e['id'] + '.lock')
+        with open(lf, 'w') as f:
+            f.write('{"by": "another-worker"}')
+        try:
+            mk(stale=300).ensure(e, wait=0.3, poll=0.05)
+            got = None
+        except V.NotReady as ex:
+            got = str(ex)
+        check(got and 'another worker' in got, 'volume: a live lock is respected (the job gets NotReady instead of a second download)')
+        os.utime(lf, (time.time() - 1000, time.time() - 1000))
+        mk(stale=300).ensure(e)
+        check(mk().ready(e) and not os.path.exists(lf), 'volume: a lock nobody refreshed for 300 s is taken over (its worker died)')
+
+        # a full volume is a clear error
+        e = m['models'][8]
+        reset(e)
+        real_du = V.shutil.disk_usage
+        V.shutil.disk_usage = lambda path: types.SimpleNamespace(total=10, used=10, free=1000)
+        try:
+            mk().ensure(e)
+            got = None
+        except V.VolumeError as ex:
+            got = str(ex)
+        finally:
+            V.shutil.disk_usage = real_du
+        check(got and 'The volume is full' in got, f'volume: not enough free space says so: "{(got or "")[:80]}"')
+        mk().ensure(e)
+
+        # aria2c path (a stand-in binary that downloads with urllib), hashed after
+        e = m['models'][9]
+        reset(e)
+        bindir = tempfile.mkdtemp()
+        fake_aria = os.path.join(bindir, 'aria2c')
+        with open(fake_aria, 'w') as f:
+            f.write(f"""#!{sys.executable}
+import sys, os, urllib.request
+a = sys.argv[1:]
+d, o, url = a[a.index('-d') + 1], a[a.index('-o') + 1], a[-1]
+assert '--continue=true' in a and '--split=16' in a
+with urllib.request.urlopen(url) as r, open(os.path.join(d, o), 'wb') as f:
+    f.write(r.read())
+""")
+        os.chmod(fake_aria, 0o755)
+        os.environ['ARIA2C'] = fake_aria
+        try:
+            V.Volume(root, m, log=logs.append, downloader='aria2c').ensure(e)
+        finally:
+            os.environ.pop('ARIA2C', None)
+            shutil.rmtree(bindir, ignore_errors=True)
+        check(mk().ready(e), 'volume: the aria2c downloader (16 connections, resumable) is used when installed, and its file is verified')
+
+        # ComfyUI's model folders on the volume
+        y = V.comfy_paths_yaml(root)
+        try:
+            import yaml
+            cfg = yaml.safe_load(y)['massless_volume']
+            ok = cfg['base_path'] == os.path.join(root, 'models') and cfg['is_default'] is True and all(cfg[k] == k for k in V.FOLDERS)
+        except ImportError:
+            ok = f'base_path: {os.path.join(root, "models")}' in y
+        check(ok, 'volume: extra_model_paths.yaml points every ComfyUI model folder at the volume')
+        folders = {e['target'].split('/')[0] for e in real['models']}
+        check(folders <= set(V.FOLDERS), f'volume: the YAML covers every folder the manifest uses ({sorted(folders)})')
+        with open(os.path.join(root, 'm.json'), 'w') as f:
+            json.dump(m, f)
+        rc = V.main(['--root', root, '--manifest', os.path.join(root, 'm.json'), '--status'])
+        check(rc == 0, 'volume: python volume.py --status (for a CPU pod) reports a complete volume')
     finally:
-        shutil.rmtree(tmp, ignore_errors=True)
-
-
-def test_fastwan_mapping(m, fetch_model):
-    if OFFLINE:
-        return skip('FastWan rename against the real headers (offline)')
-    ref = [e for e in m['models'] if e['id'] == 'wan22_ti2v_5b'][0]
-    fw = [e for e in m['models'] if e['id'] == 'fastwan22_ti2v_5b'][0]
-    try:
-        a, b = remote_header(ref['url']), remote_header(fw['url'])
-    except Exception as e:
-        return check(False, f'FastWan header fetch: {e}')
-    mapped = {fetch_model.wan_diffusers_to_comfy(k): v['shape'] for k, v in b.items()}
-    same = None not in mapped and set(mapped) == set(a) and all(mapped[k] == a[k]['shape'] for k in a)
-    check(same, f'FastWan rename gives exactly the {len(a)} tensor names and shapes of Comfy-Org\'s Wan 2.2 5B file')
+        hf.stop()
+        shutil.rmtree(root, ignore_errors=True)
+    return m, files
 
 
 # =============================================================================================
@@ -1009,11 +1222,13 @@ class StubRunpod:
         self.serverless = types.SimpleNamespace(progress_update=lambda job, p: self.updates.append(p), start=lambda cfg: None)
 
 
-def import_handler(fake_host, comfy_dir, image='main', workflows=None):
+def import_handler(fake_host, comfy_dir, image='main', workflows=None, volume='off', manifest=None):
     stub = StubRunpod()
     sys.modules['runpod'] = stub  # never talk to RunPod from the tests
     os.environ.update({'COMFY_DIR': comfy_dir, 'COMFY_HOST': fake_host, 'COMFY_START': '0', 'MASSLESS_IMAGE': image,
-                       'MASSLESS_WORKFLOWS': workflows or os.path.join(GPU, 'workflows')})
+                       'MASSLESS_WORKFLOWS': workflows or os.path.join(GPU, 'workflows'), 'MASSLESS_VOLUME': volume,
+                       'MASSLESS_MANIFEST': manifest or os.path.join(GPU, 'models.json'), 'MASSLESS_MODEL_WAIT': '0'})
+    sys.modules.pop('volume', None)
     sys.path.insert(0, GPU)
     sys.modules.pop('handler', None)
     import handler
@@ -1033,56 +1248,101 @@ def leftovers(root):
     return out
 
 
-def test_handler_main():
+def make_audio(path, seconds=3, rate=44100):
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', f'sine=frequency=220:duration={seconds}:sample_rate={rate}', path], check=True)
+    with open(path, 'rb') as f:
+        return f.read()
+
+
+def graph_ok(index, graph, what):
+    """A graph the handler built (modes rewired, chunks added) is checked like the workflow files."""
+    if index is None:
+        return
+    targets = {e['target'] for e in load_json(os.path.join(GPU, 'models.json'))['models']}
+    g = json.loads(json.dumps(graph))
+    errs = validate_workflow(what, g, index, targets)
+    check(not errs, f'{what}: the submitted graph passes the ComfyUI source check' + ('' if not errs else ' -> ' + '; '.join(errs)))
+
+
+def test_handler_main(index=None):
     tmp = tempfile.mkdtemp()
     fake = FakeComfy(tmp).start()
+    sys.path.insert(0, GPU)
+    import volume as V
+    sys.path.remove(GPU)
+    hf = FakeHF({})
+    vm, vfiles = tiny_manifest(load_json(os.path.join(GPU, 'models.json')), hf.base, size=4000)
+    hf.files.update(vfiles)
+    vol = os.path.join(tmp, 'runpod-volume', 'massless')
+    os.makedirs(vol)
+    mpath = os.path.join(tmp, 'models.test.json')
+    with open(mpath, 'w') as f:
+        json.dump(vm, f)
+    V.Volume(vol, vm, log=lambda m: None, downloader='python').ensure_all()
+    media = shutil.which('ffmpeg') and shutil.which('ffprobe')
     try:
-        h, stub = import_handler(fake.host, tmp)
+        h, stub = import_handler(fake.host, tmp, volume=vol, manifest=mpath)
+        h.VOLUME.downloader = 'python'
+        h.VOLUME.log = lambda m: None
         has_ws = h.websocket is not None
         if not has_ws:
             skip('websocket path (pip install websocket-client); the /history polling path is still tested')
+        last = lambda: list(fake.prompts.values())[-1]  # noqa: E731
 
-        # ---- animate, fast path
+        # ---- animate: image to video, Quick (Wan2.2-Lightning LoRA, 4 steps, no CFG)
         img = b64_image(1000, 700)
         out = run_job(h, {'job': 'animate', 'image': img, 'prompt': 'the sea breathes', 'seed': 42})
         ok = 'error' not in out and out['type'] == 'video' and out['mime'] == 'video/mp4' and base64.b64decode(out['data'])[4:8] == b'ftyp'
-        check(ok, f"animate (wan-fast): {out.get('error') or out['model']}, {out.get('width')}x{out.get('height')}, {out.get('duration')} s, {out.get('seconds')} s wall")
-        g = list(fake.prompts.values())[-1]
-        check(g['noise']['inputs']['noise_seed'] == 42 and g['prompt']['inputs']['text'] == 'the sea breathes'
-              and (g['latent']['inputs']['width'], g['latent']['inputs']['height'], g['latent']['inputs']['length']) == (832, 480, 121)
-              and g['image_in']['inputs']['image'].startswith('massless_') and g['unet']['inputs']['unet_name'].startswith('fastwan'),
-              'animate: seed, prompt, 832x480x121 and the uploaded image are set on the named nodes')
-        check(all(k in out for k in ('type', 'mime', 'data', 'width', 'height', 'duration', 'seconds', 'model', 'seed')) and out['seed'] == 42 and out['steps'] == 3,
-              'animate: output has type, mime, data, width, height, duration, seconds, model, seed')
+        check(ok, f"animate (i2v quick): {out.get('error') or out['model']}, {out.get('width')}x{out.get('height')}, {out.get('duration')} s, {out.get('seconds')} s wall")
+        g = last()
+        hi, lo = g['sampler_high']['inputs'], g['sampler_low']['inputs']
+        check(hi['noise_seed'] == 42 and (hi['steps'], hi['cfg'], hi['end_at_step']) == (4, 1.0, 2) and (lo['steps'], lo['cfg'], lo['start_at_step']) == (4, 1.0, 2)
+              and g['prompt']['inputs']['text'] == 'the sea breathes' and (g['latent']['inputs']['width'], g['latent']['inputs']['height'], g['latent']['inputs']['length']) == (832, 480, 81)
+              and g['image_in']['inputs']['image'].startswith('massless_') and g['shift_high']['inputs']['model'] == ['lora_high', 0]
+              and g['unet_high']['inputs']['unet_name'] == 'wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors',
+              'animate quick: high-noise expert steps 0-2 and low-noise 2-4 with the 4-step LoRA, cfg 1, 832x480x81, seed, prompt and upload set')
+        check(all(k in out for k in ('type', 'mime', 'data', 'width', 'height', 'duration', 'seconds', 'model', 'seed')) and out['seed'] == 42 and out['steps'] == 4
+              and out['fps'] == 16 and out['model'] == 'wan2.2-i2v-a14b-lightning-4step', 'animate: output has type, mime, data, width, height, duration, seconds, model, seed (16 fps)')
+        graph_ok(index, g, 'animate i2v quick')
         check(not leftovers(tmp), 'animate: the uploaded frame and the rendered MP4 are deleted afterwards')
         pct = [u['percent'] for u in stub.updates]
         check(len(stub.updates) >= 3 and pct == sorted(pct) and any('Rendering' in u['text'] for u in stub.updates) if has_ws else len(stub.updates) >= 1,
               f'progress: {len(stub.updates)} runpod progress updates, percent never goes down ({pct[:3]}..{pct[-1:]})')
-        from PIL import Image
-        uploaded = [c for c in fake.calls if c[1] == '/upload/image']
-        check(len(uploaded) == 1, 'animate: one upload per job')
+        check(len([c for c in fake.calls if c[1] == '/upload/image']) == 1, 'animate: one upload per job')
 
-        # ---- animate, stock 5B, 720p portrait
-        stub.updates.clear()
-        out = run_job(h, {'job': 'animate', 'image': img, 'model': 'wan', 'resolution': '720p', 'aspect': '9:16', 'steps': 12, 'negative': 'blurry', 'seed': 7})
-        g = list(fake.prompts.values())[-1]
-        check('error' not in out and (out['width'], out['height']) == (704, 1280) and g['sampler']['inputs']['steps'] == 12 and g['sampler']['inputs']['seed'] == 7
-              and g['negative']['inputs']['text'] == 'blurry' and g['save']['inputs']['format.codec.encoding.crf'] == 20.0,
-              f"animate (wan 720p 9:16, 12 steps): {out.get('error') or out['model']}")
+        # ---- animate: Best (no LoRA, CFG, full steps), 720p portrait
+        out = run_job(h, {'job': 'animate', 'image': img, 'mode': 'best', 'resolution': '720p', 'aspect': '9:16', 'steps': 12, 'cfg': 4, 'negative': 'blurry', 'seed': 7})
+        g = last()
+        check('error' not in out and (out['width'], out['height']) == (720, 1280) and 'lora_high' not in g and 'lora_low' not in g
+              and g['shift_high']['inputs']['model'] == ['unet_high', 0] and g['shift_low']['inputs']['model'] == ['unet_low', 0]
+              and (g['sampler_high']['inputs']['steps'], g['sampler_high']['inputs']['end_at_step'], g['sampler_low']['inputs']['start_at_step'], g['sampler_high']['inputs']['cfg']) == (12, 6, 6, 4.0)
+              and g['negative']['inputs']['text'] == 'blurry' and g['save']['inputs']['format.codec.encoding.crf'] == 20.0 and out['model'] == 'wan2.2-i2v-a14b',
+              f"animate best (720p 9:16, 12 steps, cfg 4): LoRAs removed, experts at full strength: {out.get('error') or out['model']}")
+        graph_ok(index, g, 'animate i2v best')
+
+        # ---- animate: text to video
+        n_up = len(fake.uploads)
+        out = run_job(h, {'job': 'animate', 'prompt': 'a paper boat drifting down a rainy street', 'resolution': '720p'})
+        g = last()
+        check('error' not in out and 'image_in' not in g and g['latent']['class_type'] == 'EmptyHunyuanLatentVideo' and (out['width'], out['height']) == (1280, 720)
+              and g['unet_low']['inputs']['unet_name'].startswith('wan2.2_t2v_low') and g['lora_low']['inputs']['lora_name'].startswith('wan2.2_t2v_lightx2v')
+              and len(fake.uploads) == n_up and out['source'] == 'text', f"animate t2v (no image): T2V-A14B, nothing uploaded: {out.get('error') or out['model']}")
+        graph_ok(index, g, 'animate t2v quick')
 
         # ---- music
         out = run_job(h, {'job': 'music', 'tags': 'synthwave, driving bass', 'lyrics': '[verse]\nneon on the water', 'duration': 45, 'bpm': 104, 'key': 'A minor', 'seed': 5})
-        g = list(fake.prompts.values())[-1]
+        g = last()
         check('error' not in out and out['mime'] == 'audio/mpeg' and base64.b64decode(out['data'])[:3] == b'ID3' and out['duration'] == 45.0
               and g['text']['inputs']['bpm'] == 104 and g['text']['inputs']['keyscale'] == 'A minor' and g['latent']['inputs']['seconds'] == 45.0
               and g['text']['inputs']['duration'] == 45.0 and g['sampler']['inputs']['seed'] == 5,
               f"music: {out.get('error') or out['model']}, {out.get('duration')} s, tags/lyrics/bpm/key/seconds set")
         out = run_job(h, {'job': 'music', 'tags': 'ambient pads'})
-        g = list(fake.prompts.values())[-1]
+        g = last()
         check('error' not in out and g['text']['inputs']['lyrics'] == '[Instrumental]' and out['instrumental'] and out['duration'] == 30.0,
               'music: no lyrics means an instrumental, 30 s by default')
 
         # ---- upscale
+        from PIL import Image
         out = run_job(h, {'job': 'upscale', 'image': b64_image(300, 200, 'PNG'), 'scale': 2})
         im = Image.open(io.BytesIO(base64.b64decode(out['data']))) if 'data' in out else None
         check(im is not None and im.format == 'JPEG' and im.size == (600, 400) and out['mime'] == 'image/jpeg' and out['quality'] == 92,
@@ -1099,12 +1359,90 @@ def test_handler_main():
         run_job(h, {'job': 'music', 'tags': 'x'})
         check(not os.path.exists(stale), 'files a crashed job left behind are swept after the next job')
 
+        if not media:
+            skip('motion, lipsync and upscale_video (need ffmpeg and ffprobe)')
+        else:
+            # ---- motion: reference image + driving clip (30 fps, with sound) -> 16 fps 4n+1 frames, sound added back
+            drive = base64.b64encode(make_mp4(os.path.join(tmp, 'drive.mp4'), seconds=3, size='640x360', fps=30)).decode()
+            n_up = len(fake.uploads)
+            out = run_job(h, {'job': 'motion', 'image': b64_image(600, 800), 'video': drive, 'prompt': 'Character description: a knight', 'seed': 9, 'steps': 8})
+            g = last()
+            ups = fake.uploads[n_up:]
+            vid_up = [u for u in ups if u[1] == 'video/mp4']
+            info = ffprobe(vid_up[0][2]) if vid_up else {'streams': []}
+            vs = [x for x in info['streams'] if x['codec_type'] == 'video']
+            check('error' not in out and len(ups) == 2 and vs and vs[0]['r_frame_rate'] == '16/1' and len(info['streams']) == 1
+                  and g['image_in']['inputs']['image'].endswith('_main.png') and g['video_in']['inputs']['file'].endswith('_video.mp4'),
+                  f"motion: the still and the driving clip are uploaded; ComfyUI gets the clip at 16 fps with no sound ({out.get('error') or vs[0]['r_frame_rate']})")
+            n = out.get('frames', 0)
+            check(g['animate']['inputs']['length'] == n and (n - 1) % 4 == 0 and 40 <= n <= 49 and (g['animate']['inputs']['width'], g['animate']['inputs']['height']) == (832, 480)
+                  and (g['pose']['inputs']['resize_type.width'], g['pose']['inputs']['resize_type.height']) == (832, 480) and g['sigmas']['inputs']['steps'] == 8
+                  and g['sampler']['inputs']['noise_seed'] == 9, f'motion: {n} frames (4n+1 of a 3 s clip at 16 fps), landscape 832x480, 8 steps, seed set')
+            res = ffprobe(base64.b64decode(out['data'])) if 'data' in out else {'streams': []}
+            check(sorted(x['codec_type'] for x in res['streams']) == ['audio', 'video'] and out['kept_audio'] is True and out['model'] == 'wan-animate-2-14b-distill',
+                  "motion: the driving clip's sound is muxed back into the result")
+            graph_ok(index, g, 'motion')
+            portrait = base64.b64encode(make_mp4(os.path.join(tmp, 'tall.mp4'), seconds=2, size='360x640', fps=24, audio=False)).decode()
+            out = run_job(h, {'job': 'motion', 'image': img, 'video': portrait, 'keep_audio': False})
+            res = ffprobe(base64.b64decode(out['data'])) if 'data' in out else {'streams': [1, 2]}
+            check('error' not in out and (out['width'], out['height']) == (480, 832) and len(res['streams']) == 1 and out['kept_audio'] is False,
+                  f"motion: a portrait clip gives 480x832, silent: {out.get('error') or (out['width'], out['height'])}")
+            check(not [d for d in os.listdir(tempfile.gettempdir()) if d.startswith('massless-motion-')], 'motion: its temp folder is removed')
+
+            # ---- lipsync: face + 7 s of speech -> two 77-frame S2V chunks, trimmed to the speech
+            speech = base64.b64encode(make_audio(os.path.join(tmp, 'speech.mp3'), seconds=7)).decode()
+            n_up = len(fake.uploads)
+            out = run_job(h, {'job': 'lipsync', 'image': b64_image(800, 800), 'audio': speech, 'seed': 3})
+            g = last()
+            wav = [u for u in fake.uploads[n_up:] if u[1] == 'audio/wav']
+            a = ffprobe(wav[0][2], '.wav')['streams'][0] if wav else {}
+            check('error' not in out and a.get('sample_rate') == '48000' and a.get('channels') == 2 and g['audio_in']['inputs']['audio'].endswith('_audio.wav'),
+                  f"lipsync: the speech goes to ComfyUI as 48 kHz stereo WAV ({out.get('error') or a.get('sample_rate')})")
+            check(out.get('chunks') == 2 and 'extend_1' in g and g['concat_1']['inputs']['samples1'] == ['sampler', 0] and g['joined']['inputs']['samples2'] == ['concat_1', 0]
+                  and g['sampler_1']['inputs']['seed'] == 4 and g['frames']['inputs']['length'] == out['frames'] and 112 <= out['frames'] <= 114
+                  and (out['width'], out['height']) == (640, 640) and g['shift']['inputs']['model'] == ['lora', 0] and g['sampler']['inputs']['cfg'] == 1.0,
+                  f"lipsync quick: 7 s of speech -> 2 chunks chained, {out.get('frames')} frames, square face -> 640x640, LoRA, cfg 1")
+            graph_ok(index, g, 'lipsync quick (2 chunks)')
+            speech10 = base64.b64encode(make_audio(os.path.join(tmp, 'speech10.wav'), seconds=10)).decode()
+            out = run_job(h, {'job': 'lipsync', 'image': img, 'audio': speech10, 'mode': 'best', 'steps': 12})
+            g = last()
+            check('error' not in out and out['chunks'] == 3 and 'lora' not in g and g['shift']['inputs']['model'] == ['unet', 0] and g['sampler_2']['inputs']['cfg'] == 6.0
+                  and g['sampler_2']['inputs']['steps'] == 12 and g['joined']['inputs']['samples2'] == ['concat_2', 0] and out['aspect'] == '16:9',
+                  f"lipsync best: 10 s -> 3 chunks, no LoRA, cfg 6, 12 steps: {out.get('error') or out['model']}")
+            graph_ok(index, g, 'lipsync best (3 chunks)')
+
+            # ---- upscale_video: SeedVR2, 2x or 4x up to 1920x1080, at most 30 fps
+            clip60 = base64.b64encode(make_mp4(os.path.join(tmp, 'c60.mp4'), seconds=2, size='320x180', fps=60)).decode()
+            n_up = len(fake.uploads)
+            out = run_job(h, {'job': 'upscale_video', 'video': clip60, 'seed': 1})
+            g = last()
+            up = ffprobe(fake.uploads[-1][2]) if len(fake.uploads) > n_up else {'streams': []}
+            vs = [x for x in up['streams'] if x['codec_type'] == 'video']
+            check('error' not in out and (g['resize']['inputs']['resize_type.width'], g['resize']['inputs']['resize_type.height']) == (640, 360)
+                  and vs and vs[0]['r_frame_rate'] == '30/1' and any(x['codec_type'] == 'audio' for x in up['streams']) and out['fps'] == 30 and 59 <= out['frames'] <= 61,
+                  f"upscale_video: 320x180 at 60 fps -> 640x360, re-timed to 30 fps, sound kept ({out.get('error') or out['frames']} frames)")
+            graph_ok(index, g, 'upscale_video')
+            out = run_job(h, {'job': 'upscale_video', 'video': base64.b64encode(make_mp4(os.path.join(tmp, 'c4.mp4'), seconds=1, size='640x360', fps=24)).decode(), 'scale': 4})
+            check((out.get('width'), out.get('height')) == (1920, 1080), f"upscale_video 4x of 640x360 is capped at 1920x1080: {out.get('error') or (out['width'], out['height'])}")
+            big = base64.b64encode(make_mp4(os.path.join(tmp, 'c1080.mp4'), seconds=1, size='1920x1080', fps=24, audio=False)).decode()
+            check('already as large' in run_job(h, {'job': 'upscale_video', 'video': big}).get('error', ''), 'upscale_video refuses a clip that is already 1080p')
+
+            # ---- a video over the result limit is re-encoded to fit
+            fake.reset(video_seconds=3, video_size='640x360', video_crf=4)
+            h.MAX_RESULT_B64 = 400_000
+            out = run_job(h, {'job': 'animate', 'image': img})
+            h.MAX_RESULT_B64 = 15_000_000
+            fake.reset()
+            check('error' not in out and out.get('reencoded') is True and len(out['data']) <= 400_000 and ffprobe(base64.b64decode(out['data']))['streams'][0]['codec_name'] == 'h264',
+                  f"a video over the result limit is re-encoded to fit ({out.get('error') or len(out['data'])} base64 bytes)")
+
         # ---- validation (none of these reach ComfyUI)
         n_prompts = len(fake.prompts)
+        clip = base64.b64encode(fake_mp4()).decode()
         bad = [
             ({'job': 'paint'}, 'job must be one of'),
             ('not a dict', 'input must be a JSON object'),
-            ({'job': 'animate'}, 'image is required'),
+            ({'job': 'animate'}, 'prompt is required'),
             ({'job': 'animate', 'image': 'abc$%^'}, 'not valid base64'),
             ({'job': 'animate', 'image': base64.b64encode(b'GIF89a' + b'\x00' * 100).decode()}, 'JPEG, PNG or WebP'),
             ({'job': 'animate', 'image': base64.b64encode(base64.b64decode(img)[:200]).decode()}, 'could not be decoded'),
@@ -1113,17 +1451,31 @@ def test_handler_main():
             ({'job': 'animate', 'image': b64_image(100, 100)}, 'at least 128 px'),
             ({'job': 'animate', 'image': img, 'resolution': '1080p'}, 'resolution must be one of'),
             ({'job': 'animate', 'image': img, 'aspect': '4:3'}, 'aspect must be one of'),
-            ({'job': 'animate', 'image': img, 'steps': 8}, 'exactly 3 steps'),
-            ({'job': 'animate', 'image': img, 'model': 'wan', 'steps': 2}, 'between 4 and 40'),
-            ({'job': 'animate', 'image': img, 'model': 'wan', 'steps': 41}, 'between 4 and 40'),
-            ({'job': 'animate', 'image': img, 'model': 'ltx'}, 'LTX-2.5 is not in this image'),
-            ({'job': 'animate', 'image': img, 'negative': 'blur'}, 'negative needs model "wan"'),
+            ({'job': 'animate', 'image': img, 'mode': 'fast'}, 'mode must be one of'),
+            ({'job': 'animate', 'image': img, 'steps': 3}, 'between 4 and 8'),
+            ({'job': 'animate', 'image': img, 'mode': 'best', 'steps': 31}, 'between 10 and 30'),
+            ({'job': 'animate', 'image': img, 'mode': 'best', 'resolution': '720p', 'steps': 25}, 'between 10 and 20'),
+            ({'job': 'animate', 'image': img, 'mode': 'best', 'cfg': 9}, 'between 1.5 and 8'),
+            ({'job': 'animate', 'image': img, 'cfg': 3}, 'cfg needs mode "best"'),
+            ({'job': 'animate', 'image': img, 'model': 'wan'}, 'model is gone'),
+            ({'job': 'animate', 'image': img, 'negative': 'blur'}, 'negative needs mode "best"'),
             ({'job': 'animate', 'image': img, 'seed': -1}, 'between 0 and'),
             ({'job': 'animate', 'image': img, 'seed': True}, 'whole number'),
             ({'job': 'animate', 'image': img, 'seed': 1.5}, 'whole number'),
             ({'job': 'animate', 'image': img, 'prompt': 'x' * 1201}, 'limit is 1200'),
             ({'job': 'animate', 'image': img, 'prompt': 42}, 'must be text'),
             ({'job': 'animate', 'image': img, 'fps': 30}, 'Unknown field fps'),
+            ({'job': 'motion', 'image': img}, 'video is required'),
+            ({'job': 'motion', 'video': clip}, 'image is required'),
+            ({'job': 'motion', 'image': img, 'video': img}, 'video must be MP4, MOV or WEBM'),
+            ({'job': 'motion', 'image': img, 'video': clip, 'steps': 20}, 'between 6 and 12'),
+            ({'job': 'motion', 'image': img, 'video': clip, 'keep_audio': 'yes'}, 'true or false'),
+            ({'job': 'motion', 'image': img, 'video': base64.b64encode(fake_mp4()[:8] + os.urandom(7_100_000)).decode()}, 'limit is 7 MB'),
+            ({'job': 'lipsync', 'image': img}, 'audio is required'),
+            ({'job': 'lipsync', 'image': img, 'audio': clip}, 'audio must be MP3, WAV, M4A, OGG or FLAC'),
+            ({'job': 'lipsync', 'image': img, 'audio': clip, 'mode': 'best', 'steps': 30}, 'between 10 and 20'),
+            ({'job': 'upscale_video'}, 'video is required'),
+            ({'job': 'upscale_video', 'video': clip, 'scale': 3}, 'scale must be 2 or 4'),
             ({'job': 'music'}, 'tags is required'),
             ({'job': 'music', 'tags': 'x', 'duration': 5}, 'between 10 and 180'),
             ({'job': 'music', 'tags': 'x', 'duration': 200}, 'between 10 and 180'),
@@ -1134,13 +1486,50 @@ def test_handler_main():
             ({'job': 'upscale', 'image': img, 'scale': 3}, 'scale must be 2 or 4'),
             ({'job': 'upscale', 'image': img, 'format': 'png'}, 'format must be one of'),
             ({'job': 'sound', 'video': 'x'}, 'runs on the lab endpoint'),
+            ({'job': 'prepare', 'jobs': ['paint']}, 'jobs must be a list of'),
         ]
+        if media:
+            long_clip = base64.b64encode(make_mp4(os.path.join(tmp, 'long.mp4'), seconds=12, size='160x120', audio=False)).decode()
+            long_audio = base64.b64encode(make_audio(os.path.join(tmp, 'long.mp3'), seconds=12)).decode()
+            bad += [({'job': 'motion', 'image': img, 'video': long_clip}, 'limit is 10 s'),
+                    ({'job': 'upscale_video', 'video': long_clip}, 'limit is 10 s'),
+                    ({'job': 'lipsync', 'image': img, 'audio': long_audio}, 'limit is 10 s'),
+                    ({'job': 'motion', 'image': img, 'video': base64.b64encode(fake_mp4()[:24] + b'\x00' * 400).decode()}, 'could not be read')]
         for inp, want in bad:
             got = run_job(h, inp).get('error', '')
             check(want in got, f'rejects {str(inp)[:60]!r}: "{got[:90]}"')
         check(len(fake.prompts) == n_prompts, 'invalid input never reaches ComfyUI')
         good_data_url = run_job(h, {'job': 'upscale', 'image': 'data:image/jpeg;base64,' + b64_image(64, 64)})
         check('error' not in good_data_url, 'a data: URL image is accepted')
+
+        # ---- the model volume, as the handler sees it
+        cmd = h.COMFY.command() if not os.environ.get('COMFY_CMD') else []
+        check('--extra-model-paths-config' in cmd and h.write_model_paths() == h.MODEL_PATHS and f'base_path: {os.path.join(vol, "models")}' in open(h.MODEL_PATHS).read(),
+              'ComfyUI is started with --extra-model-paths-config pointing at the volume')
+        lora = next(e for e in vm['models'] if e['id'] == 'lightx2v_i2v_high')
+        os.remove(os.path.join(vol, 'models', lora['target']))
+        out = run_job(h, {'job': 'animate', 'image': img, 'mode': 'best'})
+        check('error' not in out and h.VOLUME._background is None, 'Best mode needs no LoRA, so it runs while the LoRA file is missing')
+        n_prompts = len(fake.prompts)
+        got = run_job(h, {'job': 'animate', 'image': img}).get('error', '')
+        check('not on the GPU volume yet' in got and 'lightx2v_i2v_high' in got and 'prepare job' in got and len(fake.prompts) == n_prompts,
+              f'a job whose model file is missing fails at once, before ComfyUI: "{got[:110]}"')
+        if h.VOLUME._background:
+            h.VOLUME._background.join(10)
+        check(h.VOLUME.ready(lora), 'the missing file is fetched in the background meanwhile')
+        os.remove(os.path.join(vol, 'models', lora['target']))
+        st = run_job(h, {'job': 'prepare', 'check': True})
+        check(st.get('type') == 'status' and st['ready'] is False and st['files_ready'] == st['files'] - 1, f"prepare (check): {st.get('files_ready')}/{st.get('files')} files ready")
+        stub.updates.clear()
+        st = run_job(h, {'job': 'prepare', 'jobs': ['animate']})
+        check(st.get('ready') is True and st['files'] == len(h.needs('animate')) and 'error' not in st, f"prepare (animate): downloads what is missing, {st.get('files')} files ready")
+        os.remove(os.path.join(vol, 'models', lora['target']))
+        hf.rules['lightx2v_i2v_high'] = {'slow': 0.2}
+        h.MODEL_WAIT = 30
+        out = run_job(h, {'job': 'animate', 'image': img})
+        h.MODEL_WAIT = 0
+        hf.rules.clear()
+        check('error' not in out, f"MASSLESS_MODEL_WAIT: a job waits for its file to arrive, then runs ({out.get('error') or 'ok'})")
 
         # ---- ComfyUI failures
         fake.reset(mode='reject')
@@ -1164,7 +1553,7 @@ def test_handler_main():
 
         # ---- timeout: interrupt + dequeue, clear message, cleanup
         fake.reset(mode='hang')
-        h.TIMEOUT_SCALE = 0.01  # animate wan-fast 480p: 240 s -> 2.4 s
+        h.TIMEOUT_SCALE = 0.01  # animate quick 480p: 240 s -> 2.4 s
         t = time.monotonic()
         got = run_job(h, {'job': 'animate', 'image': img})
         took = time.monotonic() - t
@@ -1185,8 +1574,14 @@ def test_handler_main():
         h.STARTUP_TIMEOUT = 1
         got = h.handler({'id': 'x', 'input': {'job': 'music', 'tags': 'x'}})
         check('did not start' in got.get('error', '') and got.get('refresh_worker') is True, 'ComfyUI unreachable: clear error and refresh_worker')
+
+        # ---- no volume attached
+        h2, _ = import_handler(fake.host, tmp, volume=os.path.join(tmp, 'not-mounted', 'massless'), manifest=mpath)
+        got = run_job(h2, {'job': 'music', 'tags': 'x'}).get('error', '')
+        check('No network volume is mounted' in got, f'an endpoint without its volume says so: "{got[:90]}"')
     finally:
         fake.stop()
+        hf.stop()
         shutil.rmtree(tmp, ignore_errors=True)
 
 
@@ -1359,25 +1754,21 @@ def serve(port, root):
 def main():
     if len(sys.argv) >= 4 and sys.argv[1] == '--serve':
         return serve(sys.argv[2], sys.argv[3])
-    sys.path.insert(0, GPU)
-    import fetch_model
-    sys.path.remove(GPU)
-
     print('== workflows vs the pinned ComfyUI source')
     index = test_workflows(os.path.join(GPU, 'models.json'), os.path.join(GPU, 'workflows'), 'main')
     if index:
-        test_validator_catches_mistakes(index, os.path.join(GPU, 'workflows', 'animate_wan_fast.json'), manifest_targets(os.path.join(GPU, 'models.json'))[1])
+        test_validator_catches_mistakes(index, os.path.join(GPU, 'workflows', 'animate_i2v.json'), manifest_targets(os.path.join(GPU, 'models.json'))[1])
     print('== Lab workflows vs ComfyUI v0.43.1 and the pinned custom nodes')
     test_workflows(os.path.join(GPU, 'models.lab.json'), os.path.join(GPU, 'lab', 'workflows'), 'lab')
     print('== manifests and Dockerfiles')
-    m = test_manifest(os.path.join(GPU, 'models.json'), os.path.join(GPU, 'Dockerfile'), commercial=True)
+    m = test_manifest(os.path.join(GPU, 'models.json'), os.path.join(GPU, 'Dockerfile'), commercial=True, baked=False)
     lab = test_manifest(os.path.join(GPU, 'models.lab.json'), os.path.join(GPU, 'Dockerfile.lab'), commercial=False)
     test_urls(m)
     test_urls(lab)
-    test_rekey(fetch_model)
-    test_fastwan_mapping(m, fetch_model)
+    print('== the model volume (download, verify, resume, lock) against a fake Hugging Face')
+    test_volume()
     print('== handler against a fake ComfyUI')
-    test_handler_main()
+    test_handler_main(index)
     test_warm_start()
     print('== Lab image: handler (sound, fibo) against a fake ComfyUI')
     test_handler_lab()

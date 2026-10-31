@@ -1,5 +1,5 @@
 {
-  "about": "Model files baked into the Massless GPU worker image (gpu/Dockerfile). Every URL is pinned to a Hugging Face commit; sha256 and size are checked at build time by gpu/fetch_model.py and by tests/gpu_handler_test.py (HEAD). target is relative to the models root (/models in the image, linked to ComfyUI/models). Licenses were read from each model card on Hugging Face.",
+  "about": "Model files for the Massless main GPU worker. None are in the image: the worker keeps them on a RunPod network volume at <MASSLESS_VOLUME>/models/<target> and fetches any that are missing (workers/gpu/volume.py) from the pinned Hugging Face commit, checking size and sha256 before use. Listed in the order a fresh volume is filled. Licenses were read from each model card on Hugging Face; every file allows commercial use.",
   "image": "main",
   "comfyui": {
     "version": "v0.42.5",
@@ -9,60 +9,191 @@
   },
   "models": [
     {
-      "id": "wan22_ti2v_5b",
-      "jobs": ["animate"],
-      "name": "Wan 2.2 TI2V-5B (fp16)",
-      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors",
-      "sha256": "456f901338bd9eadbded3828b819109a9b68e8a525ca5cf8d0049a69fcfeca1e",
-      "size": 9999658848,
-      "target": "diffusion_models/wan2.2_ti2v_5B_fp16.safetensors",
-      "license": "Apache-2.0",
-      "commercial": true,
-      "card": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B",
-      "notes": "Wan-AI's Apache-2.0 weights, repackaged for ComfyUI by Comfy-Org (repo card: apache-2.0)."
-    },
-    {
-      "id": "fastwan22_ti2v_5b",
-      "jobs": ["animate"],
-      "name": "FastWan 2.2 TI2V-5B FullAttn (3-step DMD distill, bf16)",
-      "url": "https://huggingface.co/FastVideo/FastWan2.2-TI2V-5B-FullAttn-Diffusers/resolve/3e187042a324f6f5fb68fd22110a78725253de8f/transformer/diffusion_pytorch_model.safetensors",
-      "sha256": "a1cf4acd5d0242ca0cad68e115064f4ac7e748686c9cf0da050ce87decc6b9bf",
-      "size": 9999660080,
-      "target": "diffusion_models/fastwan2.2_ti2v_5B_bf16.safetensors",
-      "convert": "diffusers-wan",
-      "license": "Apache-2.0",
-      "commercial": true,
-      "card": "https://huggingface.co/FastVideo/FastWan2.2-TI2V-5B-FullAttn-Diffusers",
-      "notes": "Published in diffusers layout only. fetch_model.py renames its 825 tensors to ComfyUI's Wan names (header only; the tensor bytes are untouched), so the core UNETLoader loads it exactly like the stock 5B. The mapping is checked against the Comfy-Org 5B header in the tests. sha256 is of the downloaded diffusers file."
-    },
-    {
       "id": "umt5_xxl_fp8",
-      "jobs": ["animate"],
+      "jobs": [
+        "animate",
+        "motion",
+        "lipsync"
+      ],
       "name": "umT5-XXL text encoder (fp8 e4m3fn scaled)",
-      "url": "https://huggingface.co/Comfy-Org/Wan-2.1/resolve/123acf1cc74bccbb9bfff8ac1ee72edc08c2341d/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
       "sha256": "c3355d30191f1f066b26d93fba017ae9809dce6c627dda5f6a66eaa651204f68",
       "size": 6735906897,
       "target": "text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
       "license": "Apache-2.0",
       "commercial": true,
-      "card": "https://huggingface.co/Comfy-Org/Wan-2.1",
-      "notes": "The Wan text encoder (Google umT5-XXL, Apache-2.0) as repackaged by Comfy-Org (repo card: apache-2.0)."
+      "card": "https://huggingface.co/Comfy-Org/Wan-2.2",
+      "notes": "The Wan text encoder (Google umT5-XXL, Apache-2.0), byte-identical to the copy in Comfy-Org/Wan-Animate-2."
     },
     {
-      "id": "wan22_vae",
-      "jobs": ["animate"],
-      "name": "Wan 2.2 VAE (16x16x4)",
-      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/vae/wan2.2_vae.safetensors",
-      "sha256": "e40321bd36b9709991dae2530eb4ac303dd168276980d3e9bc4b6e2b75fed156",
-      "size": 1409400960,
-      "target": "vae/wan2.2_vae.safetensors",
+      "id": "wan21_vae",
+      "jobs": [
+        "animate",
+        "motion",
+        "lipsync"
+      ],
+      "name": "Wan 2.1 VAE (used by every Wan 14B model)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/vae/wan_2.1_vae.safetensors",
+      "sha256": "2fc39d31359a4b0a64f55876d8ff7fa8d780956ae2cb13463b0223e15148976b",
+      "size": 253815318,
+      "target": "vae/wan_2.1_vae.safetensors",
       "license": "Apache-2.0",
       "commercial": true,
-      "card": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B"
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-I2V-A14B/tree/206a9ee1b7bfaaf8f7e4d81335650533490646a3",
+      "notes": "The 14B models (I2V, T2V, S2V, Animate 2) all use the Wan 2.1 VAE; Comfy-Org/Wan-Animate-2 ships the same weights as Wan2_1_VAE_bf16."
+    },
+    {
+      "id": "wan22_i2v_high",
+      "jobs": [
+        "animate"
+      ],
+      "name": "Wan 2.2 I2V-A14B high-noise expert (fp8 scaled)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "sha256": "6122e79d55e0f235698d11d657f3b196c5273c830da00b2b013c5a048d5e6a42",
+      "size": 14294742832,
+      "target": "diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-I2V-A14B/tree/206a9ee1b7bfaaf8f7e4d81335650533490646a3",
+      "notes": "Wan-AI's Apache-2.0 weights as scaled fp8, repackaged for ComfyUI by Comfy-Org (Comfy-Org/Wan-2.2 at ee6f4a4, card: apache-2.0)."
+    },
+    {
+      "id": "wan22_i2v_low",
+      "jobs": [
+        "animate"
+      ],
+      "name": "Wan 2.2 I2V-A14B low-noise expert (fp8 scaled)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "sha256": "5471a457b6ac404202a5fbe6c11595a3d5641fc766b00f38763f72303fffc21e",
+      "size": 14294742832,
+      "target": "diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-I2V-A14B/tree/206a9ee1b7bfaaf8f7e4d81335650533490646a3",
+      "notes": "Wan-AI's Apache-2.0 weights as scaled fp8, repackaged for ComfyUI by Comfy-Org (Comfy-Org/Wan-2.2 at ee6f4a4, card: apache-2.0)."
+    },
+    {
+      "id": "lightx2v_i2v_high",
+      "jobs": [
+        "animate"
+      ],
+      "name": "Wan2.2-Lightning I2V 4-step LoRA, high noise (Seko V1, rank 64)",
+      "url": "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/18bccf8884ec0a078eed79785eb4ef13ea16ce1e/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors",
+      "sha256": "d176c808d6fc461999b68e321efcb7501b20b8c3797523ed0df14f7d1deff11e",
+      "size": 1226977424,
+      "target": "loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/lightx2v/Wan2.2-Lightning/tree/18bccf8884ec0a078eed79785eb4ef13ea16ce1e",
+      "notes": "Byte-identical to Comfy-Org/Wan-2.2 loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors."
+    },
+    {
+      "id": "lightx2v_i2v_low",
+      "jobs": [
+        "animate"
+      ],
+      "name": "Wan2.2-Lightning I2V 4-step LoRA, low noise (Seko V1, rank 64)",
+      "url": "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/18bccf8884ec0a078eed79785eb4ef13ea16ce1e/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors",
+      "sha256": "024f21de095bc8fad9809ded3e9e49a2e170dcf27075da8145ba7d60d8aab7f9",
+      "size": 1226977424,
+      "target": "loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/lightx2v/Wan2.2-Lightning/tree/18bccf8884ec0a078eed79785eb4ef13ea16ce1e"
+    },
+    {
+      "id": "wan22_t2v_high",
+      "jobs": [
+        "animate"
+      ],
+      "name": "Wan 2.2 T2V-A14B high-noise expert (fp8 scaled)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors",
+      "sha256": "cad711ae211c8b23455ec68cd6a190a33a3d874234a77eb57266d73f8f0e6c9f",
+      "size": 14293923632,
+      "target": "diffusion_models/wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B/tree/c8c270b13ee05bfa474194ac9fb07a5868a97cea",
+      "notes": "Wan-AI's Apache-2.0 weights as scaled fp8, repackaged for ComfyUI by Comfy-Org (Comfy-Org/Wan-2.2 at ee6f4a4, card: apache-2.0)."
+    },
+    {
+      "id": "wan22_t2v_low",
+      "jobs": [
+        "animate"
+      ],
+      "name": "Wan 2.2 T2V-A14B low-noise expert (fp8 scaled)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors",
+      "sha256": "e71b96d7c82e638694c5e7fb98fac4bfb0e4ddc5fbbb4b1df40da8f0f1278a97",
+      "size": 14293923632,
+      "target": "diffusion_models/wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B/tree/c8c270b13ee05bfa474194ac9fb07a5868a97cea",
+      "notes": "Wan-AI's Apache-2.0 weights as scaled fp8, repackaged for ComfyUI by Comfy-Org (Comfy-Org/Wan-2.2 at ee6f4a4, card: apache-2.0)."
+    },
+    {
+      "id": "lightx2v_t2v_high",
+      "jobs": [
+        "animate",
+        "lipsync"
+      ],
+      "name": "Wan2.2-Lightning T2V 4-step LoRA, high noise (Seko V1.1, rank 64)",
+      "url": "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/18bccf8884ec0a078eed79785eb4ef13ea16ce1e/Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1/high_noise_model.safetensors",
+      "sha256": "698321cb86bd30c4af06c9b84e656a1048c8cb54e06d50694536fb5de37fde41",
+      "size": 1226977424,
+      "target": "loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/lightx2v/Wan2.2-Lightning/tree/18bccf8884ec0a078eed79785eb4ef13ea16ce1e",
+      "notes": "Also the Quick lip-sync LoRA, as in ComfyUI's S2V template."
+    },
+    {
+      "id": "lightx2v_t2v_low",
+      "jobs": [
+        "animate"
+      ],
+      "name": "Wan2.2-Lightning T2V 4-step LoRA, low noise (Seko V1.1, rank 64)",
+      "url": "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/18bccf8884ec0a078eed79785eb4ef13ea16ce1e/Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1/low_noise_model.safetensors",
+      "sha256": "ec95216e614b3c132c11bfb387b11feedf62163150ccc9068bca8a189771e75a",
+      "size": 1226977424,
+      "target": "loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/lightx2v/Wan2.2-Lightning/tree/18bccf8884ec0a078eed79785eb4ef13ea16ce1e"
+    },
+    {
+      "id": "acestep15_vae",
+      "jobs": [
+        "music"
+      ],
+      "name": "ACE-Step 1.5 audio VAE",
+      "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/vae/ace_1.5_vae.safetensors",
+      "sha256": "6de92e3a862acd287e08b024ac90f0783a8635451b728721a33ff03565bcb2bb",
+      "size": 337431732,
+      "target": "vae/ace_1.5_vae.safetensors",
+      "license": "MIT",
+      "commercial": true,
+      "card": "https://huggingface.co/ACE-Step/Ace-Step1.5"
+    },
+    {
+      "id": "acestep15_qwen06b",
+      "jobs": [
+        "music"
+      ],
+      "name": "ACE-Step 1.5 text encoder (Qwen3-0.6B)",
+      "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/text_encoders/qwen_0.6b_ace15.safetensors",
+      "sha256": "fd4590c82153b8ddb67e15a2e7aaa8afa8b83a858c8a9b82a4831063156aa7a7",
+      "size": 1191588248,
+      "target": "text_encoders/qwen_0.6b_ace15.safetensors",
+      "license": "MIT",
+      "commercial": true,
+      "card": "https://huggingface.co/ACE-Step/Ace-Step1.5"
     },
     {
       "id": "acestep15_turbo",
-      "jobs": ["music"],
+      "jobs": [
+        "music"
+      ],
       "name": "ACE-Step 1.5 turbo DiT (8 steps)",
       "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/diffusion_models/acestep_v1.5_turbo.safetensors",
       "sha256": "3f6e0797fad420a39bd33979eb6e840e30989e34a3794e843d23b60ec6e422d7",
@@ -74,20 +205,10 @@
       "notes": "Upstream card: MIT, and states generated music may be used commercially. Comfy-Org's repackage card says apache-2.0; both permit commercial use."
     },
     {
-      "id": "acestep15_qwen06b",
-      "jobs": ["music"],
-      "name": "ACE-Step 1.5 text encoder (Qwen3-0.6B)",
-      "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/text_encoders/qwen_0.6b_ace15.safetensors",
-      "sha256": "fd4590c82153b8ddb67e15a2e7aaa8afa8b83a858c8a9b82a4831063156aa7a7",
-      "size": 1191588248,
-      "target": "text_encoders/qwen_0.6b_ace15.safetensors",
-      "license": "MIT",
-      "commercial": true,
-      "card": "https://huggingface.co/ACE-Step/Ace-Step1.5"
-    },
-    {
       "id": "acestep15_lm17b",
-      "jobs": ["music"],
+      "jobs": [
+        "music"
+      ],
       "name": "ACE-Step 1.5 5Hz planner LM (Qwen3-1.7B base)",
       "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/text_encoders/qwen_1.7b_ace15.safetensors",
       "sha256": "ed63e9247d1f55f3ace04fa11e95b085fc82d459c82c5626f0b2e37b91ebd710",
@@ -99,20 +220,10 @@
       "notes": "The 1.7B planner (ComfyUI's default split template). The 4B planner (8.4 GB) composes better and still fits 24 GB; swap it in if music quality matters more than cold start."
     },
     {
-      "id": "acestep15_vae",
-      "jobs": ["music"],
-      "name": "ACE-Step 1.5 audio VAE",
-      "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/vae/ace_1.5_vae.safetensors",
-      "sha256": "6de92e3a862acd287e08b024ac90f0783a8635451b728721a33ff03565bcb2bb",
-      "size": 337431732,
-      "target": "vae/ace_1.5_vae.safetensors",
-      "license": "MIT",
-      "commercial": true,
-      "card": "https://huggingface.co/ACE-Step/Ace-Step1.5"
-    },
-    {
       "id": "realesrgan_x4plus",
-      "jobs": ["upscale"],
+      "jobs": [
+        "upscale"
+      ],
       "name": "Real-ESRGAN x4plus",
       "url": "https://huggingface.co/Comfy-Org/Real-ESRGAN/resolve/5fd49b7b278836f48af63ecd314d0f98ab336105/RealESRGAN_x4plus.safetensors",
       "sha256": "37f9a931c215f040aa6d50f711f2cb115f713c46df1d0d6469a8bd7bfe9a60bb",
@@ -122,18 +233,95 @@
       "commercial": true,
       "card": "https://huggingface.co/Comfy-Org/Real-ESRGAN",
       "notes": "xinntao/Real-ESRGAN weights (BSD-3-Clause) as safetensors, so no pickle is loaded."
-    }
-  ],
-  "considered": [
-    {
-      "name": "LTX-2.5 distilled (Lightricks)",
-      "decision": "not included",
-      "why": "The Hugging Face repo is gated (an HF token and accepting Lightricks' terms are needed, so it cannot be fetched anonymously at build time). Its ComfyUI quantized build does not fit a 24 GB GPU: the 22B distilled transformer is 21.5 GB as int8-convrot (18.7 GB nvfp4, Blackwell only) plus a 15.4 GB Gemma-4 12B int8 text encoder, and ComfyUI's int8/fp4 kernels (comfy-kitchen CUDA backend) are switched off on CUDA 12 builds of PyTorch. License: LTX-2.x Community License (free under $10M revenue)."
     },
     {
-      "name": "Wan2.2-TI2V-5B-Turbo (quanhaol, 4-step)",
-      "decision": "not included",
-      "why": "No license on its model card, and it ships as a 20 GB pickled model.pt rather than safetensors."
+      "id": "wan22_s2v",
+      "jobs": [
+        "lipsync"
+      ],
+      "name": "Wan 2.2 S2V-14B speech-to-video (fp8 scaled)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/diffusion_models/wan2.2_s2v_14B_fp8_scaled.safetensors",
+      "sha256": "140e75af5534ac3d91e710d9df756f7032addd64b341ba2c1c70e3e6da9aa216",
+      "size": 16394832474,
+      "target": "diffusion_models/wan2.2_s2v_14B_fp8_scaled.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-S2V-14B/tree/dab4e9c55bbe4c8c4d03db1c2c98c7f0ac9c454b",
+      "notes": "Wan-AI's Apache-2.0 weights as scaled fp8, repackaged for ComfyUI by Comfy-Org (Comfy-Org/Wan-2.2 at ee6f4a4, card: apache-2.0)."
+    },
+    {
+      "id": "wav2vec2_large_en",
+      "jobs": [
+        "lipsync"
+      ],
+      "name": "wav2vec2 large (XLSR-53, English) audio encoder (fp16)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/audio_encoders/wav2vec2_large_english_fp16.safetensors",
+      "sha256": "f0017a43ea57ef6b3d4866be607844bbd8cada6d30966f7d70044ed0d63d3f9e",
+      "size": 630997322,
+      "target": "audio_encoders/wav2vec2_large_english_fp16.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-english/tree/569a6236e92bd5f7652a0420bfe9bb94c5664080",
+      "notes": "The audio encoder Wan2.2-S2V-14B ships (its wav2vec2-large-xlsr-53-english folder; upstream card apache-2.0), repackaged by Comfy-Org."
+    },
+    {
+      "id": "wan_animate2_distill",
+      "jobs": [
+        "motion"
+      ],
+      "name": "Wan-Animate-2 14B, distilled (bf16)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-Animate-2/resolve/e7181fe1896b7f2ce34120d1a3663413548240d7/diffusion_models/wan_animate_2_distill_bf16.safetensors",
+      "sha256": "eb05383cb4b71228bbeb959f4468431a93ab25d0399054b317f399be114d08f9",
+      "size": 32789894104,
+      "target": "diffusion_models/wan_animate_2_distill_bf16.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-Animate-2-14B/tree/6e8f1973bf0abc2aafd517992e8b6d88c3c46e69",
+      "notes": "Wan-AI's Apache-2.0 distillation weights (wan_animate_2_bf16_distillation), repackaged for ComfyUI by Comfy-Org (Comfy-Org/Wan-Animate-2, card: apache-2.0). bf16, because the int8_convrot copy needs comfy-kitchen's CUDA 13 kernels."
+    },
+    {
+      "id": "clip_vision_h",
+      "jobs": [
+        "motion"
+      ],
+      "name": "CLIP ViT-H/14 image encoder (OpenCLIP, LAION-2B)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-Animate-2/resolve/e7181fe1896b7f2ce34120d1a3663413548240d7/clip_vision/clip_vision_h.safetensors",
+      "sha256": "64a7ef761bfccbadbaa3da77366aac4185a6c58fa5de5f589b42a65bcc21f161",
+      "size": 1264219396,
+      "target": "clip_vision/clip_vision_h.safetensors",
+      "license": "MIT",
+      "commercial": true,
+      "card": "https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K/tree/1c2b8495b28150b8a4922ee1c8edee224c284c0c",
+      "notes": "Repackaged by Comfy-Org in Comfy-Org/Wan-Animate-2."
+    },
+    {
+      "id": "seedvr2_7b",
+      "jobs": [
+        "upscale_video"
+      ],
+      "name": "SeedVR2 7B one-step video restoration (fp16)",
+      "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/df48879708206a403d2a61acd55578c2e80fd233/diffusion_models/seedvr2_7b_fp16.safetensors",
+      "sha256": "2742ca6fee63bc5cc1773f426dd4b07b78cad27f51c9ea5cd42b035e6b592252",
+      "size": 16480583960,
+      "target": "diffusion_models/seedvr2_7b_fp16.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/ByteDance-Seed/SeedVR2-7B/tree/eb0c4281d41ba3767d4f14370f0e37e9e9180c16",
+      "notes": "ByteDance-Seed's Apache-2.0 weights, repackaged for ComfyUI by Comfy-Org (Comfy-Org/SeedVR2 at df48879, card: apache-2.0). 7B rather than 3B: on an 80 GB GPU it fits with room for 1080p chunks, and it restores more detail."
+    },
+    {
+      "id": "seedvr2_vae",
+      "jobs": [
+        "upscale_video"
+      ],
+      "name": "SeedVR2 EMA VAE (fp16)",
+      "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/df48879708206a403d2a61acd55578c2e80fd233/vae/seedvr2_ema_vae_fp16.safetensors",
+      "sha256": "20678548f420d98d26f11442d3528f8b8c94e57ee046ef93dbb7633da8612ca1",
+      "size": 501324814,
+      "target": "vae/seedvr2_ema_vae_fp16.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/ByteDance-Seed/SeedVR2-7B/tree/eb0c4281d41ba3767d4f14370f0e37e9e9180c16"
     }
   ]
 }

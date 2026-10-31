@@ -1,7 +1,8 @@
 // Hosted generation boundary. Credentials and the budget ledger never reach the browser.
 // One ledger for every hosted GPU job: MOSS Image (its own endpoint, a lifetime allowance) and the GPU worker's
-// jobs (workers/gpu: animate, music, upscale, and Lab jobs when LAB_ENABLED), all inside one daily budget.
-import { FOLEY_BLOCKED, LAB_JOBS, QUEUE_SEC, STARTUP_SEC, actualCents, gpuSettings, reserveCents, utcDay, validateGpuJob } from './gpu-jobs.js';
+// jobs (workers/gpu: animate, motion, lipsync, upscale_video, music, upscale, and Lab jobs when LAB_ENABLED), all
+// inside one daily budget.
+import { FOLEY_BLOCKED, LAB_JOBS, QUEUE_SEC, STARTUP_SEC, actualCents, gpuSettings, quotes, reserveCents, utcDay, validateGpuJob } from './gpu-jobs.js';
 const reply = (body, status = 200) =>
   Response.json(body, {
     status,
@@ -64,6 +65,11 @@ export function validateGeneration(body) {
     idempotencyKey: body.idempotencyKey,
   };
 }
+async function sha256Hex(text) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export async function generationAPI(request, env) {
   const url = new URL(request.url);
   if (url.pathname === "/api/config") return reply(generationConfig(env));
@@ -329,6 +335,8 @@ export class GenerationLedger {
       leftCents: left,
       jobsLeftForYou: left < 2 ? 0 : Math.max(0, g.perUser - mine),
       perUserDaily: g.perUser,
+      centsPerHour: g.rate,
+      estimates: quotes(g.rate),
       queue: queue.length,
       resetsAt: new Date(Date.parse(day + "T00:00:00Z") + 86400000).toISOString(),
     };
@@ -361,7 +369,8 @@ export class GenerationLedger {
       }, 451);
     const sec = v.seconds + STARTUP_SEC;
     const cents = reserveCents(v.seconds, lab ? g.labRate : g.rate);
-    const fingerprint = JSON.stringify([v.job, v.input, !!lab]);
+    // a hash, not the input: images and clips can be several MB and storage values are limited to 2 MB
+    const fingerprint = await sha256Hex(JSON.stringify([v.job, v.input, !!lab]));
     const day = utcDay();
     let job, isNew = false;
     try {
@@ -389,7 +398,7 @@ export class GenerationLedger {
             : `Only ${left}¢ of GPU time is left today and this job could take up to ${cents}¢. Try a smaller job, or come back after midnight UTC.`), { status: 429, budget: true });
         }
         job = {
-          id: crypto.randomUUID(), kind: "gpu", owner, job: v.job, lab, input: v.input, fingerprint,
+          id: crypto.randomUUID(), kind: "gpu", owner, job: v.job, lab, fingerprint,
           status: "SUBMITTING", createdAt: Date.now(), reservedCents: cents, day, timeoutSec: sec + QUEUE_SEC,
         };
         const queue = ((await tx.get("queue")) || []).slice(-200);
@@ -425,7 +434,6 @@ export class GenerationLedger {
       job.status = "SUBMISSION_UNKNOWN";
       job.error = "Submission could not be confirmed. It will not be automatically repeated.";
     }
-    delete job.input; // the image or clip is not kept once it has been sent
     await this.ctx.storage.put("job:" + job.id, job);
     return reply(this.publicJob(job), 202);
   }

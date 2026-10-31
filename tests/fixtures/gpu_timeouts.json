@@ -1,0 +1,192 @@
+[
+ {
+  "job": "animate",
+  "input": {
+   "mode": "quick",
+   "resolution": "480p",
+   "steps": 4
+  },
+  "worst": 240,
+  "warm": 64
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "quick",
+   "resolution": "480p",
+   "steps": 6
+  },
+  "worst": 270,
+  "warm": 86
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "quick",
+   "resolution": "480p",
+   "steps": 8
+  },
+  "worst": 300,
+  "warm": 108
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "best",
+   "resolution": "480p",
+   "steps": 10
+  },
+  "worst": 450,
+  "warm": 218
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "best",
+   "resolution": "480p",
+   "steps": 20
+  },
+  "worst": 750,
+  "warm": 416
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "best",
+   "resolution": "480p",
+   "steps": 30
+  },
+  "worst": 1050,
+  "warm": 614
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "quick",
+   "resolution": "720p",
+   "steps": 4
+  },
+  "worst": 450,
+  "warm": 205
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "quick",
+   "resolution": "720p",
+   "steps": 6
+  },
+  "worst": 570,
+  "warm": 285
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "quick",
+   "resolution": "720p",
+   "steps": 8
+  },
+  "worst": 690,
+  "warm": 365
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "best",
+   "resolution": "720p",
+   "steps": 10
+  },
+  "worst": 1290,
+  "warm": 765
+ },
+ {
+  "job": "animate",
+  "input": {
+   "mode": "best",
+   "resolution": "720p",
+   "steps": 20
+  },
+  "worst": 2370,
+  "warm": 1485
+ },
+ {
+  "job": "animate",
+  "input": {},
+  "worst": 240,
+  "warm": 64
+ },
+ {
+  "job": "motion",
+  "input": {
+   "steps": 6
+  },
+  "worst": 600,
+  "warm": 310
+ },
+ {
+  "job": "motion",
+  "input": {
+   "steps": 10
+  },
+  "worst": 870,
+  "warm": 490
+ },
+ {
+  "job": "motion",
+  "input": {
+   "steps": 12
+  },
+  "worst": 990,
+  "warm": 580
+ },
+ {
+  "job": "lipsync",
+  "input": {
+   "mode": "quick",
+   "steps": 4
+  },
+  "worst": 390,
+  "warm": 186
+ },
+ {
+  "job": "lipsync",
+  "input": {
+   "mode": "quick",
+   "steps": 8
+  },
+  "worst": 630,
+  "warm": 342
+ },
+ {
+  "job": "lipsync",
+  "input": {
+   "mode": "best",
+   "steps": 10
+  },
+  "worst": 1200,
+  "warm": 732
+ },
+ {
+  "job": "lipsync",
+  "input": {
+   "mode": "best",
+   "steps": 20
+  },
+  "worst": 2250,
+  "warm": 1434
+ },
+ {
+  "job": "upscale_video",
+  "input": {},
+  "worst": 510,
+  "warm": 290
+ },
+ {
+  "job": "upscale_video",
+  "input": {
+   "scale": 4
+  },
+  "worst": 510,
+  "warm": 290
+ }
+]

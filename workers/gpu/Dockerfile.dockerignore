@@ -1,7 +1,7 @@
 # Used by BuildKit when building workers/gpu/Dockerfile from the repository root: send only the workers/gpu/ files the
 # images copy, not the site, node_modules or media.
 *
-!workers/gpu/fetch_model.py
+!workers/gpu/volume.py
 !workers/gpu/handler.py
 !workers/gpu/requirements.txt
 !workers/gpu/models.json

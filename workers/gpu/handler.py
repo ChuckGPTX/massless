@@ -1,18 +1,24 @@
-"""Massless GPU worker: a RunPod Serverless handler that drives ComfyUI. MIT License (see gpu/LICENSE).
+"""Massless GPU worker: a RunPod Serverless handler that drives ComfyUI. MIT License (see workers/gpu/LICENSE).
 
 One job per call. The input is {"job": "<type>", ...fields}; the output is
 {type, mime, data (base64), width, height, duration, seconds, model, seed, ...}, or {"error": "..."}.
 
-    animate  image -> 5 s MP4 with Wan 2.2 TI2V-5B (3-step FastWan distill by default)
-    music    style tags (+ lyrics) -> MP3 with ACE-Step 1.5 turbo
-    upscale  image -> 2x or 4x JPEG/WebP with Real-ESRGAN x4plus
+  Main image (MASSLESS_IMAGE=main, 80 GB GPU, weights on a RunPod network volume):
+    animate        image -> video (Wan 2.2 I2V-A14B) or text -> video (T2V-A14B), 5 s at 16 fps, 480p or 720p;
+                   mode "quick" (Wan2.2-Lightning LoRA, 4-8 steps) or "best" (full steps with CFG)
+    motion         reference image + driving clip (<= 10 s) -> the character performing that motion (Wan-Animate-2)
+    lipsync        face image + speech (<= 10 s) -> a talking video with that speech (Wan 2.2 S2V-14B)
+    upscale_video  clip (<= 10 s) -> up to 1920x1080 (SeedVR2 7B, one step), sound kept
+    music          style tags (+ lyrics) -> MP3 with ACE-Step 1.5 turbo
+    upscale        image -> 2x or 4x JPEG/WebP with Real-ESRGAN x4plus
+    prepare        (operator only; the site never sends it) fill or check the model volume
   Lab image (MASSLESS_IMAGE=lab; research licenses, results marked commercial: false):
     sound    MP4 (<= 10 s) + optional text -> the clip with generated foley muxed in, plus the audio alone
              (MMAudio, or HunyuanVideo-Foley)
     fibo     structured caption, Massless rig shot or text -> image, or an image edit (Fibo 2.0 edit turbo)
 
 ComfyUI (GPL-3.0, installed separately, not part of this file) is started once per worker and kept
-warm. Each job loads an API-format graph from gpu/workflows, sets its named input nodes, submits it over
+warm. Each job loads an API-format graph from workflows/, sets its named input nodes, submits it over
 ComfyUI's HTTP API and follows it on the websocket (with /history polling as a fallback) until it
 finishes, fails or times out. Uploaded inputs and rendered outputs are deleted after every job.
 
@@ -24,22 +30,29 @@ Environment (all optional):
     COMFY_ARGS         extra arguments appended to the default ComfyUI command
     COMFY_STARTUP_TIMEOUT  seconds to wait for ComfyUI to answer (180)
     MASSLESS_IMAGE     main or lab: which job types this image serves (main)
-    MASSLESS_WORKFLOWS directory of workflow JSON files (gpu/workflows next to this file)
+    MASSLESS_VOLUME    where the model volume keeps its files (/runpod-volume/massless); "off" = the
+                       weights are already in ComfyUI's models folder (the Lab image, local runs)
+    MASSLESS_MANIFEST  models.json to use (next to this file)
+    MASSLESS_MODEL_WAIT  seconds a job waits for its model files to arrive on the volume (0: fail at once)
+    MASSLESS_WORKFLOWS directory of workflow JSON files (workflows/ next to this file)
     MASSLESS_TIMEOUT_SCALE  multiply every job timeout (1.0)
     MASSLESS_MAX_RESULT_MB  largest base64 result in MB (15)
     MASSLESS_RIG       rig.json for fibo shots (next to this file, or public/data/rig.json in the repo)
-    FFMPEG, FFPROBE    binaries for the Lab sound job (ffmpeg, ffprobe)
+    FFMPEG, FFPROBE    binaries for the video and audio jobs (ffmpeg, ffprobe)
 """
 import base64
 import binascii
 import copy
 import io
 import json
+import math
 import os
 import random
 import shlex
+import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import uuid
@@ -58,6 +71,9 @@ except ImportError:  # the tests and local runs do not need the SDK
     runpod = None
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import volume as volume_mod  # noqa: E402  (workers/gpu/volume.py, next to this file)
+
 COMFY_DIR = os.environ.get('COMFY_DIR', '/opt/ComfyUI')
 COMFY_HOST = os.environ.get('COMFY_HOST', '127.0.0.1:8188')
 COMFY_START = os.environ.get('COMFY_START', '1') == '1'
@@ -66,11 +82,19 @@ IMAGE_KIND = os.environ.get('MASSLESS_IMAGE', 'main')
 WORKFLOWS = os.environ.get('MASSLESS_WORKFLOWS', os.path.join(HERE, 'workflows'))
 TIMEOUT_SCALE = float(os.environ.get('MASSLESS_TIMEOUT_SCALE', '1'))
 MAX_RESULT_B64 = int(float(os.environ.get('MASSLESS_MAX_RESULT_MB', '15')) * 1_000_000)
+VOLUME_DIR = os.environ.get('MASSLESS_VOLUME', '/runpod-volume/massless' if IMAGE_KIND == 'main' else 'off')
+MANIFEST = os.environ.get('MASSLESS_MANIFEST', os.path.join(HERE, 'models.json'))
+MODEL_WAIT = float(os.environ.get('MASSLESS_MODEL_WAIT', '0'))
+FFMPEG = os.environ.get('FFMPEG', 'ffmpeg')
+FFPROBE = os.environ.get('FFPROBE', 'ffprobe')
 
 MAX_INPUT_B64 = 9_500_000      # RunPod /run bodies are limited to 10 MB
 MAX_INPUT_SIDE = 2048           # the site sends JPEG <= 1536 px; a little headroom
 MAX_INPUT_PIXELS = 2048 * 2048
 MAX_UPSCALE_SIDE = 4096
+MAX_MEDIA_B64 = 9_400_000       # a clip or a sound file plus the rest of the request under RunPod's 10 MB
+MAX_MEDIA_BYTES = 7_050_000
+MAX_CLIP_SECONDS = 10.0
 SEED_MAX = 2**32 - 1
 Image.MAX_IMAGE_PIXELS = 64_000_000  # Pillow's own bomb guard, on top of our size checks
 
@@ -148,7 +172,8 @@ def _choice(inp, key, options, default):
 
 
 def _seed(inp):
-    return _int(inp, 'seed', 0, SEED_MAX, None)
+    v = _int(inp, 'seed', 0, SEED_MAX, None)
+    return random.SystemRandom().randint(0, SEED_MAX) if v is None else v
 
 
 def _sniff(raw):
@@ -158,6 +183,24 @@ def _sniff(raw):
         return 'PNG'
     if raw[:4] == b'RIFF' and raw[8:12] == b'WEBP':
         return 'WEBP'
+    return None
+
+
+def media_kind(raw):
+    """Container of a clip or a sound file, from its first bytes."""
+    if len(raw) >= 12 and raw[4:8] == b'ftyp':
+        brand = raw[8:12]
+        return 'm4a' if brand in (b'M4A ', b'M4B ') else 'mov' if brand == b'qt  ' else 'mp4'
+    if raw[:4] == b'\x1aE\xdf\xa3':
+        return 'webm'
+    if raw[:4] == b'RIFF' and raw[8:12] == b'WAVE':
+        return 'wav'
+    if raw[:4] == b'OggS':
+        return 'ogg'
+    if raw[:4] == b'fLaC':
+        return 'flac'
+    if raw[:3] == b'ID3' or (len(raw) > 1 and raw[0] == 0xFF and raw[1] & 0xE0 == 0xE0):
+        return 'mp3'
     return None
 
 
@@ -206,6 +249,17 @@ def decode_image(value, key='image', min_side=64):
     return im.convert('RGB')
 
 
+def decode_media(value, key, kinds):
+    """Base64 clip or sound file -> (bytes, kind). Checks the size before decoding."""
+    if isinstance(value, str) and len(value) * 3 // 4 > MAX_MEDIA_BYTES:
+        raise Invalid(f'{key} is {len(value) * 3 / 4e6:.1f} MB; the limit is {MAX_MEDIA_BYTES / 1e6:.0f} MB.')
+    raw = decode_b64(value, key, MAX_MEDIA_B64 + 1000)
+    kind = media_kind(raw)
+    if kind not in kinds:
+        raise Invalid(f"{key} must be {', '.join(k.upper() for k in kinds[:-1])} or {kinds[-1].upper()}.")
+    return raw, kind
+
+
 def png_bytes(im):
     buf = io.BytesIO()
     im.save(buf, 'PNG', compress_level=1)
@@ -217,87 +271,455 @@ def cover(im, w, h):
     return ImageOps.fit(im, (w, h), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
 
 
+# ---------------------------------------------------------------- ffmpeg
+
+def _run(cmd, timeout=120, what='ffmpeg'):
+    try:
+        r = subprocess.run(cmd, capture_output=True, timeout=timeout)
+    except FileNotFoundError:
+        raise JobError(f'{what} is not installed in this image.') from None
+    except subprocess.TimeoutExpired:
+        raise JobError(f'{what} took too long.') from None
+    if r.returncode != 0:
+        tail = r.stderr.decode('utf-8', 'replace').strip().splitlines()[-1:] or ['failed']
+        raise Invalid(f'The file could not be read ({tail[0][:160]}).') if what == 'ffprobe' else JobError(f'{what} failed: {tail[0][:200]}')
+    return r.stdout
+
+
+def probe(path):
+    """Duration, size, fps, frame count and tracks of a clip or a sound file."""
+    info = json.loads(_run([FFPROBE, '-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', path], 30, 'ffprobe') or b'{}')
+    streams = info.get('streams', [])
+    video = next((st for st in streams if st.get('codec_type') == 'video' and not (st.get('disposition') or {}).get('attached_pic')), None)
+    audio = next((st for st in streams if st.get('codec_type') == 'audio'), None)
+    duration = float((video or audio or {}).get('duration') or (info.get('format') or {}).get('duration') or 0)
+    fps = 0.0
+    if video:
+        num, _, den = str(video.get('avg_frame_rate') or video.get('r_frame_rate') or '0/1').partition('/')
+        try:
+            fps = float(num) / float(den or 1)
+        except (ValueError, ZeroDivisionError):
+            fps = 0.0
+    return {'width': int((video or {}).get('width') or 0), 'height': int((video or {}).get('height') or 0), 'duration': duration,
+            'fps': fps, 'codec': (video or audio or {}).get('codec_name'), 'has_video': video is not None, 'has_audio': audio is not None,
+            'frames': int((video or {}).get('nb_frames') or 0)}
+
+
+def probe_video(path):
+    info = probe(path)
+    if not info['has_video']:
+        raise Invalid('video has no video track.')
+    return info
+
+
+def count_frames(path):
+    out = _run([FFPROBE, '-v', 'error', '-select_streams', 'v:0', '-count_packets', '-show_entries', 'stream=nb_read_packets',
+                '-of', 'csv=p=0', path], 60, 'ffprobe')
+    try:
+        return int(out.decode().strip().split(',')[0])
+    except ValueError:
+        raise JobError('Could not count the frames of the prepared clip.') from None
+
+
+def fit_video(data, duration, tmp):
+    """Re-encode an MP4 that would be over the result limit as base64, at a bitrate that fits."""
+    if len(data) * 4 / 3 <= MAX_RESULT_B64 * 0.98:
+        return data, False
+    src, dst = os.path.join(tmp, 'big.mp4'), os.path.join(tmp, 'fit.mp4')
+    with open(src, 'wb') as f:
+        f.write(data)
+    kbps = max(300, int(MAX_RESULT_B64 * 0.75 * 0.9 * 8 / max(duration, 0.5) / 1000) - 160)
+    _run([FFMPEG, '-v', 'error', '-y', '-i', src, '-map', '0:v:0', '-map', '0:a?', '-c:v', 'libx264', '-preset', 'medium', '-b:v', f'{kbps}k',
+          '-maxrate', f'{kbps}k', '-bufsize', f'{2 * kbps}k', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', dst], 300)
+    with open(dst, 'rb') as f:
+        return f.read(), True
+
+
 # ---------------------------------------------------------------- job specs
 
 class Spec:
-    """What to run: a workflow, the inputs to set on it, an optional upload and how to package the result."""
+    """What to run: a workflow, the inputs to set on it, uploads, the model files it needs and how to package the result."""
 
-    def __init__(self, job, workflow, sets, out_node, timeout, meta, upload=None, finish=None, stages=None, cleanup=None):
+    def __init__(self, job, workflow, sets, out_node, timeout, meta, upload=None, finish=None, stages=None, cleanup=None,
+                 uploads=None, models=(), edit=None):
         self.job = job
         self.workflow = workflow
-        self.sets = sets          # {node_id: {input: value}}; '$upload' is replaced by the uploaded name
+        self.sets = sets          # {node_id: {input: value}}; '$upload' / '$upload:<key>' become the uploaded names
         self.out_node = out_node
         self.timeout = timeout * TIMEOUT_SCALE
         self.meta = meta          # merged into the result
-        self.upload = upload      # (bytes, extension, mime) for a Load* node, or None
+        self.uploads = dict(uploads or {})  # {key: (bytes, extension, mime)} for Load* nodes
+        if upload is not None:
+            self.uploads['main'] = upload
         self.finish = finish or (lambda raw, fn: (raw, meta['mime']))
         self.stages = stages or {}
         self.cleanup = cleanup    # called once the job is over, success or not
+        self.models = list(models)  # manifest ids that must be on the volume
+        self.edit = edit          # graph -> None: rewires the loaded workflow (modes, extra chunks)
 
 
+def needs(*jobs_or_ids, manifest=None):
+    """Manifest ids for a list of ids (kept) and job kinds (expanded)."""
+    m = manifest or _manifest()
+    ids = {e['id'] for e in m['models']}
+    out = []
+    for x in jobs_or_ids:
+        out += [x] if x in ids else [e['id'] for e in m['models'] if x in e['jobs']]
+    return list(dict.fromkeys(out))
+
+
+_manifest_cache = None
+
+
+def _manifest():
+    global _manifest_cache
+    if _manifest_cache is None:
+        _manifest_cache = volume_mod.load_manifest(MANIFEST)
+    return _manifest_cache
+
+
+def _rewire(graph, drop, node, inp, src):
+    for d in drop:
+        graph.pop(d, None)
+    graph[node]['inputs'][inp] = [src, 0]
+
+
+def _ceil30(x):
+    return 30 * math.ceil(x / 30 - 1e-9)
+
+
+# Timing model for an A100 80 GB (the slower of the endpoint's two GPU types; an H100 runs about twice as fast).
+# One Wan 14B forward pass over an 81-frame clip: ~11 s at 480p, ~40 s at 720p. "best" runs CFG (cond and uncond
+# batched, ~1.8x a pass). The timeout is the cold model load from the volume + 1.5x the warm estimate, rounded up
+# to 30 s. src/gpu-jobs.js mirrors these numbers (tests/fixtures/gpu_timeouts.json is checked against both).
+COLD_LOAD = {'animate': 120, 'motion': 120, 'lipsync': 90, 'upscale_video': 60}
+WAN_PASS = {'480p': 11.0, '720p': 40.0}
+WAN_OVERHEAD = {'480p': 20, '720p': 45}
+STEPS = {('animate', 'quick'): (4, 8, 4), ('animate', 'best', '480p'): (10, 30, 20), ('animate', 'best', '720p'): (10, 20, 20),
+         ('lipsync', 'quick'): (4, 8, 4), ('lipsync', 'best'): (10, 20, 20), ('motion',): (6, 12, 10)}
+MOTION_PASS = 15.0     # one Wan-Animate-2 pass over a 21-latent-frame window at 480p (reference frame + pose branch)
+S2V_PASS = 13.0        # one S2V pass over a 77-frame chunk at 480p (audio and reference conditioning)
+SEEDVR2_FRAME = 0.9    # seconds per 1920x1080 output frame (VAE encode + one 7B step + VAE decode)
+
+
+def _evals(mode, steps):
+    return steps if mode == 'quick' else steps * 1.8
+
+
+def animate_estimate(mode, resolution, steps):
+    return WAN_OVERHEAD[resolution] + WAN_PASS[resolution] * _evals(mode, steps)
+
+
+def motion_windows(frames):
+    latent = (frames - 1) // 4 + 1 + 1  # + the reference frame
+    return 1 if latent <= 21 else 1 + math.ceil((latent - 21) / 13)
+
+
+def motion_estimate(steps, frames=161):
+    return 40 + MOTION_PASS * motion_windows(frames) * steps
+
+
+def lipsync_estimate(mode, steps, chunks=3):
+    return 30 + S2V_PASS * chunks * _evals(mode, steps)
+
+
+def upscale_video_estimate(frames=300, pixels=1920 * 1080):
+    return 20 + SEEDVR2_FRAME * frames * pixels / (1920 * 1080)
+
+
+def job_timeout(job, warm):
+    return COLD_LOAD[job] + _ceil30(1.5 * warm)
+
+
+DEFAULT_PROMPT = 'smooth natural motion, cinematic, steady camera'
 ANIMATE_SIZES = {
     ('480p', '16:9'): (832, 480), ('480p', '9:16'): (480, 832), ('480p', '1:1'): (640, 640),
-    ('720p', '16:9'): (1280, 704), ('720p', '9:16'): (704, 1280), ('720p', '1:1'): (960, 960),
+    ('720p', '16:9'): (1280, 720), ('720p', '9:16'): (720, 1280), ('720p', '1:1'): (960, 960),
 }
-ANIMATE_FPS = 24
-ANIMATE_FRAMES = 121  # 5 s at 24 fps; Wan's frame count is 4n+1
-ANIMATE_MODELS = {
-    'wan-fast': ('animate_wan_fast.json', 'wan2.2-ti2v-5b-fastwan-3step'),
-    'wan': ('animate_wan.json', 'wan2.2-ti2v-5b'),
-}
-DEFAULT_PROMPT = 'smooth natural motion, cinematic, steady camera'
-STAGES_ANIMATE = {'unet': (2, 'Loading the video model'), 'clip': (12, 'Loading the text encoder'), 'vae': (16, 'Loading the VAE'),
-                  'prompt': (18, 'Reading the prompt'), 'negative': (19, 'Reading the prompt'), 'latent': (20, 'Encoding the first frame'),
-                  'sampler': (24, 'Rendering frames'), 'decode': (80, 'Decoding frames'), 'video': (94, 'Encoding the video'), 'save': (95, 'Encoding the video')}
+WAN_FPS = 16
+ANIMATE_FRAMES = 81  # 5 s at 16 fps; Wan's frame count is 4n+1
+STAGES_ANIMATE = {'unet_high': (2, 'Loading the video model'), 'clip': (10, 'Loading the text encoder'), 'vae': (14, 'Loading the VAE'),
+                  'prompt': (16, 'Reading the prompt'), 'negative': (17, 'Reading the prompt'), 'latent': (18, 'Preparing the first frame'),
+                  'sampler_high': (20, 'Rendering the motion'), 'sampler_low': (55, 'Rendering the detail'), 'decode': (88, 'Decoding frames'),
+                  'video': (94, 'Encoding the video'), 'save': (95, 'Encoding the video')}
 
 
-def animate_timeout(model, resolution, steps):
-    # first job on a cold worker also loads about 18 GB of weights; generous, and enforced
-    if model == 'wan-fast':
-        return 240 if resolution == '480p' else 420
-    return (120 + 12 * steps) if resolution == '480p' else (180 + 36 * steps)
+def _steps(inp, key):
+    lo, hi, default = STEPS[key]
+    return _int(inp, 'steps', lo, hi, default)
 
 
 def spec_animate(inp):
-    _fields(inp, ['image', 'prompt', 'negative', 'resolution', 'aspect', 'seed', 'steps', 'model'])
-    model = inp.get('model', 'wan-fast')
-    if model == 'ltx':
-        raise Invalid('LTX-2.5 is not in this image (gated download, and it does not fit a 24 GB GPU). Use model "wan-fast" or "wan".')
-    model = _choice(inp, 'model', list(ANIMATE_MODELS), 'wan-fast')
+    if inp.get('model') is not None:
+        raise Invalid('model is gone: animate always runs Wan 2.2 A14B. Choose mode "quick" or "best".')
+    _fields(inp, ['image', 'prompt', 'negative', 'resolution', 'aspect', 'seed', 'steps', 'mode', 'cfg'])
+    mode = _choice(inp, 'mode', ['quick', 'best'], 'quick')
     resolution = _choice(inp, 'resolution', ['480p', '720p'], '480p')
     aspect = _choice(inp, 'aspect', ['16:9', '9:16', '1:1'], '16:9')
-    prompt = _text(inp, 'prompt', 1200, DEFAULT_PROMPT)
-    if model == 'wan-fast':
-        if inp.get('steps') not in (None, 3):
-            raise Invalid('steps: the fast model runs exactly 3 steps. Send model "wan" for 4 to 40 steps.')
-        steps = 3
+    t2v = inp.get('image') is None
+    prompt = _text(inp, 'prompt', 1200, None if t2v else DEFAULT_PROMPT, required=t2v)
+    if mode == 'quick':
+        steps = _steps(inp, ('animate', 'quick'))
+        if inp.get('cfg') is not None:
+            raise Invalid('cfg needs mode "best" (the quick LoRA runs without guidance).')
         if inp.get('negative'):
-            raise Invalid('negative needs model "wan" (the fast model runs without CFG, so it would be ignored).')
-        negative = None
+            raise Invalid('negative needs mode "best" (the quick LoRA runs without guidance, so it would be ignored).')
+        cfg, negative = 1.0, None
     else:
-        steps = _int(inp, 'steps', 4, 40, 20)
+        steps = _steps(inp, ('animate', 'best', resolution))
+        cfg = round(_num(inp, 'cfg', 1.5, 8.0, 3.5), 2)
         negative = _text(inp, 'negative', 600, None)
     seed = _seed(inp)
-    seed = random.SystemRandom().randint(0, SEED_MAX) if seed is None else seed
     w, h = ANIMATE_SIZES[(resolution, aspect)]
-    im = cover(decode_image(inp.get('image'), 'image', min_side=128), w, h)
-    workflow, model_id = ANIMATE_MODELS[model]
+    split = math.ceil(steps / 2)  # the high-noise expert takes the first half, as in ComfyUI's template
     sets = {
-        'image_in': {'image': '$upload'},
         'prompt': {'text': prompt},
         'latent': {'width': w, 'height': h, 'length': ANIMATE_FRAMES},
+        'sampler_high': {'noise_seed': seed, 'steps': steps, 'cfg': cfg, 'end_at_step': split},
+        'sampler_low': {'steps': steps, 'cfg': cfg, 'start_at_step': split},
         'save': {'format.codec.encoding.crf': 19.0 if resolution == '480p' else 20.0},
     }
-    if model == 'wan-fast':
-        sets['noise'] = {'noise_seed': seed}
-    else:
-        sets['sampler'] = {'seed': seed, 'steps': steps}
-        if negative:
-            sets['negative'] = {'text': negative}
-    meta = {'type': 'video', 'mime': 'video/mp4', 'width': w, 'height': h, 'duration': round(ANIMATE_FRAMES / ANIMATE_FPS, 3),
-            'fps': ANIMATE_FPS, 'frames': ANIMATE_FRAMES, 'model': model_id, 'seed': seed, 'steps': steps,
-            'resolution': resolution, 'aspect': aspect}
-    return Spec('animate', workflow, sets, 'save', animate_timeout(model, resolution, steps), meta, upload=(png_bytes(im), 'png', 'image/png'), stages=STAGES_ANIMATE)
+    if negative:
+        sets['negative'] = {'text': negative}
+    kind = 't2v' if t2v else 'i2v'
+    uploads = {}
+    if not t2v:
+        im = cover(decode_image(inp.get('image'), 'image', min_side=128), w, h)
+        uploads['main'] = (png_bytes(im), 'png', 'image/png')
+        sets['image_in'] = {'image': '$upload'}
+    models = needs('umt5_xxl_fp8', 'wan21_vae', f'wan22_{kind}_high', f'wan22_{kind}_low', *([f'lightx2v_{kind}_high', f'lightx2v_{kind}_low'] if mode == 'quick' else []))
+
+    def edit(graph):
+        if mode == 'best':  # no LoRA: the experts at full strength, with CFG
+            _rewire(graph, ['lora_high'], 'shift_high', 'model', 'unet_high')
+            _rewire(graph, ['lora_low'], 'shift_low', 'model', 'unet_low')
+
+    meta = {'type': 'video', 'mime': 'video/mp4', 'width': w, 'height': h, 'duration': round(ANIMATE_FRAMES / WAN_FPS, 3),
+            'fps': WAN_FPS, 'frames': ANIMATE_FRAMES, 'model': f'wan2.2-{kind}-a14b' + ('-lightning-4step' if mode == 'quick' else ''),
+            'seed': seed, 'steps': steps, 'cfg': cfg, 'mode': mode, 'resolution': resolution, 'aspect': aspect, 'source': 'text' if t2v else 'image'}
+
+    def finish(raw, filename):
+        tmp = tempfile.mkdtemp(prefix='massless-animate-')
+        try:
+            data, meta['reencoded'] = fit_video(raw, meta['duration'], tmp)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        return data, 'video/mp4'
+
+    timeout = job_timeout('animate', animate_estimate(mode, resolution, steps))
+    return Spec('animate', f'animate_{kind}.json', sets, 'save', timeout, meta, uploads=uploads, stages=STAGES_ANIMATE, models=models, edit=edit, finish=finish)
+
+
+def _orient(w, h):
+    r = w / max(h, 1)
+    return '1:1' if 0.8 <= r <= 1.25 else '16:9' if r > 1 else '9:16'
+
+
+def _clip_in(inp, key, kinds, tmp):
+    """Write an input clip to tmp, probe it, and check its length."""
+    raw, kind = decode_media(inp.get(key), key, kinds)
+    src = os.path.join(tmp, f'source.{kind}')
+    with open(src, 'wb') as f:
+        f.write(raw)
+    info = probe_video(src)
+    if info['duration'] > MAX_CLIP_SECONDS + 0.05:
+        raise Invalid(f"{key} is {info['duration']:.1f} s; the limit is {MAX_CLIP_SECONDS:.0f} s.")
+    if info['duration'] < 1:
+        raise Invalid(f'{key} must be at least 1 s long.')
+    if info['width'] < 64 or info['height'] < 64:
+        raise Invalid(f"{key} is {info['width']}x{info['height']}; it must be at least 64 px on each side.")
+    return src, info
+
+
+STAGES_MOTION = {'unet': (2, 'Loading Wan-Animate-2'), 'clip': (10, 'Loading the text encoder'), 'video_in': (14, 'Reading the driving clip'),
+                 'see_ref': (16, 'Looking at the character'), 'animate': (18, 'Reading the motion'), 'sampler': (24, 'Animating the character'),
+                 'decode': (88, 'Decoding frames'), 'save': (95, 'Encoding the video')}
+
+
+def spec_motion(inp):
+    _fields(inp, ['image', 'video', 'prompt', 'seed', 'steps', 'keep_audio'])
+    steps = _steps(inp, ('motion',))
+    prompt = _text(inp, 'prompt', 1200, 'Character description: the person in the reference image\nBackground description: the same place as the reference image')
+    seed = _seed(inp)
+    keep_audio = inp.get('keep_audio', True)
+    if not isinstance(keep_audio, bool):
+        raise Invalid('keep_audio must be true or false.')
+    im = decode_image(inp.get('image'), 'image', min_side=128)
+    tmp = tempfile.mkdtemp(prefix='massless-motion-')
+    try:
+        src, info = _clip_in(inp, 'video', ['mp4', 'mov', 'webm'], tmp)
+        w, h = ANIMATE_SIZES[('480p', _orient(info['width'], info['height']))]
+        drive = os.path.join(tmp, 'drive.mp4')
+        # what the model reads: 16 fps (Wan's rate), the first 10 s, small enough to upload fast, no sound
+        _run([FFMPEG, '-v', 'error', '-y', '-i', src, '-t', f'{MAX_CLIP_SECONDS:g}', '-an', '-vf',
+              f"fps={WAN_FPS},scale='if(gt(iw,ih),-2,{max(w, h)})':'if(gt(iw,ih),{max(w, h)},-2)'",
+              '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '14', '-pix_fmt', 'yuv420p', drive], 180)
+        frames = count_frames(drive)
+        if frames < 17:
+            raise Invalid('video must be at least 1 s long.')
+        length = (frames - 1) // 4 * 4 + 1
+        sound = None
+        if keep_audio and info['has_audio']:
+            sound = os.path.join(tmp, 'drive.m4a')
+            _run([FFMPEG, '-v', 'error', '-y', '-i', src, '-t', f'{length / WAN_FPS:.3f}', '-vn', '-c:a', 'aac', '-b:a', '160k', sound], 60)
+        with open(drive, 'rb') as f:
+            drive_bytes = f.read()
+    except BaseException:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+    duration = round(length / WAN_FPS, 3)
+    meta = {'type': 'video', 'mime': 'video/mp4', 'width': w, 'height': h, 'duration': duration, 'fps': WAN_FPS, 'frames': length,
+            'model': 'wan-animate-2-14b-distill', 'seed': seed, 'steps': steps, 'resolution': '480p', 'kept_audio': sound is not None}
+
+    def finish(raw, filename):
+        out = os.path.join(tmp, 'motion.mp4')
+        with open(out, 'wb') as f:
+            f.write(raw)
+        if sound:
+            muxed = os.path.join(tmp, 'motion_sound.mp4')
+            _run([FFMPEG, '-v', 'error', '-y', '-i', out, '-i', sound, '-map', '0:v:0', '-map', '1:a:0', '-c', 'copy', '-shortest',
+                  '-movflags', '+faststart', muxed], 60)
+            out = muxed
+        with open(out, 'rb') as f:
+            data = f.read()
+        data, meta['reencoded'] = fit_video(data, duration, tmp)
+        return data, 'video/mp4'
+
+    sets = {'image_in': {'image': '$upload'}, 'video_in': {'file': '$upload:video'}, 'prompt': {'text': prompt},
+            'pose': {'resize_type.width': w, 'resize_type.height': h},
+            'animate': {'width': w, 'height': h, 'length': length}, 'sigmas': {'steps': steps}, 'sampler': {'noise_seed': seed}}
+    uploads = {'main': (png_bytes(cover(im, w, h)), 'png', 'image/png'), 'video': (drive_bytes, 'mp4', 'video/mp4')}
+    timeout = job_timeout('motion', motion_estimate(steps, length))
+    return Spec('motion', 'motion_animate2.json', sets, 'save', timeout, meta, uploads=uploads, finish=finish, stages=STAGES_MOTION,
+                cleanup=lambda: shutil.rmtree(tmp, ignore_errors=True), models=needs('motion'))
+
+
+S2V_CHUNK = 77  # frames per S2V chunk (the length of the official code)
+STAGES_LIPSYNC = {'unet': (2, 'Loading Wan 2.2 S2V'), 'audio_encoder': (8, 'Loading the speech encoder'), 'listen': (12, 'Listening'),
+                  'clip': (14, 'Loading the text encoder'), 'latent': (18, 'Looking at the face'), 'sampler': (20, 'Animating the face'),
+                  'decode': (90, 'Decoding frames'), 'save': (95, 'Encoding the video')}
+
+
+def spec_lipsync(inp):
+    _fields(inp, ['image', 'audio', 'prompt', 'aspect', 'seed', 'steps', 'mode'])
+    mode = _choice(inp, 'mode', ['quick', 'best'], 'quick')
+    steps = _steps(inp, ('lipsync', mode))
+    cfg = 1.0 if mode == 'quick' else 6.0
+    prompt = _text(inp, 'prompt', 1200, 'The person is talking to the camera, natural expressions and gestures.')
+    seed = _seed(inp)
+    im = decode_image(inp.get('image'), 'image', min_side=128)
+    aspect = _choice(inp, 'aspect', ['16:9', '9:16', '1:1'], _orient(im.width, im.height))
+    w, h = ANIMATE_SIZES[('480p', aspect)]
+    raw, kind = decode_media(inp.get('audio'), 'audio', ['mp3', 'wav', 'm4a', 'ogg', 'flac'])
+    tmp = tempfile.mkdtemp(prefix='massless-lipsync-')
+    try:
+        src = os.path.join(tmp, f'input.{kind}')
+        with open(src, 'wb') as f:
+            f.write(raw)
+        info = probe(src)
+        if not info['has_audio']:
+            raise Invalid('audio has no sound track.')
+        if info['duration'] > MAX_CLIP_SECONDS + 0.05:
+            raise Invalid(f"audio is {info['duration']:.1f} s; the limit is {MAX_CLIP_SECONDS:.0f} s.")
+        if info['duration'] < 1:
+            raise Invalid('audio must be at least 1 s long.')
+        wav = os.path.join(tmp, 'speech.wav')
+        _run([FFMPEG, '-v', 'error', '-y', '-i', src, '-t', f'{MAX_CLIP_SECONDS:g}', '-vn', '-ac', '2', '-ar', '48000', '-c:a', 'pcm_s16le', wav], 60)
+        with open(wav, 'rb') as f:
+            wav_bytes = f.read()
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    seconds = min(info['duration'], MAX_CLIP_SECONDS)
+    frames = max(1, math.ceil(seconds * WAN_FPS))
+    chunks = math.ceil(frames / S2V_CHUNK)
+
+    def edit(graph):
+        if mode == 'best':
+            _rewire(graph, ['lora'], 'shift', 'model', 'unet')
+        prev = 'sampler'
+        for k in range(1, chunks):
+            ext, smp, cat = f'extend_{k}', f'sampler_{k}', f'concat_{k}'
+            graph[ext] = {'class_type': 'WanSoundImageToVideoExtend', '_meta': {'title': f'Chunk {k + 1}: the next {S2V_CHUNK} frames'},
+                          'inputs': {'positive': ['prompt', 0], 'negative': ['negative', 0], 'vae': ['vae', 0], 'length': S2V_CHUNK,
+                                     'video_latent': [prev, 0], 'audio_encoder_output': ['listen', 0], 'ref_image': ['image_in', 0]}}
+            graph[smp] = {'class_type': 'KSampler', '_meta': {'title': f'Chunk {k + 1}'},
+                          'inputs': dict(graph['sampler']['inputs'], seed=(seed + k) % (SEED_MAX + 1), steps=steps, cfg=cfg,
+                                                positive=[ext, 0], negative=[ext, 1], latent_image=[ext, 2])}
+            graph[cat] = {'class_type': 'LatentConcat', '_meta': {'title': f'Chunks 1-{k + 1}'},
+                          'inputs': {'samples1': [prev, 0], 'samples2': [smp, 0], 'dim': 't'}}
+            prev = cat
+        graph['joined']['inputs']['samples2'] = [prev, 0]
+
+    sets = {'image_in': {'image': '$upload'}, 'audio_in': {'audio': '$upload:audio'}, 'prompt': {'text': prompt},
+            'latent': {'width': w, 'height': h, 'length': S2V_CHUNK}, 'sampler': {'seed': seed, 'steps': steps, 'cfg': cfg},
+            'frames': {'length': frames}}
+    meta = {'type': 'video', 'mime': 'video/mp4', 'width': w, 'height': h, 'duration': round(frames / WAN_FPS, 3), 'fps': WAN_FPS, 'frames': frames,
+            'model': 'wan2.2-s2v-14b' + ('-lightning-4step' if mode == 'quick' else ''), 'seed': seed, 'steps': steps, 'cfg': cfg, 'mode': mode,
+            'aspect': aspect, 'chunks': chunks, 'resolution': '480p'}
+
+    def finish(raw, filename):
+        t = tempfile.mkdtemp(prefix='massless-lipsync-')
+        try:
+            data, meta['reencoded'] = fit_video(raw, meta['duration'], t)
+        finally:
+            shutil.rmtree(t, ignore_errors=True)
+        return data, 'video/mp4'
+
+    uploads = {'main': (png_bytes(cover(im, w, h)), 'png', 'image/png'), 'audio': (wav_bytes, 'wav', 'audio/wav')}
+    models = needs('umt5_xxl_fp8', 'wan21_vae', 'wan22_s2v', 'wav2vec2_large_en', *(['lightx2v_t2v_high'] if mode == 'quick' else []))
+    timeout = job_timeout('lipsync', lipsync_estimate(mode, steps, chunks))
+    return Spec('lipsync', 'lipsync_s2v.json', sets, 'save', timeout, meta, uploads=uploads, finish=finish, stages=STAGES_LIPSYNC, models=models, edit=edit)
+
+
+UPSCALE_VIDEO_MAX = (1920, 1080)  # long side, short side
+UPSCALE_VIDEO_FPS = 30
+STAGES_UPSCALE_VIDEO = {'unet': (2, 'Loading SeedVR2'), 'video_in': (8, 'Reading the clip'), 'resize': (10, 'Resizing'), 'encode': (14, 'Encoding frames'),
+                        'sampler': (40, 'Restoring detail'), 'decode': (60, 'Decoding frames'), 'post': (88, 'Matching colors'), 'save': (93, 'Encoding the video')}
+
+
+def upscale_video_size(w, h, scale):
+    long_max, short_max = UPSCALE_VIDEO_MAX
+    s = min(scale, long_max / max(w, h), short_max / min(w, h))
+    return 2 * max(1, round(w * s / 2)), 2 * max(1, round(h * s / 2))
+
+
+def spec_upscale_video(inp):
+    _fields(inp, ['video', 'scale', 'seed'])
+    scale = _int(inp, 'scale', 2, 4, 2)
+    if scale not in (2, 4):
+        raise Invalid('scale must be 2 or 4.')
+    seed = _seed(inp)
+    tmp = tempfile.mkdtemp(prefix='massless-vup-')
+    try:
+        src, info = _clip_in(inp, 'video', ['mp4', 'mov', 'webm'], tmp)
+        w, h = upscale_video_size(info['width'], info['height'], scale)
+        if w <= info['width'] * 1.05 and h <= info['height'] * 1.05:
+            raise Invalid(f"video is {info['width']}x{info['height']}; it is already as large as this job makes ({UPSCALE_VIDEO_MAX[0]}x{UPSCALE_VIDEO_MAX[1]} at most).")
+        fps = info['fps'] if 0 < info['fps'] <= UPSCALE_VIDEO_FPS + 0.01 else UPSCALE_VIDEO_FPS
+        clip = os.path.join(tmp, 'clip.mp4')
+        _run([FFMPEG, '-v', 'error', '-y', '-i', src, '-t', f'{MAX_CLIP_SECONDS:g}', '-map', '0:v:0', '-map', '0:a:0?', '-vf', f'fps={fps:.6g}',
+              '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '12', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', clip], 180)
+        frames = count_frames(clip)
+        with open(clip, 'rb') as f:
+            clip_bytes = f.read()
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    duration = round(frames / fps, 3)
+    meta = {'type': 'video', 'mime': 'video/mp4', 'width': w, 'height': h, 'duration': duration, 'fps': round(fps, 3), 'frames': frames,
+            'model': 'seedvr2-7b', 'seed': seed, 'scale': round(w / info['width'], 3), 'source': [info['width'], info['height']]}
+
+    def finish(raw, filename):
+        t = tempfile.mkdtemp(prefix='massless-vup-')
+        try:
+            data, meta['reencoded'] = fit_video(raw, duration, t)
+        finally:
+            shutil.rmtree(t, ignore_errors=True)
+        return data, 'video/mp4'
+
+    sets = {'video_in': {'file': '$upload:video'}, 'resize': {'resize_type.width': w, 'resize_type.height': h}, 'sampler': {'seed': seed}}
+    timeout = job_timeout('upscale_video', upscale_video_estimate(frames, w * h))
+    return Spec('upscale_video', 'upscale_video_seedvr2.json', sets, 'save', timeout, meta, uploads={'video': (clip_bytes, 'mp4', 'video/mp4')},
+                finish=finish, stages=STAGES_UPSCALE_VIDEO, models=needs('upscale_video'))
 
 
 KEYSCALES = [f'{root} {q}' for q in ('major', 'minor') for root in
@@ -320,7 +742,6 @@ def spec_music(inp):
     ts = _choice(inp, 'timesignature', ['2', '3', '4', '6'], '4')
     language = _choice(inp, 'language', LANGUAGES, 'en')
     seed = _seed(inp)
-    seed = random.SystemRandom().randint(0, SEED_MAX) if seed is None else seed
     sets = {
         'text': {'tags': tags, 'lyrics': lyrics, 'seed': seed, 'bpm': bpm, 'duration': duration,
                  'timesignature': ts, 'language': language, 'keyscale': key},
@@ -329,7 +750,7 @@ def spec_music(inp):
     }
     meta = {'type': 'audio', 'mime': 'audio/mpeg', 'width': None, 'height': None, 'duration': duration,
             'model': 'ace-step-1.5-turbo', 'seed': seed, 'bpm': bpm, 'key': key, 'instrumental': lyrics == '[Instrumental]'}
-    return Spec('music', 'music_ace15.json', sets, 'save', 90 + duration, meta, stages=STAGES_MUSIC)
+    return Spec('music', 'music_ace15.json', sets, 'save', 90 + duration, meta, stages=STAGES_MUSIC, models=needs('music'))
 
 
 STAGES_UPSCALE = {'model': (5, 'Loading Real-ESRGAN'), 'image_in': (10, 'Reading the image'), 'upscale': (12, 'Upscaling'),
@@ -374,18 +795,14 @@ def spec_upscale(inp):
         return data, mime
 
     sets = {'image_in': {'image': '$upload'}, 'resize': {'width': w, 'height': h}}
-    return Spec('upscale', 'upscale_esrgan.json', sets, 'save', 150, meta, upload=(png_bytes(im), 'png', 'image/png'), finish=finish, stages=STAGES_UPSCALE)
+    return Spec('upscale', 'upscale_esrgan.json', sets, 'save', 150, meta, upload=(png_bytes(im), 'png', 'image/png'), finish=finish, stages=STAGES_UPSCALE, models=needs('upscale'))
 
 
 
 # ---------------------------------------------------------------- Lab jobs (research licenses, MASSLESS_IMAGE=lab)
 # Every Lab result carries license and commercial: false so the site can label it.
 
-FFMPEG = os.environ.get('FFMPEG', 'ffmpeg')
-FFPROBE = os.environ.get('FFPROBE', 'ffprobe')
-MAX_VIDEO_B64 = 9_400_000      # about a 7 MB MP4 plus the rest of the request under RunPod's 10 MB
-MAX_VIDEO_BYTES = 7_050_000
-MAX_VIDEO_SECONDS = 10.0
+MAX_VIDEO_B64, MAX_VIDEO_BYTES, MAX_VIDEO_SECONDS = MAX_MEDIA_B64, MAX_MEDIA_BYTES, MAX_CLIP_SECONDS
 SOUND_FPS = 25                 # MMAudio's sync encoder samples 25 fps and its node does not resample
 SOUND_SIDE = 512               # the visual encoders look at 384-512 px; smaller uploads, same result
 SOUND_MODELS = {
@@ -401,29 +818,6 @@ STAGES_SOUND = {'video_in': (3, 'Reading the clip'), 'frames': (6, 'Reading the 
                 'save': (92, 'Mixing the track into the clip')}
 
 
-def _run(cmd, timeout=120, what='ffmpeg'):
-    try:
-        r = subprocess.run(cmd, capture_output=True, timeout=timeout)
-    except FileNotFoundError:
-        raise JobError(f'{what} is not installed in this image.') from None
-    except subprocess.TimeoutExpired:
-        raise JobError(f'{what} took too long.') from None
-    if r.returncode != 0:
-        tail = r.stderr.decode('utf-8', 'replace').strip().splitlines()[-1:] or ['failed']
-        raise Invalid(f'The video could not be read ({tail[0][:160]}).') if what == 'ffprobe' else JobError(f'{what} failed: {tail[0][:200]}')
-    return r.stdout
-
-
-def probe_video(path):
-    info = json.loads(_run([FFPROBE, '-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', path], 30, 'ffprobe') or b'{}')
-    video = next((st for st in info.get('streams', []) if st.get('codec_type') == 'video'), None)
-    if video is None:
-        raise Invalid('video has no video track.')
-    duration = float(video.get('duration') or (info.get('format') or {}).get('duration') or 0)
-    return {'width': int(video.get('width') or 0), 'height': int(video.get('height') or 0), 'duration': duration,
-            'codec': video.get('codec_name'), 'has_audio': any(st.get('codec_type') == 'audio' for st in info.get('streams', []))}
-
-
 def spec_sound(inp):
     import shutil
     import tempfile
@@ -435,7 +829,6 @@ def spec_sound(inp):
     prompt = _text(inp, 'prompt', 400, '')
     negative = _text(inp, 'negative', 300, '' if model == 'mmaudio' else 'noisy, harsh, distorted')
     seed = _seed(inp)
-    seed = random.SystemRandom().randint(0, SEED_MAX) if seed is None else seed
     value = inp.get('video')
     if isinstance(value, str) and len(value) * 3 // 4 > MAX_VIDEO_BYTES:
         raise Invalid(f'video is {len(value) * 3 / 4e6:.1f} MB; the limit is {MAX_VIDEO_BYTES / 1e6:.0f} MB.')
@@ -612,7 +1005,6 @@ def spec_fibo(inp):
     mode = _choice(inp, 'mode', ['generate', 'edit'], 'generate')
     steps = _int(inp, 'steps', 2, 8, 4)
     seed = _seed(inp)
-    seed = random.SystemRandom().randint(0, SEED_MAX) if seed is None else seed
     prompt, shot = inp.get('prompt'), inp.get('shot')
     if prompt is None and shot is None:
         raise Invalid('prompt or shot is required.')
@@ -663,7 +1055,8 @@ def spec_fibo(inp):
     return Spec('fibo', workflow, sets, 'save', 240, meta, upload=upload, finish=finish, stages=STAGES_FIBO)
 
 
-JOBS = {'main': {'animate': spec_animate, 'music': spec_music, 'upscale': spec_upscale},
+JOBS = {'main': {'animate': spec_animate, 'motion': spec_motion, 'lipsync': spec_lipsync, 'upscale_video': spec_upscale_video,
+                 'music': spec_music, 'upscale': spec_upscale},
         'lab': {'sound': spec_sound, 'fibo': spec_fibo}}
 
 
@@ -690,14 +1083,20 @@ def load_workflow(name):
     return copy.deepcopy(_wf_cache[name])
 
 
-def apply_sets(graph, sets, upload_name=None):
+def apply_sets(graph, sets, names=None):
+    """Set named inputs. '$upload' is the main upload's name in ComfyUI's input folder, '$upload:<key>' another one's."""
+    names = names if isinstance(names, dict) else {'main': names}
     for node, values in sets.items():
         if node not in graph:
             raise JobError(f'workflow has no node "{node}"')
         for k, v in values.items():
             if k not in graph[node]['inputs']:
                 raise JobError(f'workflow node "{node}" has no input "{k}"')
-            graph[node]['inputs'][k] = upload_name if v == '$upload' else v
+            if isinstance(v, str) and (v == '$upload' or v.startswith('$upload:')):
+                v = names.get(v.partition(':')[2] or 'main')
+                if v is None:
+                    raise JobError(f'workflow node "{node}" wants an upload the job did not make')
+            graph[node]['inputs'][k] = v
     return graph
 
 
@@ -719,6 +1118,8 @@ class Comfy:
                '--disable-partner-nodes', '--log-stdout']
         if IMAGE_KIND == 'main':
             cmd.append('--disable-all-custom-nodes')  # the Lab image loads its pinned custom nodes
+        if VOLUME is not None:
+            cmd += ['--extra-model-paths-config', MODEL_PATHS]
         return cmd + shlex.split(os.environ.get('COMFY_ARGS', ''))
 
     def start(self):
@@ -932,11 +1333,12 @@ def _safe_unlink(base, *parts):
             pass
 
 
-def cleanup(upload_name, files, max_age=600):
-    """Delete this job's upload and outputs, plus anything of ours older than max_age seconds that a
+def cleanup(uploads, files, max_age=600):
+    """Delete this job's uploads and outputs, plus anything of ours older than max_age seconds that a
     failed job left behind (outputs a crashed run never reported, for example)."""
-    if upload_name:
-        _safe_unlink(os.path.join(COMFY_DIR, 'input'), upload_name)
+    for name in ([uploads] if isinstance(uploads, str) else uploads or []):
+        if name:
+            _safe_unlink(os.path.join(COMFY_DIR, 'input'), name)
     for f in files:
         _safe_unlink(os.path.join(COMFY_DIR, f.get('type', 'output')), f.get('subfolder', ''), f['filename'])
     cutoff = time.time() - max_age
@@ -956,6 +1358,46 @@ def cleanup(upload_name, files, max_age=600):
 
 
 COMFY = Comfy()
+VOLUME = None if VOLUME_DIR == 'off' else volume_mod.Volume(VOLUME_DIR, _manifest())
+MODEL_PATHS = os.path.join(tempfile.gettempdir(), 'massless_extra_model_paths.yaml')
+
+
+def write_model_paths():
+    """ComfyUI reads its model folders from the volume (passed as --extra-model-paths-config)."""
+    if VOLUME is None:
+        return None
+    with open(MODEL_PATHS, 'w', encoding='utf-8') as f:
+        f.write(volume_mod.comfy_paths_yaml(VOLUME.root))
+    return MODEL_PATHS
+
+
+def volume_problem():
+    if VOLUME is None:
+        return None
+    if not os.path.isdir(os.path.dirname(VOLUME.root.rstrip('/')) or '/'):
+        return f'No network volume is mounted at {os.path.dirname(VOLUME.root.rstrip("/"))}. Attach the model volume to this endpoint (workers/gpu/README.md).'
+    return None
+
+
+def require_models(spec):
+    """Every file the job needs must be on the volume (checked against its sha256 when it arrived)."""
+    if VOLUME is None or not spec.models:
+        return
+    problem = volume_problem()
+    if problem:
+        raise JobError(problem)
+    missing = VOLUME.missing(spec.models)
+    if not missing:
+        return
+    VOLUME.start_background(missing + [i for i in VOLUME.ids_for() if i not in missing])
+    end = time.monotonic() + MODEL_WAIT
+    while missing and time.monotonic() < end:
+        time.sleep(min(2.0, max(0.05, end - time.monotonic())))
+        missing = VOLUME.missing(spec.models)
+    if missing:
+        s = VOLUME.status(spec.models)
+        raise JobError(f'The {spec.job} models are not on the GPU volume yet ({s["bytes_ready"] / 1e9:.1f} of {s["bytes"] / 1e9:.1f} GB; '
+                       f'missing {", ".join(missing)}). They download once after setup: run the prepare job (workers/gpu/README.md), then try again.')
 
 
 def run(spec, report=None):
@@ -963,17 +1405,19 @@ def run(spec, report=None):
     t0 = time.monotonic()
     progress = Progress(spec.job, spec.stages, report)
     progress.push(force=True)
+    require_models(spec)
     COMFY.ready()
     deadline = time.monotonic() + spec.timeout
     graph = load_workflow(spec.workflow)
-    upload_name, files, prompt_id = None, [], str(uuid.uuid4())
+    if spec.edit:
+        spec.edit(graph)
+    names, files, prompt_id = {}, [], str(uuid.uuid4())
     client_id = uuid.uuid4().hex
     ws = None
     try:
-        if spec.upload is not None:
-            data, ext, mime = spec.upload
-            upload_name = COMFY.upload(data, f'massless_{prompt_id}.{ext}', mime)
-        apply_sets(graph, spec.sets, upload_name)
+        for key, (data, ext, mime) in spec.uploads.items():
+            names[key] = COMFY.upload(data, f'massless_{prompt_id}_{key}.{ext}', mime)
+        apply_sets(graph, spec.sets, names)
         ws = COMFY.open_ws(client_id)
         COMFY.submit(graph, prompt_id, client_id)
         try:
@@ -1004,11 +1448,46 @@ def run(spec, report=None):
                 ws.close()
             except Exception:
                 pass
-        cleanup(upload_name, files)
+        cleanup(list(names.values()), files)
         COMFY.forget(prompt_id)
         if spec.cleanup:
             spec.cleanup()
             spec.cleanup = None
+
+
+def prepare(inp, report=None):
+    """Operator job: download every missing model file to the volume (or with check: true, only report).
+    Send it with a long executionTimeout; the site never sends it (src/gpu-jobs.js does not know it)."""
+    _fields(inp, ['jobs', 'check'])
+    if VOLUME is None:
+        raise Invalid('This image does not use a model volume.')
+    problem = volume_problem()
+    if problem:
+        raise JobError(problem)
+    jobs = inp.get('jobs')
+    if jobs is not None and (not isinstance(jobs, list) or not jobs or not set(jobs) <= set(JOBS.get(IMAGE_KIND, {}))):
+        raise Invalid(f"jobs must be a list of {', '.join(JOBS.get(IMAGE_KIND, {}))}.")
+    ids = VOLUME.ids_for(jobs)
+    t0 = time.monotonic()
+    failed = []
+    if not inp.get('check'):
+        done = threading.Event()
+
+        def work():
+            failed.extend(VOLUME.ensure_all(ids))
+            done.set()
+        threading.Thread(target=work, daemon=True).start()
+        while not done.wait(5.0):
+            if report:
+                s = VOLUME.status(ids)
+                report({'text': f"Copying models to the volume: {s['bytes_ready'] / 1e9:.1f} of {s['bytes'] / 1e9:.1f} GB",
+                        'percent': int(100 * s['bytes_ready'] / max(1, s['bytes'])), 'job': 'prepare'})
+    s = VOLUME.status(ids)
+    free = shutil.disk_usage(VOLUME.root).free if os.path.isdir(VOLUME.root) else None
+    out = {'type': 'status', 'mime': 'application/json', 'volume': VOLUME.root, 'free_bytes': free, 'seconds': round(time.monotonic() - t0, 1), **s}
+    if failed:
+        out['error'] = '; '.join(f'{i}: {msg}' for i, msg in failed)[:1500]
+    return out
 
 
 def handler(job):
@@ -1018,7 +1497,10 @@ def handler(job):
         report = lambda p: runpod.serverless.progress_update(job, p)  # noqa: E731
     spec = None
     try:
-        spec = build_spec(job.get('input'))
+        inp = job.get('input')
+        if isinstance(inp, dict) and inp.get('job') == 'prepare':
+            return prepare(inp, report)
+        spec = build_spec(inp)
         return run(spec, report)
     except Invalid as e:
         return {'error': str(e)}
@@ -1034,8 +1516,20 @@ def handler(job):
             spec.cleanup = None
 
 
-if __name__ == '__main__':
+def boot():
+    """Worker start: point ComfyUI at the volume, bring any missing weights in, start ComfyUI."""
+    if VOLUME is not None:
+        write_model_paths()
+        problem = volume_problem()
+        if problem:
+            print(f'[massless] {problem}', flush=True)
+        else:
+            VOLUME.start_background()
     COMFY.start()  # boot ComfyUI while RunPod hands us the first job
+
+
+if __name__ == '__main__':
+    boot()
     if runpod is None:
         raise SystemExit('The runpod package is not installed.')
     runpod.serverless.start({'handler': handler})

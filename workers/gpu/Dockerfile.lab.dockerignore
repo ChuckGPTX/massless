@@ -3,6 +3,7 @@
 *
 !workers/gpu/fetch_model.py
 !workers/gpu/handler.py
+!workers/gpu/volume.py
 !workers/gpu/models.lab.json
 !workers/gpu/LICENSE
 !workers/gpu/lab/
