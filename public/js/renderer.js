@@ -1,4 +1,4 @@
-// Massless renderer: a still + a depth map become a mesh you can fly a camera through.
+// Chucksi renderer: a still + a depth map become a mesh you can fly a camera through.
 // Vertices are pushed along their own rest-camera rays, so the rest frame matches the source exactly.
 // Pass 1 renders the scene with depth-of-field; pass 2 applies lens and film finishing.
 
@@ -271,7 +271,7 @@ export class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     const gl = canvas.getContext('webgl2', { antialias: true, preserveDrawingBuffer: true, premultipliedAlpha: false });
-    if (!gl) throw new Error('This browser has no WebGL2, which Massless needs to move the camera.');
+    if (!gl) throw new Error('This browser has no WebGL2, which Chucksi needs to move the camera.');
     this.gl = gl;
     this.scene = program(gl, SCENE_VS, SCENE_FS);
     this.post = program(gl, POST_VS, POST_FS);

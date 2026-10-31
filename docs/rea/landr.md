@@ -1,4 +1,4 @@
-# LANDR, reverse-engineered for Massless
+# LANDR, reverse-engineered for Chucksi
 
 Clean-room notes: LANDR's own help center blocks automated reads (HTTP 403), so the behavior below comes from LANDR's public blog, launch coverage, hands-on reviews, the AudioShake press releases and Wikipedia. No LANDR code, presets, audio or text were copied. Our style and setting names are our own.
 
@@ -39,7 +39,7 @@ Spotify measures with ITU-R BS.1770, the same meter `extract-worker.js` already 
 
 ---
 
-## 2. What Massless already has
+## 2. What Chucksi already has
 
 | Existing piece | File | Reuse |
 | --- | --- | --- |

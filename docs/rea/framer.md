@@ -1,4 +1,4 @@
-# Framer, reverse-engineered for Massless
+# Framer, reverse-engineered for Chucksi
 
 Clean-room notes: Framer publishes Markdown views of its product pages (`?md`) and an `llms.txt` index; the behavior below comes from those public pages, its help center, its updates log and third-party reviews. No Framer code, templates, components, copy or assets were copied. We call our feature **Website**; section, theme and effect names are our own.
 
@@ -29,11 +29,11 @@ Value: **H** = the reason people choose Framer, **M** = used by most sites, **L*
 
 **What users value most**: going from a prompt to a published, good-looking site in minutes; animations; one-click hosting with SSL and domains; responsive control per breakpoint. **Pain points** (from a guide written by a migration agency, so read with that bias): AI output is a starting point that still takes about half a day of cleanup and polish; no clean code export, so sites are locked in; CMS weak for complex content; no native e-commerce, accounts or backend; heavy animations can hurt mobile performance ([p0stman guide](https://p0stman.com/guides/framer-limitations)).
 
-The gap Massless can fill: a free generator whose output is **plain static files you own**, with art from our own Image tool, and no lock-in.
+The gap Chucksi can fill: a free generator whose output is **plain static files you own**, with art from our own Image tool, and no lock-in.
 
 ---
 
-## 2. What Massless already has
+## 2. What Chucksi already has
 
 | Existing piece | File | Reuse |
 | --- | --- | --- |
@@ -166,7 +166,7 @@ Collect every string path in the spec, translate with m2m100 (cheap) or Llama 3.
 | --- | --- | --- | --- | --- |
 | **A. Download ZIP** | Static files the user hosts anywhere (Cloudflare Pages, GitHub Pages, Netlify drop), with short step-by-step guides | None for us | — | v1 |
 | **B. Astro project** | Same site as an Astro project | None | — | v2 |
-| **C. Unlisted preview links** | `https://<random>.<preview-domain>` served by a Worker from R2, for showing a client or a friend | Phishing pages, scam and crypto pages, brand impersonation, malware links, SEO spam, illegal images (uploads), harassment pages | Typed spec only (no raw HTML, no scripts, no forms, no password fields, links validated); a **separate registrable domain** listed on the [Public Suffix List](https://publicsuffix.org/) so one bad page cannot get `massless.chucksi.com` blocklisted or share cookies; Turnstile and per-visitor caps on publish; 7-day expiry; `noindex`; 10 MB size cap; Llama Guard over all text and a brand/login keyword screen; URL reputation checks on outbound links; image screening (Cloudflare's CSAM Scanning Tool on the zone; generated images are already ours); a "report this page" link and a takedown address; only hashed IPs kept, like the existing caps | v2 |
+| **C. Unlisted preview links** | `https://<random>.<preview-domain>` served by a Worker from R2, for showing a client or a friend | Phishing pages, scam and crypto pages, brand impersonation, malware links, SEO spam, illegal images (uploads), harassment pages | Typed spec only (no raw HTML, no scripts, no forms, no password fields, links validated); a **separate registrable domain** listed on the [Public Suffix List](https://publicsuffix.org/) so one bad page cannot get `chucksi.com` blocklisted or share cookies; Turnstile and per-visitor caps on publish; 7-day expiry; `noindex`; 10 MB size cap; Llama Guard over all text and a brand/login keyword screen; URL reputation checks on outbound links; image screening (Cloudflare's CSAM Scanning Tool on the zone; generated images are already ours); a "report this page" link and a takedown address; only hashed IPs kept, like the existing caps | v2 |
 | **D. Permanent hosting and custom domains** | What Framer sells | All of C, forever, plus support load and cost | Not planned. If ever: accounts, verified email, manual review for custom domains | Not planned |
 
 ### Abuse model in one paragraph

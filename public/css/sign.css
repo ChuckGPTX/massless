@@ -1,4 +1,4 @@
-/* Massless Sign: the signer page (/sign) and the parts Office > Sign shares with it (sheets, link cards,
+/* Chucksi Sign: the signer page (/sign) and the parts Office > Sign shares with it (sheets, link cards,
    Verify, field chips). Builds on site.css tokens. Classes are prefixed sg- to stay out of other pages. */
 
 .sign-body { --ok: #3ddc84; --bad: #ff5d6c; --warn: #ffd166; --paper: #fff; min-height: 100dvh; display: flex; flex-direction: column; }

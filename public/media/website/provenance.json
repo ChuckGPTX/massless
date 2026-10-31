@@ -1,8 +1,8 @@
 {
   "date": "2026-10-30",
-  "generator": "Massless Image studio using Cloudflare Workers AI",
+  "generator": "Chucksi Image studio using Cloudflare Workers AI",
   "model": "FLUX.1 schnell",
-  "notice": "Original images generated through the live Massless Image tool for the Form & Field website study. Prompt-remix controls are in demo-site/studio.js.",
+  "notice": "Original images generated through the live Chucksi Image tool for the Form & Field website study. Prompt-remix controls are in demo-site/studio.js.",
   "images": [
     {
       "name": "pavilion",

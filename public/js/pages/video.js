@@ -161,7 +161,7 @@ async function loadFrame({ ref, name, image, sub, look, gradeMix = 0.45, depth =
     status('Reading depth on your device', null);
     d = await estimateDepth(image, (f, msg) => status(msg, f));
     status(null);
-    if (d.source === 'estimate') toast('The depth model could not load here, so Massless guessed the depth. Moves still work, with less accuracy.', 'error');
+    if (d.source === 'estimate') toast('The depth model could not load here, so Chucksi guessed the depth. Moves still work, with less accuracy.', 'error');
   }
   depthCache.set(ref, d);
   state.current.depth = d;
@@ -335,7 +335,7 @@ async function selectEffect(id, look, { scroll = false } = {}) {
   startLoop();
 }
 
-// Existing Massless-rendered demonstrations, curated by the move they show.
+// Existing Chucksi-rendered demonstrations, curated by the move they show.
 // Keep the selected user image unchanged when choosing a move.
 const MOVE_DEMOS = {
   'crash-zoom': 'samurai', 'pan-right': 'diner', 'crane-up': 'jellyfish',
@@ -393,7 +393,7 @@ function addClip(blob, ext, label) {
   const url = URL.createObjectURL(blob);
   const v = el('video', { src: url, muted: true, loop: true, playsinline: true, autoplay: true });
   v.muted = true;
-  $('#clips').prepend(el('div', { class: 'clip fresh' }, v, el('div', { class: 'meta' }, el('span', {}, label), el('a', { class: 'dl', href: url, download: `massless-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now() % 1e6}.${ext}` }, 'Download'))));
+  $('#clips').prepend(el('div', { class: 'clip fresh' }, v, el('div', { class: 'meta' }, el('span', {}, label), el('a', { class: 'dl', href: url, download: `chucksi-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now() % 1e6}.${ext}` }, 'Download'))));
   $('#clips-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -685,7 +685,7 @@ function bind() {
   $('#out-fps').addEventListener('change', (e) => (state.fps = Number(e.target.value)));
   $('#finish-reset').addEventListener('click', () => { state.overrides = {}; buildFinishSliders(); });
   $('#play').addEventListener('click', () => { state.playing = !state.playing; $('#play').textContent = state.playing ? 'Pause' : 'Play'; startLoop(); });
-  $('#still').addEventListener('click', async () => download(await renderer.readPixelsPNG(), `massless-frame-${Date.now()}.png`));
+  $('#still').addEventListener('click', async () => download(await renderer.readPixelsPNG(), `chucksi-frame-${Date.now()}.png`));
   $('#record').addEventListener('click', doRecord);
   $('#board-add').addEventListener('click', addToBoard);
   $('#board-play').addEventListener('click', playBoard);

@@ -1,4 +1,4 @@
-// Master for Massless: the worker that measures and masters a mix, so the page stays responsive.
+// Master for Chucksi: the worker that measures and masters a mix, so the page stays responsive.
 // The page decodes the file in the tab and sends the samples here; nothing leaves the device.
 // Messages (each answered { id, ok, ... }; progress arrives as { id, progress, label }):
 //   load { rate, channels }            keep the source

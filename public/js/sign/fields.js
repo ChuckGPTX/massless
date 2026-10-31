@@ -1,4 +1,4 @@
-// Field types for Massless Sign. Sizes are in PDF points (1/72 inch) at page scale 1.
+// Field types for Chucksi Sign. Sizes are in PDF points (1/72 inch) at page scale 1.
 
 export const FIELD_TYPES = {
   signature: { label: 'Signature', short: 'Sign', w: 180, h: 38, required: true, icon: '<path d="M2 11.5c1.5-1 2.8-5 4.3-5S6 11 7.5 11s1.9-2.6 3-2.6.6 1.8 1.6 1.8 1.4-.8 1.9-1.3M2 14h12"/>' },

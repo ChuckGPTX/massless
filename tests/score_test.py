@@ -56,7 +56,7 @@ SETUP = """async (brief) => {
   window.__film = await import('/js/film.js');
   window.__render = async ({ style, bpm, seed, length = 'standard', minBeats = 0, cuts = null, pcm = true }) => {
     const { templateSpec, layout } = __film;
-    const spec = templateSpec({ name: 'Massless', brief, style, bpm, length });
+    const spec = templateSpec({ name: 'Chucksi', brief, style, bpm, length });
     while (layout(spec).beats < minBeats) spec.blocks.splice(spec.blocks.length - 1, 0, { type: 'words', beats: 4, words: ['ONE', 'TWO', 'THREE', 'FOUR'] });
     const lay = layout(spec);
     const t0 = performance.now();

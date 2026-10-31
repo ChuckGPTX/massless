@@ -1,4 +1,4 @@
-// Massless Sign local storage (IndexedDB, this browser only): envelopes you sent, Deals and their files.
+// Chucksi Sign local storage (IndexedDB, this browser only): envelopes you sent, Deals and their files.
 // Envelope records hold the owner token, the signer tokens and the key, so this device can show status,
 // share links again and build the final PDF. Export a Deal as an encrypted file to move it.
 

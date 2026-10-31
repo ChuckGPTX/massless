@@ -1,4 +1,4 @@
-// Master for Massless: an automatic mastering chain that runs entirely on the visitor's device.
+// Master for Chucksi: an automatic mastering chain that runs entirely on the visitor's device.
 // analyze() measures a mix (BS.1770 loudness, loudness range, 4x true peak, tonal balance against a typical
 // mastered mix, stereo width, clipping). planChain() turns that report plus a character and a destination into
 // settings; master() runs the chain: subsonic high-pass, a gentle tilt EQ, glue compression, optional width,

@@ -1,4 +1,4 @@
-// Local server for Massless Sign: serves public/ like the Worker does and mounts src/sign.js on
+// Local server for Chucksi Sign: serves public/ like the Worker does and mounts src/sign.js on
 // in-memory R2 and D1 (tools/sign/fakes.mjs). For development and the Playwright test.
 //   node tools/sign/dev_server.mjs [--port 8788] [--contracts tests/fixtures/contracts] [--test]
 // Prints "READY http://127.0.0.1:<port>" once listening. --test adds GET /__sign/dump (every stored

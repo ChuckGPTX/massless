@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public')
 BLANK = '/__audio_test__.html'
-SPEECH = 'Massless is a free cinema camera for AI shots.'
+SPEECH = 'Chucksi is a free cinema camera for AI shots.'
 VOICE_TIMEOUT_MS = 15 * 60 * 1000  # first load downloads ~115 MB on WebAssembly
 
 ap = argparse.ArgumentParser()

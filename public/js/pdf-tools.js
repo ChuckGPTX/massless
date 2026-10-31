@@ -168,7 +168,7 @@ export async function imagesToPdf(files, { size = 'image', margin = 24, onProgre
       doc.addPage([pw, ph]).drawImage(img, { x: (pw - w) / 2, y: (ph - h) / 2, width: w, height: h });
     }
   }
-  doc.setProducer('Massless Office');
+  doc.setProducer('Chucksi Office');
   return doc.save();
 }
 
@@ -218,7 +218,7 @@ export async function mergePdfs(list, { onProgress } = {}) {
     const pages = await out.copyPages(src, src.getPageIndices());
     pages.forEach((p) => out.addPage(p));
   }
-  out.setProducer('Massless Office');
+  out.setProducer('Chucksi Office');
   return { bytes: await out.save(), pages: out.getPageCount() };
 }
 
@@ -229,7 +229,7 @@ export async function extractPages(bytes, indices, srcDoc) {
   const out = await PDFDocument.create();
   const pages = await out.copyPages(src, indices);
   pages.forEach((p) => out.addPage(p));
-  out.setProducer('Massless Office');
+  out.setProducer('Chucksi Office');
   return out.save();
 }
 
@@ -284,7 +284,7 @@ export async function compressPdf(bytes, { quality = 0.6, dpi = 110, onProgress 
   } finally {
     closePdf(pdf);
   }
-  out.setProducer('Massless Office');
+  out.setProducer('Chucksi Office');
   return out.save();
 }
 

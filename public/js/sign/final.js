@@ -80,7 +80,7 @@ export async function buildSigned(lib, { pdf, meta, payloads, envelopeId, comple
     return imgCache.get(b64);
   };
   const ink = rgb(0.08, 0.1, 0.16);
-  const tag = `Massless Sign  ${String(envelopeId || '').slice(0, 10)}`;
+  const tag = `Chucksi Sign  ${String(envelopeId || '').slice(0, 10)}`;
   const attachments = [];
 
   for (const f of meta.fields || []) {
@@ -176,10 +176,10 @@ export async function buildSigned(lib, { pdf, meta, payloads, envelopeId, comple
 function stamp(doc, meta, envelopeId, completedAt) {
   const when = new Date(completedAt || 0);
   doc.setTitle(String(meta.name || 'Document').replace(/\.pdf$/i, ''));
-  doc.setSubject(`Massless Sign envelope ${envelopeId}`);
+  doc.setSubject(`Chucksi Sign envelope ${envelopeId}`);
   doc.setKeywords([`massless-sign:${envelopeId}`]);
-  doc.setProducer('Massless Sign');
-  doc.setCreator('Massless Sign (massless.chucksi.com)');
+  doc.setProducer('Chucksi Sign');
+  doc.setCreator('Chucksi Sign (chucksi.com)');
   doc.setCreationDate(when);
   doc.setModificationDate(when);
 }
@@ -217,8 +217,8 @@ export async function buildFinal(lib, { signedBytes, meta, payloads, envelopeId,
   // header
   page.drawRectangle({ x: ML, y: y - 14, width: 14, height: 14, color: C(AMBER) });
   page.drawCircle({ x: ML + 7, y: y - 7, size: 3.6, borderColor: C(INK), borderWidth: 1.4 });
-  text('MASSLESS SIGN', ML + 22, y - 10.5, 8, F.b, INK);
-  text('massless.chucksi.com/sign', PW - MR - F.r.widthOfTextAtSize('massless.chucksi.com/sign', 7.5), y - 10.5, 7.5, F.r, SOFT);
+  text('CHUCKSI SIGN', ML + 22, y - 10.5, 8, F.b, INK);
+  text('chucksi.com/sign', PW - MR - F.r.widthOfTextAtSize('chucksi.com/sign', 7.5), y - 10.5, 7.5, F.r, SOFT);
   y -= 46;
   text('Certificate of Completion', ML, y, 22, F.b, INK);
   y -= 18;
@@ -312,7 +312,7 @@ export async function buildFinal(lib, { signedBytes, meta, payloads, envelopeId,
   header();
   const who = (ev) => {
     if (ev.actor === 'owner') return 'Sender';
-    if (ev.actor === 'server') return 'Massless';
+    if (ev.actor === 'server') return 'Chucksi';
     const i = ev.signer;
     const m = (meta.signers || []).find((s) => s.index === i) || {};
     return (payloads[i] && payloads[i].name) || m.name || `Signer ${i + 1}`;
@@ -334,7 +334,7 @@ export async function buildFinal(lib, { signedBytes, meta, payloads, envelopeId,
   // attestation
   section('Attestation');
   const recHash = await sha256Hex(new TextEncoder().encode(attest.json));
-  const intro = 'Massless signed the audit trail above (envelope, fingerprints, signers and events) with ECDSA P-256 (ES256). The exact record is embedded in this PDF as massless-sign-audit.json. Its public key is at massless.chucksi.com/api/sign/key.';
+  const intro = 'Chucksi signed the audit trail above (envelope, fingerprints, signers and events) with ECDSA P-256 (ES256). The exact record is embedded in this PDF as massless-sign-audit.json. Its public key is at chucksi.com/api/sign/key.';
   const il = wrap(F.r, 8, intro, W, memo);
   ensure(il.length * 10.5 + 70);
   y -= 6;
@@ -350,7 +350,7 @@ export async function buildFinal(lib, { signedBytes, meta, payloads, envelopeId,
 
   // verify
   section('Check this file');
-  const vt = 'Open massless.chucksi.com/sign, choose Verify and drop in this PDF. Massless recomputes the file\'s SHA-256 in your browser and looks for the sealed record. Changing any byte of this file makes the check fail.';
+  const vt = 'Open chucksi.com/sign, choose Verify and drop in this PDF. Chucksi recomputes the file\'s SHA-256 in your browser and looks for the sealed record. Changing any byte of this file makes the check fail.';
   const vl = wrap(F.r, 8, vt, W, memo);
   ensure(vl.length * 10.5 + 8);
   for (const l of vl) { y -= 10.5; text(l, ML, y, 8, F.r, INK); }
@@ -358,14 +358,14 @@ export async function buildFinal(lib, { signedBytes, meta, payloads, envelopeId,
   // footers
   certPages.forEach((p, i) => {
     p.drawLine({ start: { x: ML, y: 44 }, end: { x: PW - MR, y: 44 }, thickness: 0.4, color: C(RULE) });
-    p.drawText(S(F.r, 'Massless Sign provides templates and signing tools, not legal advice.'), { x: ML, y: 32, size: 6.8, font: F.r, color: C(SOFT) });
+    p.drawText(S(F.r, 'Chucksi Sign provides templates and signing tools, not legal advice.'), { x: ML, y: 32, size: 6.8, font: F.r, color: C(SOFT) });
     const r = `Envelope ${rec.envelopeId}  ·  Certificate ${i + 1} of ${certPages.length}`;
     p.drawText(S(F.r, r), { x: PW - MR - F.r.widthOfTextAtSize(r, 6.8), y: 32, size: 6.8, font: F.r, color: C(SOFT) });
   });
 
   const when = new Date(rec.completedAt);
   await doc.attach(new TextEncoder().encode(JSON.stringify({ kind: 'massless-sign/attestation', envelopeId, kid: rec.kid, alg: 'ES256', record: attest.json, sig: attest.sig }, null, 2)), 'massless-sign-audit.json', {
-    mimeType: 'application/json', description: 'Massless Sign audit record and ES256 signature', creationDate: when, modificationDate: when,
+    mimeType: 'application/json', description: 'Chucksi Sign audit record and ES256 signature', creationDate: when, modificationDate: when,
   });
   stamp(doc, meta, envelopeId, rec.completedAt);
   return doc.save();
@@ -375,7 +375,7 @@ export async function buildFinal(lib, { signedBytes, meta, payloads, envelopeId,
 export async function claimedEnvelope(lib, bytes) {
   try {
     const doc = await lib.PDFDocument.load(bytes, { updateMetadata: false, ignoreEncryption: true });
-    const m = String(doc.getSubject() || '').match(/Massless Sign envelope ([A-Za-z0-9_-]{22})/) || String(doc.getKeywords() || '').match(/massless-sign:([A-Za-z0-9_-]{22})/);
+    const m = String(doc.getSubject() || '').match(/(?:Chucksi|Massless) Sign envelope ([A-Za-z0-9_-]{22})/) || String(doc.getKeywords() || '').match(/massless-sign:([A-Za-z0-9_-]{22})/);
     return { id: m ? m[1] : null, title: doc.getTitle() || null, pages: doc.getPageCount() };
   } catch {
     return { id: null, title: null, pages: 0 };

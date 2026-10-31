@@ -24,7 +24,7 @@ const uid = (p) => `${p}${Date.now().toString(36)}${(n++).toString(36)}`;
 
 const COPY = {
   prepare: ['Send for<br>signature', 'Start from a contract template or your own PDF, place fields for each signer, then send. Everything is encrypted in this browser before it is uploaded.'],
-  envelopes: ['Your<br>envelopes', 'Envelopes created on this device. Status comes from Massless; the links and keys stay here.'],
+  envelopes: ['Your<br>envelopes', 'Envelopes created on this device. Status comes from Chucksi; the links and keys stay here.'],
   deals: ['Deals', 'One place per deal: envelopes, documents, people and a checklist. Stored in this browser. Export it as an encrypted file to move it.'],
   verify: ['Verify a<br>signed PDF', 'Drop a final PDF. Its fingerprint is computed here and checked against the sealed record.'],
 };
@@ -76,7 +76,7 @@ function setSv(sv) {
     verifyBox();
     $('#sv-verify').replaceChildren(
       el('div', { class: 'row-sel' }, el('span', {}, el('small', {}, 'What gets checked'), el('strong', {}, 'Fingerprint, seal and audit trail'))),
-      el('p', { class: 'side-note' }, 'Verify computes the PDF\'s SHA-256 in this browser and sends only that number. Massless returns the sealed record, and this page checks the ES256 signature with the public key at /api/sign/key.'),
+      el('p', { class: 'side-note' }, 'Verify computes the PDF\'s SHA-256 in this browser and sends only that number. Chucksi returns the sealed record, and this page checks the ES256 signature with the public key at /api/sign/key.'),
       el('p', { class: 'side-note' }, 'Re-saving, printing to PDF or editing a signed file changes its fingerprint, so it no longer verifies. Keep the file you downloaded.'),
       noticeEl());
   }
@@ -118,7 +118,7 @@ function verifyBox() {
 const EXCLUDED = 'U.S. e-signature law (the ESIGN Act and UETA) does not cover wills, codicils and testamentary trusts; adoption, divorce and other family-law matters; court orders, notices and official court papers; notices of utility shutoff, default, foreclosure, eviction or repossession of a primary residence; cancellation of health or life insurance; product recall notices; and papers that must travel with hazardous materials. Deeds for recording, notarized or witnessed documents and some other instruments may need wet ink, a notary or a set process. Check before you send.';
 const noticeEl = () => el('div', { class: 'side-note sg-legal-note' },
   el('span', { html: svg('<circle cx="8" cy="8" r="6"/><path d="M8 7.2v4M8 4.8v.2"/>') }),
-  el('span', {}, 'Massless Sign provides templates and signing tools, not legal advice. ',
+  el('span', {}, 'Chucksi Sign provides templates and signing tools, not legal advice. ',
     el('details', { class: 'sg-excl-d' }, el('summary', {}, 'Documents it should not be used for'), el('span', {}, EXCLUDED))));
 
 // ======================================================================
@@ -377,7 +377,7 @@ function signersEl() {
     }
   }
   wrap.append(el('button', { type: 'button', class: 'btn-ghost wide', id: 'sg-add-signer', disabled: P.signers.length >= MAX_SIGNERS || null, html: `${svg('<path d="M8 3v10M3 8h10"/>')}<span>Add signer</span>`, onclick: () => addSigner() }));
-  wrap.append(el('p', { class: 'side-note' }, P.routing === 'sequential' ? 'Each signer can sign only after the ones above have signed. Massless enforces the order.' : 'Everyone can sign at the same time, in any order.'));
+  wrap.append(el('p', { class: 'side-note' }, P.routing === 'sequential' ? 'Each signer can sign only after the ones above have signed. Chucksi enforces the order.' : 'Everyone can sign at the same time, in any order.'));
   return wrap;
 }
 
@@ -909,7 +909,7 @@ function sentView() {
     el('p', { class: 'sg-hintline' }, hint),
     el('div', { class: 'sg-sent-grid' }, ...cards),
     owner,
-    el('p', { class: 'side-note muted' }, 'Massless sends no email in this version. Copy, share, show the QR code, or hand your device to the signer.'));
+    el('p', { class: 'side-note muted' }, 'Chucksi sends no email in this version. Copy, share, show the QR code, or hand your device to the signer.'));
 }
 
 // ======================================================================
@@ -973,7 +973,7 @@ function envCard(r, deals = {}) {
       r.status === 'sent' ? el('button', { type: 'button', class: 'btn-ghost small', onclick: () => { links.hidden = !links.hidden; if (!links.childElementCount) links.append(...r.signers.map((s) => signerLinkCard({ origin: location.origin, envelopeId: r.id, key: r.key, signer: s, message: r.message, docName: r.name, all: r.signers }))); } }, 'Signer links') : null,
       ['deleted', 'expired'].includes(r.status) ? null : el('a', { class: 'btn-ghost small', href: manageUrl(r), target: '_blank', rel: 'noopener', html: `${ICONS.open}<span>${r.status === 'completed' ? 'Download signed PDF' : 'Status'}</span>` }),
       el('button', { type: 'button', class: 'btn-ghost small', onclick: () => copyText(manageUrl(r), 'Manage link') }, 'Copy manage link'),
-      el('button', { type: 'button', class: 'btn-ghost small danger', onclick: async () => { if (!confirm('Forget this envelope on this device? It stays on Massless until it expires or you delete it from its status page. Without this record you will need the manage link to reach it.')) return; await localEnv.del(r.id); renderEnvelopes(); refreshEnvCount(); } }, 'Forget')),
+      el('button', { type: 'button', class: 'btn-ghost small danger', onclick: async () => { if (!confirm('Forget this envelope on this device? It stays on Chucksi until it expires or you delete it from its status page. Without this record you will need the manage link to reach it.')) return; await localEnv.del(r.id); renderEnvelopes(); refreshEnvCount(); } }, 'Forget')),
     links);
   return card;
 }

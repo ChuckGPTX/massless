@@ -1,4 +1,4 @@
-"""Render a Massless hero frame with open weights through the Comfy SDK.
+"""Render a Chucksi hero frame with open weights through the Comfy SDK.
 
 The same rig vocabulary as the web app (public/data/rig.json) compiles the prompt, and the
 workflow (public/comfy/massless_shot_flux_schnell.api.json) runs FLUX.1 [schnell], an
@@ -56,7 +56,7 @@ def compile_prompt(subject, a):
 
 
 def main():
-    p = argparse.ArgumentParser(description="Render a Massless shot with open weights via the Comfy SDK")
+    p = argparse.ArgumentParser(description="Render a Chucksi shot with open weights via the Comfy SDK")
     p.add_argument("subject")
     p.add_argument("--camera", default="35mm")
     p.add_argument("--lens", default="anamorphic")
@@ -93,7 +93,7 @@ def main():
         path = out / output.name
         output.to_file(str(path))
         print("Saved", path)
-    print("Load it in Massless with 'Use my own still' to add camera moves.")
+    print("Load it in Chucksi with 'Use my own still' to add camera moves.")
 
 
 if __name__ == "__main__":

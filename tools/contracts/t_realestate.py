@@ -6,11 +6,11 @@ add = TEMPLATES.append
 
 def re_state_var(help=None):
     return V("state", "State where the property is located", "select", True, "", STATE_CODES,
-             help or "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules.")
+             help or "Two-letter code. Chucksi shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules.")
 
 
 STATE_HOOK = S("State-specific requirements", """
-The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.""")
+The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Chucksi shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.""")
 
 TX_LICENSEE = when("Texas notes", """
 **Texas.** If a Texas real estate license holder negotiates this transaction, TREC rules generally require the license holder to use the TREC promulgated contract forms instead of this template. For most residential property with one dwelling unit, the seller must give the buyer the Seller's Disclosure Notice described in Texas Property Code §5.008 (or a substantially similar notice). If any recorded lien will stay on the property after the sale (for example a subject-to or wraparound transaction), Texas Property Code §5.016 requires the seller to give the buyer, and each lienholder, a separate written notice at least seven days before the contract is signed or the property is conveyed, whichever is earlier, unless an exception applies.""", "state == 'TX'")

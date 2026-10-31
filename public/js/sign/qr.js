@@ -1,4 +1,4 @@
-// A small QR code encoder (model 2, byte mode, versions 1-40), written for Massless Sign links.
+// A small QR code encoder (model 2, byte mode, versions 1-40), written for Chucksi Sign links.
 // Reed-Solomon over GF(256), block interleaving, all eight masks scored by the standard penalty rules.
 
 const ECC = { L: 0, M: 1, Q: 2, H: 3 };

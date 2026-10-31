@@ -1,4 +1,4 @@
-// Contract templates for Massless Sign: load, fill and render to a PDF with pdf-lib and standard fonts.
+// Contract templates for Chucksi Sign: load, fill and render to a PDF with pdf-lib and standard fonts.
 // Template format: public/office/contracts/<id>.json, listed in public/office/contracts/index.json.
 // Section bodies are markdown-lite: blank lines split paragraphs, a newline is a line break, "- " is a
 // bullet, "1. " or "(a) " a numbered item, "## " a subheading, **bold** and *italic*. {{variable}} fills
@@ -535,7 +535,7 @@ export async function renderTemplate(lib, tplIn, values, opts = {}) {
   }
 
   // ----- disclaimer on the last page -----
-  const notice = 'Massless Sign provides templates and signing tools, not legal advice.';
+  const notice = 'Chucksi Sign provides templates and signing tools, not legal advice.';
   const disc = [tpl.disclaimer, notice].filter(Boolean).join(' ');
   const dl = wrapPlain(F.s, 7.4, disc, W - 20);
   const dH = 22 + dl.length * 9.6 + 8;
@@ -549,7 +549,7 @@ export async function renderTemplate(lib, tplIn, values, opts = {}) {
 
   // ----- footers -----
   const total = pages.length;
-  const foot = safe(F.s, `${tpl.title || 'Agreement'}   ·   ${tpl.id || 'template'} v${tpl.version || 1}   ·   Generated with Massless Sign`);
+  const foot = safe(F.s, `${tpl.title || 'Agreement'}   ·   ${tpl.id || 'template'} v${tpl.version || 1}   ·   Generated with Chucksi Sign`);
   pages.forEach((p, i) => {
     p.drawLine({ start: { x: ML, y: 48 }, end: { x: PW - MR, y: 48 }, thickness: 0.4, color: C(RULE) });
     p.drawText(foot, { x: ML, y: 36, size: 6.8, font: F.s, color: C(SOFT) });
@@ -558,9 +558,9 @@ export async function renderTemplate(lib, tplIn, values, opts = {}) {
   });
 
   doc.setTitle(safe(F.s, title));
-  doc.setSubject(`Massless Sign template ${tpl.id || ''} v${tpl.version || 1}`);
-  doc.setProducer('Massless Sign');
-  doc.setCreator('Massless Sign (massless.chucksi.com)');
+  doc.setSubject(`Chucksi Sign template ${tpl.id || ''} v${tpl.version || 1}`);
+  doc.setProducer('Chucksi Sign');
+  doc.setCreator('Chucksi Sign (chucksi.com)');
   const bytes = await doc.save();
   return { bytes, fields, pages: pages.map(() => ({ w: PW, h: PH })), name: `${title}.pdf` };
 }

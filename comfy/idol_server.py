@@ -1,10 +1,10 @@
-"""Run Idol (speridlabs/idol, Apache-2.0) on your own GPU for the Massless 3D page.
+"""Run Idol (speridlabs/idol, Apache-2.0) on your own GPU for the Chucksi 3D page.
 
     git clone https://github.com/speridlabs/idol-sdk && pip install -e idol-sdk
     hf auth login            # after requesting access to DINOv3 and FLUX.2-dev on Hugging Face
-    python comfy/idol_server.py [--port 7861] [--origin https://massless.chucksi.com]
+    python comfy/idol_server.py [--port 7861] [--origin https://chucksi.com]
 
-Then open https://massless.chucksi.com/3d, choose "Idol on your GPU" and press Build 3D.
+Then open https://chucksi.com/3d, choose "Idol on your GPU" and press Build 3D.
 The browser POSTs the still to /generate and gets a standard 3DGS .ply back. Nothing leaves your machine
 except the image the page sends to this server on localhost.
 """
@@ -15,10 +15,10 @@ from urllib.parse import urlparse, parse_qs
 ap = argparse.ArgumentParser()
 ap.add_argument('--host', default='127.0.0.1')
 ap.add_argument('--port', type=int, default=7861)
-ap.add_argument('--origin', action='append', default=None, help='allowed page origin (repeatable); default: massless.chucksi.com and localhost')
+ap.add_argument('--origin', action='append', default=None, help='allowed page origin (repeatable); default: chucksi.com, the old massless.chucksi.com host and localhost')
 ap.add_argument('--weights', default='speridlabs/idol')
 args = ap.parse_args()
-ORIGINS = set(args.origin or ['https://massless.chucksi.com', 'http://localhost:8787', 'http://127.0.0.1:8787'])
+ORIGINS = set(args.origin or ['https://chucksi.com', 'https://massless.chucksi.com', 'http://localhost:8787', 'http://127.0.0.1:8787'])
 
 import torch  # noqa: E402
 from idol import IdolPipeline  # noqa: E402
@@ -94,5 +94,5 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-print(f'Massless Idol server on http://{args.host}:{args.port} (allowed origins: {", ".join(sorted(ORIGINS))})', flush=True)
+print(f'Chucksi Idol server on http://{args.host}:{args.port} (allowed origins: {", ".join(sorted(ORIGINS))})', flush=True)
 ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()

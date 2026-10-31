@@ -1,4 +1,4 @@
-// Massless Sign crypto, shared by the sender (Office > Sign), the signer page (/sign) and the tests.
+// Chucksi Sign crypto, shared by the sender (Office > Sign), the signer page (/sign) and the tests.
 // Everything here is Web Crypto: AES-GCM 256 for envelopes, SHA-256 fingerprints, ECDSA P-256 to check
 // the Worker's attestation, PBKDF2 for encrypted Deals exports. The envelope key never leaves the browser:
 // it travels only in the link fragment (#k=...), which browsers never send to a server.

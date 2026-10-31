@@ -126,7 +126,7 @@ async function makeDemo() {
     demo = true;
     $("#track-file").value = "";
     $("#track-info").textContent =
-      "Original Massless demo instrumental · no artist vocals. Your own track stays on this device.";
+      "Original Chucksi demo instrumental · no artist vocals. Your own track stays on this device.";
     message("Ready. Play with sound or export your preview.");
   } catch (e) {
     message(`Could not create the demo: ${e.message}`);

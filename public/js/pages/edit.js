@@ -512,7 +512,7 @@ $("#tool-save").onclick = async (e) => {
 $("#tool-download").onclick = async () => {
   try {
     if (!T.result) throw new Error("Nothing to download yet.");
-    downloadBlob(await toPNG(T.result), `massless-${T.tool}.png`);
+    downloadBlob(await toPNG(T.result), `chucksi-${T.tool}.png`);
   } catch (err) {
     message(err.message);
   }
@@ -571,7 +571,7 @@ $("#clear-models").onclick = async () => {
 $("#download").onclick = async () => {
   try {
     if (!image) throw new Error("Open an image first.");
-    downloadBlob(await toPNG(canvas), "massless-edit.png");
+    downloadBlob(await toPNG(canvas), "chucksi-edit.png");
   } catch (e) {
     message(e.message);
   }

@@ -113,7 +113,7 @@ function frameObject() {
   controls.update();
 }
 
-/** kind: 'scene' (Massless depth splat, already in viewer coordinates) or 'object' (Idol or any .ply). */
+/** kind: 'scene' (Chucksi depth splat, already in viewer coordinates) or 'object' (Idol or any .ply). */
 async function showSplat(bytes, { name, kind, target, D, count }) {
   if (!SplatMesh) await viewerReady;
   const next = new SplatMesh({ fileBytes: bytes.slice(0), fileName: name });
@@ -192,7 +192,8 @@ async function loadFile(file) {
 
 async function openSplatFile(file) {
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const ours = new TextDecoder().decode(bytes.slice(0, 200)).includes('Massless depth splat');
+  const head = new TextDecoder().decode(bytes.slice(0, 200));
+  const ours = head.includes('Chucksi depth splat') || head.includes('Massless depth splat'); // older exports
   status('Opening the splat', null);
   try {
     if (ours) {
@@ -346,7 +347,7 @@ function bind() {
   $('#ply-in').addEventListener('change', (e) => openSplatFile(e.target.files[0]));
   $('#open-splat').addEventListener('click', () => $('#ply-in').click());
   $('#build').addEventListener('click', build);
-  $('#download').addEventListener('click', () => state.splat && download(new Blob([state.splat.bytes], { type: 'application/octet-stream' }), `massless-${state.splat.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-')}`));
+  $('#download').addEventListener('click', () => state.splat && download(new Blob([state.splat.bytes], { type: 'application/octet-stream' }), `chucksi-${state.splat.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-')}`));
   $('#strength').addEventListener('input', (e) => { state.strength = Number(e.target.value); $('#o-strength').textContent = `${Math.round(state.strength * 100)}%`; rebuildSoon(); });
   $('#detail').addEventListener('change', (e) => { state.cols = Number(e.target.value); rebuildSoon(); });
   $('#fill').addEventListener('change', (e) => { state.fill = e.target.checked; rebuildSoon(); });
