@@ -117,7 +117,7 @@ function render() {
         new Blob([JSON.stringify(recipeFor(item), null, 2)], {
           type: "application/json",
         }),
-        "massless-recipe.json",
+        "chucksi-recipe.json",
       ),
     );
     button("Rename", async () => {

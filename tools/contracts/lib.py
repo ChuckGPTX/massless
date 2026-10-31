@@ -1,4 +1,4 @@
-"""Helpers for authoring the Massless contract library. Templates are authored in Python and dumped to JSON."""
+"""Helpers for authoring the Chucksi contract library. Templates are authored in Python and dumped to JSON."""
 import re, textwrap
 
 LAST_REVIEWED = "2026-10-30"
@@ -8,7 +8,7 @@ STATE_CODES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA",
                "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC",
                "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
-BASE_DISCLAIMER = ("This is a starting template from the Massless open contract library. It is not legal advice, and "
+BASE_DISCLAIMER = ("This is a starting template from the Chucksi open contract library. It is not legal advice, and "
                    "using it does not create an attorney-client relationship. Laws vary by state and change over time. "
                    "Have a licensed attorney in your state review it before you sign.")
 

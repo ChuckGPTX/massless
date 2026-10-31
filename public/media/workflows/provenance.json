@@ -10,7 +10,8 @@
     "height": 1024,
     "steps": 50,
     "guidance": 3,
-    "role": "MOSS Image concept artwork; not a generated VFX video"
+    "role": "MOSS Image concept artwork; not a generated VFX video",
+    "edit": "2026-10-31: the small bottom wordmark was retouched from MASSLESS to CHUCKSI for the rebrand (inpainted and re-lettered); the rest of the image is the unedited model output."
   },
   {
     "file": "moss-fire.jpg",

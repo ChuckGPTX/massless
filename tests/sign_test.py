@@ -1,4 +1,4 @@
-"""Massless Sign end-to-end in headless Chromium.
+"""Chucksi Sign end-to-end in headless Chromium.
 
 Starts tools/sign/dev_server.mjs (serves public/, mounts src/sign.js on in-memory R2/D1, serves the
 fixture templates from tests/fixtures/contracts at /office/contracts/), then drives the real UI:

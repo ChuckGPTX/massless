@@ -1,7 +1,7 @@
 {
   "date": "2026-10-30",
   "generator": "Built-in image generation",
-  "notice": "Original promotional artwork created in ChatGPT. These stills are scene illustrations, not output examples of the Massless image model. No input image was used.",
+  "notice": "Original promotional artwork created in ChatGPT. These stills are scene illustrations, not output examples of the Chucksi image model. No input image was used.",
   "prompts": {
     "velvet": "Use case: photorealistic-natural. A cinematic landscape 16:9 photograph for a camera-movement example. An empty small vintage velvet cinema, emerald upholstered seats, warm illuminated aisle, a single art deco golden wall lamp in the foreground, deep stage curtains in the distance. Strong foreground middle ground and background separation, atmospheric fine haze, warm tungsten practical lighting and cool shadows, refined film photography, no people, no text, no logos, no watermark. A finished photographic artwork, not a website mockup.",
     "botanical": "Use case: photorealistic-natural. A cinematic landscape 16:9 photograph for a rack-focus camera example: an exquisite pale ivory magnolia blossom with fine water droplets in the left foreground, a quiet glass conservatory with verdant ferns and a curved path receding to the right background. Fresh morning light, delicate peach and mint palette, realistic organic texture, layered depth, dreamlike yet photographic, crisp blossom and softly separated greenhouse. No people, words, logos, watermark or interface.",

@@ -59,7 +59,7 @@ $("#download").onclick = async () => {
   if (await update())
     downloadBlob(
       new Blob([renderTemplate(settings(), art)], { type: "text/html" }),
-      "massless-" + settings().template + ".html",
+      "chucksi-" + settings().template + ".html",
     );
 };
 $("#save").onclick = () => {
@@ -69,7 +69,7 @@ $("#save").onclick = () => {
   } catch {}
   downloadBlob(
     new Blob([JSON.stringify(s, null, 2)], { type: "application/json" }),
-    "massless-template.json",
+    "chucksi-template.json",
   );
   message(
     "Settings downloaded. Selected images stay in this browser; HTML exports embed them.",
@@ -83,7 +83,7 @@ $("#restore").onchange = async (e) => {
       throw new Error("Choose a template settings file under 10 KB.");
     const s = JSON.parse(await f.text());
     if (s.version !== 1)
-      throw new Error("Choose a Massless template settings file.");
+      throw new Error("Choose a Chucksi template settings file.");
     apply(s);
     await update();
   } catch (e) {

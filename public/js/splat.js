@@ -1,6 +1,6 @@
 // Turn a still plus its depth map into a 3D Gaussian splat, written as a standard 3DGS .ply.
 // Every sample becomes a small, flat Gaussian placed along its own camera ray, so the result
-// opens in any splat viewer (Spark, SuperSplat, Polycam) as well as in Massless.
+// opens in any splat viewer (Spark, SuperSplat, Polycam) as well as in Chucksi.
 // A second, sparser layer from the refilled background sits behind foreground objects, so
 // orbiting reveals plausible surroundings instead of holes.
 
@@ -81,7 +81,7 @@ export function depthToSplat({ image, depth, cols = 400, sNear = 0.5, sFar = 1.6
       }
     }
   }
-  const header = `ply\nformat binary_little_endian 1.0\ncomment Massless depth splat\nelement vertex ${count}\n${PROPS.map((p) => `property float ${p}`).join('\n')}\nend_header\n`;
+  const header = `ply\nformat binary_little_endian 1.0\ncomment Chucksi depth splat\nelement vertex ${count}\n${PROPS.map((p) => `property float ${p}`).join('\n')}\nend_header\n`;
   const head = new TextEncoder().encode(header);
   const bytes = new Uint8Array(head.length + out.byteLength);
   bytes.set(head, 0);

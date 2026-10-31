@@ -1,6 +1,6 @@
 # REA notes: what to build next
 
-Clean-room studies of three paid products and one technical question, written to decide what Massless builds next. Each study maps the product's features from public sources, lists open-source building blocks with licenses checked at the source, and designs our own version on Massless's architecture (browser first, Cloudflare Workers AI free tier, the RunPod GPU worker for heavy models).
+Clean-room studies of three paid products and one technical question, written to decide what Chucksi builds next. Each study maps the product's features from public sources, lists open-source building blocks with licenses checked at the source, and designs our own version on Chucksi's architecture (browser first, Cloudflare Workers AI free tier, the RunPod GPU worker for heavy models).
 
 | Study | One-line takeaway |
 | --- | --- |

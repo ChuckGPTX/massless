@@ -143,7 +143,7 @@ $("#glb").onclick = async () => {
       (() => {
         const exported = scene.clone();
         const view = camera.clone();
-        view.name = "Massless camera";
+        view.name = "Chucksi camera";
         exported.add(view);
         return exported;
       })(),
@@ -151,7 +151,7 @@ $("#glb").onclick = async () => {
     );
     downloadBlob(
       new Blob([buffer], { type: "model/gltf-binary" }),
-      "massless-scene.glb",
+      "chucksi-scene.glb",
     );
     message("GLB exported with objects, materials and lights.");
   } catch (e) {
@@ -178,7 +178,7 @@ function recipe() {
 $("#settings").onclick = () =>
   downloadBlob(
     new Blob([JSON.stringify(recipe(), null, 2)], { type: "application/json" }),
-    "massless-scene.json",
+    "chucksi-scene.json",
   );
 $("#restore").onchange = async (e) => {
   try {
@@ -187,7 +187,7 @@ $("#restore").onchange = async (e) => {
     if (f.size > 30000) throw new Error("Choose a scene file under 30 KB.");
     const s = JSON.parse(await f.text());
     if (s.version !== 1 || !Array.isArray(s.objects) || s.objects.length > 40)
-      throw new Error("Choose Massless scene settings.");
+      throw new Error("Choose Chucksi scene settings.");
     for (const o of s.objects) {
       if (
         !["box", "sphere", "torus", "cone"].includes(o.shape) ||

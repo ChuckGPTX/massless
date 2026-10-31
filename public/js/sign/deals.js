@@ -62,8 +62,8 @@ export async function exportDeals(ids, pass) {
 }
 export async function importDeals(text, pass) {
   let wrap;
-  try { wrap = JSON.parse(text); } catch { throw new Error('That is not a Massless Deals file.'); }
-  if (wrap.kind !== 'massless-sign/deals-export') throw new Error('That is not a Massless Deals file.');
+  try { wrap = JSON.parse(text); } catch { throw new Error('That is not a Chucksi Deals file.'); }
+  if (wrap.kind !== 'massless-sign/deals-export') throw new Error('That is not a Chucksi Deals file.');
   const key = await C.passKey(pass, C.unb64u(wrap.salt), wrap.iter || 310000);
   let plain;
   try { plain = await C.decrypt(key, C.unb64u(wrap.data), C.AAD.deals); } catch { throw new Error('Wrong passphrase, or the file was changed.'); }
@@ -82,7 +82,7 @@ function askPass({ title, confirm: twice, action }) {
     const b = twice ? el('input', { type: 'password', id: 'deal-pass2', autocomplete: 'new-password', placeholder: 'Type it again', 'aria-label': 'Repeat passphrase' }) : null;
     const go = el('button', { type: 'button', class: 'btn-accent', id: 'deal-pass-go' }, action);
     d.append(
-      el('p', {}, twice ? 'The file is encrypted with AES-256 using a key made from this passphrase. Massless never sees it, and nobody can open the file without it.' : 'Type the passphrase used when the file was exported.'),
+      el('p', {}, twice ? 'The file is encrypted with AES-256 using a key made from this passphrase. Chucksi never sees it, and nobody can open the file without it.' : 'Type the passphrase used when the file was exported.'),
       el('div', { class: 'field stack' }, a, b),
       el('div', { class: 'sg-actions' }, el('button', { type: 'button', class: 'btn-ghost', onclick: () => d.close() }, 'Cancel'), go));
     document.body.append(d);
@@ -109,7 +109,7 @@ export function mountDeals({ side, stage, envelopes, manageUrl, newEnvelope }) {
   const titleLabel = el('span', {}, PRESETS.residential.titleLabel);
   preset.addEventListener('change', () => { const p = PRESETS[preset.value]; title.placeholder = p.placeholder; titleLabel.textContent = p.titleLabel; });
   title.addEventListener('keydown', (e) => { if (e.key === 'Enter') newDeal(); });
-  const importIn = el('input', { type: 'file', accept: '.json,.massless-deal,application/json', hidden: true, id: 'deal-import-in' });
+  const importIn = el('input', { type: 'file', accept: '.json,.chucksi-deal,.massless-deal,application/json', hidden: true, id: 'deal-import-in' });
   importIn.addEventListener('change', async () => {
     const f = importIn.files[0];
     importIn.value = '';
@@ -127,7 +127,7 @@ export function mountDeals({ side, stage, envelopes, manageUrl, newEnvelope }) {
     el('label', { class: 'row-sel sel' }, el('small', {}, 'Deal type'), preset),
     el('div', { class: 'field' }, el('div', { class: 'f-head' }, titleLabel), title),
     el('p', { class: 'side-note' }, 'Each type starts with a checklist you can edit. Press New deal below.'),
-    el('div', { class: 'grid2' }, el('label', { class: 'btn-ghost', for: 'deal-import-in' }, 'Import'), el('button', { type: 'button', class: 'btn-ghost', id: 'deal-export-all', onclick: async () => { const all = await store.all(); if (!all.length) { toast('No deals to export yet.', 'error'); return; } exportFlow(all.map((d) => d.id), 'massless-deals'); } }, 'Export all')),
+    el('div', { class: 'grid2' }, el('label', { class: 'btn-ghost', for: 'deal-import-in' }, 'Import'), el('button', { type: 'button', class: 'btn-ghost', id: 'deal-export-all', onclick: async () => { const all = await store.all(); if (!all.length) { toast('No deals to export yet.', 'error'); return; } exportFlow(all.map((d) => d.id), 'chucksi-deals'); } }, 'Export all')),
     importIn,
     el('p', { class: 'side-note' }, 'Deals live only in this browser. Exports are encrypted with your passphrase.'));
 
@@ -145,7 +145,7 @@ export function mountDeals({ side, stage, envelopes, manageUrl, newEnvelope }) {
     if (!pass) return;
     try {
       const blob = await exportDeals(ids, pass);
-      download(blob, `${base.replace(/[^\w.-]+/g, '-').slice(0, 60)}.massless-deal.json`);
+      download(blob, `${base.replace(/[^\w.-]+/g, '-').slice(0, 60)}.chucksi-deal.json`);
       toast('Exported. Keep the passphrase: there is no way to recover it.');
     } catch (e) { toast(e.message, 'error'); }
   }
@@ -253,7 +253,7 @@ export function mountDeals({ side, stage, envelopes, manageUrl, newEnvelope }) {
         el('span', { class: 'grow' }),
         el('button', { type: 'button', class: 'btn-accent small', id: 'deal-new-env', onclick: () => newEnvelope(d.id, d.people) }, 'New envelope for this deal'),
         el('button', { type: 'button', class: 'btn-ghost small', id: 'deal-export', onclick: () => exportFlow([d.id], d.title) }, 'Export'),
-        el('button', { type: 'button', class: 'btn-ghost small danger', onclick: async () => { if (!confirm(`Delete the deal "${d.title}" and its documents from this browser? Envelopes stay on Massless.`)) return; await store.del(d.id); current = null; refresh(); } }, 'Delete')),
+        el('button', { type: 'button', class: 'btn-ghost small danger', onclick: async () => { if (!confirm(`Delete the deal "${d.title}" and its documents from this browser? Envelopes stay on Chucksi.`)) return; await store.del(d.id); current = null; refresh(); } }, 'Delete')),
       el('label', { class: 'sg-dtitle-wrap' }, el('small', {}, PRESETS[d.preset]?.titleLabel || 'Deal'), titleIn),
       el('div', { class: 'sg-dprog' }, prog, progText),
       el('div', { class: 'sg-dcols' },

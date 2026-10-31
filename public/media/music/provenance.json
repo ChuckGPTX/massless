@@ -1,7 +1,7 @@
 {
   "date": "2026-10-30",
-  "notice": "Commissioned showcase media, not output of the Massless video renderer. The app has no runtime Higgsfield dependency. The user supplied and authorized the performer photo for these previews; the original photo is retained privately outside the public repository. Model and image rights do not inherit the MIT code license.",
-  "audio": "Original Massless synthesized instrumental; no artist vocals or original Showtime recording. Replaces provider-generated audio in the published clips.",
+  "notice": "Commissioned showcase media, not output of the Chucksi video renderer. The app has no runtime Higgsfield dependency. The user supplied and authorized the performer photo for these previews; the original photo is retained privately outside the public repository. Model and image rights do not inherit the MIT code license.",
+  "audio": "Original Chucksi synthesized instrumental; no artist vocals or original Showtime recording. Replaces provider-generated audio in the published clips.",
   "generations": [
     {
       "name": "showtime-animated",

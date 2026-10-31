@@ -1,4 +1,4 @@
-// Client for the Massless Sign Worker routes. Every POST goes through apiFetch, which answers the
+// Client for the Chucksi Sign Worker routes. Every POST goes through apiFetch, which answers the
 // Turnstile human check once and retries. Tokens travel in the Authorization header; keys never leave.
 
 import { apiFetch } from '../human.js';
@@ -14,11 +14,11 @@ async function read(res) {
   if (!res.ok) {
     let msg = data.error;
     if (!msg) {
-      if (res.status === 404 && !data.error) msg = 'Massless Sign is not switched on here yet.';
+      if (res.status === 404 && !data.error) msg = 'Chucksi Sign is not switched on here yet.';
       else if (res.status >= 500) msg = 'The signing server had a problem. Try again in a minute.';
       else msg = `Something went wrong (${res.status}). Try again.`;
     }
-    if (res.status === 501) msg = data.error || 'Massless Sign is not switched on here yet.';
+    if (res.status === 501) msg = data.error || 'Chucksi Sign is not switched on here yet.';
     throw new SignError(msg, res.status, data);
   }
   return data;

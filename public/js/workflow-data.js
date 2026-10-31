@@ -94,7 +94,7 @@ export function validatePlan(value) {
     value.version !== 1 ||
     !WORKFLOWS.some((x) => x.id === value.workflowId)
   )
-    throw new Error("Choose a Massless workflow plan.");
+    throw new Error("Choose a Chucksi workflow plan.");
   const spec = WORKFLOWS.find((x) => x.id === value.workflowId);
   if (
     typeof value.brief !== "string" ||

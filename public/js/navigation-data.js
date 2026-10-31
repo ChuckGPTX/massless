@@ -246,7 +246,7 @@ export const STUDIOS = [
         "CLOUD",
       ),
       item(
-        "Massless synth",
+        "Chucksi synth",
         "Procedural ambience with Web Audio",
         "/audio?tab=beds",
         "wave",
@@ -260,7 +260,7 @@ export const STUDIOS = [
         "LOCAL",
       ),
       item(
-        "Massless master",
+        "Chucksi master",
         "BS.1770 loudness and a true-peak limiter",
         "/audio?tab=master",
         "sliders",
@@ -386,7 +386,7 @@ export const STUDIOS = [
       ),
       item(
         "Verify a signed PDF",
-        "Check a Massless Sign certificate",
+        "Check a Chucksi Sign certificate",
         "/sign#verify",
         "scan",
       ),

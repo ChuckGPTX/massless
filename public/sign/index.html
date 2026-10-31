@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Massless Sign: free, open-source e-signatures</title>
+  <title>Chucksi Sign: free, open-source e-signatures</title>
   <meta name="description" content="Sign documents on any phone. End-to-end encrypted: the key stays in the link, never on the server. Certificate of Completion and Verify included. Free and open source.">
   <meta name="theme-color" content="#0b0b0c">
   <meta name="referrer" content="no-referrer">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Massless">
-  <meta property="og:url" content="https://massless.chucksi.com/sign">
-  <meta property="og:title" content="Massless Sign: free, open-source e-signatures">
+  <meta property="og:site_name" content="Chucksi">
+  <meta property="og:url" content="https://chucksi.com/sign">
+  <meta property="og:title" content="Chucksi Sign: free, open-source e-signatures">
   <meta property="og:description" content="End-to-end encrypted e-signatures with a Certificate of Completion. Free and open source.">
-  <meta property="og:image" content="https://massless.chucksi.com/og.jpg?v=2">
+  <meta property="og:image" content="https://chucksi.com/og.jpg?v=3">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -24,8 +24,8 @@
 </head>
 <body class="sign-body">
   <header class="nav sg-nav">
-    <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
-    <a class="sg-brand" href="/sign">Massless <b>Sign</b></a>
+    <a class="nav-logo" href="/" aria-label="Chucksi home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+    <a class="sg-brand" href="/sign">Chucksi <b>Sign</b></a>
     <div class="nav-right">
       <button type="button" class="pill-link sg-secure" data-dialog="how"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span>Encrypted</span></button>
       <a class="btn-ghost sg-hide-s" href="/sign#verify">Verify</a>
@@ -34,7 +34,7 @@
   </header>
 
   <main id="app" class="sg-app center" aria-live="polite">
-    <noscript><p class="sg-status">Massless Sign needs JavaScript: decryption and signing happen in your browser.</p></noscript>
+    <noscript><p class="sg-status">Chucksi Sign needs JavaScript: decryption and signing happen in your browser.</p></noscript>
   </main>
 
   <div class="sg-bar" id="bar" hidden role="region" aria-label="Signing progress"></div>
@@ -42,15 +42,15 @@
   <dialog class="sheet sg-sheet" id="how">
     <form method="dialog" class="sheet-head"><h2>How it stays private</h2><button class="x" aria-label="Close">×</button></form>
     <p><strong>The key is in the link.</strong> When the sender creates an envelope, their browser makes a random 256-bit key, encrypts the PDF, the field layout and the filled-in details with AES-GCM, and uploads only the ciphertext. The key travels after the # in the link, a part browsers never send to a server.</p>
-    <p><strong>What Massless sees:</strong> encrypted blobs, their sizes, SHA-256 fingerprints, how many signers there are and in what order, and when each step happened, from which IP address and browser. <strong>What it never sees:</strong> the document's text, names and emails, anything typed into fields, signatures, the message or decline reasons.</p>
-    <p><strong>Proof.</strong> Each step is logged with the server's time, IP and user agent. When everyone has signed, a browser with the key builds the final PDF and a Certificate of Completion. Massless signs the audit trail with an ECDSA P-256 key and records the final file's fingerprint, so Verify can prove a file is unchanged.</p>
+    <p><strong>What Chucksi sees:</strong> encrypted blobs, their sizes, SHA-256 fingerprints, how many signers there are and in what order, and when each step happened, from which IP address and browser. <strong>What it never sees:</strong> the document's text, names and emails, anything typed into fields, signatures, the message or decline reasons.</p>
+    <p><strong>Proof.</strong> Each step is logged with the server's time, IP and user agent. When everyone has signed, a browser with the key builds the final PDF and a Certificate of Completion. Chucksi signs the audit trail with an ECDSA P-256 key and records the final file's fingerprint, so Verify can prove a file is unchanged.</p>
     <p><strong>Retention.</strong> Unsigned envelopes are deleted after 30 days, completed ones after 90. The sender can delete any time.</p>
     <p><strong>Not for every document.</strong> U.S. e-signature law (the ESIGN Act and UETA) does not cover wills, codicils and testamentary trusts; adoption, divorce and other family-law matters; court orders, notices and official court papers; notices of utility shutoff, default, foreclosure, eviction or repossession of a primary residence; cancellation of health or life insurance; product recall notices; and papers that must travel with hazardous materials. Deeds for recording, notarized or witnessed documents and some other instruments may need wet ink, a notary or a set process. Check before you send.</p>
-    <p class="small">Massless Sign provides templates and signing tools, not legal advice. Open source under the MIT license.</p>
+    <p class="small">Chucksi Sign provides templates and signing tools, not legal advice. Open source under the MIT license.</p>
   </dialog>
 
   <footer class="sg-foot">
-    <span>Massless Sign provides templates and signing tools, not legal advice.</span>
+    <span>Chucksi Sign provides templates and signing tools, not legal advice.</span>
     <nav><a href="/sign#verify">Verify</a><a href="/office?tab=sign">Send a document</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">Open source (MIT)</a></nav>
   </footer>
 

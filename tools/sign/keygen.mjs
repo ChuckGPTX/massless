@@ -1,4 +1,4 @@
-// Make the Massless Sign attestation key: an ECDSA P-256 private JWK for the SIGN_KEY secret.
+// Make the Chucksi Sign attestation key: an ECDSA P-256 private JWK for the SIGN_KEY secret.
 //   node tools/sign/keygen.mjs | npx wrangler secret put SIGN_KEY
 // Prints the private JWK on stdout and the public key ID on stderr. Keep the private key secret; the
 // Worker serves only the public half at /api/sign/key.

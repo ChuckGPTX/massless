@@ -1,4 +1,4 @@
-// In-memory stand-ins for the Massless Sign bindings, for tests and local development.
+// In-memory stand-ins for the Chucksi Sign bindings, for tests and local development.
 // FakeD1 runs office/sign_schema.sql on an in-memory SQLite (node:sqlite), so the real SQL is exercised.
 // FakeR2 keeps objects in a Map. Neither touches the disk.
 

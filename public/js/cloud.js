@@ -45,7 +45,8 @@ export async function signIn(email, password) {
   return s;
 }
 export async function signUp(email, password) {
-  const j = await auth("signup", { email, password });
+  // the confirmation email links back to this site's Projects page
+  const j = await auth(`signup?redirect_to=${encodeURIComponent(location.origin + "/projects/")}`, { email, password });
   if (j.access_token)
     saveSession({
       ...j,

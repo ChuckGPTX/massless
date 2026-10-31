@@ -65,7 +65,7 @@ export function signerLinkCard(opts) {
   const { origin, envelopeId, key, signer, message, docName } = opts;
   const link = signLink(origin, envelopeId, signer.token, key);
   const nameText = signer.name || `Signer ${signer.index + 1}`;
-  const invite = `${message ? `${message}\n\n` : ''}Please review and sign "${docName}" with Massless Sign:`;
+  const invite = `${message ? `${message}\n\n` : ''}Please review and sign "${docName}" with Chucksi Sign:`;
   const card = el('article', { class: 'sg-lcard', 'data-signer': signer.index });
   card.style.setProperty('--c', signer.color || '#f5a524');
   const btn = (label, icon, fn, cls = 'btn-ghost small') => el('button', { type: 'button', class: cls, html: `${icon}<span>${label}</span>`, onclick: fn });

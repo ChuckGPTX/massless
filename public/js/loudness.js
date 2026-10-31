@@ -1,4 +1,4 @@
-// Loudness for Massless, shared by Extract audio and Master: the ITU-R BS.1770 meter, loudness range, a 4x
+// Loudness for Chucksi, shared by Extract audio and Master: the ITU-R BS.1770 meter, loudness range, a 4x
 // oversampled true-peak meter and the look-ahead limiter (which can watch true peaks instead of samples).
 // Pure JavaScript with no DOM, so it runs in workers, pages and the Node tests.
 

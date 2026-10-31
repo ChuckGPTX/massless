@@ -1,4 +1,4 @@
-// Massless Sign: Worker routes (src/sign.js) on in-memory R2 and D1 (SQLite running migrations/sign),
+// Chucksi Sign: Worker routes (src/sign.js) on in-memory R2 and D1 (SQLite running migrations/sign),
 // the Worker wiring in src/index.js, and the encrypted Deals export. Runs with `npm test`.
 // Covers create, caps, signing order, consent, decline, completion, attestation and seal signatures,
 // verify pass and tamper fail, expiry and cleanup, delete, and that storage never holds plaintext.
@@ -22,7 +22,7 @@ test('Sign routes: envelopes, order, consent, decline, attestation, verify, expi
     return cond;
   }
 
-  const ORIGIN = 'https://massless.chucksi.com';
+  const ORIGIN = 'https://chucksi.com';
   const T0 = Date.UTC(2026, 9, 30, 12, 0, 0);
   let now = T0;
   _setClock(() => now);

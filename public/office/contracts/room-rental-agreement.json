@@ -88,7 +88,7 @@
         "WI",
         "WY"
       ],
-      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+      "help": "Two-letter code. Chucksi shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
     },
     {
       "id": "host_name",
@@ -511,7 +511,7 @@
     {
       "id": "s19",
       "title": "19. State-specific requirements",
-      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Chucksi shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
       "optional": false
     },
     {
@@ -527,7 +527,7 @@
       "optional": false
     }
   ],
-  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "disclaimer": "This is a starting template from the Chucksi open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
   "sources": [
     {
       "title": "42 U.S.C. §3603 Fair Housing Act exemptions (Cornell LII)",

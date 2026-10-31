@@ -1,10 +1,12 @@
-# Massless
+# Chucksi
+
+Formerly Massless; now at https://chucksi.com.
 
 **A free cinema camera for AI shots.** Design a shot with real camera, lens and film choices, render it with a free open-weight model, then fly a camera through it: dolly zoom, crash zoom, arcs, crane, rack focus, bullet time. Export MP4.
 
-Live: **https://massless.chucksi.com**
+Live: **https://chucksi.com**
 
-The Higgs field is what gives particles mass. Massless aims to remove the weight from creative tools: no account required, open-weight models, and editing that runs on your device. Browser tools are free to use. Hosted inference has shared daily limits; operating a GPU or exceeding a provider's free allowance can cost money.
+Chucksi, the open creative studio, aims to remove the weight from creative tools: no account required, open-weight models, and editing that runs on your device. Browser tools are free to use. Hosted inference has shared daily limits; operating a GPU or exceeding a provider's free allowance can cost money.
 
 ## The site
 
@@ -12,7 +14,7 @@ Five showcase pages introduce the tools: `/studios/image/`, `/studios/video/`, `
 
 | Page | What it does |
 | --- | --- |
-| **Explore** (`/`) | Original cinematic artwork, clear starting points, launch rail, tool tiles, the moves showcase and a wall of clips made in Massless. |
+| **Explore** (`/`) | Original cinematic artwork, clear starting points, launch rail, tool tiles, the moves showcase and a wall of clips made in Chucksi. |
 | **Image** (`/image`) | Cinema Studio, the shot designer. Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio, genre and palette compile into a prompt you can read and edit. Up to four takes per prompt with FLUX.1 schnell. |
 | **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish, plus one-tap effects: LiDAR scan, Vanish, Bullet time freeze and Clones. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
 | **Music Preview** (`/music`) | Turn artwork and a short audio clip into a beat-grid music teaser. Local upload, playback, landscape/portrait/square layouts and MP4 with audio. |
@@ -35,19 +37,19 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 | --- | --- | --- | --- |
 | Hero frame | FLUX.1 [schnell] (Apache-2.0), SDXL-Lightning and SDXL 1.0 (OpenRAIL++), DreamShaper 8 (CreativeML OpenRAIL-M) | Open weights | Cloudflare Workers AI free daily allocation, or your own ComfyUI; Pollinations' community API (NVIDIA Sana, 1 image per 45 s) as a fallback |
 | Depth | Depth Anything V2 Small | Apache-2.0 | The visitor's browser, WebGPU or WebAssembly, via Transformers.js |
-| Camera, lens, film | Massless renderer (WebGL2) | MIT | The visitor's browser |
+| Camera, lens, film | Chucksi renderer (WebGL2) | MIT | The visitor's browser |
 | Video | WebCodecs H.264 + mp4-muxer | Built in / MIT | The visitor's device |
 | Voiceover | Kokoro-82M via kokoro-js | Apache-2.0 | The visitor's browser, WebGPU or WebAssembly |
 | Voiceover, 6 languages | MeloTTS | MIT | Cloudflare Workers AI free daily allocation (`/api/tts`, capped) |
 | Captions | Whisper large-v3-turbo | MIT | Cloudflare Workers AI free daily allocation (`/api/transcribe`, capped); audio is downmixed to 16 kHz mono in the browser first |
-| Sound beds | Massless synth (Web Audio) | MIT | The visitor's browser |
+| Sound beds | Chucksi synth (Web Audio) | MIT | The visitor's browser |
 | Video to MP3 | LAME 3.100 via wasm-media-encoders 0.7.0 (MP3), WebCodecs + mp4-muxer (M4A) | LGPL-2.0 / MIT | The visitor's browser; the encoder is loaded unmodified from jsDelivr and checked by SHA-256 |
 | Remove background | BiRefNet lite (512 × 512 ONNX) or MODNet | MIT / Apache-2.0 | The visitor's browser, WebGPU or WebAssembly, via ONNX Runtime Web |
 | Upscale 2× / 4× | Real-ESRGAN general x4v3 | BSD-3-Clause | The visitor's browser, WebGPU or WebAssembly |
 | Erase object | MI-GAN (512, Places2), or PatchMatch texture copy | MIT | The visitor's browser |
-| Edit by text | Whisper large-v3-turbo for the words; Massless edit engine (`textedit.js`) for cuts, crossfades and captions | MIT | Whisper: Cloudflare Workers AI (`/api/transcribe`, capped); everything else in the visitor's browser |
-| Mastering | Massless mastering chain (`master.js`, `loudness.js`), encoders as Video to MP3 | MIT | The visitor's browser |
-| 3D, in the browser | Depth Anything V2 + Massless splat builder, rendered with Spark | Apache-2.0 / MIT | The visitor's browser |
+| Edit by text | Whisper large-v3-turbo for the words; Chucksi edit engine (`textedit.js`) for cuts, crossfades and captions | MIT | Whisper: Cloudflare Workers AI (`/api/transcribe`, capped); everything else in the visitor's browser |
+| Mastering | Chucksi mastering chain (`master.js`, `loudness.js`), encoders as Video to MP3 | MIT | The visitor's browser |
+| 3D, in the browser | Depth Anything V2 + Chucksi splat builder, rendered with Spark | Apache-2.0 / MIT | The visitor's browser |
 | 3D, full object | Idol (speridlabs) | Apache-2.0 | Your own NVIDIA GPU, through `comfy/idol_server.py` |
 
 The `/api/shot` Worker has a daily request cap (`DAILY_CAP`, default 120 frames) and a per-visitor cap (`PER_VISITOR_CAP`, default 12). These KV-backed request counters are best-effort limits, not a guaranteed spending ceiling: concurrent requests can race, models consume different amounts, and other AI endpoints share Cloudflare's allocation. Atomic budget reservation across all inference endpoints is required before expanding hosted GPU features. When a cap is hit, alternative engines may still be available through Pollinations or your ComfyUI.
@@ -121,7 +123,7 @@ Any static server works for the app alone (`python3 -m http.server -d public`); 
 
 Deploy to your own Cloudflare account: create a KV namespace, put its id in `wrangler.jsonc`, then `npx wrangler deploy`. Workers AI is enabled through the `ai` binding.
 
-How massless.chucksi.com runs today: the Worker in `src/index.js` was uploaded through the Cloudflare API without an assets binding, so it serves the files in `public/` straight from this repo's `main` branch and caches them at Cloudflare's edge. Each page load is pinned to one commit, so a push to `main` goes live within about a minute and a page never mixes two versions; only changes to `src/index.js` need a Worker re-upload (or a switch to `wrangler deploy`, which uses the assets binding instead).
+How chucksi.com runs today: the Worker in `src/index.js` was uploaded through the Cloudflare API without an assets binding, so it serves the files in `public/` straight from this repo's `main` branch and caches them at Cloudflare's edge. Each page load is pinned to one commit, so a push to `main` goes live within about a minute and a page never mixes two versions; only changes to `src/index.js` need a Worker re-upload (or a switch to `wrangler deploy`, which uses the assets binding instead).
 
 ## Open weights only, on your GPU (ComfyUI)
 
@@ -148,7 +150,7 @@ Idol turns one image into a complete 3D Gaussian splat, including the sides the 
 # request access to facebook/dinov3-vith16plus-pretrain-lvd1689m and black-forest-labs/FLUX.2-dev first
 hf auth login
 git clone https://github.com/speridlabs/idol-sdk && pip install -e idol-sdk
-python comfy/idol_server.py          # http://127.0.0.1:7861, allows massless.chucksi.com and localhost:8787
+python comfy/idol_server.py          # http://127.0.0.1:7861, allows chucksi.com and localhost:8787
 ```
 
 Open `/3d`, choose **Full object** and press **Build 3D**. The page posts the still to `/generate` and shows the returned `.ply`. No GPU: Idol's Hugging Face demo exports a `.ply` that **Open .ply** loads.
@@ -188,9 +190,9 @@ python3 tests/shots.py out "/!@1440x900" "/video@390x844"   # screenshots, ! = f
 
 ## Launch media
 
-The portal hero and floating-world artwork (`massless-portal-v1.jpg`, `massless-world-v1.jpg`) were created with OpenAI image generation for the site's visual identity. They are promotional artwork, not examples of output from a Massless model. See [asset provenance and generation prompts](docs/asset-provenance.md).
+The portal hero and floating-world artwork (`massless-portal-v1.jpg`, `massless-world-v1.jpg`) were created with OpenAI image generation for the site's visual identity. They are promotional artwork, not examples of output from a Chucksi model. See [asset provenance and generation prompts](docs/asset-provenance.md).
 
-The sample stills in `public/media/art` were generated for the launch page with a commercial image model (Higgsfield Soul). The "Real projects" row uses art from two projects by the Massless maker, used with permission: [Tiny Prompters](https://tinyprompters.com) (`tp-*`) and the T1 Vendetta fighting game (`t1-*`). Every clip in `public/media/clips` was rendered from those stills by Massless's own camera in headless Chromium. Nothing a visitor runs touches a paid model, and the stills can be swapped for FLUX.1 schnell renders without code changes.
+The sample stills in `public/media/art` were generated for the launch page with a commercial image model (Higgsfield Soul). The "Real projects" row uses art from two projects by the Chucksi maker, used with permission: [Tiny Prompters](https://tinyprompters.com) (`tp-*`) and the T1 Vendetta fighting game (`t1-*`). Every clip in `public/media/clips` was rendered from those stills by Chucksi's own camera in headless Chromium. Nothing a visitor runs touches a paid model, and the stills can be swapped for FLUX.1 schnell renders without code changes.
 
 ## Limits
 
@@ -213,11 +215,11 @@ Games, a website builder, expanded contract/e-sign workflows and hosted Runpod i
 
 MIT, see [LICENSE](LICENSE); third-party notices for the image tools' models are in [LICENSES/](LICENSES/). Uses FLUX.1 [schnell] by Black Forest Labs (Apache-2.0), Depth Anything V2 Small (Apache-2.0), Transformers.js by Hugging Face (Apache-2.0), ONNX Runtime Web by Microsoft (MIT), BiRefNet (MIT), MODNet (Apache-2.0), Real-ESRGAN (BSD-3-Clause), MI-GAN by Picsart AI Research (MIT), mp4-muxer by Vanilagy (MIT), Big Shoulders Display and Instrument Sans (SIL Open Font License).
 
-Inspired by Comfy's Open Source Higgsfield challenge and by REA (Reverse Engineer Anything). Massless contains no code, prompts, assets or branding from Higgsfield; features were rebuilt from public descriptions of their behavior.
+Inspired by Comfy's Open Source Higgsfield challenge and by REA (Reverse Engineer Anything). Chucksi contains no code, prompts, assets or branding from Higgsfield; features were rebuilt from public descriptions of their behavior.
 
 ## Motion-first Explore
 
-Explore now leads with Showtime music-video previews, native effects, five distinct studio landing pages and live browser demos. The camera library has 28 distinct scene artworks, including four new original studies. The Music Preview tool renders artwork and audio locally; Form & Field uses images generated through Massless. The Orbit game and Form & Field website are original, small open-source demos. The gallery's commissioned Kling/Wan/Genjutsu films are visual references, not outputs of the current Massless tools. No paid generation API is required to run the site. See [release notes and GPU roadmap](docs/MOTION-RELEASE.md) and [artwork provenance](docs/asset-provenance.md).
+Explore now leads with Showtime music-video previews, native effects, five distinct studio landing pages and live browser demos. The camera library has 28 distinct scene artworks, including four new original studies. The Music Preview tool renders artwork and audio locally; Form & Field uses images generated through Chucksi. The Orbit game and Form & Field website are original, small open-source demos. The gallery's commissioned Kling/Wan/Genjutsu films are visual references, not outputs of the current Chucksi tools. No paid generation API is required to run the site. See [release notes and GPU roadmap](docs/MOTION-RELEASE.md) and [artwork provenance](docs/asset-provenance.md).
 
 ## Workflows, private projects and MOSS Image
 

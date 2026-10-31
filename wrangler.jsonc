@@ -37,7 +37,7 @@
     "ASSET_REF": "main",
     // AI Gateway in front of every model call (logs and caching off; burst rate limit on).
     "AI_GATEWAY": "massless",
-    // Public Turnstile site key for massless.chucksi.com.
+    // Public Turnstile site key (allowed hosts: chucksi.com, www.chucksi.com, massless.chucksi.com).
     "TURNSTILE_SITEKEY": "0x4AAAAAAFtDPWdw4pzGXhHG",
     // Massless Sign: envelopes per visitor per day, and for everyone per day (atomic counters in D1).
     "PER_VISITOR_SIGN": "20",

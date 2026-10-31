@@ -529,14 +529,14 @@ async function makeSample() {
   const fb = await doc.embedFont(StandardFonts.HelveticaBold);
   const ink = rgb(0.1, 0.1, 0.12), soft = rgb(0.42, 0.42, 0.46), amber = rgb(1, 0.75, 0.18);
   const pages = [
-    ['A free PDF toolkit', ['Massless Office opens, edits and converts PDFs in your browser.', 'Nothing is uploaded. Pick a tool above the page and try it here:', '', 'Highlight this line with the marker.', 'Click anywhere with Text and type a sentence.', 'Circle something with Draw.', 'Leave a sticky Note in the margin.']],
+    ['A free PDF toolkit', ['Chucksi Office opens, edits and converts PDFs in your browser.', 'Nothing is uploaded. Pick a tool above the page and try it here:', '', 'Highlight this line with the marker.', 'Click anywhere with Text and type a sentence.', 'Circle something with Draw.', 'Leave a sticky Note in the margin.']],
     ['Convert anything', ['Turn photos into a PDF, or every page into a PNG.', 'Merge several files, split out the pages you need,', 'rotate sideways scans and shrink big files.', '', 'Extract text pulls the words out as a .txt file.']],
     ['Sign here', ['Make a signature once with Sign, then click the line below.', 'Drag to move it, pull the corner to resize, then press Save PDF.']],
   ];
   pages.forEach(([title, lines], i) => {
     const p = doc.addPage([612, 792]);
     p.drawRectangle({ x: 0, y: 760, width: 612, height: 32, color: amber });
-    p.drawText('MASSLESS OFFICE', { x: 56, y: 771, size: 10, font: fb, color: rgb(0.11, 0.08, 0) });
+    p.drawText('CHUCKSI OFFICE', { x: 56, y: 771, size: 10, font: fb, color: rgb(0.11, 0.08, 0) });
     p.drawText(`Page ${i + 1} of ${pages.length}`, { x: 480, y: 771, size: 10, font: f, color: rgb(0.11, 0.08, 0) });
     p.drawText(title, { x: 56, y: 680, size: 34, font: fb, color: ink });
     lines.forEach((l, k) => l && p.drawText(l, { x: 56, y: 630 - k * 26, size: 14, font: f, color: k ? soft : ink }));
@@ -552,7 +552,7 @@ async function makeSample() {
 async function openSample() {
   const b = $('#sample');
   b.disabled = true;
-  try { await openBytes('massless-sample.pdf', await makeSample()); } catch (e) { toast(`Could not make the sample: ${e.message}`, 'error'); } finally { b.disabled = false; }
+  try { await openBytes('chucksi-sample.pdf', await makeSample()); } catch (e) { toast(`Could not make the sample: ${e.message}`, 'error'); } finally { b.disabled = false; }
 }
 
 // ---------- signature pad ----------
