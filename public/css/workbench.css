@@ -41,6 +41,13 @@
   color: #c7c7c7;
   font-size: 13px;
 }
+.bench label.btn-accent {
+  display: inline-flex;
+  flex-direction: row;
+  color: var(--accent-ink);
+  font-size: 14px;
+  cursor: pointer;
+}
 .bench input:not([type="range"]):not([type="checkbox"]):not([type="color"]),
 .bench select,
 .bench textarea {

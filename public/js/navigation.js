@@ -83,6 +83,12 @@ export function initNavigation() {
   const mobileProjects=node("a","studio-explore mobile-projects","My projects");mobileProjects.href="/projects/";nav.append(mobileProjects);
   const library=node("a","btn-ghost","My library");library.href="/library/";
   if(!header.querySelector('.nav-right a[href="/library/"]')) header.querySelector(".nav-right")?.prepend(library);
+  // Every page links to the source, since being open is the point.
+  const right=header.querySelector(".nav-right");
+  if(right&&!right.querySelector('a[href^="https://github.com/ChuckGPTX/massless"]')){
+    const gh=node("a","btn-ghost","GitHub");gh.href="https://github.com/ChuckGPTX/massless";gh.rel="noopener";
+    const cta=right.querySelector(".btn-accent");cta?cta.before(gh):right.append(gh);
+  }
   nav.id = "studio-navigation";
 
   const toggle = node("button", "studio-mobile-toggle");
