@@ -80,7 +80,7 @@ async function boot() {
     }
     return fail('Could not open the envelope', e.message || String(e));
   }
-  document.title = `${S.meta.name || 'Document'} | Massless Sign`;
+  document.title = `${S.meta.name || 'Document'} | Chucksi Sign`;
   if (S.owner) return manage();
   S.me = S.meta.signers.find((s) => s.index === S.env.you.index) || { index: S.env.you.index, role: `r${S.env.you.index}` };
   S.mine = (S.meta.fields || []).filter((x) => x.role === S.me.role).sort(byPosition);
@@ -114,7 +114,7 @@ function loading(title, sub) {
   screen('center', el('div', { class: 'sg-status' }, el('span', { class: 'sg-spin', 'aria-hidden': 'true' }), el('h1', { class: 'display' }, title), el('p', { class: 'muted' }, sub)));
 }
 function fail(title, sub) {
-  screen('center', el('div', { class: 'sg-status bad' }, el('span', { class: 'sg-badge bad', html: I.x }), el('h1', { class: 'display' }, title), el('p', { class: 'muted' }, sub), el('a', { class: 'btn-ghost', href: '/sign' }, 'Massless Sign home')));
+  screen('center', el('div', { class: 'sg-status bad' }, el('span', { class: 'sg-badge bad', html: I.x }), el('h1', { class: 'display' }, title), el('p', { class: 'muted' }, sub), el('a', { class: 'btn-ghost', href: '/sign' }, 'Chucksi Sign home')));
   try { sessionStorage.removeItem('ms-sign'); } catch { /* fine */ }
 }
 
@@ -137,18 +137,18 @@ async function downloadOriginal() {
 }
 
 function landing(focusVerify) {
-  document.title = 'Massless Sign: free, open-source e-signatures';
+  document.title = 'Chucksi Sign: free, open-source e-signatures';
   const v = el('div', { class: 'sg-verify-box', id: 'verify' });
   screen('landing',
     el('section', { class: 'sg-hero' },
       el('span', { class: 'sg-eyebrow', html: `${I.lock}<span>Free · open source (MIT) · end-to-end encrypted</span>` }),
       el('h1', { class: 'display' }, 'Sign anything.', el('br'), 'Show no one.'),
-      el('p', { class: 'muted' }, 'Massless Sign sends documents for signature with the key in the link, never on the server. Signers sign on any phone, the final PDF carries a certificate, and anyone can check it.'),
+      el('p', { class: 'muted' }, 'Chucksi Sign sends documents for signature with the key in the link, never on the server. Signers sign on any phone, the final PDF carries a certificate, and anyone can check it.'),
       el('div', { class: 'sg-cta' }, el('a', { class: 'btn-accent', href: '/office?tab=sign' }, 'Send a document'), el('a', { class: 'btn-ghost', href: '#verify', onclick: (e) => { e.preventDefault(); v.scrollIntoView({ behavior: 'smooth' }); } }, 'Verify a PDF'))),
     el('section', { class: 'sg-feats' },
       feat('Encrypted before upload', 'Your browser locks the PDF, fields and signatures with a random key. The key rides in the link after the #, which browsers never send to a server.'),
       feat('Signed in order', 'Signers go one after another or all at once. The server enforces the order and timestamps every step with IP and device.'),
-      feat('Proof you can check', 'The final PDF ends with a Certificate of Completion. Massless signs the audit trail, and Verify catches a single changed byte.')),
+      feat('Proof you can check', 'The final PDF ends with a Certificate of Completion. Chucksi signs the audit trail, and Verify catches a single changed byte.')),
     el('section', { class: 'sg-vsec' }, el('h2', { class: 'display' }, 'Verify'), v),
     el('section', { class: 'sg-feat sg-excl' }, el('h3', {}, 'Not for every document'), el('p', { class: 'muted' }, EXCLUDED)));
   mountVerify(v);
@@ -263,16 +263,16 @@ function consentView() {
       el('h2', { class: 'display' }, 'Before you sign'),
       el('p', { class: 'lead' }, `${S.meta.senderName ? esc(S.meta.senderName) : 'The sender'} asks you to review and sign this document electronically. Please read this, then agree to continue.`),
       sec('Electronic records and signatures', 'You agree to receive this document and its signed copy electronically, and to sign with an electronic signature. Your electronic signature means the same as signing on paper. This consent covers this envelope only.'),
-      sec('Your right to paper', 'You can ask the sender for a paper copy instead, at any time. Massless charges nothing for it; the sender will tell you if they charge a fee. You can also download and print the document below.'),
+      sec('Your right to paper', 'You can ask the sender for a paper copy instead, at any time. Chucksi charges nothing for it; the sender will tell you if they charge a fee. You can also download and print the document below.'),
       sec('Withdrawing consent', 'You can withdraw consent before you finish by choosing Decline, or by telling the sender. Withdrawing does not undo a signature you already gave. If you withdraw, the sender may send the document on paper. Tell the sender if your email or other contact details change.'),
       sec('What you need', 'A current web browser (Chrome, Safari, Edge or Firefox from the last two years) with JavaScript on, a screen that can show PDFs, and a way to save or print files. No account and no app.'),
-      sec('Keeping a copy', 'Download the PDF now, and the final signed PDF with its certificate once everyone has signed. Keep your link: it is the only way back in. Completed envelopes are deleted from Massless after 90 days.'),
-      el('div', { class: 'sg-row' }, el('button', { type: 'button', class: 'btn-ghost', html: `${I.dl}<span>Download the document (PDF)</span>`, onclick: downloadOriginal }), el('button', { type: 'button', class: 'btn-ghost', onclick: () => $('#how')?.showModal() }, 'How Massless keeps it private')),
+      sec('Keeping a copy', 'Download the PDF now, and the final signed PDF with its certificate once everyone has signed. Keep your link: it is the only way back in. Completed envelopes are deleted from Chucksi after 90 days.'),
+      el('div', { class: 'sg-row' }, el('button', { type: 'button', class: 'btn-ghost', html: `${I.dl}<span>Download the document (PDF)</span>`, onclick: downloadOriginal }), el('button', { type: 'button', class: 'btn-ghost', onclick: () => $('#how')?.showModal() }, 'How Chucksi keeps it private')),
       box,
       go,
       el('button', { type: 'button', class: 'sg-link danger', onclick: declineFlow }, 'Decline to sign')));
 }
-const notice = () => el('p', { class: 'sg-notice' }, 'Massless Sign provides templates and signing tools, not legal advice.');
+const notice = () => el('p', { class: 'sg-notice' }, 'Chucksi Sign provides templates and signing tools, not legal advice.');
 
 // ======================================================================
 // in-person hand-off
@@ -567,7 +567,7 @@ function moreMenu() {
       const a = await adoptSignature({ name: S.adopted?.name || S.confirmedName || S.me.name || '', needInitials: S.mine.some((x) => x.type === 'initials') });
       if (a) { S.adopted = a; saveDraft(); drawFields(true); }
     }),
-    item('How Massless keeps this private', () => $('#how')?.showModal()),
+    item('How Chucksi keeps this private', () => $('#how')?.showModal()),
     item('Decline to sign', declineFlow, 'danger'));
   document.body.append(d);
   d.addEventListener('close', () => d.remove());
@@ -665,7 +665,7 @@ async function completedView(justSigned = false) {
   screen('center', el('div', { class: 'sg-card sg-done wide' },
     el('span', { class: 'sg-badge ok', html: I.check }),
     el('h1', { class: 'display' }, justSigned ? 'Done. Everyone signed.' : 'Completed'),
-    el('p', { class: 'muted' }, `${(S.meta.name || 'The document').replace(/\.pdf$/i, '')} is signed by everyone. The final PDF adds a Certificate of Completion with the audit trail, sealed by Massless.`),
+    el('p', { class: 'muted' }, `${(S.meta.name || 'The document').replace(/\.pdf$/i, '')} is signed by everyone. The final PDF adds a Certificate of Completion with the audit trail, sealed by Chucksi.`),
     signers, state, dl,
     el('div', { class: 'sg-row center' },
       el('button', { type: 'button', class: 'btn-ghost small', html: `${I.dl}<span>Original PDF</span>`, onclick: downloadOriginal }),
@@ -711,7 +711,7 @@ async function manage() {
   if (rec && env.status === 'sent') {
     for (const s of rec.signers) links.append(signerLinkCard({ origin: location.origin, envelopeId: env.id, key: S.f.k, signer: s, message: S.meta.message, docName: S.meta.name, all: rec.signers }));
   } else if (env.status === 'sent') {
-    links.append(el('p', { class: 'muted small' }, 'Signer links live on the device that created the envelope (Office > Sign > Envelopes). Massless cannot show them here: it never stored them.'));
+    links.append(el('p', { class: 'muted small' }, 'Signer links live on the device that created the envelope (Office > Sign > Envelopes). Chucksi cannot show them here: it never stored them.'));
   } else links.hidden = true;
   const auditBox = el('section', { class: 'sg-sec' }, el('h2', {}, 'Audit trail'), el('p', { class: 'muted small' }, 'Loading…'));
   const declined = el('div', { class: 'sg-reasons-box' });
@@ -727,20 +727,20 @@ async function manage() {
     links, auditBox);
   try {
     const a = await S.api.audit();
-    const rows = a.events.map((e) => el('tr', {}, el('td', {}, String(e.seq)), el('td', {}, utcStamp(e.at)), el('td', {}, el('strong', {}, EVENT_LABEL[e.type] || e.type)), el('td', {}, e.actor === 'owner' ? 'Sender' : e.actor === 'server' ? 'Massless' : nameOf(S.meta.signers.find((s) => s.index === e.signer))), el('td', { class: 'mono' }, e.ip || ''), el('td', { class: 'ua' }, e.ua || '')));
+    const rows = a.events.map((e) => el('tr', {}, el('td', {}, String(e.seq)), el('td', {}, utcStamp(e.at)), el('td', {}, el('strong', {}, EVENT_LABEL[e.type] || e.type)), el('td', {}, e.actor === 'owner' ? 'Sender' : e.actor === 'server' ? 'Chucksi' : nameOf(S.meta.signers.find((s) => s.index === e.signer))), el('td', { class: 'mono' }, e.ip || ''), el('td', { class: 'ua' }, e.ua || '')));
     auditBox.replaceChildren(el('h2', {}, 'Audit trail'), el('div', { class: 'sg-tablewrap' }, el('table', { class: 'sg-table' }, el('thead', {}, el('tr', {}, ...['#', 'Time', 'Event', 'By', 'IP', 'Device'].map((h) => el('th', {}, h)))), el('tbody', {}, ...rows))));
   } catch (e) { auditBox.querySelector('p').textContent = e.message; }
   if (rec) local.put({ ...rec, status: env.status, statusText, checked: Date.now() }).catch(() => {});
 }
 
 async function deleteEnvelope() {
-  if (!confirm('Delete this envelope for everyone? The document, signatures and audit trail are erased from Massless. Links stop working. A seal with fingerprints only (no names, no content) stays so copies already downloaded can still be verified.')) return;
+  if (!confirm('Delete this envelope for everyone? The document, signatures and audit trail are erased from Chucksi. Links stop working. A seal with fingerprints only (no names, no content) stays so copies already downloaded can still be verified.')) return;
   try {
     await S.api.remove();
     const rec = await local.get(S.env.id).catch(() => null);
     if (rec) await local.put({ ...rec, status: 'deleted', statusText: 'Deleted' });
     try { sessionStorage.removeItem('ms-sign'); } catch { /* fine */ }
-    screen('center', el('div', { class: 'sg-card sg-done' }, el('span', { class: 'sg-badge', html: I.check }), el('h1', { class: 'display' }, 'Deleted'), el('p', { class: 'muted' }, 'The envelope and its ciphertext are gone from Massless.'), el('a', { class: 'btn-ghost', href: '/office?tab=sign' }, 'Back to Office')));
+    screen('center', el('div', { class: 'sg-card sg-done' }, el('span', { class: 'sg-badge', html: I.check }), el('h1', { class: 'display' }, 'Deleted'), el('p', { class: 'muted' }, 'The envelope and its ciphertext are gone from Chucksi.'), el('a', { class: 'btn-ghost', href: '/office?tab=sign' }, 'Back to Office')));
   } catch (e) { toast(e.message, 'error'); }
 }
 

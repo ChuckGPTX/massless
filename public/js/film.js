@@ -220,7 +220,7 @@ R.hero = (g, W, H, lb, blk, env) => {
   grad.addColorStop(1, bg);
   g.fillStyle = grad;
   g.fillRect(0, 0, W, H);
-  const text = (blk.text || env.spec.title || 'MASSLESS').toUpperCase();
+  const text = (blk.text || env.spec.title || 'CHUCKSI').toUpperCase();
   const sz = fitFont(g, text, W * 0.78, H * 0.42);
   const angle = -0.9 + 1.8 * ease.inOut(t);
   const s = 0.86 + 0.18 * ease.out(t * 1.3) + 0.25 * (1 - ease.outExpo(lb * 2));
@@ -491,7 +491,7 @@ R.logo = (g, W, H, lb, blk, env) => {
   const hit = ease.outExpo(lb * 3);
   g.fillStyle = env.ground(0);
   g.fillRect(0, 0, W, H);
-  const name = (blk.text || env.spec.title || 'MASSLESS').toUpperCase();
+  const name = (blk.text || env.spec.title || 'CHUCKSI').toUpperCase();
   const sz = fitFont(g, name, W * 0.66, H * 0.22);
   const mark = sz * 0.9;
   const s = 1 + 0.4 * (1 - hit);
@@ -642,8 +642,8 @@ function keywords(text, n) {
 }
 
 /** A complete beat sheet from a brief, with no model: the structure of a launch film, filled with the brief's words. */
-export function templateSpec({ name = 'Massless', brief = '', style = 'phonk', bpm = 150, palette = 'amber', length = 'standard', images = [] }) {
-  const title = name.trim() || 'Massless';
+export function templateSpec({ name = 'Chucksi', brief = '', style = 'phonk', bpm = 150, palette = 'amber', length = 'standard', images = [] }) {
+  const title = name.trim() || 'Chucksi';
   const kw = keywords(`${brief}`, 12);
   while (kw.length < 8) kw.push(['FAST', 'FREE', 'BOLD', 'YOURS', 'NOW', 'LOUD', 'CLEAN', 'REAL'][kw.length % 8]);
   const num = (brief.match(/\b\d{1,5}\b/) || [])[0];
@@ -669,7 +669,7 @@ export function templateSpec({ name = 'Massless', brief = '', style = 'phonk', b
     blocks.push({ type: 'words', beats: 4, words: [kw[0], kw[1], kw[2], title.toUpperCase()], mode: 'split' });
     blocks.push({ type: 'hero', beats: 4, text: title });
   }
-  blocks.push({ type: 'logo', beats: 6, text: title, sub: brief ? brief.split(/[.!?]/)[0].slice(0, 70) : 'Made with Massless' });
+  blocks.push({ type: 'logo', beats: 6, text: title, sub: brief ? brief.split(/[.!?]/)[0].slice(0, 70) : 'Made with Chucksi' });
   return { title, style, bpm, palette, blocks };
 }
 

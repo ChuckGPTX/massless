@@ -194,7 +194,7 @@ async function genVoice() {
   const v = VOICES.find((x) => x.id === state.voice);
   try {
     const res = await speak(text, { voice: v.id, speed: Number($('#speed').value), onProgress: progress });
-    await addItem({ type: 'voice', title: text, sub: `${v.name} · ${res.duration.toFixed(1)} s`, blob: res.blob, duration: res.duration, file: `massless-voice-${v.name.toLowerCase()}` }, true);
+    await addItem({ type: 'voice', title: text, sub: `${v.name} · ${res.duration.toFixed(1)} s`, blob: res.blob, duration: res.duration, file: `chucksi-voice-${v.name.toLowerCase()}` }, true);
   } catch (e) { toast(`Voice failed: ${e.message}`, 'error'); } finally { setBusy(false); }
 }
 
@@ -203,7 +203,7 @@ async function genMelo(text) {
   setBusy(true, 'Sending to Cloudflare');
   try {
     const res = await speakMelo(text, { lang: l.id, onProgress: progress });
-    await addItem({ type: 'voice', title: text, sub: `MeloTTS · ${l.name} · ${res.duration.toFixed(1)} s`, blob: res.blob, duration: res.duration, file: `massless-voice-melotts-${l.id}` }, true);
+    await addItem({ type: 'voice', title: text, sub: `MeloTTS · ${l.name} · ${res.duration.toFixed(1)} s`, blob: res.blob, duration: res.duration, file: `chucksi-voice-melotts-${l.id}` }, true);
   } catch (e) { toast(`Voice failed: ${e.message}`, 'error'); } finally { setBusy(false); }
 }
 
@@ -214,7 +214,7 @@ async function genBed() {
   const seconds = Math.min(MAX_BED_SECONDS, Number($('#length').value));
   try {
     const res = await renderBed(b.id, seconds, { intensity: Number($('#bed-intensity').value) });
-    await addItem({ type: 'bed', title: `${b.name} bed`, sub: `${seconds} s · stereo 48 kHz`, blob: res.blob, duration: res.duration, file: `massless-bed-${b.id}` }, true);
+    await addItem({ type: 'bed', title: `${b.name} bed`, sub: `${seconds} s · stereo 48 kHz`, blob: res.blob, duration: res.duration, file: `chucksi-bed-${b.id}` }, true);
   } catch (e) { toast(`Render failed: ${e.message}`, 'error'); } finally { setBusy(false); }
 }
 

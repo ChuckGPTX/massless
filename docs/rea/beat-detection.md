@@ -1,6 +1,6 @@
-# Beat and downbeat detection for Massless
+# Beat and downbeat detection for Chucksi
 
-Goal: given a song the visitor drops in (or one Massless made), return its tempo, every beat and the first beat of every bar, fast enough to cut Film blocks and Video storyboard shots to it, in the browser for $0, with a more accurate path where it's worth it.
+Goal: given a song the visitor drops in (or one Chucksi made), return its tempo, every beat and the first beat of every bar, fast enough to cut Film blocks and Video storyboard shots to it, in the browser for $0, with a more accurate path where it's worth it.
 
 Research date: 2026-10-30. Licenses verified from each repo's LICENSE file and, for weights, the Hugging Face model card metadata. Third-party code was read, not executed.
 
@@ -8,7 +8,7 @@ Research date: 2026-10-30. Licenses verified from each repo's LICENSE file and, 
 
 ## 1. The starting point: Imagination Studio's `app/beats.py`
 
-Source: [drowzeys/Imagination-Studio-by-keys-Wasserman](https://github.com/drowzeys/Imagination-Studio-by-keys-Wasserman), `app/beats.py` (301 lines), Apache-2.0. Massless already carries its license and NOTICE in `LICENSES/`.
+Source: [drowzeys/Imagination-Studio-by-keys-Wasserman](https://github.com/drowzeys/Imagination-Studio-by-keys-Wasserman), `app/beats.py` (301 lines), Apache-2.0. Chucksi already carries its license and NOTICE in `LICENSES/`.
 
 **What it does** (from reading the code):
 
@@ -137,7 +137,7 @@ Add `tests/beats_eval.py` (mir_eval, MIT) and a JS harness that runs the engines
 
 1. **Synthetic** (committed, generated in the test): click tracks at 60-200 BPM, with tempo ramps, swing, a pickup bar, 3/4 and 6/8, added noise and reverb. Pass bar: tempo within 1%, beat F above 0.95, correct downbeat phase for 4/4 and 3/4.
 2. **Parity**: the JS DSP port against reference JSON produced once from the reviewed Python original (committed fixtures; beat times within 1 ms, BPM within 0.01).
-3. **Real music, local only**: GTZAN (with the publicly shared beat annotations) or any set the maintainer owns, never committed (audio copyright). Report F, CMLt, AMLt for beats and downbeats per engine, so the table in section 3 gets a "Massless DSP" and "Massless Beat This! small (ONNX)" row measured by us.
+3. **Real music, local only**: GTZAN (with the publicly shared beat annotations) or any set the maintainer owns, never committed (audio copyright). Report F, CMLt, AMLt for beats and downbeats per engine, so the table in section 3 gets a "Chucksi DSP" and "Chucksi Beat This! small (ONNX)" row measured by us.
 4. **CC-licensed songs** (5-10, committed with attribution, beats hand-annotated by tapping and correcting): a small regression set that runs in CI.
 
 ---

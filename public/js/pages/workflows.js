@@ -127,7 +127,7 @@ $("#export-run").onclick = () => {
     url = URL.createObjectURL(blob),
     a = make("a");
   a.href = url;
-  a.download = "massless-" + plan.workflowId + ".json";
+  a.download = "chucksi-" + plan.workflowId + ".json";
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };

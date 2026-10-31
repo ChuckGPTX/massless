@@ -1,4 +1,4 @@
-// Edit by text for Massless: the pure logic behind cutting media by editing its transcript.
+// Edit by text for Chucksi: the pure logic behind cutting media by editing its transcript.
 // Words come from Whisper (word timings per segment). The visitor's edits are a small state, never media:
 //   { struck: Set<word index>, caps: Map<gap index, seconds> }
 // compile() turns words + state into keep ranges in source seconds; snapCuts() moves every cut edge to the
@@ -507,7 +507,7 @@ const tc = (t, fps) => {
 };
 
 /** CMX 3600 edit list of the kept ranges (frame-rounded timecode) for any editor that reads EDLs. */
-export function toEdl(keep, { title = 'Massless edit', clip = 'source', fps = 30 } = {}) {
+export function toEdl(keep, { title = 'Chucksi edit', clip = 'source', fps = 30 } = {}) {
   const lines = [`TITLE: ${title.replace(/[\r\n]/g, ' ').slice(0, 70)}`, 'FCM: NON-DROP FRAME', ''];
   let rec = 0;
   keep.forEach(([a, b], k) => {

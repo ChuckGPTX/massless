@@ -72,7 +72,7 @@ def make_pdf(path, label, n, rotate=None):
     c = rl_canvas.Canvas(buf, pagesize=letter)
     for i in range(1, n + 1):
         c.setFont('Helvetica-Bold', 26)
-        c.drawString(72, 700, f'Massless {label} page {i}')
+        c.drawString(72, 700, f'Chucksi {label} page {i}')
         c.setFont('Helvetica', 13)
         for k in range(12):
             c.drawString(72, 660 - k * 22, f'Line {k + 1} of sample text on page {i} for the Office test.')
@@ -329,7 +329,7 @@ with sync_playwright() as p:
     grew = [len(r.pages[i].get_contents().get_data()) - len(orig.pages[i].get_contents().get_data()) for i in range(3)]
     check('content_streams_grew', grew[0] > 200 and grew[1] > 50 and grew[2] > 20, grew)
     t1 = r.pages[0].extract_text()
-    check('saved_text_drawn', 'Hello from the test' in t1 and 'Massless doc3 page 1' in t1)
+    check('saved_text_drawn', 'Hello from the test' in t1 and 'Chucksi doc3 page 1' in t1)
     r1 = rects(r.pages[0])
     check('highlight_coords_page1', any(all(approx(a, b) for a, b in zip(rc, exp_hl1)) for rc in r1), {'expected': [round(v, 1) for v in exp_hl1], 'found': [[round(v, 1) for v in rc] for rc in r1]})
     r2 = rects(r.pages[1])
@@ -423,7 +423,7 @@ with sync_playwright() as p:
     # extract text
     info, data = run_convert(pg, 'text', [DOC3])
     txt = data.decode('utf-8')
-    check('extract_text', all(f'Massless doc3 page {i}' in txt for i in (1, 2, 3)) and '--- Page 2 ---' in txt and pg.input_value('#text-out') == txt, {**info, 'head': txt[:80]})
+    check('extract_text', all(f'Chucksi doc3 page {i}' in txt for i in (1, 2, 3)) and '--- Page 2 ---' in txt and pg.input_value('#text-out') == txt, {**info, 'head': txt[:80]})
 
     # downloads happen only on click, from the result card
     with pg.expect_download() as dl:
@@ -449,7 +449,7 @@ with sync_playwright() as p:
     body = ASK['bodies'][-1]
     check('ask_answer_shown', pg.inner_text('.acard:first-child p') == 'Mock answer to: What is on page 2?' and 'llama-3.3-70b' in pg.inner_text('.acard:first-child .meta'),
           pg.inner_text('.acard:first-child'))
-    check('ask_request_shape', set(body) == {'question', 'text'} and body['question'] == 'What is on page 2?' and 0 < len(body['text']) <= 12000 and 'Massless doc3 page 2' in body['text'], {'keys': list(body), 'chars': len(body['text'])})
+    check('ask_request_shape', set(body) == {'question', 'text'} and body['question'] == 'What is on page 2?' and 0 < len(body['text']) <= 12000 and 'Chucksi doc3 page 2' in body['text'], {'keys': list(body), 'chars': len(body['text'])})
     ASK['mode'] = '429'
     pg.click('#ask')
     pg.wait_for_function("document.querySelectorAll('.acard').length === 3 && !massless.live.busy")

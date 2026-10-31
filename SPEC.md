@@ -1,4 +1,4 @@
-# Massless: clean-room feature contract
+# Chucksi: clean-room feature contract
 
 This is the "oracle" step of the REA-style loop (observe → write the contract → rebuild from scratch → check against the contract). Every behavior below was taken from **public** material only: product help pages, public API schemas published on docs.comfy.org, third-party tutorials and marketing pages. No proprietary code, binaries, weights, prompts or assets were inspected, decompiled or copied.
 
@@ -11,7 +11,7 @@ This is the "oracle" step of the REA-style loop (observe → write the contract 
 - A key ("hero") frame is generated first and defines the look; motion is applied after.
 - Paid models do the generation (Kling, Veo, Seedance, Higgsfield's own).
 
-**Massless contract**
+**Chucksi contract**
 
 | Input | Values |
 | --- | --- |
@@ -27,7 +27,7 @@ This is the "oracle" step of the REA-style loop (observe → write the contract 
 | Stock / grade | 8 presets |
 | Aspect | 2.39:1, 1.85:1, 16:9, 4:5, 9:16, 1:1 |
 
-**Output:** a hero frame at the chosen aspect, plus the exact compiled prompt shown to the user (Higgsfield hides it; Massless shows it and lets you edit it).
+**Output:** a hero frame at the chosen aspect, plus the exact compiled prompt shown to the user (Higgsfield hides it; Chucksi shows it and lets you edit it).
 
 **Improvement over the original:** the rig is not only words in a prompt. Lens, focal length, camera look and aperture also drive a physical post pipeline: barrel distortion for 8/14mm, oval bokeh and streak flares for anamorphic, glow for vintage glass, grain and gate weave for film bodies, chroma bleed and scanlines for VHS, and real depth-based blur for aperture.
 
@@ -38,7 +38,7 @@ This is the "oracle" step of the REA-style loop (observe → write the contract 
 - Image in, preset out: Dolly In/Out, Crash Zoom In/Out, Dolly Zoom, Arc Left/Right, Crane Up/Down, Tilt Up/Down, Handheld, Bullet Time, Focus Change, Static, and more.
 - About 150 seconds of server time per clip on a paid video model; fixed duration; credits per clip.
 
-**Massless contract**
+**Chucksi contract**
 
 - Input: any still (generated or uploaded).
 - 28 presets in five groups. Push and pull: dolly in/out, crash zoom in/out, zoom in/out, dolly zoom in/out, FPV dive. Orbit: arc left/right, bullet time, wide orbit, snorricam. Crane and tilt: crane up/down, tilt up/down. Slide and pan: truck left/right, pan left/right. Texture: breathe, handheld, earthquake, float, dutch roll, rack focus.
@@ -53,7 +53,7 @@ This is the "oracle" step of the REA-style loop (observe → write the contract 
 
 ## Free-model replacement map
 
-| Paid in the original | Massless uses | License | Where it runs |
+| Paid in the original | Chucksi uses | License | Where it runs |
 | --- | --- | --- | --- |
 | Hero-frame model (Higgsfield Soul, Seedream, Nano Banana…) | FLUX.1 [schnell] | Apache-2.0 | Pollinations free API, Cloudflare Workers AI free daily allocation, or your own ComfyUI |
 | Image-to-video camera models (Kling, Veo, Wan, Seedance) | Depth Anything V2 Small + WebGL camera | Apache-2.0 | The visitor's browser (WebGPU or WASM) |

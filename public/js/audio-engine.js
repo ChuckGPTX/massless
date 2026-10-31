@@ -1,4 +1,4 @@
-// Free, in-browser audio for Massless.
+// Free, in-browser audio for Chucksi.
 // Voices: Kokoro-82M (Apache-2.0, open weights) through kokoro-js, on WebGPU when available,
 // otherwise WebAssembly. Ambience beds: synthesized from scratch with OfflineAudioContext.
 // Kokoro and the beds never leave the visitor's machine. MeloTTS (more languages) sends only the script to

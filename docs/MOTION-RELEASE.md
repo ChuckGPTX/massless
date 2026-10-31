@@ -6,10 +6,10 @@ This release leads with a Showtime music-video preview, native LiDAR and Vanish 
 
 - The navigation labels open `/studios/image/`, `/studios/video/`, `/studios/audio/`, `/studios/3d/` and `/studios/office/`. Separate arrow buttons open Features and Models menus. Existing workspaces and deep links continue to work.
 - Five different visual directions: an image gallery, Showtime screening room, audio listening space, live 3D playground and a paper-inspired document studio. Each includes multiple examples and direct links to working tools.
-- Two new wrestling-ring Showtime clips: a Kling 4.0 animated performance and a Genjutsu Light photo-based motion transfer using that performance. The project owner supplied the performer photo. Published audio is an original Massless instrumental, not the artist's recording or vocals.
+- Two new wrestling-ring Showtime clips: a Kling 4.0 animated performance and a Genjutsu Light photo-based motion transfer using that performance. The project owner supplied the performer photo. Published audio is an original Chucksi instrumental, not the artist's recording or vocals.
 - A local Music Preview tool at `/music`: artwork and audio upload, artist/title, tempo and color controls, landscape/portrait/square layouts, sound playback, seeking and H.264/AAC MP4 export. Audio up to 60 seconds stays on the device. The cut grid follows the user-set tempo; the waveform follows measured audio energy. Automatic beat detection is not claimed.
 - Four new original camera-scene artworks. All 28 camera presets now have distinct scene artwork: seven existing motion clips and 21 illustrative stills. Selecting a move retains the user's current input image.
-- Form & Field at `/demo-site/`: a responsive editorial website study with three images generated through Massless's own Image tool, project details, section navigation and image-prompt remix links. This is a small working website example, not an AI website builder.
+- Form & Field at `/demo-site/`: a responsive editorial website study with three images generated through Chucksi's own Image tool, project details, section navigation and image-prompt remix links. This is a small working website example, not an AI website builder.
 - Original browser demos: a rotating 3D projection and the playable Orbit arcade game. Orbit is a small game, not an AI game studio.
 - Existing LiDAR, Vanish, freeze and clone effects remain available. LiDAR is a visual effect based on estimated depth, not a physical scan.
 - Customer-facing infrastructure labels are simplified, including “Full object” and “Reconstruction service.” Technical setup remains in developer documentation.
@@ -17,7 +17,7 @@ This release leads with a Showtime music-video preview, native LiDAR and Vanish 
 
 ## Media boundary
 
-The six earlier commissioned gallery clips and the two Showtime clips are optional pre-rendered showcase media. Kling, Wan 3.0 Prime, Genjutsu Light and Marketing Studio are not described as open-source implementations. Their outputs are not demonstrations of the current Massless generation models. No proprietary generation API is added to the runtime.
+The six earlier commissioned gallery clips and the two Showtime clips are optional pre-rendered showcase media. Kling, Wan 3.0 Prime, Genjutsu Light and Marketing Studio are not described as open-source implementations. Their outputs are not demonstrations of the current Chucksi generation models. No proprietary generation API is added to the runtime.
 
 See [asset provenance](asset-provenance.md), `public/media/showcase/provenance.json`, `public/media/music/provenance.json`, `public/media/website/provenance.json` and `public/media/art/new-studies-provenance.json` for prompts, settings, attribution and checksums. Original downloads are retained outside the repository. One earlier lunar-rover request could not be recovered from the provider's request history and is excluded from the gallery.
 

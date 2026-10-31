@@ -1,4 +1,4 @@
-// Captions for Massless: speech to text with Whisper large-v3-turbo (MIT) on Cloudflare Workers AI.
+// Captions for Chucksi: speech to text with Whisper large-v3-turbo (MIT) on Cloudflare Workers AI.
 // The file is decoded in the browser, downmixed to mono and resampled to 16 kHz, then sent as a small
 // 16-bit WAV (32 KB per second) only when the visitor presses Transcribe. Long files go in parts and the
 // timestamps are shifted back into place. Captions are rebuilt from the segments as sentence-level cues.

@@ -64,7 +64,7 @@ async function stills() {
 
 // ---------- building ----------
 async function writeSpec() {
-  const name = $('#name').value.trim() || 'Massless';
+  const name = $('#name').value.trim() || 'Chucksi';
   const brief = $('#brief').value.trim();
   const style = $('#style').value;
   const bpm = Number($('#bpm').value);
@@ -340,7 +340,7 @@ function addFilm(blob, W, H) {
   $('#clips-wrap').hidden = false;
   const url = URL.createObjectURL(blob);
   const v = el('video', { src: url, controls: true, playsinline: true });
-  const name = `${(state.spec.title || 'massless').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-film-${H}p.mp4`;
+  const name = `${(state.spec.title || 'chucksi').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-film-${H}p.mp4`;
   $('#clips').prepend(el('div', { class: 'clip fresh' }, v, el('div', { class: 'meta' }, el('span', {}, `${W}×${H} · ${(blob.size / 1e6).toFixed(1)} MB`), el('a', { class: 'dl', href: url, download: name }, 'Download'))));
   $('#clips-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

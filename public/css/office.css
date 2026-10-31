@@ -166,7 +166,7 @@ label.row-sel .btn-ghost.small { grid-column: 2; grid-row: 1 / span 2; min-heigh
 }
 
 /* ======================================================================
-   Sign tab (Massless Sign). Shared pieces (sheets, link cards, Verify) live in /sign/sign.css.
+   Sign tab (Chucksi Sign). Shared pieces (sheets, link cards, Verify) live in /sign/sign.css.
    ====================================================================== */
 .side-tabs { gap: 16px; }
 .sg-subnav { flex-wrap: nowrap; gap: 4px; }

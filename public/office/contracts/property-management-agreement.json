@@ -343,7 +343,7 @@
       "optional": false
     }
   ],
-  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "disclaimer": "This is a starting template from the Chucksi open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
   "sources": [
     {
       "title": "HUD: Fair housing rights and obligations",

@@ -1,4 +1,4 @@
-// Verify a final Massless Sign PDF: hash it in the browser, look up the sealed record, check the Worker's
+// Verify a final Chucksi Sign PDF: hash it in the browser, look up the sealed record, check the Worker's
 // ES256 signatures, and show pass or fail. Changing a single byte of the file changes its SHA-256, so
 // no sealed record matches and the check fails.
 
@@ -28,7 +28,7 @@ export async function verifyFile(bytes) {
       step(false, 'Sealed record found', `This file says it is envelope ${res.envelopeId}, sealed ${utcStamp(res.sealedAt)}, but its fingerprint does not match the sealed copy.`);
       return { ok: false, reason: 'changed', steps, hash, claimed };
     }
-    step(false, 'Sealed record found', claimed.id ? `No sealed record for envelope ${claimed.id}. It may be unfinished, or the record was never sealed.` : 'No Massless Sign record matches this file.');
+    step(false, 'Sealed record found', claimed.id ? `No sealed record for envelope ${claimed.id}. It may be unfinished, or the record was never sealed.` : 'No Chucksi Sign record matches this file.');
     return { ok: false, reason: 'unknown', steps, hash, claimed };
   }
   step(true, 'Sealed record found', `Envelope ${res.envelopeId}`);
@@ -38,7 +38,7 @@ export async function verifyFile(bytes) {
   const sealKey = keys.find((k) => k.kid === res.seal.kid) || key;
   const sealOk = await verifySignature(sealKey, res.seal.json, res.seal.sig);
   const hashOk = sealRec.finalHash === hash;
-  step(sealOk && hashOk, 'Massless signature on the seal is valid', sealOk ? `ES256 · key ${res.seal.kid}` : 'The seal signature does not check out.');
+  step(sealOk && hashOk, 'Chucksi signature on the seal is valid', sealOk ? `ES256 · key ${res.seal.kid}` : 'The seal signature does not check out.');
   let audit = null;
   if (res.audit) {
     const rec = JSON.parse(res.audit.json);
@@ -85,7 +85,7 @@ export function mountVerify(box, { compact = false } = {}) {
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 function resultCard(name, r) {
-  const title = r.ok ? 'Authentic and unchanged' : r.reason === 'changed' ? 'This file was changed after signing' : r.reason === 'unknown' ? 'Not a sealed Massless Sign file' : 'The seal does not check out';
+  const title = r.ok ? 'Authentic and unchanged' : r.reason === 'changed' ? 'This file was changed after signing' : r.reason === 'unknown' ? 'Not a sealed Chucksi Sign file' : 'The seal does not check out';
   const sub = r.ok
     ? `${escapeHtml(name)} is byte-for-byte the copy sealed on ${escapeHtml(utcStamp(r.seal.sealedAt))}.`
     : r.reason === 'changed' ? 'At least one byte differs from the sealed copy. Ask the sender for the original.' : r.reason === 'unknown' ? 'No sealed record matches this file. It may have been edited, re-saved or printed to PDF, or it was never sealed.' : 'Do not rely on this file.';

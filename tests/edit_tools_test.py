@@ -214,7 +214,7 @@ with sync_playwright() as p:
         pg.click('#tool-download')
     dl = d.value
     path = dl.path()
-    check('download_png', dl.suggested_filename == 'massless-remove-bg.png' and os.path.getsize(path) > 1000 and open(path, 'rb').read(4) == b'\x89PNG', dl.suggested_filename)
+    check('download_png', dl.suggested_filename == 'chucksi-remove-bg.png' and os.path.getsize(path) > 1000 and open(path, 'rb').read(4) == b'\x89PNG', dl.suggested_filename)
     # second use: everything comes from this browser's Cache API
     model_url = [u for u in PINNED if 'modnet' in u][0]
     before = dict(net)
@@ -257,7 +257,7 @@ with sync_playwright() as p:
     pg.screenshot(path=os.path.join(OUT, 'upscale-1440.png'))
     with pg.expect_download() as d:
         pg.click('#tool-download')
-    check('upscale_download', d.value.suggested_filename == 'massless-upscale.png')
+    check('upscale_download', d.value.suggested_filename == 'chucksi-upscale.png')
     pg.close()
 
     # ---------------- Erase ----------------

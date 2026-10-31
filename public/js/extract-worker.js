@@ -1,4 +1,4 @@
-// Extract audio for Massless: the worker that trims, fades, evens out loudness and encodes.
+// Extract audio for Chucksi: the worker that trims, fades, evens out loudness and encodes.
 // The page decodes the file with the browser's own decoder and streams the samples in, chunk by chunk;
 // this worker never sees the file and nothing leaves the tab.
 //   MP3: LAME 3.100 (LGPL) compiled to WebAssembly by wasm-media-encoders 0.7.0 (MIT), fetched unmodified

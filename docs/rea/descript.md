@@ -1,4 +1,4 @@
-# Descript, reverse-engineered for Massless
+# Descript, reverse-engineered for Chucksi
 
 Clean-room notes: everything below about Descript comes from its public help center (help.descript.com, which publishes Markdown copies of every article), third-party reviews and press. No Descript code, binaries, UI assets or text were copied. Feature names in our design are our own; we do not reuse "Studio Sound", "Overdub", "Underlord" or "Regenerate".
 
@@ -27,15 +27,15 @@ Value column: how much the feature matters to users, judged from review coverage
 | **Translate, dub, lip sync** | Translate captions; dub into about 30 languages with stock voices, each speaker mapped to a voice; optional lip sync for single-speaker, front-facing footage; each output is a new composition. | MT over the transcript, TTS per translated segment fitted to the original timing, then a lip-sync video model. | M | [Dub speech](https://help.descript.com/repurpose/dubbing.md), [Lip sync](https://help.descript.com/repurpose/lip-sync.md) |
 | **Create clips** | 1 to 20 clips of 10 s to 5 min, optional 9:16 or 1:1 layout, optional topic; each clip is its own composition. | LLM highlight picking over the timed transcript, then reframing and captions. | **H** for social creators | [Create clips](https://help.descript.com/repurpose/create-clips-from-your-content.md) |
 | **Underlord (agentic co-editor)** | A chat panel with a model picker; it can add captions, make clips, translate, apply effects, search the web; each prompt costs credits for the "agent brain" plus any tool it runs; costs are non-deterministic. | An LLM with tool calls into the editor. | M (growing) | [Underlord](https://help.descript.com/getting-started/underlord-beta-your-ai-co-editor-in-descript.md), [AI tools overview](https://help.descript.com/descript-tour/ai-tools-overview.md) |
-| Recording (Rooms), publishing, share pages | Remote multi-person recording, hosted share pages, podcast host exports. | Out of scope for Massless. | — | [Help center index](https://help.descript.com/llms.txt) |
+| Recording (Rooms), publishing, share pages | Remote multi-person recording, hosted share pages, podcast host exports. | Out of scope for Chucksi. | — | [Help center index](https://help.descript.com/llms.txt) |
 
-**Pricing context.** Plans meter two currencies: media minutes (upload/record) and AI credits (every AI feature, including chatting with the agent). A 2026 review lists Free (1 media hour, 100 one-time credits), Hobbyist $16-24/mo (10 h, 400 credits), Creator $24-35/mo (30 h, 800 credits), Business $50-65/mo (40 h, 1,500 credits) ([Style Factory review](https://www.stylefactoryproductions.com/?p=39448); [Descript credits page](https://help.descript.com/billing-payments-plans/track-and-understand-your-media-minutes-and-ai-credits.md)). Filler removal and the speech enhancer cost credits, so the most loved features are exactly the ones behind the meter. That is the gap Massless can fill for $0.
+**Pricing context.** Plans meter two currencies: media minutes (upload/record) and AI credits (every AI feature, including chatting with the agent). A 2026 review lists Free (1 media hour, 100 one-time credits), Hobbyist $16-24/mo (10 h, 400 credits), Creator $24-35/mo (30 h, 800 credits), Business $50-65/mo (40 h, 1,500 credits) ([Style Factory review](https://www.stylefactoryproductions.com/?p=39448); [Descript credits page](https://help.descript.com/billing-payments-plans/track-and-understand-your-media-minutes-and-ai-credits.md)). Filler removal and the speech enhancer cost credits, so the most loved features are exactly the ones behind the meter. That is the gap Chucksi can fill for $0.
 
 **What users value most** (same review, plus G2/Capterra aggregates it quotes at 4.5/5): transcript editing, one-pass filler and silence removal, the speech enhancer (no metallic artifacts), styled captions, clips for social. **Complaints:** names and jargon need manual transcript fixes; filler removal is sometimes too aggressive; cloud processing slows long projects; visual editing is weak; AI and team features are tier-locked.
 
 ---
 
-## 2. What Massless already has to build on
+## 2. What Chucksi already has to build on
 
 | Existing piece | File | Reuse for |
 | --- | --- | --- |

@@ -1,8 +1,8 @@
-# Massless Sign contract library
+# Chucksi Sign contract library
 
-Free, open contract templates for Massless Sign: everyday agreements, business contracts, real estate, creative finance, music and joint ventures. Each template is a JSON file that the Sign engine fills in, renders and sends for signature.
+Free, open contract templates for Chucksi Sign: everyday agreements, business contracts, real estate, creative finance, music and joint ventures. Each template is a JSON file that the Sign engine fills in, renders and sends for signature.
 
-**This is not legal advice.** Every template is a starting point. Laws vary by state and change often. Have a licensed attorney in your state review a contract before you sign it, especially for real estate, creative finance (subject-to, seller financing, wraps, lease-options, contracts for deed), employment and music deals with ownership transfers. Massless is not a law firm, and using these templates does not create an attorney-client relationship.
+**This is not legal advice.** Every template is a starting point. Laws vary by state and change often. Have a licensed attorney in your state review a contract before you sign it, especially for real estate, creative finance (subject-to, seller financing, wraps, lease-options, contracts for deed), employment and music deals with ownership transfers. Chucksi is not a law firm, and using these templates does not create an attorney-client relationship.
 
 ## Files
 

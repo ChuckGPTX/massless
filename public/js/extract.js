@@ -1,4 +1,4 @@
-// Extract audio for Massless: turn a video or audio file the visitor already has into MP3, M4A or WAV.
+// Extract audio for Chucksi: turn a video or audio file the visitor already has into MP3, M4A or WAV.
 // The file is read and decoded in this tab at its own sample rate: MP4/MOV/M4A and MP3 are streamed through
 // WebCodecs (only the audio is read, a slice at a time) and WAV is read as PCM; anything else goes through the
 // browser's decodeAudioData. The audio is then streamed in chunks to extract-worker.js, which trims, fades,

@@ -14,11 +14,11 @@ FLUX 3 Image Klein's official ComfyUI distilled template is included from `Comfy
 
 The user selected the existing `gorilla-city-2032` project in ChuckGPTX's Org after the free-project limit prevented a new dedicated project. Changes are limited to `massless_projects`, `massless_assets`, `massless_workflow_runs` and the private `massless-private` storage bucket. `supabase/schema.sql` records the applied schema. Existing game tables, functions and auth settings were not changed.
 
-Every Massless table has owner-based RLS and authenticated grants; anonymous table access is revoked. Composite foreign keys prevent assigning assets/runs to someone else's project. Storage policies restrict paths to the signed-in user's UUID folder. Uploads are capped at 30 MB and allowed MIME types; signed downloads expire after five minutes. The browser receives only a Supabase publishable key. No service-role key is used. Sign-out targets only the current session, so another app's sessions are not globally revoked.
+Every Chucksi table has owner-based RLS and authenticated grants; anonymous table access is revoked. Composite foreign keys prevent assigning assets/runs to someone else's project. Storage policies restrict paths to the signed-in user's UUID folder. Uploads are capped at 30 MB and allowed MIME types; signed downloads expire after five minutes. The browser receives only a Supabase publishable key. No service-role key is used. Sign-out targets only the current session, so another app's sessions are not globally revoked.
 
-Email/password sign-in and sign-up use existing Supabase settings. Email confirmation is enabled. A user must confirm their email and return to Massless to sign in. Existing Gorilla City accounts share the same authentication project. Browser storage retains the Massless session until sign-out. A fresh user session is needed for the final manual sign-in/upload check; no user's credentials were entered or exposed during development.
+Email/password sign-in and sign-up use existing Supabase settings. Email confirmation is enabled. A user must confirm their email and return to Chucksi to sign in. Existing Gorilla City accounts share the same authentication project. Browser storage retains the Chucksi session until sign-out. A fresh user session is needed for the final manual sign-in/upload check; no user's credentials were entered or exposed during development.
 
-Verification: a rolled-back database transaction tested two synthetic identities, owner reads, cross-owner invisibility, forged ownership rejection, composite ownership rejection, and storage path rejection. No test users/files remain. Public REST access to project rows returns HTTP 401. Security advisors report no new Massless findings; existing Gorilla City function warnings remain outside this release.
+Verification: a rolled-back database transaction tested two synthetic identities, owner reads, cross-owner invisibility, forged ownership rejection, composite ownership rejection, and storage path rejection. No test users/files remain. Public REST access to project rows returns HTTP 401. Security advisors report no new Chucksi findings; existing Gorilla City function warnings remain outside this release.
 
 ## MOSS worker and budget
 
@@ -44,7 +44,7 @@ Worker source must be bundled because it now imports `src/generations.js`; Wrang
 
 ## Next features from saved X posts
 
-- A visual workflow canvas with real ComfyUI connections, execution status, reusable inputs and export, inspired by `raph651/open-source-canvas` (MIT). Its offline demo imagery is placeholder content; require real runs before showing completed output in Massless.
+- A visual workflow canvas with real ComfyUI connections, execution status, reusable inputs and export, inspired by `raph651/open-source-canvas` (MIT). Its offline demo imagery is placeholder content; require real runs before showing completed output in Chucksi.
 - Transcript-based cuts, silence removal, caption burn-in and portrait reframing, inspired by the saved `kajisho5/ffmpeg-skill` post. Review the source license and package FFmpeg as an isolated media worker before implementing. A skill collection is development tooling, not an inference model.
 - Reference-consistent video with Pika H3 Flex: evaluate official weights, license, memory, runtime and output quality before buying capacity.
 - Local speech and dubbing evaluation from Audio8 and VoiceStudio bookmarks, including voice-consent controls and model license review.

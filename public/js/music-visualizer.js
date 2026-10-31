@@ -107,7 +107,7 @@ export function drawMusicFrame(canvas, image, config, analysis, time) {
   c.textBaseline = "alphabetic";
   c.fillStyle = "#b8bfb8";
   c.font = `500 ${Math.round(w * 0.012 + (portrait ? 6 : 0))}px "Instrument Sans", sans-serif`;
-  c.fillText("MASSLESS SESSIONS / 001", tx, h * 0.085);
+  c.fillText("CHUCKSI SESSIONS / 001", tx, h * 0.085);
   c.fillStyle = accent;
   c.font = `600 ${Math.round(w * (stacked ? 0.035 : 0.018))}px "Instrument Sans", sans-serif`;
   c.fillText(
