@@ -1,0 +1,48 @@
+{
+  "unet": {
+    "class_type": "UNETLoader",
+    "_meta": { "title": "Fibo 2.0 edit turbo, bf16 (CC BY-NC 4.0): text-to-image and edits in 4 steps" },
+    "inputs": { "unet_name": "fibo2_edit_turbo_bf16.safetensors", "weight_dtype": "default" }
+  },
+  "clip": {
+    "class_type": "CLIPLoader",
+    "_meta": { "title": "Qwen3-VL-4B caption encoder" },
+    "inputs": { "clip_name": "qwen3vl_4b_bf16.safetensors", "type": "fibo2", "device": "default" }
+  },
+  "vae": {
+    "class_type": "VAELoader",
+    "_meta": { "title": "FLUX.2 VAE" },
+    "inputs": { "vae_name": "flux2-vae.safetensors" }
+  },
+  "text": {
+    "class_type": "TextEncodeFibo2",
+    "_meta": { "title": "INPUT prompt (JSON caption or text), width, height (Fibo's trained size for the aspect)" },
+    "inputs": { "clip": ["clip", 0], "prompt": "a lighthouse at dusk", "negative_prompt": "", "width": 1024, "height": 1024, "batch_size": 1 }
+  },
+  "sampler": {
+    "class_type": "KSampler",
+    "_meta": { "title": "INPUT seed, steps (4 steps, CFG 1: the turbo distill)" },
+    "inputs": {
+      "model": ["unet", 0],
+      "seed": 0,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "positive": ["text", 0],
+      "negative": ["text", 1],
+      "latent_image": ["text", 2],
+      "denoise": 1.0
+    }
+  },
+  "decode": {
+    "class_type": "VAEDecode",
+    "_meta": { "title": "Decode" },
+    "inputs": { "samples": ["sampler", 0], "vae": ["vae", 0] }
+  },
+  "save": {
+    "class_type": "SaveImage",
+    "_meta": { "title": "OUTPUT: PNG (the handler re-encodes JPEG q92)" },
+    "inputs": { "images": ["decode", 0], "filename_prefix": "massless/fibo" }
+  }
+}

@@ -52,3 +52,12 @@ Worker source must be bundled because it now imports `src/generations.js`; Wrang
 - Original scroll-driven website scenes inspired by the Scrolltide bookmark. Do not redistribute a commercial prompt library without a license.
 
 Prioritize the canvas and transcript-editing workflows after the sign-in and MOSS path have real user acceptance coverage.
+
+## GPU worker jobs (Animate, Music, Upscale, Lab)
+
+`workers/gpu/` (see its README) adds a second RunPod worker for Wan 2.2 TI2V-5B, ACE-Step 1.5 and Real-ESRGAN, and a
+separate Lab image (MMAudio, HunyuanVideo-Foley, Fibo 2.0; non-commercial licenses, off unless `LAB_ENABLED=true`).
+They go through the same `GenerationLedger`: `src/gpu-jobs.js` validates each job and prices it from GPU-seconds,
+`GPU_DAILY_BUDGET_CENTS` is one daily budget for every hosted job (MOSS included, settled to its real cost; the
+MOSS lifetime cap still applies), and `GPU_PER_USER_DAILY` limits each signed-in user. The Video and Music pages
+show an Animate and a Compose panel (`public/js/gpu-panel.js`) with the remaining daily budget and queue.

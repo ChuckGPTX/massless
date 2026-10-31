@@ -79,3 +79,51 @@ try {
 } finally {
   await mf.dispose();
 }
+
+// GPU jobs: one daily budget under real concurrency. 18 cents fits two 9-cent animate reservations.
+const gpu = new Miniflare(
+  convertV4MiniflareOptions({
+    workers: [
+      {
+        name: "gpu-ledger-test",
+        modules: true,
+        script:
+          compiled.outputFiles[0].text +
+          `
+export class RuntimeLedger extends GenerationLedger {
+ async provider(path){return path==='/run'?{id:'rp-'+crypto.randomUUID(),status:'IN_QUEUE'}:{status:'COMPLETED',executionTime:20000,delayTime:0,output:{type:'audio',mime:'audio/mpeg',data:'SUQz'.repeat(600000)}};}
+}
+export default {fetch(request,env){return env.TEST_LEDGER.get(env.TEST_LEDGER.idFromName('gpu')).fetch(request)}};`,
+        compatibilityDate: "2026-10-01",
+        durableObjects: { TEST_LEDGER: { className: "RuntimeLedger", useSQLite: true } },
+        bindings: { GPU_ENDPOINT_ID: "gpu-ep", RUNPOD_API_KEY: "k", GPU_DAILY_BUDGET_CENTS: "18", GPU_PER_USER_DAILY: "3" },
+      },
+    ],
+  }),
+);
+try {
+  const submit = (owner, i) =>
+    gpu.dispatchFetch("http://massless.test/api/generations", {
+      method: "POST",
+      headers: { "x-owner-id": owner, "content-type": "application/json" },
+      body: JSON.stringify({ job: "animate", input: { image: "/9j/" + "A".repeat(100) }, idempotencyKey: "gpu-runtime-key-" + String(i).padStart(4, "0") }),
+    });
+  const results = await Promise.all(Array.from({ length: 8 }, (_, i) => submit("user" + i, i).then(async (r) => ({ status: r.status, j: await r.json() }))));
+  const accepted = results.filter((r) => r.status === 202);
+  assert.equal(accepted.length, 2, JSON.stringify(results.map((r) => r.status)));
+  assert.ok(results.filter((r) => r.status === 429).every((r) => /GPU/.test(r.j.error)));
+  const id = accepted[0].j.id, owner = "user" + results.indexOf(accepted[0]);
+  const done = await (await gpu.dispatchFetch("http://massless.test/api/generations/" + id, { headers: { "x-owner-id": owner } })).json();
+  assert.equal(done.status, "COMPLETED");
+  assert.equal(done.costCents, 1);
+  const file = await gpu.dispatchFetch("http://massless.test/api/generations/" + id + "/file", { headers: { "x-owner-id": owner } });
+  assert.equal(file.headers.get("content-type"), "audio/mpeg");
+  assert.equal((await file.arrayBuffer()).byteLength, 1800000);
+  const budget = await (await gpu.dispatchFetch("http://massless.test/api/generations/budget", { headers: { "x-owner-id": owner } })).json();
+  assert.equal(budget.leftCents, 18 - 9 - 1);
+  console.log(
+    "SQLite Durable Object runtime passed: GPU daily budget under 8 concurrent submissions, settlement refund, 2.4 MB result in 1 MB pieces.",
+  );
+} finally {
+  await gpu.dispose();
+}

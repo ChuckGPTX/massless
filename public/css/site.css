@@ -154,3 +154,13 @@ button { cursor: pointer; }
   .nav-right .btn-accent { display: none; }
 }
 .small { font-size: 12.5px; }
+
+/* Hosted GPU panels (js/gpu-panel.js) */
+.gpu-panel { max-width: 1100px; margin: 24px auto; padding: 18px 20px; border: 1px solid rgba(255, 191, 47, 0.25); border-radius: 14px; }
+.gpu-panel h3 { margin: 0 0 6px; }
+.gpu-panel .gpu-note, .gpu-panel .gpu-meter { opacity: 0.8; margin: 4px 0 12px; }
+.gpu-form { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.gpu-form label { display: grid; gap: 4px; font-size: 0.9em; }
+.gpu-form textarea { min-width: 260px; }
+.gpu-result { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.gpu-result video { max-width: 100%; border-radius: 10px; }

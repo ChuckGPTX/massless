@@ -1,0 +1,36 @@
+MIT License
+
+Copyright (c) 2026 Chuck Crawley
+
+This license covers the Massless GPU worker files written for this repository: gpu/handler.py,
+gpu/fetch_model.py, gpu/worker_routes.js, gpu/workflows/*.json, gpu/lab/*, the Dockerfiles, manifests
+and README in gpu/, and the tests tests/gpu_handler_test.py and tests/gpu_routes_test.mjs. None of it is
+copied from runpod-workers/worker-comfyui or any other worker.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+Third-party software and weights in the built images (not part of this repository, not covered above)
+
+- ComfyUI (https://github.com/comfyanonymous/ComfyUI), GPL-3.0. Installed unmodified at a pinned
+  commit as a separate program; the handler talks to it only over its local HTTP and websocket API.
+- Python packages listed in gpu/requirements.txt, each under its own license.
+- Model weights listed in gpu/models.json (main image) and gpu/models.lab.json (Lab image), each under
+  the license recorded there. The Lab image's models are research or non-commercial licenses; see
+  gpu/README.md.

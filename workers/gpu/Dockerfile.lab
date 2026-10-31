@@ -1,0 +1,180 @@
+# syntax=docker/dockerfile:1
+# Massless GPU worker, Lab endpoint: research-licensed models, kept out of the main image so it stays
+# commercial-clean. Jobs: sound (MMAudio or HunyuanVideo-Foley) and fibo (Fibo 2.0). Every result is labelled
+# with its license and commercial: false. Same handler code as the main image (MASSLESS_IMAGE=lab).
+# Our files are MIT; ComfyUI (GPL-3.0) and the two custom nodes (MIT; Tencent Hunyuan Community) are fetched
+# at pinned commits and installed unmodified. Licenses: workers/gpu/models.lab.json and workers/gpu/README.md.
+#
+# Build context is the repository root (RunPod: Dockerfile path workers/gpu/Dockerfile.lab, build context .):
+#   docker build -f workers/gpu/Dockerfile.lab -t massless-gpu-lab .
+#   docker build -f workers/gpu/Dockerfile.lab --build-arg MASSLESS_SKIP_MODELS=1 -t massless-gpu-lab:noweights .
+#
+# The first layers are identical to workers/gpu/Dockerfile, so a builder that has built one reuses them for the other.
+
+ARG BASE_IMAGE=nvcr.io/nvidia/cuda:12.6.3-runtime-ubuntu24.04@sha256:2c8193530ecc423e0f123d0c85b68a15d1395adcddabfc943e2523dbfde172e1
+FROM ${BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 python3-venv ca-certificates curl aria2 git \
+ && rm -rf /var/lib/apt/lists/*
+
+# ---- model weights: values copied from workers/gpu/models.lab.json (tests/gpu_handler_test.py checks they match) ----
+COPY workers/gpu/fetch_model.py /opt/massless/fetch_model.py
+ARG MASSLESS_SKIP_MODELS=0
+
+# SigLIP2 base patch16-512 config.json (Foley visual encoder) [Apache-2.0], 0.00 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/google/siglip2-base-patch16-512/resolve/a89f5c5093f902bf39d3cd4d81d2c09867f0724b/config.json \
+    a15bc39fbcd92498dea6d5d3cb2b0d8b9ba389d6a3f2b565ea66128a2d141934 276 /hf/hub/models--google--siglip2-base-patch16-512/snapshots/a89f5c5093f902bf39d3cd4d81d2c09867f0724b/config.json
+
+# LAION CLAP larger_clap_general special_tokens_map.json (Foley text encoder) [Apache-2.0], 0.00 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/special_tokens_map.json \
+    06e405a36dfe4b9604f484f6a1e619af1a7f7d09e34a8555eb0b77b66318067f 280 /hf/hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/special_tokens_map.json
+
+# LAION CLAP larger_clap_general config.json (Foley text encoder) [Apache-2.0], 0.00 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/config.json \
+    6268f76a067e3104bf9001e97d7dcc0fcfb16f3086cfb478ee72d95900d7fc1d 643 /hf/hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/config.json
+
+# LAION CLAP larger_clap_general tokenizer_config.json (Foley text encoder) [Apache-2.0], 0.00 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/tokenizer_config.json \
+    e2eb445cfdbf4711de620cbdf10478b0423950799e85652d9f28da47066ab86d 1362 /hf/hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/tokenizer_config.json
+
+# BigVGAN v2 44 kHz config [MIT], 0.00 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/nvidia/bigvgan_v2_44khz_128band_512x/resolve/95a9d1dcb12906c03edd938d77b9333d6ded7dfb/config.json \
+    65b7f487bfaf15256056a75f6667ef5f640214c981922a111927873705ea4ddb 1403 /models/mmaudio/nvidia/bigvgan_v2_44khz_128band_512x/config.json
+
+# LAION CLAP larger_clap_general merges.txt (Foley text encoder) [Apache-2.0], 0.00 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/merges.txt \
+    1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5 456318 /hf/hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/merges.txt
+
+# LAION CLAP larger_clap_general vocab.json (Foley text encoder) [Apache-2.0], 0.00 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/vocab.json \
+    ed19656ea1707df69134c4af35c8ceda2cc9860bf2c3495026153a133670ab5e 798293 /hf/hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/vocab.json
+
+# LAION CLAP larger_clap_general tokenizer.json (Foley text encoder) [Apache-2.0], 0.00 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/tokenizer.json \
+    dc239041d98de27ffc3975473a1a23e3db4c937b23c138c38bbc66588bd247e5 2108774 /hf/hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/tokenizer.json
+
+# HunyuanVideo-Foley Synchformer, fp16 [Tencent-Hunyuan-Community], 0.47 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/phazei/HunyuanVideo-Foley/resolve/f94bbf32576f02b37715f54cdba3a5e82910dde7/synchformer_state_dict_fp16.safetensors \
+    4876e7dc86cd255bcf79540d93838362aed2e8a9d6f4574a92728c9fc699f511 474981066 /models/foley/synchformer_state_dict_fp16.safetensors
+
+# MMAudio Synchformer, fp16 [CC-BY-NC-4.0], 0.47 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/Kijai/MMAudio_safetensors/resolve/5984623e6b436818c6ff287ef6eec93e3e05aa3f/mmaudio_synchformer_fp16.safetensors \
+    b8d05128c76da6ee88720a89d25a5f86c603589883d02b53f563c3c66afe3581 474981098 /models/mmaudio/mmaudio_synchformer_fp16.safetensors
+
+# NVIDIA BigVGAN v2 44 kHz vocoder (MMAudio 44k mode) [MIT], 0.49 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/nvidia/bigvgan_v2_44khz_128band_512x/resolve/95a9d1dcb12906c03edd938d77b9333d6ded7dfb/bigvgan_generator.pt \
+    d9fe7ec6bd0b44ed9d66973d5012d8181c1570b01e5c72df51973e241dccd357 489041291 /models/mmaudio/nvidia/bigvgan_v2_44khz_128band_512x/bigvgan_generator.pt
+
+# MMAudio VAE 44.1 kHz, fp16 [CC-BY-NC-4.0], 0.61 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/Kijai/MMAudio_safetensors/resolve/5984623e6b436818c6ff287ef6eec93e3e05aa3f/mmaudio_vae_44k_fp16.safetensors \
+    2598189f081bd10c86975106e5b6e2490168667429a75b52d77671283f245649 610966060 /models/mmaudio/mmaudio_vae_44k_fp16.safetensors
+
+# HunyuanVideo-Foley DAC VAE 48 kHz, fp16 [Tencent-Hunyuan-Community], 0.74 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/phazei/HunyuanVideo-Foley/resolve/f94bbf32576f02b37715f54cdba3a5e82910dde7/vae_128d_48k_fp16.safetensors \
+    216fdd5a4c9774417b209a5d1754db5326c9f47375b232cce1333c13b3f239ab 743210820 /models/foley/vae_128d_48k_fp16.safetensors
+
+# LAION CLAP larger_clap_general pytorch_model.bin (Foley text encoder) [Apache-2.0], 0.78 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/laion/larger_clap_general/resolve/ada0c23a36c4e8582805bb38fec3905903f18b41/pytorch_model.bin \
+    314eb00cce6ad68d25237b8446b659ccdb136ed4672c1bca470f142f72455026 776444665 /hf/hub/models--laion--larger_clap_general/snapshots/ada0c23a36c4e8582805bb38fec3905903f18b41/pytorch_model.bin
+
+# SigLIP2 base patch16-512 model.safetensors (Foley visual encoder) [Apache-2.0], 1.50 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/google/siglip2-base-patch16-512/resolve/a89f5c5093f902bf39d3cd4d81d2c09867f0724b/model.safetensors \
+    fe0e601c625e69eed8e73500d39e9b6164403fe03db8048e87913c3cefbbb3fe 1503344520 /hf/hub/models--google--siglip2-base-patch16-512/snapshots/a89f5c5093f902bf39d3cd4d81d2c09867f0724b/model.safetensors
+
+# Apple DFN5B CLIP ViT-H-14-384, fp16 (MMAudio visual encoder) [Apple-AMLR], 1.97 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/Kijai/MMAudio_safetensors/resolve/5984623e6b436818c6ff287ef6eec93e3e05aa3f/apple_DFN5B-CLIP-ViT-H-14-384_fp16.safetensors \
+    d8ad903a79adc2b29bacfeedabfa3d78b03d36d3b4dcb885c0649fe8c5d763cb 1973509450 /models/mmaudio/apple_DFN5B-CLIP-ViT-H-14-384_fp16.safetensors
+
+# MMAudio large 44.1 kHz v2, fp16 [CC-BY-NC-4.0], 2.06 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/Kijai/MMAudio_safetensors/resolve/5984623e6b436818c6ff287ef6eec93e3e05aa3f/mmaudio_large_44k_v2_fp16.safetensors \
+    a61378951ba4e8bfde2e977c0ad8211a7e02e1e92fd6a5b1c258a6464c1d102f 2061198424 /models/mmaudio/mmaudio_large_44k_v2_fp16.safetensors
+
+# HunyuanVideo-Foley XXL, fp8 e4m3fn weights [Tencent-Hunyuan-Community], 5.34 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/phazei/HunyuanVideo-Foley/resolve/f94bbf32576f02b37715f54cdba3a5e82910dde7/hunyuanvideo_foley_fp8_e4m3fn.safetensors \
+    1b2fa56b9d9bd0c89f3d7e486f9f00032f247cf10dd860cc6d7f0b734bca8a31 5341941120 /models/foley/hunyuanvideo_foley_fp8_e4m3fn.safetensors
+
+# FLUX.2 VAE [Apache-2.0], 0.34 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/Comfy-Org/Fibo-2.0/resolve/4742d4bec410034142c8e65559e5f00c6f29eccb/vae/flux2-vae.safetensors \
+    868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3 336211292 /models/vae/flux2-vae.safetensors
+
+# Qwen3-VL-4B text encoder for Fibo 2.0, bf16 [Apache-2.0], 8.88 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/Comfy-Org/Fibo-2.0/resolve/4742d4bec410034142c8e65559e5f00c6f29eccb/text_encoders/qwen3vl_4b_bf16.safetensors \
+    36f3ff447ef59201722e8f9ce6020c9819fdcfba6aa2608c4e09b1c0ce114e34 8875719384 /models/text_encoders/qwen3vl_4b_bf16.safetensors
+
+# Fibo 2.0 edit turbo (8B, 4 steps, text-to-image and edit), bf16 [CC-BY-NC-4.0], 16.45 GB
+RUN python3 /opt/massless/fetch_model.py \
+    https://huggingface.co/Comfy-Org/Fibo-2.0/resolve/4742d4bec410034142c8e65559e5f00c6f29eccb/diffusion_models/fibo2_edit_turbo_bf16.safetensors \
+    028f6cf13af75840d7cc7346a5784fe55887c6b9299d173c8271161ba5ccf7d0 16452934194 /models/diffusion_models/fibo2_edit_turbo_bf16.safetensors
+
+# Hugging Face cache refs for the two repos above, so from_pretrained(..., local_files_only=True) finds them
+RUN mkdir -p /hf/hub/models--google--siglip2-base-patch16-512/refs && printf %s a89f5c5093f902bf39d3cd4d81d2c09867f0724b > /hf/hub/models--google--siglip2-base-patch16-512/refs/main \
+ && mkdir -p /hf/hub/models--laion--larger_clap_general/refs && printf %s ada0c23a36c4e8582805bb38fec3905903f18b41 > /hf/hub/models--laion--larger_clap_general/refs/main
+
+# ---- ffmpeg for the sound job (probe, re-time, mux) ----
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
+
+# ---- Python: torch 2.11.0+cu126 (torchaudio for Foley) and everything else pinned in workers/gpu/lab/requirements.txt ----
+COPY workers/gpu/lab/requirements.txt /opt/massless/requirements.txt
+RUN python3 -m venv /opt/venv \
+ && /opt/venv/bin/pip install -r /opt/massless/requirements.txt \
+ && /opt/venv/bin/python -c "import torch, torchaudio, av, runpod, websocket, open_clip, diffusers; print('torch', torch.__version__, 'cuda', torch.version.cuda)"
+ENV PATH=/opt/venv/bin:$PATH
+
+# ---- ComfyUI v0.43.1 (first release with Fibo 2.0) and the two custom nodes, at exact commits ----
+ARG COMFYUI_COMMIT=086099f5d8886163ef77dc354f8382cb7431582a
+ARG MMAUDIO_COMMIT=8eaeb72edc3aaf2059b57f2d96a1f6f689f19ae2
+ARG FOLEY_COMMIT=afd2960b8ad9036a9f55a15daf514112ff68e010
+RUN fetch() { git init -q "$1" && git -C "$1" fetch -q --depth 1 "$2" "$3" && git -C "$1" checkout -q FETCH_HEAD \
+      && test "$(git -C "$1" rev-parse HEAD)" = "$3" && rm -rf "$1/.git"; } \
+ && fetch /opt/ComfyUI https://github.com/comfyanonymous/ComfyUI.git ${COMFYUI_COMMIT} \
+ && fetch /opt/ComfyUI/custom_nodes/ComfyUI-MMAudio https://github.com/kijai/ComfyUI-MMAudio.git ${MMAUDIO_COMMIT} \
+ && fetch /opt/ComfyUI/custom_nodes/ComfyUI-HunyuanVideo-Foley https://github.com/phazei/ComfyUI-HunyuanVideo-Foley.git ${FOLEY_COMMIT} \
+ && cd /opt/ComfyUI && rm -rf models && mkdir -p /models /hf input output temp user && ln -s /models models
+
+# ---- our code (MIT) ----
+COPY workers/gpu/handler.py /opt/massless/handler.py
+COPY workers/gpu/lab/workflows /opt/massless/lab/workflows
+COPY workers/gpu/models.lab.json workers/gpu/LICENSE /opt/massless/
+COPY public/data/rig.json /opt/massless/rig.json
+ENV COMFY_DIR=/opt/ComfyUI \
+    MASSLESS_IMAGE=lab \
+    MASSLESS_WORKFLOWS=/opt/massless/lab/workflows \
+    MASSLESS_RIG=/opt/massless/rig.json \
+    HF_HOME=/hf \
+    HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1
+RUN python -m py_compile /opt/massless/handler.py \
+ && echo "---- image size estimate ----" \
+ && du -sh /models /hf /opt/venv /opt/ComfyUI 2>/dev/null; \
+    python3 /opt/massless/fetch_model.py --summary /opt/massless/models.lab.json
+
+WORKDIR /opt/massless
+CMD ["python", "-u", "/opt/massless/handler.py"]

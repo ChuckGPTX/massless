@@ -1,0 +1,139 @@
+{
+  "about": "Model files baked into the Massless GPU worker image (gpu/Dockerfile). Every URL is pinned to a Hugging Face commit; sha256 and size are checked at build time by gpu/fetch_model.py and by tests/gpu_handler_test.py (HEAD). target is relative to the models root (/models in the image, linked to ComfyUI/models). Licenses were read from each model card on Hugging Face.",
+  "image": "main",
+  "comfyui": {
+    "version": "v0.42.5",
+    "commit": "483dae4326356b81de05d27aca3f433dd323cc25",
+    "repo": "https://github.com/comfyanonymous/ComfyUI",
+    "license": "GPL-3.0"
+  },
+  "models": [
+    {
+      "id": "wan22_ti2v_5b",
+      "jobs": ["animate"],
+      "name": "Wan 2.2 TI2V-5B (fp16)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors",
+      "sha256": "456f901338bd9eadbded3828b819109a9b68e8a525ca5cf8d0049a69fcfeca1e",
+      "size": 9999658848,
+      "target": "diffusion_models/wan2.2_ti2v_5B_fp16.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B",
+      "notes": "Wan-AI's Apache-2.0 weights, repackaged for ComfyUI by Comfy-Org (repo card: apache-2.0)."
+    },
+    {
+      "id": "fastwan22_ti2v_5b",
+      "jobs": ["animate"],
+      "name": "FastWan 2.2 TI2V-5B FullAttn (3-step DMD distill, bf16)",
+      "url": "https://huggingface.co/FastVideo/FastWan2.2-TI2V-5B-FullAttn-Diffusers/resolve/3e187042a324f6f5fb68fd22110a78725253de8f/transformer/diffusion_pytorch_model.safetensors",
+      "sha256": "a1cf4acd5d0242ca0cad68e115064f4ac7e748686c9cf0da050ce87decc6b9bf",
+      "size": 9999660080,
+      "target": "diffusion_models/fastwan2.2_ti2v_5B_bf16.safetensors",
+      "convert": "diffusers-wan",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/FastVideo/FastWan2.2-TI2V-5B-FullAttn-Diffusers",
+      "notes": "Published in diffusers layout only. fetch_model.py renames its 825 tensors to ComfyUI's Wan names (header only; the tensor bytes are untouched), so the core UNETLoader loads it exactly like the stock 5B. The mapping is checked against the Comfy-Org 5B header in the tests. sha256 is of the downloaded diffusers file."
+    },
+    {
+      "id": "umt5_xxl_fp8",
+      "jobs": ["animate"],
+      "name": "umT5-XXL text encoder (fp8 e4m3fn scaled)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.1/resolve/123acf1cc74bccbb9bfff8ac1ee72edc08c2341d/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "sha256": "c3355d30191f1f066b26d93fba017ae9809dce6c627dda5f6a66eaa651204f68",
+      "size": 6735906897,
+      "target": "text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Comfy-Org/Wan-2.1",
+      "notes": "The Wan text encoder (Google umT5-XXL, Apache-2.0) as repackaged by Comfy-Org (repo card: apache-2.0)."
+    },
+    {
+      "id": "wan22_vae",
+      "jobs": ["animate"],
+      "name": "Wan 2.2 VAE (16x16x4)",
+      "url": "https://huggingface.co/Comfy-Org/Wan-2.2/resolve/ee6f4a40737a995bf5818954cfce6d59443b0f04/split_files/vae/wan2.2_vae.safetensors",
+      "sha256": "e40321bd36b9709991dae2530eb4ac303dd168276980d3e9bc4b6e2b75fed156",
+      "size": 1409400960,
+      "target": "vae/wan2.2_vae.safetensors",
+      "license": "Apache-2.0",
+      "commercial": true,
+      "card": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B"
+    },
+    {
+      "id": "acestep15_turbo",
+      "jobs": ["music"],
+      "name": "ACE-Step 1.5 turbo DiT (8 steps)",
+      "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/diffusion_models/acestep_v1.5_turbo.safetensors",
+      "sha256": "3f6e0797fad420a39bd33979eb6e840e30989e34a3794e843d23b60ec6e422d7",
+      "size": 4787825604,
+      "target": "diffusion_models/acestep_v1.5_turbo.safetensors",
+      "license": "MIT",
+      "commercial": true,
+      "card": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+      "notes": "Upstream card: MIT, and states generated music may be used commercially. Comfy-Org's repackage card says apache-2.0; both permit commercial use."
+    },
+    {
+      "id": "acestep15_qwen06b",
+      "jobs": ["music"],
+      "name": "ACE-Step 1.5 text encoder (Qwen3-0.6B)",
+      "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/text_encoders/qwen_0.6b_ace15.safetensors",
+      "sha256": "fd4590c82153b8ddb67e15a2e7aaa8afa8b83a858c8a9b82a4831063156aa7a7",
+      "size": 1191588248,
+      "target": "text_encoders/qwen_0.6b_ace15.safetensors",
+      "license": "MIT",
+      "commercial": true,
+      "card": "https://huggingface.co/ACE-Step/Ace-Step1.5"
+    },
+    {
+      "id": "acestep15_lm17b",
+      "jobs": ["music"],
+      "name": "ACE-Step 1.5 5Hz planner LM (Qwen3-1.7B base)",
+      "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/text_encoders/qwen_1.7b_ace15.safetensors",
+      "sha256": "ed63e9247d1f55f3ace04fa11e95b085fc82d459c82c5626f0b2e37b91ebd710",
+      "size": 3708523360,
+      "target": "text_encoders/qwen_1.7b_ace15.safetensors",
+      "license": "MIT",
+      "commercial": true,
+      "card": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+      "notes": "The 1.7B planner (ComfyUI's default split template). The 4B planner (8.4 GB) composes better and still fits 24 GB; swap it in if music quality matters more than cold start."
+    },
+    {
+      "id": "acestep15_vae",
+      "jobs": ["music"],
+      "name": "ACE-Step 1.5 audio VAE",
+      "url": "https://huggingface.co/Comfy-Org/ACE-Step-1.5/resolve/371bb1680f8c88d8c1083f6ffb6330d3d55bff76/split_files/vae/ace_1.5_vae.safetensors",
+      "sha256": "6de92e3a862acd287e08b024ac90f0783a8635451b728721a33ff03565bcb2bb",
+      "size": 337431732,
+      "target": "vae/ace_1.5_vae.safetensors",
+      "license": "MIT",
+      "commercial": true,
+      "card": "https://huggingface.co/ACE-Step/Ace-Step1.5"
+    },
+    {
+      "id": "realesrgan_x4plus",
+      "jobs": ["upscale"],
+      "name": "Real-ESRGAN x4plus",
+      "url": "https://huggingface.co/Comfy-Org/Real-ESRGAN/resolve/5fd49b7b278836f48af63ecd314d0f98ab336105/RealESRGAN_x4plus.safetensors",
+      "sha256": "37f9a931c215f040aa6d50f711f2cb115f713c46df1d0d6469a8bd7bfe9a60bb",
+      "size": 66857836,
+      "target": "upscale_models/RealESRGAN_x4plus.safetensors",
+      "license": "BSD-3-Clause",
+      "commercial": true,
+      "card": "https://huggingface.co/Comfy-Org/Real-ESRGAN",
+      "notes": "xinntao/Real-ESRGAN weights (BSD-3-Clause) as safetensors, so no pickle is loaded."
+    }
+  ],
+  "considered": [
+    {
+      "name": "LTX-2.5 distilled (Lightricks)",
+      "decision": "not included",
+      "why": "The Hugging Face repo is gated (an HF token and accepting Lightricks' terms are needed, so it cannot be fetched anonymously at build time). Its ComfyUI quantized build does not fit a 24 GB GPU: the 22B distilled transformer is 21.5 GB as int8-convrot (18.7 GB nvfp4, Blackwell only) plus a 15.4 GB Gemma-4 12B int8 text encoder, and ComfyUI's int8/fp4 kernels (comfy-kitchen CUDA backend) are switched off on CUDA 12 builds of PyTorch. License: LTX-2.x Community License (free under $10M revenue)."
+    },
+    {
+      "name": "Wan2.2-TI2V-5B-Turbo (quanhaol, 4-step)",
+      "decision": "not included",
+      "why": "No license on its model card, and it ships as a 20 GB pickled model.pt rather than safetensors."
+    }
+  ]
+}

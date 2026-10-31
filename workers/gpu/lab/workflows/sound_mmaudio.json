@@ -1,0 +1,50 @@
+{
+  "video_in": {
+    "class_type": "LoadVideo",
+    "_meta": { "title": "INPUT video (the handler uploads it re-timed to 25 fps, short side at most 512 px)" },
+    "inputs": { "file": "massless_input.mp4" }
+  },
+  "frames": {
+    "class_type": "GetVideoComponents",
+    "_meta": { "title": "Frames" },
+    "inputs": { "video": ["video_in", 0] }
+  },
+  "model": {
+    "class_type": "MMAudioModelLoader",
+    "_meta": { "title": "MMAudio large 44.1 kHz v2 (weights CC BY-NC 4.0)" },
+    "inputs": { "mmaudio_model": "mmaudio_large_44k_v2_fp16.safetensors", "base_precision": "fp16" }
+  },
+  "features": {
+    "class_type": "MMAudioFeatureUtilsLoader",
+    "_meta": { "title": "VAE, Synchformer, DFN5B CLIP and the BigVGAN v2 vocoder (44k mode)" },
+    "inputs": {
+      "vae_model": "mmaudio_vae_44k_fp16.safetensors",
+      "synchformer_model": "mmaudio_synchformer_fp16.safetensors",
+      "clip_model": "apple_DFN5B-CLIP-ViT-H-14-384_fp16.safetensors",
+      "mode": "44k",
+      "precision": "fp16"
+    }
+  },
+  "sampler": {
+    "class_type": "MMAudioSampler",
+    "_meta": { "title": "INPUT duration, steps, seed, prompt, negative_prompt" },
+    "inputs": {
+      "mmaudio_model": ["model", 0],
+      "feature_utils": ["features", 0],
+      "duration": 5.0,
+      "steps": 25,
+      "cfg": 4.5,
+      "seed": 0,
+      "prompt": "",
+      "negative_prompt": "",
+      "mask_away_clip": false,
+      "force_offload": true,
+      "images": ["frames", 0]
+    }
+  },
+  "save": {
+    "class_type": "SaveAudioAdvanced",
+    "_meta": { "title": "OUTPUT: FLAC (the handler muxes it into the original clip as AAC)" },
+    "inputs": { "audio": ["sampler", 0], "filename_prefix": "massless/sound", "format": "flac" }
+  }
+}

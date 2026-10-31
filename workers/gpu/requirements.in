@@ -1,0 +1,43 @@
+# Top-level Python dependencies of the GPU worker. gpu/requirements.txt is the full pinned lock
+# compiled from this file (the command is at the top of requirements.txt).
+
+# PyTorch for CUDA 12.6 (from https://download.pytorch.org/whl/cu126)
+torch==2.14.1+cu126
+torchvision==0.29.1+cu126
+
+# ComfyUI v0.42.5 requirements.txt, minus the UI-only template and docs packages
+# (comfyui-workflow-templates*, comfyui-embedded-docs), which a headless worker never serves.
+comfyui-frontend-package==1.55.18
+torchsde
+numpy>=1.25.0
+einops
+transformers>=4.50.3
+tokenizers>=0.13.3
+sentencepiece
+safetensors>=0.4.2
+aiohttp>=3.11.8
+yarl>=1.18.0
+pyyaml
+Pillow
+scipy
+tqdm
+psutil
+alembic
+SQLAlchemy>=2.0.0
+filelock
+av>=17.0.0
+comfy-kitchen==0.2.39
+comfy-aimdo==0.5.6
+requests
+simpleeval>=1.0.0
+blake3
+kornia>=0.7.1
+spandrel
+pydantic~=2.0
+pydantic-settings~=2.0
+PyOpenGL>=3.1.8
+comfy-angle
+
+# The handler
+runpod
+websocket-client
