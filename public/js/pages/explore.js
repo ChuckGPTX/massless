@@ -64,12 +64,12 @@ for (const [id, title, model, category, description] of studies) {
   card.type = "button";
   card.className = "study";
   card.dataset.category = category;
-  card.innerHTML = `<div class="study-visual"><video muted loop playsinline preload="none" poster="/media/${folder}/${id}.jpg" data-src="/media/${folder}/${id}.mp4" aria-label="${title}"></video><span class="media-label">${model.toUpperCase()}</span><span class="study-play" aria-hidden="true">▶</span></div><h3>${title}</h3><p>${description}</p>`;
+  card.innerHTML = `<div class="study-visual"><video muted loop playsinline preload="none" poster="/media/${folder}/${id}.jpg" data-src="/media/${folder}/${id}.mp4" aria-label="${title}"></video><span class="study-play" aria-hidden="true">▶</span></div><h3>${title}</h3><p>${description}</p>`;
   card.addEventListener("click", () => {
     $("#reference-dialog-title").textContent = title;
-    $("#reference-provider-note").hidden = false;
+    $("#reference-provider-note").hidden = true;
     $("#character-reference").hidden = id !== "robot-dance";
-    $("#reference-credit").textContent = `${model} · ${description}`;
+    $("#reference-credit").textContent = description;
     $("#reference-player").src = `/media/${folder}/${id}.mp4`;
     $("#reference-dialog").showModal();
     $("#reference-player")
@@ -82,7 +82,7 @@ $("#featured-film-play").addEventListener("click", () => {
   $("#reference-dialog-title").textContent = "Glass tide";
   $("#reference-provider-note").hidden = true;
   $("#character-reference").hidden = true;
-  $("#reference-credit").textContent = "Kling 4.0 · cinematic film study. Massless’s browser tools provide camera motion and visual effects.";
+  $("#reference-credit").textContent = "A glass koi swimming through a luminous coral world.";
   $("#reference-player").src = "/media/showcase/glass-tide.mp4";
   $("#reference-dialog").showModal();
   $("#reference-player").play().catch(() => {});

@@ -233,7 +233,7 @@ for (const preset of presets) {
     make("small", "eyebrow", "COMFYUI / " + preset.category),
     make("h3", "", preset.name),
     make("p", "", preset.description),
-    make("small", "", "LTX 2.5 + Qwen Image Edit · separate setup required"),
+    make("small", "", "Connected workflow · separate setup required"),
     actions,
   );
   card.id = "preset-" + preset.id;
@@ -246,14 +246,14 @@ for (const preset of presets) {
         "walk-of-fire": "moss-fire.jpg",
         "zero-gravity": "moss-gravity.jpg",
       }[preset.id];
-    image.alt = preset.name + " concept still generated with MOSS Image";
+    image.alt = preset.name + " concept artwork";
     art.replaceChildren(image);
     art.classList.add("preset-image");
     body.append(
       make(
         "small",
         "",
-        "Concept artwork: MOSS Image · the Comfy workflow creates the effect video.",
+        "Concept artwork · the connected workflow creates the effect video.",
       ),
     );
   }
