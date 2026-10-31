@@ -1,0 +1,563 @@
+{
+  "id": "room-rental-agreement",
+  "version": 1,
+  "title": "Room Rental and Co-Living Agreement with House Rules",
+  "category": "real-estate",
+  "summary": "Rent a private room in a shared home, with shared-space rules, utilities, chores, guests and move-out terms.",
+  "useWhen": "An owner or master tenant rents a bedroom in a home they share, or runs a co-living house where residents share common areas.",
+  "watchOuts": [
+    "Security deposit limits, separate-account and interest rules, and return deadlines vary by state and sometimes by city. Check the state notes before setting the deposit.",
+    "Many cities have rent control, just-cause eviction, registration or inspection rules that override lease terms. Verify locally.",
+    "Notices of default, eviction or the right to cure for a primary residence are excluded from the federal E-SIGN Act. Serve those notices the way your state's law requires, usually on paper, even if the lease itself is signed electronically.",
+    "Fair housing: do not screen, advertise or set terms based on race, color, religion, sex (including sexual orientation and gender identity), national origin, familial status or disability, or other classes protected by state and local law. Many places also prohibit discrimination based on source of income.",
+    "If you are a tenant renting out a room, your own lease probably requires the landlord's written consent to sublet. Subletting without it can get you evicted.",
+    "Some states treat a single roomer in an owner-occupied home as a 'lodger' with faster removal procedures (for example California Civil Code §1946.5). Others give roommates full tenant rights. Verify locally.",
+    "The federal Fair Housing Act exempts some owner-occupied buildings with four or fewer units from certain rules, but never from its advertising rules. Courts have held that choosing a roommate to share a living unit is outside the Act. State and local laws may still apply.",
+    "Stays under 30 days may count as short-term rentals subject to city permits, taxes and bans.",
+    "Co-living operators who rent many rooms may be running a rooming or boarding house that needs a license or inspection."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "host",
+      "label": "Host (owner or master tenant)"
+    },
+    {
+      "id": "resident",
+      "label": "Resident"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "host_name",
+      "label": "Host name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Owner or master tenant renting the room."
+    },
+    {
+      "id": "host_email",
+      "label": "Host email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email."
+    },
+    {
+      "id": "host_status",
+      "label": "Host is",
+      "type": "select",
+      "required": true,
+      "default": "the owner of the home",
+      "options": [
+        "the owner of the home",
+        "a tenant with written landlord consent to sublet"
+      ],
+      "help": "A tenant needs the landlord's consent."
+    },
+    {
+      "id": "resident_name",
+      "label": "Resident name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Person renting the room."
+    },
+    {
+      "id": "resident_email",
+      "label": "Resident email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email."
+    },
+    {
+      "id": "home_address",
+      "label": "Home address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Address of the shared home."
+    },
+    {
+      "id": "room",
+      "label": "Room",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "E.g. 'the northeast bedroom on the second floor, with the hall closet'."
+    },
+    {
+      "id": "private_bath",
+      "label": "Private bathroom?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "If off, bathrooms are shared."
+    },
+    {
+      "id": "shared_areas",
+      "label": "Shared areas",
+      "type": "longtext",
+      "required": true,
+      "default": "Kitchen, living room, laundry room, back yard",
+      "options": [],
+      "help": "Areas the resident may use."
+    },
+    {
+      "id": "off_limits",
+      "label": "Areas off-limits",
+      "type": "longtext",
+      "required": false,
+      "default": "Host's bedroom and bathroom, garage, storage closets",
+      "options": [],
+      "help": "Areas the resident may not use."
+    },
+    {
+      "id": "start_date",
+      "label": "Move-in date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start."
+    },
+    {
+      "id": "term_type",
+      "label": "Term",
+      "type": "select",
+      "required": true,
+      "default": "month to month",
+      "options": [
+        "month to month",
+        "fixed term"
+      ],
+      "help": "Length."
+    },
+    {
+      "id": "end_date",
+      "label": "End date",
+      "type": "date",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "For fixed terms."
+    },
+    {
+      "id": "rent",
+      "label": "Monthly rent",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Amount."
+    },
+    {
+      "id": "due_day",
+      "label": "Rent due day",
+      "type": "number",
+      "required": true,
+      "default": "1",
+      "options": [],
+      "help": "Day of month."
+    },
+    {
+      "id": "late_fee",
+      "label": "Late fee",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Reasonable amount. Check state caps."
+    },
+    {
+      "id": "deposit",
+      "label": "Security deposit",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Check state limits."
+    },
+    {
+      "id": "utilities",
+      "label": "Utilities",
+      "type": "select",
+      "required": true,
+      "default": "included in rent",
+      "options": [
+        "included in rent",
+        "split equally among residents",
+        "split as stated in house rules"
+      ],
+      "help": "How utilities are handled."
+    },
+    {
+      "id": "utility_cap",
+      "label": "Utility cap per month",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "If included in rent, the host may charge for usage above this amount."
+    },
+    {
+      "id": "furnished",
+      "label": "Room furnished?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "List furniture in the inventory."
+    },
+    {
+      "id": "quiet_hours",
+      "label": "Quiet hours",
+      "type": "text",
+      "required": true,
+      "default": "10:00 p.m. to 7:00 a.m. on weeknights, 11:00 p.m. to 8:00 a.m. on weekends",
+      "options": [],
+      "help": "When noise must be kept low."
+    },
+    {
+      "id": "guest_policy",
+      "label": "Overnight guests",
+      "type": "text",
+      "required": true,
+      "default": "no more than 3 nights in any 7-day period and 8 nights per month, with notice to housemates",
+      "options": [],
+      "help": "Limits on overnight guests."
+    },
+    {
+      "id": "cleaning",
+      "label": "Cleaning and chores",
+      "type": "longtext",
+      "required": true,
+      "default": "Clean up the kitchen right after use. Shared areas are cleaned on a rotating weekly schedule posted in the kitchen. Take out trash and recycling on your assigned weeks.",
+      "options": [],
+      "help": "Chore expectations."
+    },
+    {
+      "id": "kitchen",
+      "label": "Kitchen and food",
+      "type": "longtext",
+      "required": true,
+      "default": "Each resident has a labeled shelf in the refrigerator and pantry. Don't use others' food without asking. Shared staples may be split by agreement.",
+      "options": [],
+      "help": "Food and kitchen rules."
+    },
+    {
+      "id": "smoking",
+      "label": "Smoking and vaping",
+      "type": "select",
+      "required": true,
+      "default": "not allowed anywhere on the property",
+      "options": [
+        "not allowed anywhere on the property",
+        "allowed only outside in designated areas"
+      ],
+      "help": "Includes cannabis."
+    },
+    {
+      "id": "pets",
+      "label": "Resident may keep a pet?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Assistance animals are handled under fair housing law."
+    },
+    {
+      "id": "pet_terms",
+      "label": "Pet terms",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Type and rules."
+    },
+    {
+      "id": "parking",
+      "label": "Parking",
+      "type": "text",
+      "required": false,
+      "default": "Street parking only",
+      "options": [],
+      "help": "Parking rules."
+    },
+    {
+      "id": "entry_notice_hours",
+      "label": "Notice before host enters the room (hours)",
+      "type": "number",
+      "required": true,
+      "default": "24",
+      "options": [],
+      "help": "Except emergencies."
+    },
+    {
+      "id": "notice_days",
+      "label": "Notice to end (days)",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "Check the state's minimum."
+    },
+    {
+      "id": "built_before_1978",
+      "label": "Home built before 1978?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Adds the federal lead warning. Also sign the full federal disclosure."
+    },
+    {
+      "id": "other_rules",
+      "label": "Other house rules",
+      "type": "longtext",
+      "required": false,
+      "default": "Lock exterior doors when you leave. No parties without all housemates' agreement. Thermostat setting is decided together.",
+      "options": [],
+      "help": "Anything else."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and home",
+      "body": "**Host:** {{host_name}} ({{host_email}}), who is {{host_status}}.\n\n**Resident:** {{resident_name}} ({{resident_email}})\n\nHost rents to Resident {{room}} (the \"Room\") in the home at {{home_address}}, in {{state}} (the \"Home\"), for Resident's personal residence only.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Host is a tenant",
+      "body": "Host rents the Home from a landlord under a separate lease (the \"Master Lease\"). Host has the landlord's written consent to rent the Room. This agreement is subject to the Master Lease. Resident will follow the Master Lease's rules that Host provides in writing. If the Master Lease ends, this agreement ends too, and Host will give Resident as much notice as possible and refund prepaid rent and the deposit as required by law. Resident: [[initial:resident]]",
+      "optional": true,
+      "showIf": "host_status == 'a tenant with written landlord consent to sublet'"
+    },
+    {
+      "id": "s3",
+      "title": "3. Shared and private space",
+      "body": "Resident has private use of the Room. Resident may use these shared areas in common with other residents: {{shared_areas}}. Off-limits: {{off_limits}}.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Private bathroom",
+      "body": "Resident also has private use of the bathroom attached to the Room.",
+      "optional": true,
+      "showIf": "private_bath == true"
+    },
+    {
+      "id": "s5",
+      "title": "5. Furnishings",
+      "body": "The Room is furnished. Furniture is listed in a move-in inventory signed by both.",
+      "optional": true,
+      "showIf": "furnished == true"
+    },
+    {
+      "id": "s6",
+      "title": "6. Term",
+      "body": "Starts {{start_date}}. Term: {{term_type}}.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Fixed term",
+      "body": "This agreement ends on {{end_date}} unless the parties agree in writing to extend it. After that, it continues month to month.",
+      "optional": true,
+      "showIf": "term_type == 'fixed term'"
+    },
+    {
+      "id": "s8",
+      "title": "8. Rent and deposit",
+      "body": "Rent is {{rent}} per month, due on day {{due_day}}. Late fee after 5 days: {{late_fee}}, where allowed by law. Security deposit: {{deposit}}, returned after move-out minus lawful deductions, with an itemized statement, within the deadline set by the law of {{state}}.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Utilities",
+      "body": "Utilities (electricity, gas, water, trash and internet) are {{utilities}}.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Utility cap",
+      "body": "Rent includes utilities up to {{utility_cap}} per month for the Room's share. If a month's bills exceed the cap, Host may charge Resident its fair share of the excess with copies of the bills.",
+      "optional": true,
+      "showIf": "utilities == 'included in rent'"
+    },
+    {
+      "id": "s11",
+      "title": "11. House rules",
+      "body": "Residents agree to follow these house rules, which are part of this agreement:\n\n- **Quiet hours:** {{quiet_hours}}.\n- **Overnight guests:** {{guest_policy}}. Residents are responsible for their guests.\n- **Cleaning and chores:** {{cleaning}}\n- **Kitchen and food:** {{kitchen}}\n- **Smoking and vaping:** {{smoking}}.\n- **Parking:** {{parking}}.\n- **Safety:** don't disable smoke or carbon monoxide alarms, block exits, or use space heaters or candles unattended.\n- **Other rules:** {{other_rules}}\n\nRules may be changed by the residents and Host together, in writing. Host will give at least 7 days' notice of any new rule, and new rules may not change rent, the deposit or the term. Resident: [[initial:resident]]",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Pet",
+      "body": "Resident may keep: {{pet_terms}}. Resident is responsible for cleanup, noise and damage.",
+      "optional": true,
+      "showIf": "pets == true"
+    },
+    {
+      "id": "s13",
+      "title": "13. Privacy and entry",
+      "body": "Host will not enter the Room without at least {{entry_notice_hours}} hours' notice and a reasonable purpose (repairs, inspection or showing), except in an emergency or with Resident's consent. Shared areas may be used by all residents at any time.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "14. Repairs and damage",
+      "body": "Host keeps the Home safe and habitable and makes needed repairs after notice, as the law requires. Resident reports problems promptly and pays for damage Resident or Resident's guests cause beyond normal wear. Resident will not change locks, paint or make alterations without written consent.",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "15. Housemate disputes",
+      "body": "Residents will try to resolve disagreements directly and respectfully, then with Host's help. Repeated or serious violations of the house rules are a breach of this agreement after written notice and a chance to correct them.",
+      "optional": false
+    },
+    {
+      "id": "s16",
+      "title": "16. Ending the agreement",
+      "body": "Either party may end a month-to-month arrangement with at least {{notice_days}} days' written notice, or longer if the law requires. Host may end the agreement for a serious breach only by following the notice and court procedures that apply under the law of {{state}} to the type of occupancy, such as tenant or lodger. Host will never use lockouts, utility shut-offs or removal of belongings to force a move. At move-out, Resident returns all keys and removes all belongings.",
+      "optional": false
+    },
+    {
+      "id": "s17",
+      "title": "17. Required notices",
+      "body": "Legal notices, such as notices to pay rent or quit, will be delivered as required by the law of {{state}}, which may require paper delivery. Routine messages may be sent by email or text.",
+      "optional": false
+    },
+    {
+      "id": "s18",
+      "title": "18. Lead warning (older homes)",
+      "body": "If the Home was built before 1978, Host will provide the federal lead-based paint disclosure and EPA pamphlet before Resident signs. Housing built before 1978 may contain lead-based paint. Lead from paint, paint chips, and dust can pose health hazards if not managed properly. Lead exposure is especially harmful to young children and pregnant women. Before renting pre-1978 housing, lessors must disclose the presence of known lead-based paint and/or lead-based paint hazards in the dwelling. Lessees must also receive a federally approved pamphlet on lead poisoning prevention. Resident: [[initial:resident]]",
+      "optional": true,
+      "showIf": "built_before_1978 == true"
+    },
+    {
+      "id": "s19",
+      "title": "19. State-specific requirements",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "optional": false
+    },
+    {
+      "id": "s20",
+      "title": "20. General",
+      "body": "This agreement is governed by the law of {{state}} and applicable local law. Terms that conflict with mandatory protections are unenforceable to that extent. It is the entire agreement and may be changed only in writing. Electronic signatures are valid.",
+      "optional": false
+    },
+    {
+      "id": "s21",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Host** — {{host_name}}\n\n[[sig:host]]\n\nPrinted name: [[name:host]]\nDate: [[date:host]]\n\n**Resident** — {{resident_name}}\n\n[[sig:resident]]\n\nPrinted name: [[name:resident]]\nDate: [[date:resident]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "42 U.S.C. §3603 Fair Housing Act exemptions (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/42/3603"
+    },
+    {
+      "title": "42 U.S.C. §3604 discrimination in sale or rental, including advertising (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/42/3604"
+    },
+    {
+      "title": "Fair Housing Council v. Roommate.com, 666 F.3d 1216 (9th Cir. 2012) (Justia)",
+      "url": "https://law.justia.com/cases/federal/appellate-courts/ca9/09-55272/09-55272-2012-02-02.html"
+    },
+    {
+      "title": "California Civil Code §1946.5 (lodgers)",
+      "url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1946.5"
+    },
+    {
+      "title": "TurboTenant: security deposit laws by state (updated Feb 2026)",
+      "url": "https://www.turbotenant.com/state/security-deposit-laws-by-state/"
+    },
+    {
+      "title": "E-SIGN exceptions, 15 U.S.C. §7003 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7003"
+    },
+    {
+      "title": "40 CFR 745.113: certification and acknowledgment of disclosure (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.113"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

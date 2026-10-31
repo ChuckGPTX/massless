@@ -1,0 +1,230 @@
+{
+  "id": "lead-based-paint-disclosure",
+  "version": 1,
+  "title": "Lead-Based Paint Disclosure (Sale or Lease)",
+  "category": "real-estate",
+  "summary": "The federally required lead-based paint disclosure for selling or renting housing built before 1978, using the exact federal warning statements.",
+  "useWhen": "Selling or leasing most residential housing built before 1978. It must be signed before the buyer or tenant is obligated under the contract or lease.",
+  "watchOuts": [
+    "Timing matters: the disclosure, the records and the EPA pamphlet must be given before the buyer or tenant is bound. Giving them at closing or move-in is too late.",
+    "Buyers get a 10-day opportunity to inspect for lead (or another agreed period) unless they waive it in writing. Tenants do not get this right.",
+    "Exemptions include zero-bedroom units, housing for the elderly or disabled (unless a child under 6 lives or will live there), leases of 100 days or less, foreclosure sales and housing certified lead-free. See 40 CFR 745.101.",
+    "Keep the signed form for at least three years. Penalties for violations can be substantial.",
+    "Agents: if an agent represents the seller or landlord, the agent must also sign the agent certification. Add the agent as a signer or have the agent sign the certification on a copy.",
+    "Some states and cities add their own lead rules, for example Massachusetts, Maryland, Rhode Island, New York City and Vermont."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "owner",
+      "label": "Seller or landlord"
+    },
+    {
+      "id": "recipient",
+      "label": "Buyer or tenant"
+    }
+  ],
+  "variables": [
+    {
+      "id": "transaction",
+      "label": "Transaction",
+      "type": "select",
+      "required": true,
+      "default": "sale",
+      "options": [
+        "sale",
+        "lease"
+      ],
+      "help": "The warning statement and buyer rights differ for sales and leases."
+    },
+    {
+      "id": "property_address",
+      "label": "Property address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Housing built before 1978."
+    },
+    {
+      "id": "owner_name",
+      "label": "Seller or landlord name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Seller or lessor."
+    },
+    {
+      "id": "recipient_name",
+      "label": "Buyer or tenant name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Purchaser or lessee."
+    },
+    {
+      "id": "known_lbp",
+      "label": "Known lead-based paint or hazards",
+      "type": "select",
+      "required": true,
+      "default": "no knowledge",
+      "options": [
+        "known lead-based paint and/or hazards are present",
+        "no knowledge"
+      ],
+      "help": "Seller or landlord's actual knowledge."
+    },
+    {
+      "id": "lbp_explanation",
+      "label": "Explanation of known lead-based paint or hazards",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Location, basis for the determination and condition of painted surfaces."
+    },
+    {
+      "id": "records",
+      "label": "Records or reports available",
+      "type": "select",
+      "required": true,
+      "default": "no reports or records",
+      "options": [
+        "records and reports listed below have been provided",
+        "no reports or records"
+      ],
+      "help": "Lead inspections, risk assessments, abatement records."
+    },
+    {
+      "id": "records_list",
+      "label": "List of records provided",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Each document provided."
+    },
+    {
+      "id": "inspection_choice",
+      "label": "Buyer's 10-day inspection opportunity",
+      "type": "select",
+      "required": false,
+      "default": "received the opportunity",
+      "options": [
+        "received the opportunity",
+        "waived the opportunity"
+      ],
+      "help": "Sales only."
+    },
+    {
+      "id": "agent_involved",
+      "label": "Is an agent involved?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Agent certification is required when an agent represents the seller or landlord."
+    },
+    {
+      "id": "agent_name",
+      "label": "Agent name and brokerage",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Agent who signs the certification."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Property",
+      "body": "Property: {{property_address}}. This disclosure is for the {{transaction}} of housing built before 1978. Seller or landlord: {{owner_name}}. Buyer or tenant: {{recipient_name}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Lead warning statement (sales)",
+      "body": "**Lead Warning Statement**\n\nEvery purchaser of any interest in residential real property on which a residential dwelling was built prior to 1978 is notified that such property may present exposure to lead from lead-based paint that may place young children at risk of developing lead poisoning. Lead poisoning in young children may produce permanent neurological damage, including learning disabilities, reduced intelligence quotient, behavioral problems, and impaired memory. Lead poisoning also poses a particular risk to pregnant women. The seller of any interest in residential real property is required to provide the buyer with any information on lead-based paint hazards from risk assessments or inspections in the seller's possession and notify the buyer of any known lead-based paint hazards. A risk assessment or inspection for possible lead-based paint hazards is recommended prior to purchase.",
+      "optional": true,
+      "showIf": "transaction == 'sale'"
+    },
+    {
+      "id": "s3",
+      "title": "3. Lead warning statement (leases)",
+      "body": "**Lead Warning Statement**\n\nHousing built before 1978 may contain lead-based paint. Lead from paint, paint chips, and dust can pose health hazards if not managed properly. Lead exposure is especially harmful to young children and pregnant women. Before renting pre-1978 housing, lessors must disclose the presence of known lead-based paint and/or lead-based paint hazards in the dwelling. Lessees must also receive a federally approved pamphlet on lead poisoning prevention.",
+      "optional": true,
+      "showIf": "transaction == 'lease'"
+    },
+    {
+      "id": "s4",
+      "title": "4. Seller's or landlord's disclosure",
+      "body": "Presence of lead-based paint and/or lead-based paint hazards: {{known_lbp}}. Explanation (if known): {{lbp_explanation}}\n\nRecords and reports: {{records}}. {{records_list}}\n\nSeller or landlord initials: [[initial:owner]]",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Buyer's or tenant's acknowledgment",
+      "body": "- I have received copies of all information listed above. Initials: [[initial:recipient]]\n- I have received the pamphlet \"Protect Your Family From Lead in Your Home.\" Initials: [[initial:recipient]]",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Buyer's inspection opportunity (sales)",
+      "body": "Buyer has (check by initialing): {{inspection_choice}} to conduct a risk assessment or inspection for the presence of lead-based paint and/or lead-based paint hazards. Initials: [[initial:recipient]]",
+      "optional": true,
+      "showIf": "transaction == 'sale'"
+    },
+    {
+      "id": "s7",
+      "title": "7. Agent's acknowledgment",
+      "body": "Agent ({{agent_name}}) has informed the seller or landlord of their obligations under 42 U.S.C. 4852d and is aware of the agent's responsibility to ensure compliance. The agent signs this certification as an added signer or on a counterpart copy.",
+      "optional": true,
+      "showIf": "agent_involved == true"
+    },
+    {
+      "id": "s8",
+      "title": "8. Certification of accuracy",
+      "body": "The following parties have reviewed the information above and certify, to the best of their knowledge, that the information they have provided is true and accurate.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "Signatures",
+      "body": "**Seller or landlord** — {{owner_name}}\n\n[[sig:owner]]\n\nPrinted name: [[name:owner]]\nDate: [[date:owner]]\n\n**Buyer or tenant** — {{recipient_name}}\n\n[[sig:recipient]]\n\nPrinted name: [[name:recipient]]\nDate: [[date:recipient]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "40 CFR 745.113: certification and acknowledgment of disclosure (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.113"
+    },
+    {
+      "title": "40 CFR 745.101: scope and exemptions (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.101"
+    },
+    {
+      "title": "40 CFR 745.110: opportunity to conduct an evaluation (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.110"
+    },
+    {
+      "title": "EPA: Real estate disclosures about potential lead hazards",
+      "url": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+    },
+    {
+      "title": "EPA: Protect Your Family From Lead in Your Home (pamphlet)",
+      "url": "https://www.epa.gov/lead/protect-your-family-lead-your-home-real-estate-disclosure"
+    },
+    {
+      "title": "42 U.S.C. §4852d: disclosure of information concerning lead upon transfer of residential property (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/42/4852d"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

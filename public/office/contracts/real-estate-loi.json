@@ -1,0 +1,278 @@
+{
+  "id": "real-estate-loi",
+  "version": 1,
+  "title": "Real Estate Letter of Intent (Non-Binding)",
+  "category": "real-estate",
+  "summary": "Outline the key deal terms for a property before negotiating a full purchase contract. Mostly non-binding.",
+  "useWhen": "Making an offer on investment, commercial or multifamily property where a detailed purchase agreement will follow.",
+  "watchOuts": [
+    "Courts sometimes enforce LOIs as contracts when they look complete and the parties act on them. Keep the non-binding language clear, and keep binding terms short.",
+    "Exclusivity ('no-shop') and confidentiality are usually the only binding terms. Keep exclusivity short.",
+    "An LOI is not a substitute for a purchase agreement or state-required disclosures."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "buyer",
+      "label": "Prospective buyer"
+    },
+    {
+      "id": "seller",
+      "label": "Property owner"
+    }
+  ],
+  "variables": [
+    {
+      "id": "loi_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of the letter."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Buyer or buying entity, 'and/or assigns' if applicable."
+    },
+    {
+      "id": "seller_name",
+      "label": "Owner name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Current owner."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Address and short description."
+    },
+    {
+      "id": "price",
+      "label": "Proposed price",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Offer price."
+    },
+    {
+      "id": "terms",
+      "label": "Payment terms",
+      "type": "longtext",
+      "required": true,
+      "default": "All cash at closing.",
+      "options": [],
+      "help": "Cash, new loan, seller financing, subject-to, or a combination."
+    },
+    {
+      "id": "earnest_money",
+      "label": "Earnest money",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Deposit with the purchase agreement."
+    },
+    {
+      "id": "due_diligence_days",
+      "label": "Due diligence period (days)",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "After the purchase agreement is signed."
+    },
+    {
+      "id": "diligence_items",
+      "label": "Documents the seller will provide",
+      "type": "longtext",
+      "required": false,
+      "default": "Rent roll, leases, trailing 12 months of operating statements, utility bills, tax bills, service contracts, existing surveys and environmental reports.",
+      "options": [],
+      "help": "What the buyer needs to review."
+    },
+    {
+      "id": "closing_days",
+      "label": "Close within (days after due diligence)",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "Timeline."
+    },
+    {
+      "id": "contingencies",
+      "label": "Contingencies",
+      "type": "longtext",
+      "required": false,
+      "default": "Satisfactory due diligence, financing on terms acceptable to buyer, clear title.",
+      "options": [],
+      "help": "Main conditions."
+    },
+    {
+      "id": "exclusivity",
+      "label": "Seller agrees to exclusivity?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Seller stops marketing for a short period."
+    },
+    {
+      "id": "exclusivity_days",
+      "label": "Exclusivity period (days)",
+      "type": "number",
+      "required": false,
+      "default": "30",
+      "options": [],
+      "help": "Keep it short."
+    },
+    {
+      "id": "expires",
+      "label": "LOI expires",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date the seller must sign by."
+    },
+    {
+      "id": "governing_state",
+      "label": "State whose law applies",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Usually the property's state."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Purpose",
+      "body": "Date: {{loi_date}}. This letter summarizes the main terms on which {{buyer_name}} (\"Buyer\") proposes to buy {{property_address}} (the \"Property\") from {{seller_name}} (\"Seller\"). The parties intend to negotiate a definitive purchase agreement.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Proposed terms",
+      "body": "- **Price:** {{price}}\n- **Payment:** {{terms}}\n- **Earnest money:** {{earnest_money}}, deposited with a title company or closing attorney when the purchase agreement is signed\n- **Due diligence:** {{due_diligence_days}} days after the purchase agreement is signed, during which Buyer may terminate for any reason\n- **Seller documents:** {{diligence_items}}\n- **Closing:** within {{closing_days}} days after due diligence ends\n- **Contingencies:** {{contingencies}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Not binding",
+      "body": "**Except for the sections titled Confidentiality, Exclusivity (if included), Costs and Governing law, this letter is not a binding contract.** It creates no obligation to buy or sell, and no obligation to negotiate further. Either party may stop negotiations at any time for any reason. A binding agreement exists only when both parties sign a definitive purchase agreement.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Confidentiality",
+      "body": "Each party will keep the terms of this letter and any non-public information it receives about the Property confidential, except for disclosure to its advisers, lenders and investors who need to know.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Exclusivity",
+      "body": "For {{exclusivity_days}} days after Seller signs, Seller will not market the Property, solicit offers or negotiate with anyone else about a sale.",
+      "optional": true,
+      "showIf": "exclusivity == true"
+    },
+    {
+      "id": "s6",
+      "title": "6. Costs",
+      "body": "Each party pays its own costs of negotiating this letter and the purchase agreement.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Governing law and expiration",
+      "body": "The binding sections are governed by the law of {{governing_state}}. This letter expires if not signed by Seller by {{expires}}.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "Signatures",
+      "body": "Acknowledged and agreed, including the binding sections:\n\n**Prospective buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nTitle (if signing for a company): [[text:buyer:Title]]\nDate: [[date:buyer]]\n\n**Property owner** — {{seller_name}}\n\n[[sig:seller]]\n\nPrinted name: [[name:seller]]\nTitle (if signing for a company): [[text:seller:Title]]\nDate: [[date:seller]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "Pryor Cashman: The enforceability of letters of intent",
+      "url": "https://www.pryorcashman.com/publications/the-enforceability-of-letters-of-intent"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

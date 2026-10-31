@@ -1,0 +1,309 @@
+{
+  "id": "referral-agreement",
+  "version": 1,
+  "title": "Referral Agreement",
+  "category": "business",
+  "summary": "Pay a referral or finder's fee to someone who introduces new customers.",
+  "useWhen": "A business wants to reward a partner or individual for introducing customers, without making them a sales agent or employee.",
+  "watchOuts": [
+    "Some referral fees are illegal or need a license. Examples: real estate (a fee tied to a sale usually requires a license), legal services (lawyers face fee-sharing rules), healthcare (the federal Anti-Kickback Statute and state laws), insurance and securities (finders may need a broker license), and mortgage settlement services under RESPA.",
+    "Define a 'qualified referral' and how the referral is tracked, such as a code, an email introduction or a CRM entry. This prevents disputes over who referred whom.",
+    "If the referral partner promotes you publicly, FTC endorsement rules require them to disclose the paid relationship.",
+    "Collect a Form W-9. Payments may require a Form 1099."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "company",
+      "label": "Company"
+    },
+    {
+      "id": "referrer",
+      "label": "Referral partner"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "company_name",
+      "label": "Company: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "company_address",
+      "label": "Company: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "company_email",
+      "label": "Company: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "referrer_name",
+      "label": "Referral partner: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "referrer_address",
+      "label": "Referral partner: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "referrer_email",
+      "label": "Referral partner: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "offering",
+      "label": "Products or services covered",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "What referred customers may buy."
+    },
+    {
+      "id": "fee_type",
+      "label": "Fee type",
+      "type": "select",
+      "required": true,
+      "default": "percentage",
+      "options": [
+        "percentage",
+        "flat fee"
+      ],
+      "help": "Percentage of revenue or flat fee per customer."
+    },
+    {
+      "id": "fee_percent",
+      "label": "Fee percentage",
+      "type": "percent",
+      "required": false,
+      "default": "10",
+      "options": [],
+      "help": "Percent of net amounts actually collected from the referred customer."
+    },
+    {
+      "id": "fee_duration_months",
+      "label": "Fee paid on revenue for (months)",
+      "type": "number",
+      "required": false,
+      "default": "12",
+      "options": [],
+      "help": "How long after the first sale the percentage applies."
+    },
+    {
+      "id": "flat_fee",
+      "label": "Flat fee per qualified referral",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Amount per referred customer who becomes a paying customer."
+    },
+    {
+      "id": "registration_window_days",
+      "label": "Referral credit window (days)",
+      "type": "number",
+      "required": true,
+      "default": "90",
+      "options": [],
+      "help": "The referral counts only if the customer signs within this many days after the introduction."
+    },
+    {
+      "id": "term_months",
+      "label": "Term (months)",
+      "type": "number",
+      "required": true,
+      "default": "12",
+      "options": [],
+      "help": "How long the agreement lasts. It renews unless ended."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Company:** {{company_name}}, {{company_address}} ({{company_email}})\n\n**Referral partner (Partner):** {{referrer_name}}, {{referrer_address}} ({{referrer_email}})",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Referrals",
+      "body": "Partner may introduce potential customers for the following: {{offering}}.\n\nA \"Qualified Referral\" is a person or business that (a) Partner introduces in writing (for example by email introduction or a referral code), (b) is not already a customer or active prospect of the Company, as shown by its records, and (c) signs a paid agreement with the Company within {{registration_window_days}} days after the introduction. The Company decides in good faith whether to accept any customer.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Referral fee: percentage",
+      "body": "For each Qualified Referral, the Company will pay Partner {{fee_percent}}% of the net amounts the Company actually collects from that customer during the first {{fee_duration_months}} months after the customer's first payment. Net amounts exclude taxes, refunds, chargebacks and pass-through costs.",
+      "optional": true,
+      "showIf": "fee_type == 'percentage'"
+    },
+    {
+      "id": "s4",
+      "title": "4. Referral fee: flat",
+      "body": "For each Qualified Referral, the Company will pay Partner {{flat_fee}} after the customer has paid its first invoice and any refund period has passed.",
+      "optional": true,
+      "showIf": "fee_type == 'flat fee'"
+    },
+    {
+      "id": "s5",
+      "title": "5. Payment and statements",
+      "body": "The Company will pay fees within 30 days after the end of each calendar quarter in which they are earned, with a statement showing how they were calculated. If a payment is later refunded or charged back, the Company may deduct the related fee from future payments. Partner is responsible for its own taxes.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Partner's conduct",
+      "body": "Partner will:\n- describe the Company accurately and make no promises about pricing, terms or results beyond the Company's published materials;\n- not sign anything or make commitments on the Company's behalf;\n- follow applicable laws, including anti-spam, privacy and FTC endorsement rules, and clearly disclose that it may receive a referral fee when promoting the Company publicly; and\n- not accept a referral fee where the law prohibits it or requires a license that Partner does not hold.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Relationship",
+      "body": "Partner is an independent contractor and not the Company's employee, agent, partner or joint venturer. This agreement is not exclusive.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Confidentiality",
+      "body": "Each party will keep confidential the other's non-public information, including customer lists and pricing, and use it only for this agreement.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Term and ending",
+      "body": "This agreement lasts {{term_months}} months from {{effective_date}} and renews for successive terms of the same length unless either party gives 30 days' written notice. Fees for Qualified Referrals made before the end date remain payable on the schedule above.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Company** — {{company_name}}\n\n[[sig:company]]\n\nPrinted name: [[name:company]]\nTitle (if signing for a company): [[text:company:Title]]\nDate: [[date:company]]\n\n**Referral partner** — {{referrer_name}}\n\n[[sig:referrer]]\n\nPrinted name: [[name:referrer]]\nTitle (if signing for a company): [[text:referrer:Title]]\nDate: [[date:referrer]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "FTC: Endorsement guides FAQs",
+      "url": "https://www.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking"
+    },
+    {
+      "title": "HHS OIG: Federal Anti-Kickback Statute",
+      "url": "https://oig.hhs.gov/compliance/physician-education/fraud-abuse-laws/"
+    },
+    {
+      "title": "CFPB: RESPA Section 8 (12 CFR 1024.14) referral fees (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-12/chapter-X/part-1024/subpart-A/section-1024.14"
+    },
+    {
+      "title": "IRS: Independent contractor (self-employed) or employee?",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/independent-contractor-self-employed-or-employee"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

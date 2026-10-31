@@ -1,0 +1,367 @@
+{
+  "id": "property-management-agreement",
+  "version": 1,
+  "title": "Property Management Agreement",
+  "category": "real-estate",
+  "summary": "Hire a manager to lease, collect rent and maintain rental property, with fees, spending limits and trust-account rules.",
+  "useWhen": "An owner hires a property manager or management company to run one or more rentals.",
+  "watchOuts": [
+    "Most states require a real estate broker's license, or a property management license, to manage property for others for compensation. Check that the manager is licensed in the property's state. Unlicensed managers may not be able to collect fees.",
+    "Tenant deposits and rents must usually be held in a trust account under state law. Ask how and where.",
+    "Clarify who is the 'landlord' for legal notices, fair housing compliance and security deposit returns.",
+    "Leasing fees, renewal fees, markups on maintenance and early termination fees are where costs hide. List them all."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "owner",
+      "label": "Owner"
+    },
+    {
+      "id": "manager",
+      "label": "Manager"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "owner_name",
+      "label": "Owner: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "owner_address",
+      "label": "Owner: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "owner_email",
+      "label": "Owner: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "manager_name",
+      "label": "Manager: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "manager_address",
+      "label": "Manager: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "manager_email",
+      "label": "Manager: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "manager_license",
+      "label": "Manager's license number and state",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Broker or property management license."
+    },
+    {
+      "id": "properties",
+      "label": "Properties managed",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Addresses and unit counts."
+    },
+    {
+      "id": "mgmt_fee",
+      "label": "Management fee (% of rent collected)",
+      "type": "percent",
+      "required": true,
+      "default": "8",
+      "options": [],
+      "help": "Percent of rents actually collected."
+    },
+    {
+      "id": "min_fee",
+      "label": "Minimum monthly fee per unit",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Optional minimum."
+    },
+    {
+      "id": "leasing_fee",
+      "label": "Leasing fee for a new tenant",
+      "type": "text",
+      "required": true,
+      "default": "50% of one month's rent",
+      "options": [],
+      "help": "Fee for finding and placing a tenant."
+    },
+    {
+      "id": "renewal_fee",
+      "label": "Lease renewal fee",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Fee for renewing a lease."
+    },
+    {
+      "id": "repair_limit",
+      "label": "Repair approval limit",
+      "type": "money",
+      "required": true,
+      "default": "500",
+      "options": [],
+      "help": "Manager may spend up to this per repair without the owner's approval, except in emergencies."
+    },
+    {
+      "id": "reserve",
+      "label": "Operating reserve",
+      "type": "money",
+      "required": true,
+      "default": "500",
+      "options": [],
+      "help": "Amount kept in the trust account for expenses."
+    },
+    {
+      "id": "statement_day",
+      "label": "Owner statements and distributions by day",
+      "type": "number",
+      "required": true,
+      "default": "15",
+      "options": [],
+      "help": "Day of the month."
+    },
+    {
+      "id": "markup",
+      "label": "Manager markup on maintenance",
+      "type": "select",
+      "required": true,
+      "default": "no markup",
+      "options": [
+        "no markup",
+        "up to 10% on third-party invoices"
+      ],
+      "help": "Disclose any markup."
+    },
+    {
+      "id": "term_months",
+      "label": "Initial term (months)",
+      "type": "number",
+      "required": true,
+      "default": "12",
+      "options": [],
+      "help": "Initial term."
+    },
+    {
+      "id": "termination_days",
+      "label": "Notice to terminate (days)",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "After the initial term."
+    },
+    {
+      "id": "insurance_amount",
+      "label": "Owner's minimum liability insurance",
+      "type": "money",
+      "required": true,
+      "default": "1000000",
+      "options": [],
+      "help": "Owner's landlord policy naming the manager as additional insured."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Owner:** {{owner_name}}, {{owner_address}} ({{owner_email}})\n\n**Manager:** {{manager_name}}, {{manager_address}} ({{manager_email}})\n\nManager holds license {{manager_license}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Appointment",
+      "body": "Owner appoints Manager as its exclusive agent to manage the following properties (the \"Properties\"), starting {{effective_date}}:\n\n{{properties}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Manager's duties",
+      "body": "Manager will, in Owner's name and for Owner's account:\n- advertise vacancies and screen applicants with written criteria applied consistently and in compliance with fair housing laws;\n- sign leases on Owner's approved terms, up to 12 months;\n- collect rents, deposits and other charges, and handle late notices and, with Owner's approval, evictions through an attorney;\n- arrange routine maintenance and repairs, and respond to emergencies 24 hours a day;\n- conduct move-in and move-out inspections with photos, and handle deposit accounting within legal deadlines;\n- keep complete records and comply with laws that apply to the Properties.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Money and trust account",
+      "body": "Manager will hold all rents, deposits and Owner funds in a trust account as required by the law of {{governing_state}}, separate from Manager's own funds. Manager may keep an operating reserve of {{reserve}}. By day {{statement_day}} of each month, Manager will send Owner a statement of income and expenses and distribute the balance, minus the reserve and Manager's fees.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Spending authority",
+      "body": "Manager may approve repairs up to {{repair_limit}} per item without Owner's prior approval. Larger repairs need Owner's approval, except in an emergency threatening life, health or serious property damage, when Manager may act and tell Owner promptly. Manager's markup on maintenance: {{markup}}. Manager will disclose any ownership interest or affiliation with vendors it hires.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Fees",
+      "body": "Owner will pay Manager:\n- a management fee of {{mgmt_fee}}% of rents actually collected, with a minimum of {{min_fee}} per unit per month if stated;\n- a leasing fee of {{leasing_fee}} for each new tenant;\n- a renewal fee of {{renewal_fee}} for each renewal, if stated.\n\nNo other fees are charged unless Owner agrees in writing.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Owner's responsibilities",
+      "body": "Owner will keep the Properties in a condition that complies with habitability laws, fund repairs and reserves, carry property and liability insurance of at least {{insurance_amount}} naming Manager as an additional insured, provide all required disclosures and documents, and not interfere with Manager's lawful performance. Owner remains responsible for mortgage payments and property taxes, unless Manager agrees in writing to pay them from funds held.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Fair housing",
+      "body": "Owner and Manager will comply with federal, state and local fair housing laws. Manager will not follow any instruction that would violate them.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Liability",
+      "body": "Manager will indemnify Owner for losses caused by Manager's negligence, willful misconduct or breach. Owner will indemnify Manager for claims arising from the condition of the Properties or Owner's acts, except those caused by Manager's negligence or misconduct.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Term and termination",
+      "body": "The initial term is {{term_months}} months, renewing month to month after that. After the initial term, either party may terminate with {{termination_days}} days' written notice. Either party may terminate on 10 days' notice for an uncured material breach. On termination, Manager will within 30 days deliver all funds, deposits (with an accounting), leases, keys and records to Owner, and notify tenants where to pay rent.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Owner** — {{owner_name}}\n\n[[sig:owner]]\n\nPrinted name: [[name:owner]]\nTitle (if signing for a company): [[text:owner:Title]]\nDate: [[date:owner]]\n\n**Manager** — {{manager_name}}\n\n[[sig:manager]]\n\nPrinted name: [[name:manager]]\nTitle (if signing for a company): [[text:manager:Title]]\nDate: [[date:manager]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "HUD: Fair housing rights and obligations",
+      "url": "https://www.hud.gov/program_offices/fair_housing_equal_opp/fair_housing_rights_and_obligations"
+    },
+    {
+      "title": "42 U.S.C. §3604 discrimination in sale or rental, including advertising (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/42/3604"
+    },
+    {
+      "title": "Texas Real Estate Commission: contract forms",
+      "url": "https://www.trec.texas.gov/agency-information/contracts"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

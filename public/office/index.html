@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Free PDF editor and converter | Massless</title>
-  <meta name="description" content="Highlight, write on, draw on and sign PDFs, then merge, split, rotate, compress or convert them. Runs in your browser, files stay on your device. $0.">
+  <meta name="description" content="Highlight, write on, draw on and sign PDFs, merge, split, rotate, compress or convert them, and send contracts for e-signature with end-to-end encryption. Runs in your browser. $0.">
   <meta name="theme-color" content="#0b0b0c">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Massless">
   <meta property="og:url" content="https://massless.chucksi.com/office">
   <meta property="og:title" content="Free PDF editor and converter | Massless">
-  <meta property="og:description" content="Highlight, write on, draw on and sign PDFs, then merge, split, rotate, compress or convert them. Runs in your browser, files stay on your device. $0.">
+  <meta property="og:description" content="Highlight, write on, draw on and sign PDFs, merge, split, rotate, compress or convert them, and send contracts for e-signature with end-to-end encryption. Runs in your browser. $0.">
   <meta property="og:image" content="https://massless.chucksi.com/og.jpg?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/css/site.css">
   <link rel="stylesheet" href="/css/studio.css">
   <link rel="stylesheet" href="/css/office.css">
+  <link rel="stylesheet" href="/css/sign.css">
   <link rel="stylesheet" href="/css/navigation.css">
   <script type="module" src="/js/navigation.js"></script>
 </head>
@@ -51,6 +52,7 @@
         <button role="tab" aria-selected="true" aria-controls="tab-edit" id="t-edit">Edit</button>
         <button role="tab" aria-selected="false" aria-controls="tab-convert" id="t-convert">Convert</button>
         <button role="tab" aria-selected="false" aria-controls="tab-ask" id="t-ask">Ask</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-sign" id="t-sign">Sign</button>
       </div>
 
       <div class="side-scroll" id="tab-edit" role="tabpanel" aria-labelledby="t-edit">
@@ -129,10 +131,24 @@
         <p class="side-note">Ask reads the PDF open in Edit. Only its text, up to 12,000 characters, is sent to answer the question; the file itself never leaves this browser.</p>
       </div>
 
+      <div class="side-scroll sg-side" id="tab-sign" role="tabpanel" aria-labelledby="t-sign" hidden>
+        <div class="groups sg-subnav" role="tablist" aria-label="Sign">
+          <button type="button" role="tab" aria-selected="true" data-sv="prepare" id="sv-t-prepare">Prepare</button>
+          <button type="button" role="tab" aria-selected="false" data-sv="envelopes" id="sv-t-envelopes">Envelopes<span class="count" id="env-count" hidden></span></button>
+          <button type="button" role="tab" aria-selected="false" data-sv="deals" id="sv-t-deals">Deals</button>
+          <button type="button" role="tab" aria-selected="false" data-sv="verify" id="sv-t-verify">Verify</button>
+        </div>
+        <div class="stack" id="sv-prepare"></div>
+        <div class="stack" id="sv-envelopes" hidden></div>
+        <div class="stack" id="sv-deals" hidden></div>
+        <div class="stack" id="sv-verify" hidden></div>
+      </div>
+
       <div class="side-foot">
         <div id="foot-edit"><button type="button" class="go" id="save"><span id="save-label">Save PDF</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v9M4.5 7.5L8 11l3.5-3.5M3 14h10"/></svg></button></div>
         <div id="foot-convert" hidden><button type="button" class="go" id="convert"><span id="convert-label">Make PDF</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
         <div id="foot-ask" hidden><button type="button" class="go" id="ask"><span id="ask-label">Ask</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
+        <div id="foot-sign" hidden><button type="button" class="go" id="sign-go"><span id="sign-go-label">Create envelope</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5l11-6-4 11-2-4.5z"/></svg></button></div>
       </div>
     </aside>
 
@@ -142,6 +158,7 @@
           <button type="button" class="pill on" id="p-edit"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 11.5V13h1.5l7-7L10 4.5l-7 7zM10 4.5l1.5-1.5L13 4.5 11.5 6"/></svg>Edit</button>
           <button type="button" class="pill" id="p-convert"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 5.5h10l-3-3M13.5 10.5h-10l3 3"/></svg>Convert</button>
           <button type="button" class="pill" id="p-ask"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"/></svg>Ask</button>
+          <button type="button" class="pill" id="p-sign"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 11.5c1.5-1 2.8-5 4.3-5S6 11 7.5 11s1.9-2.6 3-2.6.6 1.8 1.6 1.8 1.4-.8 1.9-1.3M2 14h12"/></svg>Sign<span class="badge-new">NEW</span></button>
           <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
         </div>
         <span class="src" id="src-label">pdf.js and pdf-lib · load on first use</span>
@@ -201,6 +218,13 @@
         </div>
       </div>
 
+      <div id="view-sign" hidden>
+        <div id="sg-prepare"></div>
+        <div id="sg-envelopes" hidden></div>
+        <div id="sg-deals" hidden></div>
+        <div id="sg-verify" hidden></div>
+      </div>
+
       <div id="view-ask" hidden>
         <div class="ask-doc" id="ask-doc">
           <span class="muted">Asking about</span> <strong id="ask-doc-name">no PDF yet</strong>
@@ -239,11 +263,12 @@
     <p><strong>Edit:</strong> pdf.js (Apache-2.0) draws each page on your screen. Your highlights, text, ink, signatures and notes sit on top until you press Save, then pdf-lib (MIT) writes them into the PDF itself: highlights as see-through rectangles, text in Helvetica, ink as vector lines, signatures as images and notes as standard PDF comments.</p>
     <p><strong>Convert:</strong> merge, split, rotate and image to PDF copy pages without re-rendering, so text stays sharp and searchable. PDF to images and Compress render pages with pdf.js; Compress rebuilds the file from JPEGs, so text stops being selectable. Zips are made with fflate (MIT).</p>
     <p><strong>Ask:</strong> pulls the text out of the PDF in your browser and sends up to 12,000 characters of it, with your question, to Llama 3.3 70B on Cloudflare Workers AI. Edit and Convert never send anything anywhere.</p>
+    <p><strong>Sign:</strong> fill a contract template or upload a PDF, place fields for each signer and create an envelope. Your browser encrypts the PDF, the fields and the details with a random AES-GCM 256 key and uploads only ciphertext. The key rides in each signer's link after the #, which browsers never send to a server. Massless enforces the signing order, logs each step with time, IP and device, and signs the audit trail with an ECDSA P-256 key. The final PDF gets a Certificate of Completion, and Verify proves a file is unchanged. Unsigned envelopes are deleted after 30 days, completed ones after 90. Massless Sign provides templates and signing tools, not legal advice.</p>
   </dialog>
 
   <dialog class="sheet" id="ledger">
     <form method="dialog" class="sheet-head"><h2>Models &amp; limits</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Reading and rendering: pdf.js (Apache-2.0), in your browser. Writing: pdf-lib (MIT), in your browser. Zips: fflate (MIT), in your browser. Ask: Llama 3.3 70B (Llama 3.3 Community License) on Workers AI, free within a daily cap. Cost: $0.</p>
+    <p>Reading and rendering: pdf.js (Apache-2.0), in your browser. Writing: pdf-lib (MIT), in your browser. Zips: fflate (MIT), in your browser. Ask: Llama 3.3 70B (Llama 3.3 Community License) on Workers AI, free within a daily cap. Sign: Web Crypto in your browser, ciphertext in Cloudflare R2 and D1 on the free tier, script fonts from Fontsource (OFL). Cost: $0.</p>
   </dialog>
 
   <script type="module" src="/js/pages/office.js"></script>

@@ -19,6 +19,7 @@
   ],
   // Secrets, set in Cloudflare and never in this file: TURNSTILE_SECRET (the Turnstile widget's secret)
   // and PASS_KEY (random key that signs the human-check cookie). Without them the human check is off.
+  // SIGN_KEY: private ECDSA P-256 JWK that signs Massless Sign audit trails (node tools/sign/keygen.mjs).
   "vars": {
     // Best-effort request caps. KV counters can race and endpoints share the AI allowance;
     // these are not an atomic or cost-weighted spending ceiling.
@@ -37,8 +38,22 @@
     // AI Gateway in front of every model call (logs and caching off; burst rate limit on).
     "AI_GATEWAY": "massless",
     // Public Turnstile site key for massless.chucksi.com.
-    "TURNSTILE_SITEKEY": "0x4AAAAAAFtDPWdw4pzGXhHG"
+    "TURNSTILE_SITEKEY": "0x4AAAAAAFtDPWdw4pzGXhHG",
+    // Massless Sign: envelopes per visitor per day, and for everyone per day (atomic counters in D1).
+    "PER_VISITOR_SIGN": "20",
+    "SIGN_CAP": "2000"
   },
+  // Massless Sign (Office > Sign, /sign): ciphertext in R2, bookkeeping in D1, schema in migrations/sign.
+  // Create once:  npx wrangler r2 bucket create massless-sign
+  //               npx wrangler d1 create massless-sign   (paste its database_id below)
+  //               npx wrangler d1 migrations apply massless-sign --remote
+  //               node tools/sign/keygen.mjs | npx wrangler secret put SIGN_KEY
+  "r2_buckets": [{ "binding": "SIGN_BUCKET", "bucket_name": "massless-sign" }],
+  "d1_databases": [
+    { "binding": "SIGN_DB", "database_name": "massless-sign", "database_id": "367039b3-12c6-4c6a-8cd0-632b0012b885", "migrations_dir": "migrations/sign" }
+  ],
+  // Daily sweep of expired Sign envelopes (see scheduled() in src/index.js).
+  "triggers": { "crons": ["17 4 * * *"] },
   "durable_objects": { "bindings": [{ "name": "GENERATION_LEDGER", "class_name": "GenerationLedger" }] },
   "migrations": [{ "tag": "massless-generations-v1", "new_sqlite_classes": ["GenerationLedger"] }],
   "observability": { "enabled": true }

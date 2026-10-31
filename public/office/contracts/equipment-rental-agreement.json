@@ -1,0 +1,340 @@
+{
+  "id": "equipment-rental-agreement",
+  "version": 1,
+  "title": "Equipment Rental Agreement",
+  "category": "everyday",
+  "summary": "Rent out equipment, gear or tools with a deposit, condition checks and responsibility for damage.",
+  "useWhen": "Renting cameras, audio gear, tools, machinery, party equipment or similar items for a set period.",
+  "watchOuts": [
+    "Photograph the equipment and record serial numbers at pickup and return. Most disputes are about pre-existing damage.",
+    "Insurance: confirm whether the renter's insurance covers rented equipment (an inland marine or rented-equipment endorsement). Otherwise the renter bears full replacement cost.",
+    "Heavy machinery or vehicles may require operator certification, separate insurance or titled-vehicle rules.",
+    "Security deposits for consumer rentals may be regulated in some states."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "owner",
+      "label": "Owner"
+    },
+    {
+      "id": "renter",
+      "label": "Renter"
+    }
+  ],
+  "variables": [
+    {
+      "id": "agreement_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of agreement."
+    },
+    {
+      "id": "owner_name",
+      "label": "Owner: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "owner_address",
+      "label": "Owner: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "owner_email",
+      "label": "Owner: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "renter_name",
+      "label": "Renter: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "renter_address",
+      "label": "Renter: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "renter_email",
+      "label": "Renter: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "equipment",
+      "label": "Equipment list",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Each item with make, model, serial number, accessories and replacement value."
+    },
+    {
+      "id": "start",
+      "label": "Rental start (date and time)",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "E.g. 'June 3, 2026 at 9:00 a.m.'."
+    },
+    {
+      "id": "end",
+      "label": "Rental end (date and time)",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Return deadline."
+    },
+    {
+      "id": "rate",
+      "label": "Rental fee",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total fee or rate."
+    },
+    {
+      "id": "rate_basis",
+      "label": "Fee basis",
+      "type": "select",
+      "required": true,
+      "default": "total for the rental period",
+      "options": [
+        "total for the rental period",
+        "per day",
+        "per week"
+      ],
+      "help": "How the fee is calculated."
+    },
+    {
+      "id": "deposit",
+      "label": "Security deposit",
+      "type": "money",
+      "required": false,
+      "default": "0",
+      "options": [],
+      "help": "Refundable deposit."
+    },
+    {
+      "id": "delivery",
+      "label": "Pickup or delivery",
+      "type": "text",
+      "required": true,
+      "default": "Renter picks up and returns the equipment at Owner's address",
+      "options": [],
+      "help": "Logistics."
+    },
+    {
+      "id": "late_fee",
+      "label": "Late return fee per day",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Charge for each day late."
+    },
+    {
+      "id": "location_limit",
+      "label": "Where the equipment may be used",
+      "type": "text",
+      "required": false,
+      "default": "within the United States",
+      "options": [],
+      "help": "Location limits."
+    },
+    {
+      "id": "insurance_required",
+      "label": "Renter must insure the equipment?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Renter maintains insurance covering loss or damage."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Owner:** {{owner_name}}, {{owner_address}} ({{owner_email}})\n\n**Renter:** {{renter_name}}, {{renter_address}} ({{renter_email}})\n\nDate: {{agreement_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Equipment",
+      "body": "Owner rents to Renter the following equipment, including listed accessories (the \"Equipment\"):\n\n{{equipment}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Rental period",
+      "body": "From {{start}} to {{end}}. {{delivery}}.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Fees and deposit",
+      "body": "Renter will pay {{rate}} ({{rate_basis}}) before pickup, plus a refundable security deposit of {{deposit}}. Owner will return the deposit within 7 days after the Equipment is returned, minus documented amounts owed under this agreement, with an itemized statement.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Condition",
+      "body": "The parties will inspect the Equipment at pickup and note existing damage, with photos. Renter accepts the Equipment in that condition. Renter must return it clean and in the same condition, except for normal wear and tear. Pre-use condition notes: [[text:renter:Condition notes at pickup]]",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Use",
+      "body": "Renter will use the Equipment carefully, only for its intended purpose, in line with the manufacturer's instructions and the law, and only {{location_limit}}. Renter will not sublet, lend or modify the Equipment, and will let only competent, trained people operate it. Renter will not remove serial numbers or labels.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Loss and damage",
+      "body": "From pickup until return, Renter is responsible for loss, theft or damage to the Equipment beyond normal wear and tear. Renter will pay the reasonable cost of repair or, if the Equipment cannot be repaired, its replacement value listed above. Renter will report loss, theft or damage to Owner within 24 hours, and theft to the police.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Insurance",
+      "body": "Renter will carry insurance covering the full replacement value of the Equipment while in Renter's care, naming Owner as loss payee, and will provide proof before pickup.",
+      "optional": true,
+      "showIf": "insurance_required == true"
+    },
+    {
+      "id": "s9",
+      "title": "9. Late return",
+      "body": "If the Equipment is returned late, Renter will pay {{late_fee}} for each day or part of a day late, in addition to any other amounts owed. If the Equipment is not returned within 7 days after the end date, Owner may treat it as lost or stolen.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Owner's limits",
+      "body": "Owner provides the Equipment \"as is\", except that Owner believes it is in working order at pickup. Owner is not liable for indirect losses, such as lost profits or a cancelled shoot, caused by Equipment failure. If Equipment fails through no fault of Renter, Owner's only obligation is to replace it, if available, or refund the fee for the unused period.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Responsibility for injuries",
+      "body": "Renter is responsible for, and will indemnify Owner against, claims for injury or property damage arising from Renter's use of the Equipment, except claims caused by Owner's negligence or a defect Owner knew about and did not disclose.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Owner** — {{owner_name}}\n\n[[sig:owner]]\n\nPrinted name: [[name:owner]]\nTitle (if signing for a company): [[text:owner:Title]]\nDate: [[date:owner]]\n\n**Renter** — {{renter_name}}\n\n[[sig:renter]]\n\nPrinted name: [[name:renter]]\nTitle (if signing for a company): [[text:renter:Title]]\nDate: [[date:renter]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "UCC Article 2A (leases), §2A-103 definitions (Cornell LII)",
+      "url": "https://www.law.cornell.edu/ucc/2A/2A-103"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

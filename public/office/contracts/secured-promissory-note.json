@@ -1,0 +1,315 @@
+{
+  "id": "secured-promissory-note",
+  "version": 1,
+  "title": "Promissory Note Secured by Real Estate",
+  "category": "creative-finance",
+  "summary": "The buyer's note for a seller-financed sale, secured by a separately recorded mortgage or deed of trust.",
+  "useWhen": "Use with the Seller Financing Addendum. The note is signed by the borrower only. The security instrument must be drafted for the property's state and recorded.",
+  "watchOuts": [
+    "This note does not create a lien by itself. The mortgage or deed of trust that secures it must be drafted for the state, signed, notarized and recorded.",
+    "E-signatures: E-SIGN excludes UCC Article 3 negotiable instruments, except that notes secured by real property can be 'transferable records' only if a system that establishes control is used. If the note may be sold or pledged, sign a wet-ink original.",
+    "Dodd-Frank/Reg Z and state lending and usury laws can limit balloon payments, prepayment penalties, late fees and rates for consumer loans. See the Seller Financing Addendum.",
+    "Keep the original note in a safe place. Lost notes create problems in foreclosure."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "borrower",
+      "label": "Borrower"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "note_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Closing date."
+    },
+    {
+      "id": "borrower_name",
+      "label": "Borrower",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Buyer."
+    },
+    {
+      "id": "borrower_address",
+      "label": "Borrower address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "lender_name",
+      "label": "Lender (note holder)",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Seller."
+    },
+    {
+      "id": "lender_address",
+      "label": "Lender address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices and payments."
+    },
+    {
+      "id": "property_address",
+      "label": "Property securing the note",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Property address."
+    },
+    {
+      "id": "principal",
+      "label": "Principal",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Amount financed."
+    },
+    {
+      "id": "rate",
+      "label": "Interest rate",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Annual fixed rate."
+    },
+    {
+      "id": "payment",
+      "label": "Monthly payment",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Principal and interest."
+    },
+    {
+      "id": "first_payment",
+      "label": "First payment date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "First due date."
+    },
+    {
+      "id": "maturity",
+      "label": "Maturity date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Final due date, or the balloon date."
+    },
+    {
+      "id": "balloon",
+      "label": "Balloon note?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Large final payment."
+    },
+    {
+      "id": "late_days",
+      "label": "Grace period (days)",
+      "type": "number",
+      "required": true,
+      "default": "15",
+      "options": [],
+      "help": "Days before a late charge."
+    },
+    {
+      "id": "late_percent",
+      "label": "Late charge (% of payment)",
+      "type": "percent",
+      "required": true,
+      "default": "5",
+      "options": [],
+      "help": "Within state limits."
+    },
+    {
+      "id": "security_instrument",
+      "label": "Security instrument",
+      "type": "select",
+      "required": true,
+      "default": "deed of trust",
+      "options": [
+        "deed of trust",
+        "mortgage",
+        "security deed"
+      ],
+      "help": "Securing this note."
+    },
+    {
+      "id": "pay_to",
+      "label": "Payments made to",
+      "type": "text",
+      "required": true,
+      "default": "the Lender at the address above, or a servicer the Lender designates in writing",
+      "options": [],
+      "help": "Where to pay."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Promise to pay",
+      "body": "On {{note_date}}, for value received, {{borrower_name}} (\"Borrower\") promises to pay to the order of {{lender_name}} (\"Lender\") the principal sum of {{principal}}, with interest on the unpaid principal at {{rate}}% per year from the date of this note until paid.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Payments",
+      "body": "Borrower will pay {{payment}} per month, starting {{first_payment}} and on the same day of each month after that, until {{maturity}}, when all unpaid principal and interest is due. Payments are made to {{pay_to}}, and are applied to late charges, then interest, then principal.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Balloon payment notice",
+      "body": "**THIS IS A BALLOON NOTE. THE MONTHLY PAYMENTS WILL NOT PAY OFF THE LOAN BY THE MATURITY DATE. THE ENTIRE REMAINING BALANCE WILL BE DUE ON {{maturity}}. LENDER HAS NO OBLIGATION TO REFINANCE OR EXTEND IT.** Borrower: [[initial:borrower]]",
+      "optional": true,
+      "showIf": "balloon == true"
+    },
+    {
+      "id": "s4",
+      "title": "4. Prepayment",
+      "body": "Borrower may prepay all or part of the principal at any time without penalty. Partial prepayments do not change the due date or amount of later monthly payments unless Lender agrees in writing.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Late charge",
+      "body": "If a payment is not received within {{late_days}} days after it is due, Borrower will pay a late charge of {{late_percent}}% of the overdue payment, but not more than the law allows.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Security",
+      "body": "This note is secured by a {{security_instrument}} of the same date on the property at {{property_address}}, {{state}}, which describes when Lender may require immediate payment of the full balance, including on transfer of the property where the law allows.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Default",
+      "body": "If Borrower does not pay any amount when due, or breaks a promise in the security instrument, and does not cure within 30 days after Lender's written notice (or any longer period the law requires), Lender may declare the entire unpaid balance immediately due and enforce the security instrument as the law of {{state}} permits. Borrower will pay Lender's reasonable costs of collection and attorney fees, to the extent the law allows.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Other terms",
+      "body": "Interest will never exceed the maximum lawful rate. Any excess is applied to principal. Borrower waives presentment, demand, protest and notice of dishonor, to the extent the law allows. Notices go to the addresses above: Borrower at {{borrower_address}}, Lender at {{lender_address}}. This note is governed by the law of {{state}}. Each person who signs is fully responsible for the whole debt.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "Signatures",
+      "body": "Borrower signs this note. (Only the borrower signs a note. The lender keeps the signed original.)\n\n**Borrower** — {{borrower_name}}\n\n[[sig:borrower]]\n\nPrinted name: [[name:borrower]]\nDate: [[date:borrower]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything. Creative-finance transactions (subject-to, seller financing, wraps, lease-options, contracts for deed) can trigger lender due-on-sale rights, federal and state lending and licensing laws (Truth in Lending/Dodd-Frank, SAFE Act), state executory-contract statutes and consumer-protection claims. Each party, and especially the seller, should have independent legal counsel and a tax adviser before signing.",
+  "sources": [
+    {
+      "title": "E-SIGN exceptions, 15 U.S.C. §7003 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7003"
+    },
+    {
+      "title": "E-SIGN transferable records, 15 U.S.C. §7021 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7021"
+    },
+    {
+      "title": "UCC Article 3 (Negotiable Instruments), §3-104 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/ucc/3/3-104"
+    },
+    {
+      "title": "Regulation Z, 12 CFR 1026.36 (loan originator rules, seller-financer exclusions) (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-12/chapter-X/part-1026/subpart-E/section-1026.36"
+    },
+    {
+      "title": "Regulation Z, 12 CFR 1026.43 (ability-to-repay) (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-12/chapter-X/part-1026/subpart-E/section-1026.43"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

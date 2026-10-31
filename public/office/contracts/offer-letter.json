@@ -1,0 +1,389 @@
+{
+  "id": "offer-letter",
+  "version": 1,
+  "title": "Employment Offer Letter",
+  "category": "business",
+  "summary": "A clear at-will job offer covering role, pay, start date, benefits and conditions.",
+  "useWhen": "Offering a job to a new employee in the U.S. Pair it with your confidentiality and IP agreement and onboarding forms (I-9, W-4).",
+  "watchOuts": [
+    "At-will employment is the U.S. default, but Montana requires good cause after a probationary period. Promises in an offer letter ('permanent position', 'job security') can undercut at-will status.",
+    "Classify the role correctly as exempt or non-exempt under the FLSA and state law. A salary alone does not make a role exempt.",
+    "A growing number of states and cities require pay ranges in job postings or on request, and some ban salary-history questions. Verify locally.",
+    "Non-competes are void or restricted in several states, for example California, Minnesota, North Dakota and Oklahoma, and many states limit them for lower-wage workers.",
+    "Every new hire must complete Form I-9 within three business days of starting work. Don't make the offer contingent on citizenship. Make it contingent on employment authorization.",
+    "Background checks require separate written disclosure and authorization under the federal Fair Credit Reporting Act, plus state and local rules."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "employer",
+      "label": "Employer"
+    },
+    {
+      "id": "candidate",
+      "label": "Candidate"
+    }
+  ],
+  "variables": [
+    {
+      "id": "offer_date",
+      "label": "Offer date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of this letter."
+    },
+    {
+      "id": "employer_name",
+      "label": "Employer: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "employer_address",
+      "label": "Employer: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "candidate_name",
+      "label": "Candidate: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "candidate_email",
+      "label": "Candidate: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "job_title",
+      "label": "Job title",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Title of the position."
+    },
+    {
+      "id": "manager",
+      "label": "Reports to",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Name or title of the manager."
+    },
+    {
+      "id": "work_location",
+      "label": "Work location",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Office address, 'remote', or hybrid arrangement."
+    },
+    {
+      "id": "start_date",
+      "label": "Start date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "First day of work."
+    },
+    {
+      "id": "employment_type",
+      "label": "Employment type",
+      "type": "select",
+      "required": true,
+      "default": "full-time",
+      "options": [
+        "full-time",
+        "part-time",
+        "temporary"
+      ],
+      "help": "Type of position."
+    },
+    {
+      "id": "flsa_status",
+      "label": "FLSA status",
+      "type": "select",
+      "required": true,
+      "default": "exempt",
+      "options": [
+        "exempt",
+        "non-exempt"
+      ],
+      "help": "Non-exempt employees must be paid overtime. Check the duties and salary tests."
+    },
+    {
+      "id": "pay_basis",
+      "label": "Pay basis",
+      "type": "select",
+      "required": true,
+      "default": "annual salary",
+      "options": [
+        "annual salary",
+        "hourly wage"
+      ],
+      "help": "Salary or hourly."
+    },
+    {
+      "id": "pay_amount",
+      "label": "Pay amount",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Annual salary or hourly rate."
+    },
+    {
+      "id": "pay_frequency",
+      "label": "Pay frequency",
+      "type": "select",
+      "required": true,
+      "default": "every two weeks",
+      "options": [
+        "weekly",
+        "every two weeks",
+        "twice monthly",
+        "monthly"
+      ],
+      "help": "Check your state's minimum pay-frequency rules."
+    },
+    {
+      "id": "include_bonus",
+      "label": "Include bonus or commission?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Describe any bonus or commission plan."
+    },
+    {
+      "id": "bonus_terms",
+      "label": "Bonus or commission terms",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Eligibility, targets and timing. Say whether it is discretionary."
+    },
+    {
+      "id": "include_equity",
+      "label": "Include equity grant?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Stock options or other equity, subject to a separate plan and grant agreement."
+    },
+    {
+      "id": "equity_terms",
+      "label": "Equity terms",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Number and type of shares or options, vesting schedule and the plan name."
+    },
+    {
+      "id": "benefits",
+      "label": "Benefits summary",
+      "type": "longtext",
+      "required": false,
+      "default": "You will be eligible for the benefits the Company offers to similarly situated employees, under the terms of each plan.",
+      "options": [],
+      "help": "Health, retirement, paid time off. Refer to plan documents."
+    },
+    {
+      "id": "pto",
+      "label": "Paid time off",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "E.g. '15 days per year, accrued per pay period', or as required by state or local law."
+    },
+    {
+      "id": "contingencies",
+      "label": "Offer is contingent on",
+      "type": "longtext",
+      "required": false,
+      "default": "Verification of your identity and authorization to work in the United States (Form I-9), and signing the Company's confidentiality and invention assignment agreement.",
+      "options": [],
+      "help": "Background check, references, licenses. Background checks need separate FCRA forms."
+    },
+    {
+      "id": "accept_by",
+      "label": "Accept by",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date the offer expires."
+    },
+    {
+      "id": "work_state",
+      "label": "State where the employee will work",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Employment law of the state where the employee works usually applies."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Offer",
+      "body": "{{offer_date}}\n\n{{employer_name}}, {{employer_address}}\n\nTo: {{candidate_name}} ({{candidate_email}})\n\nDear {{candidate_name}},\n\n{{employer_name}} (the \"Company\") is pleased to offer you the {{employment_type}} position of {{job_title}}, reporting to {{manager}}, working from {{work_location}}. We would like you to start on {{start_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Pay",
+      "body": "Your pay will be {{pay_amount}} ({{pay_basis}}), paid {{pay_frequency}} and subject to required withholdings. This position is classified as {{flsa_status}} under the Fair Labor Standards Act and applicable state law.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Bonus or commission",
+      "body": "{{bonus_terms}}\n\nAny bonus or commission plan is governed by its written terms, which control if they differ from this letter.",
+      "optional": true,
+      "showIf": "include_bonus == true"
+    },
+    {
+      "id": "s4",
+      "title": "4. Equity",
+      "body": "Subject to approval by the Company's board, you will be offered: {{equity_terms}}. The grant will be governed by the Company's equity plan and your grant agreement, which control.",
+      "optional": true,
+      "showIf": "include_equity == true"
+    },
+    {
+      "id": "s5",
+      "title": "5. Benefits and time off",
+      "body": "{{benefits}}\n\nPaid time off: {{pto}}. The Company may change its benefit plans from time to time, consistent with the law.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Conditions of this offer",
+      "body": "This offer is contingent on: {{contingencies}}",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. At-will employment",
+      "body": "Your employment with the Company is at will. Either you or the Company may end it at any time, with or without cause or notice, to the extent permitted by the law of {{work_state}}. Only a written agreement signed by an authorized officer can change at-will status. This letter is not a contract for any particular length of employment.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Company policies and prior obligations",
+      "body": "You agree to follow the Company's lawful policies. Please do not bring or use any confidential information belonging to a former employer. By accepting, you confirm that you are not bound by any agreement that would prevent you from performing this job, or you have told us about it in writing.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Accepting this offer",
+      "body": "This letter, together with the documents it mentions, is the complete offer and replaces any earlier discussions. To accept, please sign below by {{accept_by}}. After that date the offer expires.\n\nWe look forward to working with you.\n\nSincerely,\n\n{{employer_name}}",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "Signatures",
+      "body": "Signed by the Company, and accepted by the candidate:\n\n**For the Company** — {{employer_name}}\n\n[[sig:employer]]\n\nPrinted name: [[name:employer]]\nTitle (if signing for a company): [[text:employer:Title]]\nDate: [[date:employer]]\n\n**Accepted by** — {{candidate_name}}\n\n[[sig:candidate]]\n\nPrinted name: [[name:candidate]]\nDate: [[date:candidate]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "USCIS: Form I-9 employment eligibility verification",
+      "url": "https://www.uscis.gov/i-9"
+    },
+    {
+      "title": "USA.gov / DOL: Employment at will and termination",
+      "url": "https://www.dol.gov/general/topic/termination"
+    },
+    {
+      "title": "signNow: Top 5 most e-signed documents",
+      "url": "https://www.signnow.com/blog/top-5-most-e-signed-documents-in-2020/"
+    },
+    {
+      "title": "Docusign: How to eSign different documents",
+      "url": "https://www.docusign.com/products/electronic-signature/learn/how-to-esign-different-documents"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

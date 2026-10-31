@@ -19,6 +19,7 @@ Five showcase pages introduce the tools: `/studios/image/`, `/studios/video/`, `
 | **Launch Film** (`/film`) | Build a kinetic launch film from a brief, with typography, scenes, music and export. |
 | **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
 | **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
+| **Sign** (`/office?tab=sign`, `/sign`) | Send a contract or your own PDF for signature, DocuSign-style: 59 open (CC0) templates for real estate, creative finance (Subto, wraps, novation, lease-option, contract for deed), music (split sheets, beat leases, producer, sync) and joint ventures, with notes for all 50 states and DC. Signers sign on any phone with no account. Documents are encrypted in the browser; the server only holds ciphertext and a signed audit trail. Templates, not legal advice. |
 | **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Extract audio: drop a video or audio file you have the rights to and get MP3 (128–320 kbps), M4A or WAV, with trim, fades and loudness levelling, all in the browser. Deep links: `/audio?tab=captions`, `/audio?tab=extract`, `/audio?engine=melo&lang=es`. |
 
 Saved shots and audio live in the visitor's browser (IndexedDB). New saves never automatically delete older originals. The Image page loads older shots in batches of 24. If a save fails, the result stays available for download in that session and is visibly marked as unsaved. There are no accounts or cloud backups; browser data can still be cleared or evicted, so download work you want to keep.
@@ -111,6 +112,14 @@ python comfy/idol_server.py          # http://127.0.0.1:7861, allows massless.ch
 ```
 
 Open `/3d`, choose **Full object** and press **Build 3D**. The page posts the still to `/generate` and shows the returned `.ply`. No GPU: Idol's Hugging Face demo exports a `.ply` that **Open .ply** loads.
+
+## How Sign works
+
+The sender's browser encrypts the PDF and every field with a fresh AES-256 key that travels only in the part of each link after `#`, which browsers never send to a server. The Worker stores ciphertext in R2 and bookkeeping (hashed tokens, signing order, event times, fingerprints) in D1, enforces signing order and consent, and signs the audit record with an ECDSA P-256 key. Every signer's browser can rebuild the identical final PDF with a Certificate of Completion; anyone can check a signed PDF at `/sign` (Verify). Unsigned envelopes are deleted after 30 days and completed ones after 90.
+
+The contract library is CC0 JSON in `public/office/contracts/` (regenerate with `python3 tools/contracts/build.py`, check with `python3 tests/contracts_test.py`). Each template lists sources and watch-outs; creative-finance and state-specific terms need review by a local attorney.
+
+Setup: an R2 bucket (`SIGN_BUCKET`), a D1 database (`SIGN_DB`, schema in `migrations/sign/`) and a `SIGN_KEY` secret (`node tools/sign/keygen.mjs`). See `wrangler.jsonc`.
 
 ## Tests
 

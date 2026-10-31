@@ -1,0 +1,628 @@
+{
+  "id": "split-sheet",
+  "version": 1,
+  "title": "Song Split Sheet",
+  "category": "music",
+  "summary": "Record who wrote a song and each writer's ownership share, PRO, IPI number and publisher, ideally on the day it is written.",
+  "useWhen": "Right after a co-writing session, before the song is released or registered. Then each writer registers the agreed shares with their PRO and The MLC.",
+  "watchOuts": [
+    "Every recorded song has two separate copyrights: the composition (music and lyrics), usually owned by songwriters and their publishers, and the sound recording or master, usually owned by whoever paid for or made the recording (the artist or label). Licenses and splits for one do not cover the other. A split sheet covers only the composition. Master ownership needs its own agreement.",
+    "Under U.S. law, co-writers of a joint work each own an undivided share of the whole song. Without a written agreement, courts generally presume equal shares. Any co-owner can grant non-exclusive licenses but must account to the others.",
+    "Shares must total 100%. Writers register their own shares with their PRO (ASCAP, BMI, SESAC or GMR) and with The MLC for U.S. digital mechanical royalties. Mismatched registrations freeze royalties.",
+    "Samples and interpolations usually require giving the original writers a share of the new composition. Agree how existing shares are reduced before release.",
+    "'Producer points' (master royalties) are not the same as writer shares. A producer who co-wrote the music should be on the split sheet. Producer credit alone does not create a writer share."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "writer1",
+      "label": "Writer 1"
+    },
+    {
+      "id": "writer2",
+      "label": "Writer 2"
+    },
+    {
+      "id": "writer3",
+      "label": "Writer 3"
+    },
+    {
+      "id": "writer4",
+      "label": "Writer 4"
+    }
+  ],
+  "variables": [
+    {
+      "id": "song_title",
+      "label": "Song title",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Working title, with any alternate titles."
+    },
+    {
+      "id": "alt_titles",
+      "label": "Alternate titles",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Optional."
+    },
+    {
+      "id": "created_date",
+      "label": "Date written",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of the writing session."
+    },
+    {
+      "id": "session_location",
+      "label": "Where written",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Studio or city."
+    },
+    {
+      "id": "artist",
+      "label": "Recording artist",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Artist who recorded or will record it."
+    },
+    {
+      "id": "iswc",
+      "label": "ISWC (if assigned)",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "International Standard Musical Work Code for the composition."
+    },
+    {
+      "id": "isrc",
+      "label": "ISRC of the recording (if assigned)",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Identifies the master recording, not the song."
+    },
+    {
+      "id": "writer_count",
+      "label": "Number of writers",
+      "type": "select",
+      "required": true,
+      "default": "2",
+      "options": [
+        "2",
+        "3",
+        "4"
+      ],
+      "help": "Two to four writers. For more, use two split sheets or add a writer schedule."
+    },
+    {
+      "id": "w1_name",
+      "label": "Writer 1: legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Legal name as registered with the PRO."
+    },
+    {
+      "id": "w1_alias",
+      "label": "Writer 1: professional name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Stage or producer name."
+    },
+    {
+      "id": "w1_contribution",
+      "label": "Writer 1: contribution",
+      "type": "select",
+      "required": false,
+      "default": "music and lyrics",
+      "options": [
+        "music and lyrics",
+        "music",
+        "lyrics",
+        "music (producer/beat)",
+        "topline melody"
+      ],
+      "help": "What they wrote."
+    },
+    {
+      "id": "w1_share",
+      "label": "Writer 1: share of the composition",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "All writers' shares must total 100%."
+    },
+    {
+      "id": "w1_pro",
+      "label": "Writer 1: PRO",
+      "type": "select",
+      "required": false,
+      "default": "not yet affiliated",
+      "options": [
+        "ASCAP",
+        "BMI",
+        "SESAC",
+        "GMR",
+        "a foreign society",
+        "not yet affiliated"
+      ],
+      "help": "Performing rights organization."
+    },
+    {
+      "id": "w1_ipi",
+      "label": "Writer 1: IPI/CAE number",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Writer's IPI number from the PRO."
+    },
+    {
+      "id": "w1_publisher",
+      "label": "Writer 1: publisher (and its IPI)",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Writer's publishing company or designee, or 'self-published' or 'none yet'."
+    },
+    {
+      "id": "w1_email",
+      "label": "Writer 1: email",
+      "type": "email",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Contact."
+    },
+    {
+      "id": "w2_name",
+      "label": "Writer 2: legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Legal name as registered with the PRO."
+    },
+    {
+      "id": "w2_alias",
+      "label": "Writer 2: professional name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Stage or producer name."
+    },
+    {
+      "id": "w2_contribution",
+      "label": "Writer 2: contribution",
+      "type": "select",
+      "required": false,
+      "default": "music and lyrics",
+      "options": [
+        "music and lyrics",
+        "music",
+        "lyrics",
+        "music (producer/beat)",
+        "topline melody"
+      ],
+      "help": "What they wrote."
+    },
+    {
+      "id": "w2_share",
+      "label": "Writer 2: share of the composition",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "All writers' shares must total 100%."
+    },
+    {
+      "id": "w2_pro",
+      "label": "Writer 2: PRO",
+      "type": "select",
+      "required": false,
+      "default": "not yet affiliated",
+      "options": [
+        "ASCAP",
+        "BMI",
+        "SESAC",
+        "GMR",
+        "a foreign society",
+        "not yet affiliated"
+      ],
+      "help": "Performing rights organization."
+    },
+    {
+      "id": "w2_ipi",
+      "label": "Writer 2: IPI/CAE number",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Writer's IPI number from the PRO."
+    },
+    {
+      "id": "w2_publisher",
+      "label": "Writer 2: publisher (and its IPI)",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Writer's publishing company or designee, or 'self-published' or 'none yet'."
+    },
+    {
+      "id": "w2_email",
+      "label": "Writer 2: email",
+      "type": "email",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Contact."
+    },
+    {
+      "id": "w3_name",
+      "label": "Writer 3: legal name",
+      "type": "party",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Legal name as registered with the PRO."
+    },
+    {
+      "id": "w3_alias",
+      "label": "Writer 3: professional name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Stage or producer name."
+    },
+    {
+      "id": "w3_contribution",
+      "label": "Writer 3: contribution",
+      "type": "select",
+      "required": false,
+      "default": "music and lyrics",
+      "options": [
+        "music and lyrics",
+        "music",
+        "lyrics",
+        "music (producer/beat)",
+        "topline melody"
+      ],
+      "help": "What they wrote."
+    },
+    {
+      "id": "w3_share",
+      "label": "Writer 3: share of the composition",
+      "type": "percent",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "All writers' shares must total 100%."
+    },
+    {
+      "id": "w3_pro",
+      "label": "Writer 3: PRO",
+      "type": "select",
+      "required": false,
+      "default": "not yet affiliated",
+      "options": [
+        "ASCAP",
+        "BMI",
+        "SESAC",
+        "GMR",
+        "a foreign society",
+        "not yet affiliated"
+      ],
+      "help": "Performing rights organization."
+    },
+    {
+      "id": "w3_ipi",
+      "label": "Writer 3: IPI/CAE number",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Writer's IPI number from the PRO."
+    },
+    {
+      "id": "w3_publisher",
+      "label": "Writer 3: publisher (and its IPI)",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Writer's publishing company or designee, or 'self-published' or 'none yet'."
+    },
+    {
+      "id": "w3_email",
+      "label": "Writer 3: email",
+      "type": "email",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Contact."
+    },
+    {
+      "id": "w4_name",
+      "label": "Writer 4: legal name",
+      "type": "party",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Legal name as registered with the PRO."
+    },
+    {
+      "id": "w4_alias",
+      "label": "Writer 4: professional name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Stage or producer name."
+    },
+    {
+      "id": "w4_contribution",
+      "label": "Writer 4: contribution",
+      "type": "select",
+      "required": false,
+      "default": "music and lyrics",
+      "options": [
+        "music and lyrics",
+        "music",
+        "lyrics",
+        "music (producer/beat)",
+        "topline melody"
+      ],
+      "help": "What they wrote."
+    },
+    {
+      "id": "w4_share",
+      "label": "Writer 4: share of the composition",
+      "type": "percent",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "All writers' shares must total 100%."
+    },
+    {
+      "id": "w4_pro",
+      "label": "Writer 4: PRO",
+      "type": "select",
+      "required": false,
+      "default": "not yet affiliated",
+      "options": [
+        "ASCAP",
+        "BMI",
+        "SESAC",
+        "GMR",
+        "a foreign society",
+        "not yet affiliated"
+      ],
+      "help": "Performing rights organization."
+    },
+    {
+      "id": "w4_ipi",
+      "label": "Writer 4: IPI/CAE number",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Writer's IPI number from the PRO."
+    },
+    {
+      "id": "w4_publisher",
+      "label": "Writer 4: publisher (and its IPI)",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Writer's publishing company or designee, or 'self-published' or 'none yet'."
+    },
+    {
+      "id": "w4_email",
+      "label": "Writer 4: email",
+      "type": "email",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Contact."
+    },
+    {
+      "id": "producer_credits",
+      "label": "Producer and other credits",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Producers, co-producers, engineers, featured artists, as credited on the recording. A producer who wrote music must also be listed as a writer to share in the composition."
+    },
+    {
+      "id": "samples",
+      "label": "Does the song use samples or interpolations?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Any recorded sample or re-sung or re-played melody or lyric from another song."
+    },
+    {
+      "id": "sample_details",
+      "label": "Samples and interpolations",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Source song, writers, recording, how it is used, and clearance status. Cleared samples usually reduce the writers' shares."
+    },
+    {
+      "id": "admin_writer",
+      "label": "Who registers the song",
+      "type": "select",
+      "required": true,
+      "default": "each writer registers their own share",
+      "options": [
+        "each writer registers their own share",
+        "Writer 1 registers for all writers"
+      ],
+      "help": "Registration with PROs and The MLC."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Song",
+      "body": "**Title:** {{song_title}} (also known as {{alt_titles}})\n**Date written:** {{created_date}} at {{session_location}}\n**Recording artist:** {{artist}}\n**ISWC:** {{iswc}}  **ISRC (recording):** {{isrc}}",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Writers and shares",
+      "body": "The writers agree that they co-wrote the musical composition named above (music and lyrics, the \"Composition\") and own it in these shares:\n\n**Writer 1:** {{w1_name}} ({{w1_alias}}). Contribution: {{w1_contribution}}. Share: **{{w1_share}}%**. PRO: {{w1_pro}}. IPI: {{w1_ipi}}. Publisher: {{w1_publisher}}. Email: {{w1_email}}. Initials: [[initial:writer1]]\n\n**Writer 2:** {{w2_name}} ({{w2_alias}}). Contribution: {{w2_contribution}}. Share: **{{w2_share}}%**. PRO: {{w2_pro}}. IPI: {{w2_ipi}}. Publisher: {{w2_publisher}}. Email: {{w2_email}}. Initials: [[initial:writer2]]",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Writer 3",
+      "body": "**Writer 3:** {{w3_name}} ({{w3_alias}}). Contribution: {{w3_contribution}}. Share: **{{w3_share}}%**. PRO: {{w3_pro}}. IPI: {{w3_ipi}}. Publisher: {{w3_publisher}}. Email: {{w3_email}}. Initials: [[initial:writer3]]",
+      "optional": true,
+      "showIf": "writer_count != '2'"
+    },
+    {
+      "id": "s4",
+      "title": "4. Writer 4",
+      "body": "**Writer 4:** {{w4_name}} ({{w4_alias}}). Contribution: {{w4_contribution}}. Share: **{{w4_share}}%**. PRO: {{w4_pro}}. IPI: {{w4_ipi}}. Publisher: {{w4_publisher}}. Email: {{w4_email}}. Initials: [[initial:writer4]]",
+      "optional": true,
+      "showIf": "writer_count == '4'"
+    },
+    {
+      "id": "s5",
+      "title": "5. Total",
+      "body": "The writers confirm that the shares listed total 100% of the Composition, including the publishing share attached to each writer's share. Each writer's publisher (if any) owns or administers that writer's share as agreed between them.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Producer and other credits",
+      "body": "{{producer_credits}}\n\nThese credits are for the recording only. They do not create any ownership of the Composition unless the person is also listed as a writer above.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Samples and interpolations",
+      "body": "The song includes: {{sample_details}}\n\nIf a sample or interpolation is cleared by giving the original writers a share of the Composition, each writer's share above will be reduced in proportion, unless the writers agree otherwise in writing. No one will release the song commercially until required clearances are obtained.",
+      "optional": true,
+      "showIf": "samples == true"
+    },
+    {
+      "id": "s8",
+      "title": "8. Registration and income",
+      "body": "Registration: {{admin_writer}}. Each writer authorizes registration of these shares with PROs (ASCAP, BMI, SESAC, GMR or foreign societies), The MLC and the U.S. Copyright Office. Each writer collects their own share of income directly or through their publisher. No writer may register a different split.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Licensing",
+      "body": "Each writer may grant non-exclusive licenses for the Composition, but must account to the others for their shares. No writer may grant an exclusive license, transfer the whole Composition, or approve a change to the lyrics or melody without all writers' written consent. A writer may sell or assign their own share.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Disputes",
+      "body": "If the writers disagree about shares, they will negotiate in good faith, then mediate, before going to court. Until resolved, each writer's PRO and MLC registrations stay as listed here.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. General",
+      "body": "This split sheet is a binding agreement about ownership shares of the Composition. It is governed by U.S. copyright law and the law of the state where it is signed, and may be signed electronically.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "Signatures — Writers 1 and 2",
+      "body": "**Writer 1** — {{w1_name}}\n\n[[sig:writer1]]\n\nPrinted name: [[name:writer1]]\nDate: [[date:writer1]]\n\n**Writer 2** — {{w2_name}}\n\n[[sig:writer2]]\n\nPrinted name: [[name:writer2]]\nDate: [[date:writer2]]",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "Signatures — Writer 3",
+      "body": "**Writer 3** — {{w3_name}}\n\n[[sig:writer3]]\n\nPrinted name: [[name:writer3]]\nDate: [[date:writer3]]",
+      "optional": true,
+      "showIf": "writer_count != '2'"
+    },
+    {
+      "id": "s14",
+      "title": "Signatures — Writer 4",
+      "body": "**Writer 4** — {{w4_name}}\n\n[[sig:writer4]]\n\nPrinted name: [[name:writer4]]\nDate: [[date:writer4]]",
+      "optional": true,
+      "showIf": "writer_count == '4'"
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Music rights are split between the composition (song) and the sound recording (master); royalties also depend on PRO, publisher, distributor and label agreements that this template does not change. An entertainment attorney should review deals involving advances, ownership transfers or long terms.",
+  "sources": [
+    {
+      "title": "U.S. Copyright Office Circular 56A: Copyright registration of musical compositions and sound recordings",
+      "url": "https://www.copyright.gov/circs/circ56a.pdf"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    },
+    {
+      "title": "17 U.S.C. §201: ownership of copyright, joint works (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/201"
+    },
+    {
+      "title": "17 U.S.C. §204: execution of transfers of copyright ownership (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/204"
+    },
+    {
+      "title": "ASCAP (performing rights organization)",
+      "url": "https://www.ascap.com/"
+    },
+    {
+      "title": "BMI (performing rights organization)",
+      "url": "https://www.bmi.com/"
+    },
+    {
+      "title": "SESAC (performing rights organization)",
+      "url": "https://www.sesac.com/"
+    },
+    {
+      "title": "Global Music Rights (performing rights organization)",
+      "url": "https://globalmusicrights.com/"
+    },
+    {
+      "title": "The MLC: What is a blanket mechanical license?",
+      "url": "https://help.themlc.com/en/support/what-is-a-blanket-mechanical-license"
+    },
+    {
+      "title": "U.S. Copyright Office: The Music Modernization Act",
+      "url": "https://www.copyright.gov/music-modernization/"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

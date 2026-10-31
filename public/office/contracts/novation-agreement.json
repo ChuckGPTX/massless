@@ -1,0 +1,254 @@
+{
+  "id": "novation-agreement",
+  "version": 1,
+  "title": "Novation Agreement",
+  "category": "creative-finance",
+  "summary": "Replace one party to a contract with a new party, with the other party's consent, releasing the departing party.",
+  "useWhen": "All three parties agree that a new party steps into a contract (for example a purchase contract, lease, service contract or loan) in place of an original party, who is released. Unlike an assignment, a novation releases the original party.",
+  "watchOuts": [
+    "A novation needs the consent of the remaining party. Without that, it is only an assignment and the original party stays liable.",
+    "Real estate investors sometimes use 'novation' to describe deals where the investor renovates or lists the seller's property and keeps the difference. Selling or marketing someone else's property for compensation without a license can be unlicensed brokerage, and may also fall under wholesaling disclosure laws. Get local legal advice before using a novation that way.",
+    "A mortgage lender must agree before a new borrower can replace the existing one. Without the lender's written release, the original borrower stays liable.",
+    "Check the original contract for anti-assignment clauses, consent requirements and required forms."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "original",
+      "label": "Departing party"
+    },
+    {
+      "id": "newparty",
+      "label": "New party"
+    },
+    {
+      "id": "remaining",
+      "label": "Remaining party"
+    }
+  ],
+  "variables": [
+    {
+      "id": "novation_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "When the substitution takes effect."
+    },
+    {
+      "id": "original_name",
+      "label": "Departing party",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Party being replaced."
+    },
+    {
+      "id": "new_name",
+      "label": "New party",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Party stepping in."
+    },
+    {
+      "id": "remaining_name",
+      "label": "Remaining party",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Other party to the contract, who consents."
+    },
+    {
+      "id": "contract_desc",
+      "label": "Contract",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Title, date and parties of the original contract."
+    },
+    {
+      "id": "contract_subject",
+      "label": "Subject matter",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "E.g. the property address or services."
+    },
+    {
+      "id": "consideration",
+      "label": "Payment to departing party (if any)",
+      "type": "text",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "Any payment for stepping out."
+    },
+    {
+      "id": "past_obligations",
+      "label": "Who is responsible for obligations before the effective date",
+      "type": "select",
+      "required": true,
+      "default": "departing party",
+      "options": [
+        "departing party",
+        "new party"
+      ],
+      "help": "Past performance and liabilities."
+    },
+    {
+      "id": "deposit_transfer",
+      "label": "Deposits or funds held under the contract",
+      "type": "text",
+      "required": false,
+      "default": "Remain held and are credited to the new party.",
+      "options": [],
+      "help": "Earnest money, security deposits, retainers."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and contract",
+      "body": "Departing party: {{original_name}}. New party: {{new_name}}. Remaining party: {{remaining_name}}.\n\nContract: {{contract_desc}} (the \"Contract\"), concerning {{contract_subject}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Substitution",
+      "body": "Effective {{novation_date}}, the New party replaces the Departing party as a party to the Contract. The New party accepts all of the Departing party's rights, and agrees to perform all of its obligations arising on or after the effective date, as if it had originally signed the Contract.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Release",
+      "body": "The Remaining party releases the Departing party from all obligations under the Contract arising on or after the effective date, and agrees to look only to the New party for them. Responsibility for obligations arising before the effective date: {{past_obligations}}.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Consent",
+      "body": "The Remaining party consents to this novation and confirms that the Contract is in effect and, to its knowledge, no party is in default. Remaining party: [[initial:remaining]]",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Payment and deposits",
+      "body": "Payment to the Departing party: {{consideration}}. Deposits and funds held under the Contract: {{deposit_transfer}}",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Contract otherwise unchanged",
+      "body": "Except for the substitution of parties, the Contract is unchanged and remains in effect.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Real estate use",
+      "body": "If the Contract concerns real estate, each party confirms it has considered whether any licensing, wholesaling disclosure, or lender consent requirement applies, and that this novation is not being used to market or sell another person's property for compensation in violation of real estate licensing law. Departing party: [[initial:original]] New party: [[initial:newparty]]",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Departing party** — {{original_name}}\n\n[[sig:original]]\n\nPrinted name: [[name:original]]\nTitle (if signing for a company): [[text:original:Title]]\nDate: [[date:original]]\n\n**New party** — {{new_name}}\n\n[[sig:newparty]]\n\nPrinted name: [[name:newparty]]\nTitle (if signing for a company): [[text:newparty:Title]]\nDate: [[date:newparty]]\n\n**Remaining party** — {{remaining_name}}\n\n[[sig:remaining]]\n\nPrinted name: [[name:remaining]]\nTitle (if signing for a company): [[text:remaining:Title]]\nDate: [[date:remaining]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything. Creative-finance transactions (subject-to, seller financing, wraps, lease-options, contracts for deed) can trigger lender due-on-sale rights, federal and state lending and licensing laws (Truth in Lending/Dodd-Frank, SAFE Act), state executory-contract statutes and consumer-protection claims. Each party, and especially the seller, should have independent legal counsel and a tax adviser before signing.",
+  "sources": [
+    {
+      "title": "Squatters.io: cited 50-state wholesaling law tracker (2026)",
+      "url": "https://squatters.io/blog/wholesaling-laws-by-state"
+    },
+    {
+      "title": "225 ILCS 454/1-10 (Illinois brokerage definition including assignable contracts)",
+      "url": "https://www.ilga.gov/Documents/legislation/ilcs/documents/022504540K1-10.htm"
+    },
+    {
+      "title": "Garn-St Germain Act due-on-sale provisions, 12 U.S.C. §1701j-3 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/12/1701j-3"
+    },
+    {
+      "title": "Cornell LII Wex: Novation",
+      "url": "https://www.law.cornell.edu/wex/novation"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

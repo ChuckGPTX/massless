@@ -1,0 +1,388 @@
+{
+  "id": "lease-option-agreement",
+  "version": 1,
+  "title": "Residential Lease with Option to Purchase",
+  "category": "creative-finance",
+  "summary": "A residential lease paired with a separate, paid option giving the tenant the right (not the obligation) to buy at a set price.",
+  "useWhen": "An owner rents a home to a tenant who wants the chance to buy it later, with an option fee and possibly rent credits.",
+  "watchOuts": [
+    "Texas: a residential lease combined with an option to purchase is treated as an executory contract if the term is more than 180 days. Texas Property Code ch. 5, subch. D then requires disclosures, recording within 30 days, annual accounting statements, specific default notices and more, with penalties. Many investors keep Texas lease-options to 180 days or less. Get Texas counsel.",
+    "Other states may treat a lease-option, especially with large option fees and rent credits, as an equitable mortgage or installment sale that requires foreclosure rather than eviction. Some, such as Illinois and Minnesota, regulate rent-to-own arrangements.",
+    "Due-on-sale: Garn-St Germain exempts leases of three years or less only if they contain no option to purchase. A lease-option on mortgaged property can let the lender call the loan.",
+    "Record a memorandum of option so the tenant-buyer's rights are protected against later liens and buyers.",
+    "Tenant-buyers should verify the owner is current on the mortgage, taxes and HOA dues, and that title is clean, before paying a large option fee.",
+    "Landlord-tenant law still governs the lease part, including deposits, habitability, notices and eviction. The option fee is not a security deposit."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "owner",
+      "label": "Owner (landlord and optionor)"
+    },
+    {
+      "id": "tenant",
+      "label": "Tenant (optionee)"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "agreement_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date signed."
+    },
+    {
+      "id": "owner_name",
+      "label": "Owner",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Landlord and optionor."
+    },
+    {
+      "id": "owner_address",
+      "label": "Owner address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "tenant_name",
+      "label": "Tenant",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Tenant and optionee."
+    },
+    {
+      "id": "tenant_email",
+      "label": "Tenant email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Property address."
+    },
+    {
+      "id": "legal_description",
+      "label": "Legal description",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For the memorandum of option."
+    },
+    {
+      "id": "lease_start",
+      "label": "Lease start",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start."
+    },
+    {
+      "id": "lease_end",
+      "label": "Lease end",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "End. In Texas, more than 180 days triggers the executory contract statute."
+    },
+    {
+      "id": "rent",
+      "label": "Monthly rent",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Market rent."
+    },
+    {
+      "id": "deposit",
+      "label": "Security deposit",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Separate from the option fee, within state limits."
+    },
+    {
+      "id": "option_fee",
+      "label": "Option fee",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Non-refundable payment for the option, credited at closing if exercised."
+    },
+    {
+      "id": "option_price",
+      "label": "Purchase price if exercised",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Fixed price, or attach a formula."
+    },
+    {
+      "id": "rent_credit",
+      "label": "Rent credit toward price per on-time payment",
+      "type": "money",
+      "required": false,
+      "default": "0",
+      "options": [],
+      "help": "Portion of each on-time rent payment credited at closing. Large credits increase the risk the deal is treated as a sale."
+    },
+    {
+      "id": "option_expires",
+      "label": "Option expires",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Last day to exercise. Usually the lease end date."
+    },
+    {
+      "id": "closing_days",
+      "label": "Close within (days after exercise)",
+      "type": "number",
+      "required": true,
+      "default": "60",
+      "options": [],
+      "help": "Time to obtain financing and close."
+    },
+    {
+      "id": "tenant_repairs",
+      "label": "Tenant pays minor repairs up to",
+      "type": "money",
+      "required": false,
+      "default": "250",
+      "options": [],
+      "help": "Per repair. Owner remains responsible for habitability and major systems."
+    },
+    {
+      "id": "record_memo",
+      "label": "Record a memorandum of option?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "Protects the tenant's option."
+    },
+    {
+      "id": "owner_has_mortgage",
+      "label": "Is the property mortgaged?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "Owner keeps the mortgage current."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and property",
+      "body": "Owner: {{owner_name}}, {{owner_address}}. Tenant: {{tenant_name}} ({{tenant_email}}). Property: {{property_address}}, {{state}}, legally described as {{legal_description}} (the \"Property\").",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Two separate agreements",
+      "body": "This document contains (A) a residential lease and (B) an option to purchase. They are separate agreements with separate consideration. Tenant is not obligated to buy. Until Tenant exercises the option and closes, Owner owns the Property and Tenant is a tenant.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Part A — Lease: term and rent",
+      "body": "The lease runs from {{lease_start}} to {{lease_end}}. Rent is {{rent}} per month, due on the 1st. Security deposit: {{deposit}}, held and returned as required by the law of {{state}}. Landlord-tenant law of {{state}} applies to the lease, including notice, habitability and eviction rules.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Part A — Lease: maintenance",
+      "body": "Owner will keep the Property habitable and maintain the roof, structure, and major systems (plumbing, electrical, heating and cooling) unless damage is caused by Tenant. Tenant will keep the Property clean, handle routine upkeep and lawn care, and pay for minor repairs up to {{tenant_repairs}} each. Tenant may not make structural changes without Owner's written consent. Other lease terms are those of the parties' standard residential lease, attached, which controls lease matters not covered here.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Part B — Option: grant and fee",
+      "body": "In exchange for a non-refundable option fee of {{option_fee}}, paid at signing, Owner grants Tenant the exclusive option to buy the Property for {{option_price}}. The option may be exercised at any time until {{option_expires}} by written notice to Owner. The option fee is not rent and not a security deposit. If Tenant buys, it is credited toward the price. If Tenant does not exercise the option, Owner keeps it. Tenant: [[initial:tenant]]",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Part B — Option: rent credits",
+      "body": "For each monthly rent payment received on time and in full, {{rent_credit}} will be credited toward the price at closing. Rent credits have no cash value and are not refundable if the option is not exercised. Tenant: [[initial:tenant]]",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Part B — Option: exercise and closing",
+      "body": "After Tenant exercises the option, the parties will close within {{closing_days}} days, using a purchase agreement on customary terms for {{state}} consistent with this option. Tenant is responsible for obtaining financing. Owner will deliver marketable title by warranty deed, free of monetary liens, at closing. If Tenant cannot close on time, the option ends unless the parties agree in writing to extend it.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Part B — Option: effect of lease default",
+      "body": "If Tenant is in material default under the lease, for example unpaid rent not cured after the legally required notice, Owner may give written notice that the option will end if the default is not cured within 30 days. The option is personal to Tenant and may not be assigned without Owner's written consent.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Owner's promises during the option",
+      "body": "Owner will not sell, further mortgage or encumber the Property in a way that prevents conveying clear title at the option price, will pay taxes, insurance and any mortgage on time, and will give Tenant written notice within 5 days of receiving any default, foreclosure, tax or lien notice. Owner: [[initial:owner]]",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Existing mortgage",
+      "body": "Most residential mortgages contain a \"due-on-sale\" clause. Federal law (the Garn-St Germain Act, 12 U.S.C. §1701j-3) generally allows the lender to enforce it and demand payment of the entire loan balance when the property, or an interest in it, is transferred without the lender's consent. Transfers to an unrelated buyer, including through a land trust where the buyer becomes a beneficiary, generally are not within the Act's exemptions. Leases longer than three years, or any lease with an option to purchase, are not exempt either. Owner confirms the mortgage is current and will keep it current. If the lender accelerates the loan, Owner remains responsible for it, and Tenant may, but need not, exercise the option early. Owner: [[initial:owner]] Tenant: [[initial:tenant]]",
+      "optional": true,
+      "showIf": "owner_has_mortgage == true"
+    },
+    {
+      "id": "s11",
+      "title": "11. Memorandum of option",
+      "body": "The parties will sign a short memorandum of this option, notarized, which Tenant may record in the county records. When the option expires or ends unexercised, Tenant will sign a release of the memorandum on request.",
+      "optional": true,
+      "showIf": "record_memo == true"
+    },
+    {
+      "id": "s12",
+      "title": "12. Texas: executory contract warning",
+      "body": "**Texas.** If this lease and option, taken together, last more than 180 days, Texas Property Code ch. 5, subch. D treats them as an executory contract for conveyance. That requires, among other things, pre-signing disclosures (including a survey or plat, tax certificates and insurance information), a contract in the language of negotiation, recording within 30 days, an annual accounting statement each January, a specific default notice with statutory cure periods, conversion rights and limits on liens. Penalties apply for non-compliance. The parties have consulted Texas counsel. Owner: [[initial:owner]] Tenant: [[initial:tenant]]",
+      "optional": true,
+      "showIf": "state == 'TX'"
+    },
+    {
+      "id": "s13",
+      "title": "13. Disclosures",
+      "body": "Owner has delivered the seller disclosures that would be required in a sale of the Property in {{state}}, and the federal lead-based paint disclosure if the home was built before 1978. Tenant had the opportunity to inspect the Property before signing. Tenant: [[initial:tenant]]",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "14. State-specific requirements",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "15. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s16",
+      "title": "Signatures",
+      "body": "Signed on {{agreement_date}}:\n\n**Owner** — {{owner_name}}\n\n[[sig:owner]]\n\nPrinted name: [[name:owner]]\nDate: [[date:owner]]\n\n**Tenant** — {{tenant_name}}\n\n[[sig:tenant]]\n\nPrinted name: [[name:tenant]]\nDate: [[date:tenant]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything. Creative-finance transactions (subject-to, seller financing, wraps, lease-options, contracts for deed) can trigger lender due-on-sale rights, federal and state lending and licensing laws (Truth in Lending/Dodd-Frank, SAFE Act), state executory-contract statutes and consumer-protection claims. Each party, and especially the seller, should have independent legal counsel and a tax adviser before signing.",
+  "sources": [
+    {
+      "title": "TexasLawHelp: Executory contracts and lease-to-own real estate (Tex. Prop. Code ch. 5, subch. D)",
+      "url": "https://texaslawhelp.org/article/executory-contracts-and-lease-to-own-real-estate"
+    },
+    {
+      "title": "Garn-St Germain Act due-on-sale provisions, 12 U.S.C. §1701j-3 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/12/1701j-3"
+    },
+    {
+      "title": "Illinois Installment Sales Contract Act, 765 ILCS 67",
+      "url": "https://ilga.gov/legislation/ilcs/ilcs3.asp?ActID=3813"
+    },
+    {
+      "title": "40 CFR 745.113: certification and acknowledgment of disclosure (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.113"
+    },
+    {
+      "title": "E-SIGN exceptions, 15 U.S.C. §7003 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7003"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

@@ -1,0 +1,309 @@
+{
+  "id": "mutual-nda",
+  "version": 1,
+  "title": "Mutual Non-Disclosure Agreement",
+  "category": "business",
+  "summary": "Two parties share confidential information with each other and both agree to protect it.",
+  "useWhen": "Two businesses or people are exploring a deal, partnership or project and both will share non-public information.",
+  "watchOuts": [
+    "Define the Purpose narrowly. A vague purpose makes it hard to prove misuse.",
+    "Trade secrets should be protected for as long as they remain trade secrets. A fixed end date on the confidentiality period can weaken that protection.",
+    "If the other party is an individual employee or contractor, keep the whistleblower immunity notice (18 U.S.C. §1833(b)). Leaving it out can cost an employer exemplary damages and attorney fees in a trade secret case.",
+    "Non-solicitation and non-compete terms are restricted or void in some states, for example California. Courts also look closely at their scope and length. Verify locally before turning on the optional clause.",
+    "An NDA cannot stop someone from reporting possible illegal conduct to the government or testifying. Clauses that try to are unenforceable and can create liability."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "partyA",
+      "label": "First party"
+    },
+    {
+      "id": "partyB",
+      "label": "Second party"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date the agreement starts. Information shared on or after this date is covered."
+    },
+    {
+      "id": "party_a_name",
+      "label": "First party: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "party_a_address",
+      "label": "First party: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "party_a_email",
+      "label": "First party: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "party_b_name",
+      "label": "Second party: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "party_b_address",
+      "label": "Second party: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "party_b_email",
+      "label": "Second party: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "purpose",
+      "label": "Purpose",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Why the information is being shared, e.g. 'evaluating a possible software licensing deal between the parties'."
+    },
+    {
+      "id": "term_years",
+      "label": "Agreement term (years)",
+      "type": "number",
+      "required": true,
+      "default": "2",
+      "options": [],
+      "help": "How long either party may keep sharing new information under this agreement."
+    },
+    {
+      "id": "confidentiality_years",
+      "label": "Confidentiality period (years)",
+      "type": "number",
+      "required": true,
+      "default": "3",
+      "options": [],
+      "help": "How long after the term ends the duty to protect information lasts. Trade secrets stay protected for as long as they remain trade secrets."
+    },
+    {
+      "id": "return_days",
+      "label": "Days to return or destroy information",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "How many days a party has to return or destroy information after a request."
+    },
+    {
+      "id": "include_nonsolicit",
+      "label": "Include non-solicitation of employees?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Each party agrees not to recruit the other's employees it met through the Purpose. Restricted in some states."
+    },
+    {
+      "id": "nonsolicit_months",
+      "label": "Non-solicitation period (months)",
+      "type": "number",
+      "required": false,
+      "default": "12",
+      "options": [],
+      "help": "Keep this short and reasonable. 6 to 12 months is common."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and purpose",
+      "body": "**First party:** {{party_a_name}}, {{party_a_address}} ({{party_a_email}})\n\n**Second party:** {{party_b_name}}, {{party_b_address}} ({{party_b_email}})\n\nThe parties want to share information with each other for this purpose: {{purpose}} (the \"Purpose\"). Each party may be a Discloser and a Recipient. This agreement starts on {{effective_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Confidential Information",
+      "body": "\"Confidential Information\" means non-public information that a party (the \"Discloser\") shares with the other party (the \"Recipient\") in connection with the Purpose, in any form, that is marked confidential or that a reasonable person would understand to be confidential from its nature and the circumstances. It includes business plans, finances, pricing, customer and supplier information, product plans, designs, software, data, know-how and trade secrets, and notes or copies that contain or are derived from them.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. What is not confidential",
+      "body": "Confidential Information does not include information that the Recipient can show:\n- is or becomes public through no fault of the Recipient;\n- the Recipient already knew without a duty of confidentiality before receiving it;\n- the Recipient receives from a third party who is free to share it; or\n- the Recipient develops independently without using the Discloser's information.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. How information must be protected",
+      "body": "The Recipient will:\n- use Confidential Information only for the Purpose;\n- protect it with at least the care it uses for its own similar information, and never less than reasonable care;\n- share it only with its employees, contractors and professional advisers who need it for the Purpose and who are bound by confidentiality duties at least as protective as these (the Recipient is responsible for their compliance); and\n- promptly tell the Discloser if it learns of any unauthorized use or disclosure.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Disclosures required by law",
+      "body": "If a law, regulation, subpoena or court order requires the Recipient to disclose Confidential Information, the Recipient may do so after (where legally allowed) giving the Discloser prompt notice and reasonable help, at the Discloser's expense, to seek a protective order. The Recipient will disclose only what is legally required.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Rights that are not limited",
+      "body": "**Whistleblower immunity notice (18 U.S.C. §1833(b)).** An individual will not be held criminally or civilly liable under any federal or state trade secret law for disclosing a trade secret (a) in confidence to a government official or to an attorney solely for the purpose of reporting or investigating a suspected violation of law, or (b) in a complaint or other document filed under seal in a lawsuit. Nothing in this agreement stops anyone from reporting possible violations of law to a government agency, testifying truthfully, or exercising rights that cannot be waived by law.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Return or destruction",
+      "body": "Within {{return_days}} days after the Discloser's written request, or when the Purpose ends, the Recipient will return or destroy the Discloser's Confidential Information and confirm this in writing if asked. The Recipient may keep copies required by law or stored in routine backups, which stay subject to this agreement while kept.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Ownership, no warranty, no obligation",
+      "body": "- All Confidential Information stays the property of the Discloser. No license or other right is granted except the limited right to use it for the Purpose.\n- Confidential Information is provided \"as is,\" without warranties.\n- Neither party is obligated to enter into any further agreement or transaction. Each party may develop or acquire products or services that compete with the other's, as long as it does not use the other's Confidential Information.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Term",
+      "body": "This agreement covers information shared during {{term_years}} years from the effective date, unless a party ends it earlier with 30 days' written notice. The duty to protect Confidential Information continues for {{confidentiality_years}} years after the term ends, and for trade secrets, for as long as they remain trade secrets under applicable law.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Remedies",
+      "body": "Unauthorized use or disclosure may cause harm that money cannot fully repair. The Discloser may seek an injunction or other court order to stop a breach, in addition to any other remedy, without having to post a bond where the law allows.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Non-solicitation of employees",
+      "body": "During the term and for {{nonsolicit_months}} months after it ends, neither party will directly solicit for employment any employee of the other party whom it first met or learned about through the Purpose. General job advertisements, and hiring people who respond to them without targeted solicitation, are not a breach. This section does not apply where prohibited by law.",
+      "optional": true,
+      "showIf": "include_nonsolicit == true"
+    },
+    {
+      "id": "s12",
+      "title": "12. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**First party** — {{party_a_name}}\n\n[[sig:partyA]]\n\nPrinted name: [[name:partyA]]\nTitle (if signing for a company): [[text:partyA:Title]]\nDate: [[date:partyA]]\n\n**Second party** — {{party_b_name}}\n\n[[sig:partyB]]\n\nPrinted name: [[name:partyB]]\nTitle (if signing for a company): [[text:partyB:Title]]\nDate: [[date:partyB]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "Defend Trade Secrets Act whistleblower immunity notice, 18 U.S.C. §1833(b) (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/18/1833"
+    },
+    {
+      "title": "signNow: Top 5 most e-signed documents",
+      "url": "https://www.signnow.com/blog/top-5-most-e-signed-documents-in-2020/"
+    },
+    {
+      "title": "Docusign: How to eSign different documents",
+      "url": "https://www.docusign.com/products/electronic-signature/learn/how-to-esign-different-documents"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}
