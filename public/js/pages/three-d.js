@@ -259,7 +259,7 @@ async function checkIdol() {
   try {
     const r = await fetch(`${idolBase()}/health`, { signal: AbortSignal.timeout(2500) });
     const j = await r.json();
-    out.textContent = j.ok ? `ready on ${j.device || 'GPU'}` : 'not ready';
+    out.textContent = j.ok ? 'connected' : 'not connected';
     return !!j.ok;
   } catch {
     out.textContent = 'not reachable';
@@ -270,18 +270,18 @@ async function checkIdol() {
 async function buildIdol() {
   const cur = state.current;
   if (!(await checkIdol())) {
-    toast(`No Idol server at ${idolBase()}. Start it with python comfy/idol_server.py (see Set up Idol), or open a .ply from the free Hugging Face demo.`, 'error');
+    toast('Connect a reconstruction service in Connection settings, or open an existing 3D file.', 'error');
     return;
   }
-  status('Idol is generating the full object on your GPU', null);
+  status('Creating your complete object…', null);
   const q = new URLSearchParams({ mode: $('#idol-mode').value, seed: $('#idol-seed').value, num_gaussians: $('#idol-count').value });
   const t0 = performance.now();
   const r = await fetch(`${idolBase()}/generate?${q}`, { method: 'POST', body: await imageBlob(cur), headers: { 'content-type': 'image/jpeg' } });
   if (!r.ok) throw new Error((await r.text()).slice(0, 200) || `HTTP ${r.status}`);
   const bytes = new Uint8Array(await r.arrayBuffer());
   await showSplat(bytes, { name: `${cur.name}-idol.ply`, kind: 'object' });
-  $('#hud-name').textContent = `${cur.name} · Idol`;
-  $('#src-label').textContent = `Idol on your GPU · ${((performance.now() - t0) / 1000).toFixed(1)} s`;
+  $('#hud-name').textContent = `${cur.name} · Full object`;
+  $('#src-label').textContent = `Object created · ${((performance.now() - t0) / 1000).toFixed(1)} s`;
   setAuto(true);
 }
 
@@ -344,6 +344,7 @@ function bind() {
   $('#frame-card').addEventListener('click', openPicker);
   $('#upload').addEventListener('change', (e) => loadFile(e.target.files[0]));
   $('#ply-in').addEventListener('change', (e) => openSplatFile(e.target.files[0]));
+  $('#open-splat').addEventListener('click', () => $('#ply-in').click());
   $('#build').addEventListener('click', build);
   $('#download').addEventListener('click', () => state.splat && download(new Blob([state.splat.bytes], { type: 'application/octet-stream' }), `massless-${state.splat.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-')}`));
   $('#strength').addEventListener('input', (e) => { state.strength = Number(e.target.value); $('#o-strength').textContent = `${Math.round(state.strength * 100)}%`; rebuildSoon(); });
@@ -378,6 +379,10 @@ async function init() {
   viewerReady = initViewer().catch((e) => { status(`The 3D viewer could not start here: ${e.message}`); throw e; });
   const p = new URLSearchParams(location.search);
   if (p.get('engine') === 'idol') showTab('idol');
+  if (p.get('panel') === 'import') {
+    $('#open-splat').focus();
+    $('#open-splat').scrollIntoView({ block: 'nearest' });
+  }
   try { await viewerReady; } catch { return; }
   $('#src-label').textContent = 'Viewer ready';
   if (p.get('shot')) await loadShot(p.get('shot'));

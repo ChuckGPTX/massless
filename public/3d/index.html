@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Image to 3D, free | Massless</title>
-  <meta name="description" content="Turn any still into a 3D Gaussian splat you can orbit, in your browser for $0, or run the open Idol model on your own GPU for full objects. Export .ply.">
+  <meta name="description" content="Turn a still into a scene you can orbit. Explore depth, reconstruct objects and export your work.">
   <meta name="theme-color" content="#0b0b0c">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Massless">
   <meta property="og:url" content="https://massless.chucksi.com/3d">
   <meta property="og:title" content="Image to 3D, free | Massless">
-  <meta property="og:description" content="Turn any still into a 3D Gaussian splat you can orbit, in your browser for $0, or run the open Idol model on your own GPU for full objects. Export .ply.">
+  <meta property="og:description" content="Turn a still into a scene you can orbit. Explore depth, reconstruct objects and export your work.">
   <meta property="og:image" content="https://massless.chucksi.com/og.jpg?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -32,16 +32,19 @@
       }
     }
   </script>
+  <link rel="stylesheet" href="/css/navigation.css">
+  <script type="module" src="/js/navigation.js"></script>
 </head>
 <body class="studio-body">
   <header class="nav">
     <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
     <nav class="nav-links" aria-label="Main">
       <a href="/">Explore</a>
-      <a href="/image">Image</a>
-      <a href="/video">Video</a>
-      <a href="/audio">Audio</a>
-      <a href="/office">Office</a>
+      <a href="/studios/image/">Image</a>
+      <a href="/studios/video/">Video</a>
+      <a href="/studios/audio/">Audio</a>
+      <a href="/studios/3d/">3D</a>
+      <a href="/studios/office/">Office</a>
     </nav>
     <div class="nav-right">
       <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
@@ -54,7 +57,7 @@
     <aside class="side" aria-label="3D controls">
       <div class="side-tabs" role="tablist">
         <button role="tab" aria-selected="true" aria-controls="tab-depth" id="t-depth">In your browser</button>
-        <button role="tab" aria-selected="false" aria-controls="tab-idol" id="t-idol">Idol on your GPU</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-idol" id="t-idol">Full object</button>
       </div>
 
       <div class="side-scroll" id="tab-shared">
@@ -77,8 +80,8 @@
 
         <div id="tab-idol" role="tabpanel" aria-labelledby="t-idol" class="stack" hidden>
           <div class="field">
-            <div class="f-head"><span>Idol server</span><output id="o-idol">not checked</output></div>
-            <input type="url" id="idol-url" class="text-in" value="http://127.0.0.1:7861" spellcheck="false" aria-label="Idol server address">
+            <div class="f-head"><span>Reconstruction service</span><output id="o-idol">not checked</output></div>
+            <input type="url" id="idol-url" class="text-in" value="http://127.0.0.1:7861" spellcheck="false" aria-label="Reconstruction service address">
           </div>
           <div class="grid2">
             <label class="row-sel sel"><small>Source</small><select id="idol-mode"><option value="synthetic">AI image</option><option value="real">Photo</option></select></label>
@@ -88,14 +91,10 @@
             <div class="f-head"><span>Seed</span><output id="o-seed">42</output></div>
             <input type="range" id="idol-seed" min="0" max="999" step="1" value="42" aria-label="Seed">
           </div>
-          <details class="adv" open>
-            <summary>Set up Idol <span class="muted">one time, NVIDIA GPU with 8 GB+</span></summary>
-            <ol class="setup">
-              <li>Request access to <a href="https://huggingface.co/facebook/dinov3-vith16plus-pretrain-lvd1689m" rel="noopener">DINOv3</a> and <a href="https://huggingface.co/black-forest-labs/FLUX.2-dev" rel="noopener">FLUX.2-dev</a> on Hugging Face, then <code>hf auth login</code>.</li>
-              <li><code>git clone https://github.com/speridlabs/idol-sdk && pip install -e idol-sdk</code></li>
-              <li><code>python comfy/idol_server.py</code> from the Massless repo, then press Build 3D.</li>
-            </ol>
-            <p class="side-note">Idol (Apache-2.0) generates the whole object, including the sides the photo never showed. No GPU? Its free <a href="https://huggingface.co/spaces/speridlabs/idol" rel="noopener">Hugging Face demo</a> exports a .ply you can open here.</p>
+          <details class="adv">
+            <summary>Connection settings</summary>
+            <p class="side-note">Enter the address of your reconstruction service above, then choose Build 3D. <a href="https://github.com/ChuckGPTX/massless#idol-on-your-gpu-full-3d-objects">Connection guide ↗</a></p>
+            <p class="side-note">You can also <a href="https://huggingface.co/spaces/speridlabs/idol" rel="noopener">create an object in the online demo</a> and open the exported file here.</p>
           </details>
         </div>
       </div>
@@ -105,7 +104,7 @@
           <button type="button" class="go" id="build"><span id="build-label">Build 3D</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button>
           <div class="grid2">
             <button type="button" class="btn-ghost wide" id="download" disabled>Download .ply</button>
-            <label class="btn-ghost wide" for="ply-in">Open .ply</label>
+            <button type="button" class="btn-ghost wide" id="open-splat">Open .ply</button>
           </div>
           <input type="file" id="ply-in" accept=".ply,.spz,.splat,.ksplat" hidden>
         </div>
@@ -157,13 +156,13 @@
   <dialog class="sheet" id="how">
     <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
     <p><strong>In your browser:</strong> Depth Anything V2 estimates depth on your device. Each sample of the still becomes a flat Gaussian placed along its camera ray, and a second layer built from the refilled background sits behind foreground objects. The result is the visible front of the scene in true 3D.</p>
-    <p><strong>Idol on your GPU:</strong> Idol (speridlabs, Apache-2.0) predicts a complete 3D object as up to a million Gaussians from one image, including its unseen sides. It needs PyTorch and an NVIDIA GPU, so it runs on your machine through a small local server, and the browser only sends the picture and shows the result.</p>
+    <p><strong>Full object:</strong> Connect a reconstruction service to create a complete object from one image, including its unseen sides. Your image is sent to the service you connect.</p>
     <p>Splats render with Spark (MIT) on three.js.</p>
   </dialog>
 
   <dialog class="sheet" id="ledger">
     <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Depth: Depth Anything V2 Small (Apache-2.0), in your browser. Splat viewer: Spark (MIT). Full objects: Idol (Apache-2.0), on your own GPU. Cost: $0.</p>
+    <p>Depth: Depth Anything V2 Small (Apache-2.0), in your browser. Splat viewer: Spark (MIT). Object reconstruction uses a connected service with its own terms. Local editing has no service charge.</p>
   </dialog>
 
   <script type="module" src="/js/pages/three-d.js"></script>

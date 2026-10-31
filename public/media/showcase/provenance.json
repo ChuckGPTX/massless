@@ -1,0 +1,166 @@
+[
+  {
+    "name": "motion-source",
+    "provider": "Higgsfield API",
+    "model": "kling-video/v4.0/text-to-video",
+    "files": [
+      {
+        "path": "media/showcase/motion-source.jpg",
+        "bytes": 16470,
+        "sha256": "2c04de205cf6e894268152896a2a17c2a39168baca9c0be6a563b47e23bb7570"
+      },
+      {
+        "path": "media/showcase/motion-source.mp4",
+        "bytes": 229173,
+        "sha256": "1dae88b701b74620d4b7ca6010ad19e85f6122dc38fd15483721ee3d845d9ba3"
+      }
+    ],
+    "parameters": {
+      "prompt": "One continuous locked-off full-body shot of one adult dancer in a simple cream jumpsuit and white sneakers, against an empty warm terracotta studio cyclorama with a soft floor shadow. The dancer performs a clear relaxed side-step to the left, opens both arms, then side-steps right and finishes with one hand raised. Entire body and both feet remain visible with generous empty space around the person for the entire six seconds. Smooth readable movements, stable anatomy, no fast spinning, no camera movement, no props, no text, no logos.",
+      "duration": 6,
+      "resolution": "720p",
+      "aspect_ratio": "16:9"
+    }
+  },
+  {
+    "name": "robot-reference",
+    "provider": "Higgsfield API",
+    "model": "marketing-studio/image",
+    "files": [
+      {
+        "path": "media/showcase/robot-reference.jpg",
+        "bytes": 67071,
+        "sha256": "4164fd6f0ca3af6ca97f092c3d17a51b19be246fca9d42b4bf57ea4282e09b19"
+      }
+    ],
+    "parameters": {
+      "prompt": "A premium original character design photograph: one friendly slender humanoid robot with a glossy cobalt-blue enamel body, cream flexible joints and a simple oval face with two small amber light eyes. Full body from head to feet, standing upright, arms relaxed slightly away from sides, both hands and feet clearly visible. Empty warm terracotta studio cyclorama, soft grounded shadow, generous empty space on all sides. Symmetric readable human proportions suitable for dance motion transfer, tactile enamel and brushed aluminum, sophisticated playful art direction. No text, no logo, no watermark, no interface.",
+      "quality": "high",
+      "moderation": "auto",
+      "resolution": "2k",
+      "aspect_ratio": "16:9",
+      "enhance_prompt": false
+    }
+  },
+  {
+    "name": "paper-city",
+    "provider": "Higgsfield API",
+    "model": "alibaba/wan-3.0-prime/text-to-video",
+    "files": [
+      {
+        "path": "media/showcase/paper-city.jpg",
+        "bytes": 54062,
+        "sha256": "f7db2c585d55680746f23fd8a7fe2f164006c663be2266cb513f598e58e50ca4"
+      },
+      {
+        "path": "media/showcase/paper-city.mp4",
+        "bytes": 631865,
+        "sha256": "a1482d230b3473279353c8a8460f0c56728f546a3fffc4fb2ef0e9fc43d7eb22"
+      }
+    ],
+    "parameters": {
+      "prompt": "Delightful handmade paper stop-motion animation. An orange paper tram rolls across a tiny mint-green and blush-pink paper city on a bridge. Folded paper trees sway and little paper birds flap overhead. The camera slowly tracks right with the tram. Visible paper fibers, crisp layered silhouettes, sunny studio lighting, playful sophisticated design, original miniature world. No readable text, logos, interface or cuts.",
+      "duration": 6,
+      "resolution": "1080p",
+      "aspect_ratio": "16:9",
+      "generate_audio": false,
+      "enable_thinking": false
+    }
+  },
+  {
+    "name": "glass-tide",
+    "provider": "Higgsfield API",
+    "model": "kling-video/v4.0/text-to-video",
+    "files": [
+      {
+        "path": "media/showcase/glass-tide.jpg",
+        "bytes": 60724,
+        "sha256": "faba3c8a3b6911bdf211b78e0ebe064143d54496b37363e8755fd13ac49e1f84"
+      },
+      {
+        "path": "media/showcase/glass-tide.mp4",
+        "bytes": 893973,
+        "sha256": "56de14ba95020ebb2552060e19caf186030ca276dc6bb49ae908163d0af9ae0d"
+      }
+    ],
+    "parameters": {
+      "prompt": "One continuous premium cinematic shot. A translucent cobalt-blue glass koi fish swims slowly through the air above pale coral sand and glossy ceramic coral sculptures. Delicate caustics ripple across the set, tiny bubbles drift upward. The camera makes a smooth slow lateral tracking move, strong parallax, spectacular tactile glass reflections, controlled studio light, teal and coral palette. The fish moves naturally and gracefully. No words, logos, watermark, interface or cuts.",
+      "duration": 6,
+      "resolution": "720p",
+      "aspect_ratio": "16:9"
+    }
+  },
+  {
+    "name": "clay-garden",
+    "provider": "Higgsfield API",
+    "model": "alibaba/wan-3.0-prime/text-to-video",
+    "files": [
+      {
+        "path": "media/showcase/clay-garden.jpg",
+        "bytes": 28135,
+        "sha256": "599bfa23fee69ff262c1a0ac9e6dc9c0367fe603478ca8c6ca6a6e68846f4a33"
+      },
+      {
+        "path": "media/showcase/clay-garden.mp4",
+        "bytes": 343348,
+        "sha256": "52b1b9a5f62594efc418435cf02c5fa04d7c7830e747a517a3d9ef401df69aa8"
+      }
+    ],
+    "parameters": {
+      "prompt": "Original high-quality clay stop-motion film, one continuous shot. A tiny round moss-green clay creature with two friendly eyes waters a small orange flower in a cobalt ceramic pot. The flower unfolds into a miniature glowing sun and the creature leans back in wonder. Tactile finger-pressed clay textures, warm cream studio background, charming expressive animation, slow camera push, exquisite miniature lighting. No text, logo, watermark, interface or recognizable characters.",
+      "duration": 6,
+      "resolution": "1080p",
+      "aspect_ratio": "16:9",
+      "generate_audio": false,
+      "enable_thinking": false
+    }
+  },
+  {
+    "name": "frost-bloom",
+    "provider": "Higgsfield API",
+    "model": "alibaba/wan-3.0-prime/text-to-video",
+    "files": [
+      {
+        "path": "media/showcase/frost-bloom.jpg",
+        "bytes": 81321,
+        "sha256": "d93ba571a9469e19c4ae1f2c69b1bf2b9e03078bf64ed13e1923e1435841e67f"
+      },
+      {
+        "path": "media/showcase/frost-bloom.mp4",
+        "bytes": 1246912,
+        "sha256": "0ceabd644c8a3da0c29bb30ed43f828a89d5ffd88016c14fb0fd1bc73a6f8821"
+      }
+    ],
+    "parameters": {
+      "prompt": "Extreme macro cinematic time-lapse. A crimson flower made of frosted glass slowly blooms from a black obsidian stone, delicate crystalline petals unfold as fine frost crystals spread and sparkle. Low side lighting in ice blue and warm ruby, beautiful shallow depth of field, dark minimal studio background. The camera slowly arcs fifteen degrees around the bloom. Rich tactile detail, single continuous six-second shot, no text, no logos or watermark.",
+      "duration": 6,
+      "resolution": "1080p",
+      "aspect_ratio": "16:9",
+      "generate_audio": false,
+      "enable_thinking": false
+    }
+  },
+  {
+    "name": "robot-dance",
+    "provider": "Higgsfield API",
+    "model": "higgsfield/genjutsu-light/motion-transfer/v1.0",
+    "parameters": {
+      "resolution": "720p",
+      "source": "motion-source",
+      "character": "robot-reference",
+      "prompt": "The cobalt-blue robot from the reference image performs the exact full-body dance from the source video in the warm terracotta studio. Preserve the robot enamel, cream joints, proportions and face. Both feet stay visible. Locked camera, fluid readable motion, no text."
+    },
+    "files": [
+      {
+        "path": "media/showcase/robot-dance.jpg",
+        "bytes": 20518,
+        "sha256": "6d4b0c408ddfeba6c955f4efb448165cd5e0489c3f7504904981c7a2deff6b42"
+      },
+      {
+        "path": "media/showcase/robot-dance.mp4",
+        "bytes": 400418,
+        "sha256": "89d5ae8cb3eae6cabd5249c94ee08670f355207d0b17b8996a1ba44e19ed4135"
+      }
+    ]
+  }
+]

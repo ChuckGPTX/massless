@@ -383,14 +383,15 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html' };
+const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/music': '/music/index.html', '/demo-site': '/demo-site/index.html' };
+for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studios/${studio}`] = `/studios/${studio}/index.html`;
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
 
 async function page(request, ref, file, ctx) {
   const res = await fetchFile(ref, file, ctx);
   if (!res) return notFound();
   let html = await res.text();
-  if (SHA.test(ref)) html = html.replace(/(href|src)="\/(css|js)\//g, `$1="/v/${ref}/$2/`);
+  if (SHA.test(ref)) html = html.replace(/(href|src)="\/(css\/[^\"]+|js\/[^\"]+|demo-site\/[^\"]+\.(?:css|js))"/g, `$1="/v/${ref}/$2"`);
   const headers = securityHeaders(new Headers({ 'content-type': TYPES.html, 'cache-control': 'public, max-age=0, must-revalidate' }));
   return new Response(request.method === 'HEAD' ? null : html, { headers });
 }
@@ -427,7 +428,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/(image|video|audio|3d|film|office)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();

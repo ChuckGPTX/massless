@@ -1,222 +1,514 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Massless: free AI cinema studio</title>
-  <meta name="description" content="Shoot AI frames with a real camera rig, fly 28 camera moves through them, cut a storyboard and add a voiceover. Every model is free and open-weight. No account, no credits, $0.">
-  <meta name="theme-color" content="#0b0b0c">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Massless">
-  <meta property="og:url" content="https://massless.chucksi.com/">
-  <meta property="og:title" content="Massless: the AI film studio that costs $0">
-  <meta property="og:description" content="Images, camera moves, voiceover, 3D and launch films on open-weight models. No account, no credits. $0.">
-  <meta property="og:image" content="https://massless.chucksi.com/og.jpg?v=2">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="massless. The AI film studio that costs $0. Open weights only, no credits, no account, runs in your browser.">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://massless.chucksi.com/og.jpg?v=2">
-  <link rel="icon" href="/favicon.ico" sizes="32x32">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/instrument-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/css/site.css">
-  <link rel="stylesheet" href="/css/explore.css">
-</head>
-<body>
-  <header class="nav">
-    <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
-    <nav class="nav-links" aria-label="Main">
-      <a href="/" aria-current="page">Explore</a>
-      <a href="/image">Image</a>
-      <a href="/video">Video</a>
-      <a href="/audio">Audio</a>
-      <a href="/office">Office</a>
-    </nav>
-    <div class="nav-right">
-      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
-      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
-      <a class="btn-accent" href="/image">Start creating</a>
-    </div>
-  </header>
-
-  <main>
-    <section class="launches" aria-label="What's new">
-      <div class="rail" id="rail">
-        <a class="launch" href="#trailer" data-dialog="trailer" id="trailer-card">
-          <div class="poster p-trailer">
-            <video muted loop playsinline preload="none" poster="/media/trailer.jpg" data-src="/media/trailer.mp4"></video>
-            <div class="poster-type" aria-hidden="true">
-              <span class="play">▶</span>
-              <b class="big">Trailer</b>
-              <span class="sound">Sound on · 15 s</span>
-            </div>
-          </div>
-          <h3>We open-sourced everything</h3>
-          <p>The 15-second trailer. Turn your sound on.</p>
-        </a>
-        <a class="launch" href="/image">
-          <div class="poster p-studio">
-            <video muted loop playsinline preload="none" poster="/media/art/cinema.jpg" data-src="/media/clips/hero-cinema.mp4"></video>
-            <div class="poster-type" aria-hidden="true">
-              <span class="mini-mark">◉ Massless</span>
-              <b class="big">Cinema</b>
-              <b class="outline">Studio</b>
-            </div>
-          </div>
-          <h3>Massless Cinema Studio</h3>
-          <p>Build the camera rig, then shoot the frame. Free.</p>
-        </a>
-        <a class="launch" href="/video">
-          <div class="poster p-moves">
-            <video muted loop playsinline preload="none" poster="/media/art/rider.jpg" data-src="/media/clips/hero-rider.mp4"></video>
-            <div class="poster-type" aria-hidden="true">
-              <b class="streak" data-text="Dolly">Dolly</b>
-              <b class="streak" data-text="Zoom">Zoom</b>
-            </div>
-          </div>
-          <h3>28 camera moves</h3>
-          <p>Dolly zoom, crash zoom, bullet time. On any still.</p>
-        </a>
-        <a class="launch" href="/video#storyboard">
-          <div class="poster p-board">
-            <video muted loop playsinline preload="none" poster="/media/art/lighthouse.jpg" data-src="/media/clips/hero-lighthouse.mp4"></video>
-            <div class="poster-type" aria-hidden="true">
-              <span class="slate tl">SC 01</span><span class="slate tr">TK 03</span>
-              <b class="big">Story</b><b class="big">board</b>
-              <span class="slate bl">00:00:04:12</span><span class="slate br"><i></i>REC</span>
-            </div>
-          </div>
-          <h3>Storyboard</h3>
-          <p>Cut your shots into one film and export an MP4.</p>
-        </a>
-        <a class="launch" href="/image#takes">
-          <div class="poster p-takes">
-            <video muted loop playsinline preload="none" poster="/media/art/neon.jpg" data-src="/media/clips/hero-neon.mp4"></video>
-            <div class="poster-type" aria-hidden="true">
-              <b class="neon">4 takes</b>
-              <span class="neon-sub">One prompt</span>
-            </div>
-          </div>
-          <h3>Takes</h3>
-          <p>Shoot up to four variations and pick the hero frame.</p>
-        </a>
-        <a class="launch" href="/audio">
-          <div class="poster p-free">
-            <video muted loop playsinline preload="none" poster="/media/art/astronaut.jpg" data-src="/media/clips/hero-astronaut.mp4"></video>
-            <div class="poster-type" aria-hidden="true">
-              <b class="price">$0</b>
-              <span class="price-sub">Open weights. Forever.</span>
-            </div>
-          </div>
-          <h3>Open weights only</h3>
-          <p>FLUX.1 schnell, Depth Anything V2, Kokoro, MeloTTS and Whisper. No paid models.</p>
-        </a>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Massless — An open studio for your imagination</title>
+    <meta
+      name="description"
+      content="Create images, camera moves, voiceovers, launch films and 3D with open creative tools. Browser tools are free; hosted AI has daily limits."
+    />
+    <meta name="theme-color" content="#0b0b0c" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Massless" />
+    <meta property="og:url" content="https://massless.chucksi.com/" />
+    <meta
+      property="og:title"
+      content="Massless — Imagination, without the weight"
+    />
+    <meta
+      property="og:description"
+      content="An open studio for images, films, sound and 3D. Start with an idea. Make it yours."
+    />
+    <meta
+      property="og:image"
+      content="https://massless.chucksi.com/media/art/massless-portal-v1.jpg"
+    />
+    <meta property="og:image:width" content="1536" />
+    <meta property="og:image:height" content="1024" />
+    <meta
+      property="og:image:alt"
+      content="An explorer facing an amber portal. Massless: an open creative studio."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:image"
+      content="https://massless.chucksi.com/media/art/massless-portal-v1.jpg"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link
+      rel="preload"
+      href="/fonts/big-shoulders-display-latin-900-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/instrument-sans-latin-500-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="/css/explore.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <script type="module" src="/js/navigation.js"></script>
+  </head>
+  <body>
+    <header class="nav">
+      <a class="nav-logo" href="/" aria-label="Massless home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle
+            cx="16"
+            cy="16"
+            r="11.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+          <path
+            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
+            stroke="currentColor"
+            stroke-width="3"
+          /></svg
+      ></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/" aria-current="page">Explore</a>
+        <a href="/studios/image/">Image</a>
+        <a href="/studios/video/">Video</a>
+        <a href="/studios/audio/">Audio</a>
+        <a href="/studios/3d/">3D</a>
+        <a href="/studios/office/">Office</a>
+      </nav>
+      <div class="nav-right">
+        <button type="button" class="pill-link" data-dialog="ledger">
+          <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path
+              d="M5.5 8.2l1.8 1.8 3.3-3.6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            /></svg
+          >Open models<span class="tag">OPEN SOURCE</span>
+        </button>
+        <a
+          class="btn-ghost"
+          href="https://github.com/ChuckGPTX/massless"
+          rel="noopener"
+          >GitHub</a
+        >
+        <a class="btn-accent" href="/image">Start creating</a>
       </div>
-      <button type="button" class="rail-btn prev" id="rail-prev" aria-label="Scroll back" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-      <button type="button" class="rail-btn next" id="rail-next" aria-label="Scroll forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-    </section>
+    </header>
 
-    <section class="duo wrap">
-      <a class="promo" href="/image">
-        <video muted loop playsinline preload="none" poster="/media/art/canyon.jpg" data-src="/media/clips/promo-canyon.mp4"></video>
-        <div class="promo-body">
-          <h2 class="display"><span>Make a film today.</span> <em>Pay nothing.</em></h2>
-          <ul>
-            <li>Unlimited FLUX.1 schnell frames, no account</li>
-            <li>28 camera moves rendered on your own device</li>
-          </ul>
-          <span class="btn-accent big">Start creating free</span>
+    <main class="explore-main">
+      <section class="explore-intro wrap" aria-labelledby="studio-title">
+        <div>
+          <p class="eyebrow">MASSLESS / THE OPEN CREATIVE STUDIO</p>
+          <h1 id="studio-title">MAKE SOMETHING <em>MOVE.</em></h1>
         </div>
-      </a>
-      <div class="tools">
-        <a class="tool" href="/image"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="M15.5 10l6-3.5v11l-6-3.5"/><circle cx="9" cy="12" r="3"/></svg><strong>Cinema Studio<span class="badge-new">NEW</span></strong><span>Camera, lens and film stock, then shoot</span></a>
-        <a class="tool" href="/video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M3 12l4-4M3 12l4 4M21 12l-4-4M21 12l-4 4"/><circle cx="12" cy="12" r="2.2"/></svg><strong>Camera Moves</strong><span>28 moves on any still image</span></a>
-        <a class="tool" href="/video?effect=lidar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="2.5"/></svg><strong>Effects<span class="badge-new">NEW</span></strong><span>LiDAR scan, Vanish, Bullet time, Clones</span></a>
-        <a class="tool" href="/film"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 5l2 4M12 5l2 4M17 5l2 4"/></svg><strong>Launch Film<span class="badge-new">NEW</span></strong><span>A kinetic launch film with music, from a brief</span></a>
-        <a class="tool" href="/office"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8l4.5 4.5v14.5H6z"/><path d="M14 2.5V7h4.5M9 12.5h6M9 16h6"/></svg><strong>Office<span class="badge-new">NEW</span></strong><span>Edit, sign and convert PDFs, free</span></a>
-        <a class="tool" href="/audio"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5"/><path d="M5 11a7 7 0 0014 0M12 18v3.5"/></svg><strong>Voiceover<span class="badge-new">NEW</span></strong><span>Voiceover, captions, sound beds and video to MP3</span></a>
-        <a class="tool" href="/3d"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l8.5 4.75v9.5L12 21.5l-8.5-4.75v-9.5z"/><path d="M12 12l8.5-4.75M12 12L3.5 7.25M12 12v9.5"/></svg><strong>Image to 3D<span class="badge-new">NEW</span></strong><span>Orbit any still as a splat, or run Idol</span></a>
-        <a class="tool" href="https://github.com/ChuckGPTX/massless#open-weights-only-on-your-gpu-comfyui" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M7 8h3M7 11h6"/></svg><strong>ComfyUI Mode</strong><span>Run every shot on your own GPU</span></a>
-      </div>
-    </section>
-
-    <section class="wrap">
-      <a class="showcase" href="/video#library">
-        <div class="wall" aria-hidden="true">
-          <video muted loop playsinline preload="none" class="t916" poster="/media/art/samurai.jpg" data-src="/media/clips/wall-samurai.mp4"></video>
-          <video muted loop playsinline preload="none" poster="/media/art/bmx.jpg" data-src="/media/clips/wall-bmx.mp4"></video>
-          <video muted loop playsinline preload="none" class="t916" poster="/media/art/fisherman.jpg" data-src="/media/clips/wall-fisherman.mp4"></video>
-          <video muted loop playsinline preload="none" poster="/media/art/dancer.jpg" data-src="/media/clips/wall-dancer.mp4"></video>
-          <span class="wall-gap"></span>
-          <video muted loop playsinline preload="none" poster="/media/art/train.jpg" data-src="/media/clips/wall-train.mp4"></video>
-          <video muted loop playsinline preload="none" class="t916" poster="/media/art/jellyfish.jpg" data-src="/media/clips/wall-jellyfish.mp4"></video>
-          <video muted loop playsinline preload="none" poster="/media/art/diner.jpg" data-src="/media/clips/wall-diner.mp4"></video>
-          <video muted loop playsinline preload="none" class="t916" poster="/media/art/summit.jpg" data-src="/media/clips/wall-summit.mp4"></video>
+        <div class="intro-aside">
+          <p>
+            From a first frame to a whole new world.<br />Open tools. A little
+            curiosity. Your imagination.
+          </p>
         </div>
-        <div class="showcase-mid">
-          <span class="mini-mark">◉ Massless</span>
-          <h2 class="display"><b>Moves</b><span>Library</span></h2>
-          <span class="btn-accent big">28 moves · $0</span>
+      </section>
+      <section class="wrap featured-grid" aria-label="Featured moving examples">
+        <article class="feature feature-wide feature-music">
+          <button id="showtime-play" class="music-watch" type="button" aria-label="Watch the Showtime music preview with sound"><video muted loop playsinline preload="none" poster="/media/music/showtime-transfer.jpg" data-src="/media/music/showtime-transfer.mp4" aria-label="Tone Da Boss Showtime performance in a wrestling ring"></video><span class="media-label">TONE DA BOSS · SHOWTIME</span><span class="music-play-label">▶ Watch with sound</span></button>
+          <a class="music-create" href="/studios/video/">Explore Video studio ↗</a>
+        </article>
+        <a class="feature" href="/video?effect=lidar"><video muted loop playsinline preload="none" poster="/media/clips/effect-lidar-active.jpg" data-src="/media/clips/effect-lidar.mp4" aria-label="A canyon transformed into a laser-swept point cloud"></video><span class="media-label">MADE IN MASSLESS · EFFECT</span><div class="feature-copy"><h2>SEE THE<br>UNSEEN.</h2><span class="feature-link">Try LiDAR scan ↗</span></div></a>
+        <a class="feature" href="/video?effect=vanish"><video muted loop playsinline preload="none" poster="/media/clips/effect-vanish-active.jpg" data-src="/media/clips/effect-vanish.mp4" aria-label="A dancer dissolving into particles"></video><span class="media-label">MADE IN MASSLESS</span><div class="feature-copy"><h2>HERE.<br>THEN GONE.</h2><span class="feature-link">Try Vanish ↗</span></div></a>
+      </section>
+      <section class="wrap discovery" aria-labelledby="discovery-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PICK A DIRECTION</p>
+            <h2 id="discovery-title">Small experiments. Big possibilities.</h2>
+          </div>
+          <span class="muted">Play. Orbit. Scroll. Make.</span>
         </div>
-      </a>
-    </section>
-
-    <section class="wrap trending">
-      <div class="row-head">
-        <h2 class="display">Trending moves</h2>
-        <a class="btn-ghost" href="/video#library">See all 28</a>
+        <div class="demo-grid">
+          <a class="demo-card" href="/3d"
+            ><div class="demo-visual crystal">
+              <canvas
+                id="crystal-preview"
+                width="720"
+                height="450"
+                aria-label="A rotating three-dimensional crystal sculpture"
+              ></canvas
+              ><span class="media-label">LIVE 3D STUDY</span>
+            </div>
+            <div class="card-copy">
+              <h3>A different perspective <span>↗</span></h3>
+              <p>Real-time 3D, then turn your own still into a depth scene.</p>
+            </div></a
+          >
+          <button class="demo-card" type="button" data-dialog="game-dialog">
+            <div class="demo-visual">
+              <canvas
+                id="game-preview"
+                width="720"
+                height="450"
+                aria-label="Gameplay preview of an original space arcade game"
+              ></canvas
+              ><span class="media-label">PLAYABLE · OPEN-SOURCE DEMO</span>
+            </div>
+            <div class="card-copy">
+              <h3>One more orbit <span>▶</span></h3>
+              <p>Take the controls. Catch the stars. Dodge the debris.</p>
+            </div>
+          </button>
+          <a class="demo-card" href="/demo-site/"
+            ><div class="demo-visual web-preview">
+              <div class="browser-chrome">
+                <i></i><i></i><i></i><span>form & field / a website study</span>
+              </div>
+              <div class="mini-page">
+                <div class="mini-nav">
+                  FORM & FIELD
+                  <span>Work&nbsp;&nbsp; Studio</span>
+                </div>
+                <div class="mini-hero">
+                  <small>INDEPENDENT DESIGN STUDIO</small
+                  ><b>Space for<br />something<br /><em>different.</em></b>
+                  <img class="mini-art" src="/media/website/pavilion.jpg" alt="" loading="lazy">
+                  <span>Explore our work ↗</span>
+                </div>
+                <div class="mini-work">
+                  <b>Ideas, made tangible.</b>
+                  <div><img src="/media/website/ceramics.jpg" alt="" loading="lazy"><img src="/media/website/lounge.jpg" alt="" loading="lazy"></div>
+                </div>
+              </div>
+              <svg class="demo-cursor" viewBox="0 0 24 30" aria-hidden="true">
+                <path
+                  d="M2 2v22l6-6 5 10 5-3-5-9h9z"
+                  fill="white"
+                  stroke="#171817"
+                  stroke-width="2"
+                /></svg
+              ><span class="media-label">RESPONSIVE WEBSITE DEMO</span>
+            </div>
+            <div class="card-copy">
+              <h3>From idea to interaction <span>↗</span></h3>
+              <p>Original design. Fresh imagery made in our own Image Studio.</p>
+            </div></a
+          >
+        </div>
+      </section>
+      <section class="wrap" id="references" aria-labelledby="reference-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">THE MOTION NOTEBOOK</p>
+            <h2 id="reference-title">Different worlds. No repeated frames.</h2>
+          </div>
+          <p class="muted section-note">
+            Fresh motion, characters and impossible worlds.<br />Find a spark for your next creation.
+          </p>
+        </div>
+        <div class="filter-bar" role="group" aria-label="Filter motion studies">
+          <button class="filter active" aria-pressed="true" data-filter="all">
+            All studies</button
+          ><button class="filter" aria-pressed="false" data-filter="cinema">
+            Cinema</button
+          ><button class="filter" aria-pressed="false" data-filter="animation">
+            Animation</button
+          ><button class="filter" aria-pressed="false" data-filter="character">
+            Characters
+          </button>
+        </div>
+        <div class="reference-grid" id="reference-grid"></div>
+        <a
+          class="character-art"
+          href="/media/showcase/robot-reference.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            src="/media/showcase/robot-reference.jpg"
+            width="1440"
+            height="810"
+            loading="lazy"
+            alt="Original blue robot standing in a terracotta studio"
+          />
+          <div>
+            <p class="eyebrow">MARKETING STUDIO IMAGE · ORIGINAL CHARACTER</p>
+            <h3>Meet the next moving part.</h3>
+            <p>Our original character, ready for a new scene.</p>
+            <span>Open the artwork ↗</span>
+          </div></a
+        >
+        <p class="reference-note">
+          These films were generated with the credited models. Massless’s current video tool animates still images with
+          depth, camera moves and effects.
+          <button class="text-button" data-dialog="ledger">
+            What runs where ↗
+          </button>
+        </p>
+      </section>
+      <section class="wrap" id="tools" aria-labelledby="tools-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">YOUR CREATIVE WORKBENCH</p>
+            <h2 id="tools-title">Start here. Take it anywhere.</h2>
+          </div>
+          <span class="muted"
+            >Free browser tools · Hosted AI has daily limits</span
+          >
+        </div>
+        <div class="tools">
+          <a class="tool" href="/image"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2.5" y="6" width="13" height="12" rx="2" />
+              <path d="M15.5 10l6-3.5v11l-6-3.5" />
+              <circle cx="9" cy="12" r="3" /></svg
+            ><strong>Cinema Studio<span class="badge-new">NEW</span></strong
+            ><span>Camera, lens and film stock, then shoot</span></a
+          >
+          <a class="tool" href="/video"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 12h18M3 12l4-4M3 12l4 4M21 12l-4-4M21 12l-4 4" />
+              <circle cx="12" cy="12" r="2.2" /></svg
+            ><strong>Camera Moves</strong
+            ><span>28 moves on any still image</span></a
+          >
+          <a class="tool" href="/video?effect=lidar"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"
+              />
+              <circle cx="12" cy="12" r="2.5" /></svg
+            ><strong>Effects<span class="badge-new">NEW</span></strong
+            ><span>LiDAR scan, Vanish, Bullet time, Clones</span></a
+          >
+          <a class="tool" href="/film"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="M3 9h18M7 5l2 4M12 5l2 4M17 5l2 4" /></svg
+            ><strong>Launch Film<span class="badge-new">NEW</span></strong
+            ><span>A kinetic launch film with music, from a brief</span></a
+          >
+          <a class="tool" href="/office"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 2.5h8l4.5 4.5v14.5H6z" />
+              <path d="M14 2.5V7h4.5M9 12.5h6M9 16h6" /></svg
+            ><strong>Office<span class="badge-new">NEW</span></strong
+            ><span>Edit, sign and convert PDFs, free</span></a
+          >
+          <a class="tool" href="/audio"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="8.5" y="2.5" width="7" height="12" rx="3.5" />
+              <path d="M5 11a7 7 0 0014 0M12 18v3.5" /></svg
+            ><strong>Voiceover<span class="badge-new">NEW</span></strong
+            ><span>Voiceover, captions, sound beds and video to MP3</span></a
+          >
+          <a class="tool" href="/3d"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2.5l8.5 4.75v9.5L12 21.5l-8.5-4.75v-9.5z" />
+              <path d="M12 12l8.5-4.75M12 12L3.5 7.25M12 12v9.5" /></svg
+            ><strong>Image to 3D<span class="badge-new">NEW</span></strong
+            ><span>Explore scenes and complete 3D objects</span></a
+          >
+          <a
+            class="tool"
+            href="https://github.com/ChuckGPTX/massless#open-weights-only-on-your-gpu-comfyui"
+            rel="noopener"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="12" rx="2" />
+              <path d="M8 20h8M12 16v4M7 8h3M7 11h6" /></svg
+            ><strong>ComfyUI Mode</strong
+            ><span>Create with your own connected workflow</span></a
+          >
+        </div>
+      </section>
+      <section class="wrap workflow-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">FOLLOW THE IDEA</p>
+            <h2>One project. A few good moves.</h2>
+          </div>
+        </div>
+        <div class="workflow-grid">
+          <a href="/image"
+            ><span>01 / CREATE</span>
+            <h3>Find the frame.</h3>
+            <p>
+              Choose your lens and visual direction. Generate a still or bring
+              your own.
+            </p></a
+          ><a href="/video"
+            ><span>02 / MOVE</span>
+            <h3>Make it cinematic.</h3>
+            <p>
+              Add depth, camera motion and effects. Arrange your shots in a
+              storyboard.
+            </p></a
+          ><a href="/audio"
+            ><span>03 / FINISH</span>
+            <h3>Give it a voice.</h3>
+            <p>
+              Create voiceover and captions, add sound, then export your work.
+            </p></a
+          >
+        </div>
+      </section>
+    </main>
+    <footer class="foot">
+      <span>Massless · Open creative tools · MIT licensed code</span>
+      <nav aria-label="Footer">
+        <button class="text-button" data-dialog="ledger">
+          Models & artwork</button
+        ><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
+      </nav>
+    </footer>
+    <dialog class="sheet game-sheet" id="game-dialog">
+      <form method="dialog" class="sheet-head">
+        <h2>Orbit / a playable experiment</h2>
+        <button class="x" aria-label="Close game">×</button>
+      </form>
+      <canvas
+        id="game-canvas"
+        width="960"
+        height="540"
+        tabindex="0"
+        aria-label="Orbit game. Use left and right arrows or drag to steer. Catch gold stars and avoid pink debris."
+      ></canvas>
+      <div class="game-controls">
+        <button class="btn-accent" id="game-start">Start game</button>
+        <p id="game-status" role="status">
+          Arrow keys or drag to steer. Catch gold. Avoid pink.
+        </p>
       </div>
-      <div class="move-row" id="move-row"></div>
-    </section>
-
-    <section class="wrap made projects">
-      <div class="row-head">
-        <h2 class="display">Real projects, moved by Massless</h2>
-        <p class="muted">Art from a kids' book series and an indie fighting game, each one still put through Massless's camera.</p>
+      <p class="muted">
+        A small original browser game. Source included with Massless.
+      </p>
+    </dialog>
+    <dialog class="sheet reference-sheet" id="reference-dialog">
+      <form method="dialog" class="sheet-head">
+        <h2 id="reference-dialog-title">Motion study</h2>
+        <button class="x" aria-label="Close film">×</button>
+      </form>
+      <video id="reference-player" controls playsinline preload="none"></video>
+      <p id="reference-credit"></p>
+      <figure id="character-reference" hidden>
+        <img
+          src="/media/showcase/robot-reference.jpg"
+          width="1440"
+          height="810"
+          alt="Original cobalt-blue robot character in a terracotta studio"
+          loading="lazy"
+        />
+        <figcaption>
+          Character artwork · Marketing Studio Image
+        </figcaption>
+      </figure>
+      <p class="muted" id="reference-provider-note">
+        Generated with the model credited above.
+      </p>
+    </dialog>
+    <dialog class="sheet" id="ledger">
+      <form method="dialog" class="sheet-head">
+        <h2>Tools, models & artwork</h2>
+        <button class="x" aria-label="Close">×</button>
+      </form>
+      <p>
+        Massless uses open-weight models. Browser tools have no service charge.
+        Hosted AI shares a daily allowance; connected services and third-party
+        providers can have compute costs and separate terms.
+      </p>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Job</th>
+              <th>Model</th>
+              <th>License</th>
+              <th>Runs on</th>
+              <th>Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Image</td>
+              <td>
+                FLUX.1 [schnell], SDXL-Lightning, SDXL 1.0, DreamShaper 8, Sana
+              </td>
+              <td>Apache-2.0 / OpenRAIL</td>
+              <td>
+                Cloudflare Workers AI free tier, Pollinations, or your ComfyUI
+              </td>
+              <td>$0</td>
+            </tr>
+            <tr>
+              <td>Depth for moves</td>
+              <td>Depth Anything V2 Small</td>
+              <td>Apache-2.0</td>
+              <td>Your browser</td>
+              <td>$0</td>
+            </tr>
+            <tr>
+              <td>Voiceover, English</td>
+              <td>Kokoro-82M</td>
+              <td>Apache-2.0</td>
+              <td>Your browser</td>
+              <td>$0</td>
+            </tr>
+            <tr>
+              <td>Voiceover, 6 languages</td>
+              <td>MeloTTS</td>
+              <td>MIT</td>
+              <td>Cloudflare Workers AI free tier</td>
+              <td>$0</td>
+            </tr>
+            <tr>
+              <td>Captions</td>
+              <td>Whisper large-v3-turbo</td>
+              <td>MIT</td>
+              <td>Cloudflare Workers AI free tier</td>
+              <td>$0</td>
+            </tr>
+            <tr>
+              <td>Beat sheets, Ask</td>
+              <td>Llama 3.3 70B</td>
+              <td>Llama 3.3 Community</td>
+              <td>Cloudflare Workers AI free tier</td>
+              <td>$0</td>
+            </tr>
+            <tr>
+              <td>Camera, lens, film, sound beds</td>
+              <td>Massless engine</td>
+              <td>MIT</td>
+              <td>Your browser</td>
+              <td>$0</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="reel" id="projects"></div>
-    </section>
+      <p>
+        Massless code is MIT licensed. Model weights have their own licenses.
+        LiDAR, Vanish and camera clips were rendered by Massless. The film
+        gallery was commissioned through Higgsfield using Kling 4.0, Wan 3.0
+        Prime, Genjutsu Light and Marketing Studio Image. Those are paid
+        gallery assets, not open-source models or outputs of the current
+        Massless tools. Games and website previews are small open-source demos,
+        not full AI builders.
+      </p>
+    </dialog>
 
-    <section class="wrap made">
-      <div class="row-head">
-        <h2 class="display">Made in Massless</h2>
-        <p class="muted">Every motion here was rendered by Massless's own camera from a single still.</p>
-      </div>
-      <div class="masonry" id="masonry"></div>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <span>© 2026 Massless · MIT licensed · Built on open weights</span>
-    <nav aria-label="Footer"><a href="#" data-dialog="ledger">The $0 ledger</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a><a href="https://github.com/ChuckGPTX/massless/blob/main/SPEC.md" rel="noopener">How it was built</a></nav>
-  </footer>
-
-  <dialog class="sheet trailer-sheet" id="trailer">
-    <form method="dialog" class="sheet-head"><h2>We open-sourced everything</h2><button class="x" aria-label="Close">×</button></form>
-    <video id="trailer-video" controls playsinline preload="none" poster="/media/trailer.jpg" src="/media/trailer.mp4"></video>
-  </dialog>
-
-  <dialog class="sheet" id="ledger">
-    <form method="dialog" class="sheet-head"><h2>The $0 ledger</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Every model in Massless is free to use and has open weights. Nothing asks for a card, a key or credits.</p>
-    <div class="scroll"><table>
-      <thead><tr><th>Job</th><th>Model</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
-      <tbody>
-        <tr><td>Image</td><td>FLUX.1 [schnell], SDXL-Lightning, SDXL 1.0, DreamShaper 8, Sana</td><td>Apache-2.0 / OpenRAIL</td><td>Cloudflare Workers AI free tier, Pollinations, or your ComfyUI</td><td>$0</td></tr>
-        <tr><td>Depth for moves</td><td>Depth Anything V2 Small</td><td>Apache-2.0</td><td>Your browser</td><td>$0</td></tr>
-        <tr><td>Voiceover, English</td><td>Kokoro-82M</td><td>Apache-2.0</td><td>Your browser</td><td>$0</td></tr>
-        <tr><td>Voiceover, 6 languages</td><td>MeloTTS</td><td>MIT</td><td>Cloudflare Workers AI free tier</td><td>$0</td></tr>
-        <tr><td>Captions</td><td>Whisper large-v3-turbo</td><td>MIT</td><td>Cloudflare Workers AI free tier</td><td>$0</td></tr>
-        <tr><td>Beat sheets, Ask</td><td>Llama 3.3 70B</td><td>Llama 3.3 Community</td><td>Cloudflare Workers AI free tier</td><td>$0</td></tr>
-        <tr><td>Camera, lens, film, sound beds</td><td>Massless engine</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-      </tbody>
-    </table></div>
-    <p>The launch key art on this page was made separately; every motion on it was rendered by Massless's own camera from those stills.</p>
-  </dialog>
-
-  <script type="module" src="/js/pages/explore.js"></script>
-</body>
+    <script type="module" src="/js/pages/explore.js"></script>
+  </body>
 </html>

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>3D studio — Massless</title>
+    <meta
+      name="description"
+      content="Depth scenes, Gaussian splats and live interactive experiments."
+    />
+    <meta name="theme-color" content="#0b0b0c" />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <link rel="stylesheet" href="/css/showcases.css" />
+    <script type="module" src="/js/navigation.js"></script>
+    <script type="module" src="/js/pages/showcases.js"></script>
+  </head>
+  <body class="showcase showcase-3d">
+    <header class="nav">
+      <a class="nav-logo" href="/" aria-label="Massless home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle
+            cx="16"
+            cy="16"
+            r="11.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+          <path
+            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
+            stroke="currentColor"
+            stroke-width="3"
+          /></svg
+      ></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/">Explore</a><a href="/studios/image/">Image</a
+        ><a href="/studios/video/">Video</a><a href="/studios/audio/">Audio</a
+        ><a href="/studios/3d/">3D</a><a href="/studios/office/">Office</a>
+      </nav>
+      <div class="nav-right">
+        <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless"
+          >GitHub</a
+        ><a class="btn-accent" href="/3d">Open studio ↗</a>
+      </div>
+    </header>
+    <main>
+      <section class="studio-hero dimension-hero">
+        <canvas
+          id="dimension-crystal"
+          width="1600"
+          height="900"
+          aria-label="A live rotating crystal, rendered using three-dimensional projection"
+        ></canvas>
+        <div class="hero-copy">
+          <p class="eyebrow">3D STUDIO / FIND ANOTHER DIMENSION</p>
+          <h1>BEYOND<br /><em>THE FRAME.</em></h1>
+          <p>
+            Give a still some depth. Walk into a new world. Make something you
+            can turn, explore and play.
+          </p>
+          <div class="hero-actions">
+            <a class="btn-accent" href="/3d">Create a depth scene ↗</a
+            ><a class="btn-ghost" href="/3d?panel=import">Open a splat</a>
+          </div>
+        </div>
+        <span class="geometry-label">LIVE GEOMETRY / ROTATION STUDY 001</span>
+      </section>
+      <section class="showcase-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">START SOMEWHERE UNEXPECTED</p>
+            <h2>A new perspective changes everything.</h2>
+          </div>
+          <p>Choose a scene to explore.</p>
+        </div>
+        <div class="examples">
+          <a class="example" href="/3d?sample=samurai"
+            ><div class="example-media">
+              <img
+                src="/media/art/samurai.jpg"
+                alt="Neon samurai scene"
+                loading="lazy"
+                width="1280"
+                height="720"
+              /><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>A world behind the image</h3>
+              <p>Turn the neon samurai into a scene you can orbit.</p>
+            </div></a
+          ><a class="example" href="/3d?sample=jellyfish"
+            ><div class="example-media">
+              <img
+                src="/media/art/jellyfish.jpg"
+                alt="Luminous jellyfish underwater"
+                loading="lazy"
+                width="1280"
+                height="720"
+              /><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>Dive a little deeper</h3>
+              <p>Start with a luminous underwater world.</p>
+            </div></a
+          ><a class="example" href="/3d?sample=canyon"
+            ><div class="example-media">
+              <video
+                muted
+                loop
+                playsinline
+                preload="none"
+                data-src="/media/clips/effect-lidar.mp4"
+                poster="/media/clips/effect-lidar-active.jpg"
+                aria-label="Canyon point-cloud sweep"
+              ></video
+              ><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>More than a flat landscape</h3>
+              <p>Explore the depth of a sunlit canyon.</p>
+            </div></a
+          >
+        </div>
+        <div class="play-feature">
+          <div>
+            <p class="eyebrow">AN OPEN-SOURCE PLAYGROUND</p>
+            <h2>ONE MORE<br /><em>ORBIT.</em></h2>
+            <p>
+              Catch the stars. Dodge the debris. A tiny playable world, built
+              right into the browser.
+            </p>
+            <button class="btn-accent" id="orbit-start">Play Orbit ↗</button>
+            <p id="orbit-status" aria-live="polite">
+              Use arrow keys or drag to move.
+            </p>
+          </div>
+          <canvas
+            id="studio-orbit"
+            width="900"
+            height="560"
+            tabindex="0"
+            aria-label="Orbit game. Use the arrow keys or drag to steer."
+          ></canvas>
+        </div>
+        <div class="tool-strip">
+          <a href="/3d?panel=import"
+            ><span>01</span><strong>Open your splats</strong
+            ><small>View PLY, SPZ and splat files.</small><b>↗</b></a
+          ><a href="/3d?engine=idol"
+            ><span>02</span><strong>Complete object reconstruction</strong
+            ><small>Connect a reconstruction service.</small><b>↗</b></a
+          ><a href="/video"
+            ><span>03</span><strong>Take it into motion</strong
+            ><small>Render a camera move through a still.</small><b>↗</b></a
+          >
+        </div>
+        <p class="studio-footnote">
+          Depth scenes reconstruct the visible front of a still. Full object
+          generation uses a connected service. Crystal and Orbit are original
+          browser demos.
+        </p>
+      </section>
+    </main>
+    <footer class="showcase-footer">
+      <a href="/">MASSLESS / OPEN CREATIVE TOOLS</a>
+      <p>Your idea. Your next experiment.</p>
+      <a href="https://github.com/ChuckGPTX/massless">Explore the source ↗</a>
+    </footer>
+    <dialog class="cinema-dialog">
+      <div class="cinema-heading">
+        <h2 id="cinema-title">Motion study</h2>
+        <button type="button" class="cinema-close" aria-label="Close video">
+          ×
+        </button>
+      </div>
+      <video
+        controls
+        playsinline
+        preload="none"
+        aria-labelledby="cinema-title"
+      ></video>
+      <p id="cinema-credit"></p>
+    </dialog>
+  </body>
+</html>

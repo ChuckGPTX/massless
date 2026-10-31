@@ -335,6 +335,16 @@ async function selectEffect(id, look, { scroll = false } = {}) {
   startLoop();
 }
 
+// Existing Massless-rendered demonstrations, curated by the move they show.
+// Keep the selected user image unchanged when choosing a move.
+const MOVE_DEMOS = {
+  'crash-zoom': 'samurai', 'pan-right': 'diner', 'crane-up': 'jellyfish',
+  'dolly-zoom': 'train', 'truck-right': 'bmx',
+  'dolly-out': 'summit', 'bullet-time': 'dancer',
+};
+
+const MOVE_ART = {"breathe": "velvet", "dolly-in": "rider", "arc-left": "tp-city", "arc-right": "tp-greenhouse", "tilt-up": "lighthouse", "handheld": "skater", "rack-focus": "botanical", "float": "observatory", "crash-zoom-out": "fisherman", "zoom-in": "cinema", "zoom-out": "astronaut", "dolly-zoom-in": "neon", "fpv": "t1-skywalk", "wide-orbit": "massless-world-v1", "snorricam": "tp-crew", "crane-down": "t1-keyart", "tilt-down": "tp-garden", "truck-left": "massless-portal-v1", "pan-left": "website/pavilion", "dutch-roll": "website/lounge", "earthquake": "website/ceramics"};
+
 function buildLibrary() {
   const groups = $('#groups');
   const lib = $('#lib');
@@ -355,8 +365,13 @@ function buildLibrary() {
     lib.append(card);
   }
   for (const m of MOVES) {
+    const sample = MOVE_DEMOS[m.id];
+    const preview = sample ? `/media/clips/wall-${sample}.mp4` : `/media/clips/move-${m.id}.mp4`;
+    const art = MOVE_ART[m.id];
+    const poster = sample ? `/media/art/${sample}.jpg` : art?.startsWith("website/") ? `/media/${art}.jpg` : `/media/art/${art}.jpg`;
+    const visual = sample ? el("video", { muted: true, loop: true, playsinline: true, preload: "none", poster, "data-src": preview }) : el("img", { src: poster, loading: "lazy", alt: `${m.name} scene example` });
     const card = el('button', { type: 'button', class: 'mcard', role: 'radio', 'aria-checked': String(m.id === state.move), 'data-key': m.id, 'data-group': m.group, title: m.hint },
-      el('div', { class: 'frame' }, el('video', { muted: true, loop: true, playsinline: true, preload: 'none', poster: `/media/clips/move-${m.id}.jpg`, 'data-src': `/media/clips/move-${m.id}.mp4` }), el('span', { class: 'use' }, m.id === state.move ? 'Selected' : 'Use move')),
+      el('div', { class: 'frame' }, visual, el('span', { class: 'use' }, m.id === state.move ? 'Selected' : 'Use move')),
       el('strong', {}, m.name), el('span', {}, `${GROUP_LABEL[m.group]} · ${m.hint}`));
     card.addEventListener('click', () => selectMove(m.id, { scroll: true }));
     lib.append(card);

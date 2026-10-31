@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Image studio — Massless</title>
+    <meta
+      name="description"
+      content="Discover image examples, camera controls and open models."
+    />
+    <meta name="theme-color" content="#0b0b0c" />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <link rel="stylesheet" href="/css/showcases.css" />
+    <script type="module" src="/js/navigation.js"></script>
+    <script type="module" src="/js/pages/showcases.js"></script>
+  </head>
+  <body class="showcase showcase-image">
+    <header class="nav">
+      <a class="nav-logo" href="/" aria-label="Massless home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle
+            cx="16"
+            cy="16"
+            r="11.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+          <path
+            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
+            stroke="currentColor"
+            stroke-width="3"
+          /></svg
+      ></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/">Explore</a><a href="/studios/image/">Image</a
+        ><a href="/studios/video/">Video</a><a href="/studios/audio/">Audio</a
+        ><a href="/studios/3d/">3D</a><a href="/studios/office/">Office</a>
+      </nav>
+      <div class="nav-right">
+        <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless"
+          >GitHub</a
+        ><a class="btn-accent" href="/image">Open studio ↗</a>
+      </div>
+    </header>
+    <main>
+      <section class="studio-hero image-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">IMAGE STUDIO / START WITH A SPARK</p>
+          <h1>SEE IT.<br /><em>MAKE IT.</em></h1>
+          <p>
+            Unreal places. Beautiful objects. A whole new point of view. Give
+            your imagination its first frame.
+          </p>
+          <form class="idea-form" action="/image">
+            <label class="sr-only" for="image-idea">Describe your image</label
+            ><input
+              id="image-idea"
+              name="prompt"
+              placeholder="A sunlit pavilion with a window to the sky…"
+              required
+              maxlength="2000"
+            /><button class="btn-accent" type="submit">Create image ↗</button>
+          </form>
+          <span class="quiet-note"
+            >Open models · camera controls · your own ComfyUI</span
+          >
+        </div>
+        <div class="image-collage">
+          <img
+            src="/media/art/diner.jpg"
+            alt="A cinematic diner scene"
+            class="collage-one"
+          /><img
+            src="/media/website/pavilion.jpg"
+            alt="Original sandstone pavilion generated in Massless"
+            class="collage-two"
+          /><img
+            src="/media/website/ceramics.jpg"
+            alt="Original ceramic still life generated in Massless"
+            class="collage-three"
+          /><span class="floating-label"
+            >A LITTLE CURIOSITY<br />GOES A LONG WAY.</span
+          >
+        </div>
+      </section>
+      <section class="showcase-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">THE IMAGE WALL</p>
+            <h2>Your next idea is in here.</h2>
+          </div>
+          <p>Choose a direction. Remix the prompt.</p>
+        </div>
+        <div class="examples image-examples">
+          <a
+            class="example"
+            href="/image?panel=prompt&prompt=Architectural%20editorial%20photo%20of%20a%20sandstone%20pavilion%20with%20circular%20oculus%2C%20reflecting%20pool%2C%20olive%20tree%2C%20warm%20golden%20light%2C%20no%20text."
+            ><div class="example-media">
+              <img
+                src="/media/website/pavilion.jpg"
+                alt="Architecture, imagined"
+                loading="lazy"
+                width="1280"
+                height="720"
+              /><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>Architecture, imagined</h3>
+              <p>A sculptural pavilion, made with Massless.</p>
+            </div></a
+          ><a
+            class="example"
+            href="/image?panel=prompt&prompt=Editorial%20product%20photograph%20of%20sculptural%20ceramic%20vases%2C%20terracotta%20and%20sage%2C%20warm%20sunlight%2C%20minimal%20composition%2C%20no%20text."
+            ><div class="example-media">
+              <img
+                src="/media/website/ceramics.jpg"
+                alt="Objects with character"
+                loading="lazy"
+                width="1280"
+                height="720"
+              /><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>Objects with character</h3>
+              <p>Small details. A completely different mood.</p>
+            </div></a
+          ><a
+            class="example"
+            href="/image?panel=prompt&prompt=Warm%20architectural%20interior%2C%20sunken%20lounge%2C%20curved%20plaster%20walls%2C%20sage%20sofa%2C%20large%20window%2C%20soft%20natural%20light%2C%20editorial%20photograph."
+            ><div class="example-media">
+              <img
+                src="/media/website/lounge.jpg"
+                alt="Find your atmosphere"
+                loading="lazy"
+                width="1280"
+                height="720"
+              /><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>Find your atmosphere</h3>
+              <p>A quiet place, designed one frame at a time.</p>
+            </div></a
+          ><a
+            class="example"
+            href="/image?panel=prompt&prompt=Cinematic%20neon%20city%20at%20night%2C%20rain%20reflections%2C%20teal%20and%20amber%20light%2C%20atmospheric%20street%20photography."
+            ><div class="example-media">
+              <img
+                src="/media/art/neon.jpg"
+                alt="After hours"
+                loading="lazy"
+                width="1280"
+                height="720"
+              /><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>After hours</h3>
+              <p>Cinematic lighting and an electric palette.</p>
+            </div></a
+          ><a
+            class="example"
+            href="/image?panel=prompt&prompt=A%20copper%20observatory%20on%20a%20floating%20volcanic%20island%20above%20clouds%2C%20huge%20peach%20moon%2C%20cinematic%20miniature%20photography."
+            ><div class="example-media">
+              <img
+                src="/media/art/observatory.jpg"
+                alt="The next world"
+                loading="lazy"
+                width="1280"
+                height="720"
+              /><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>The next world</h3>
+              <p>A new story starts with a single frame.</p>
+            </div></a
+          ><a
+            class="example"
+            href="/image?panel=prompt&prompt=Cinematic%20skateboarder%20at%20a%20sunlit%20concrete%20skatepark%2C%20blue%20jacket%2C%20golden%20light%2C%20editorial%20photo."
+            ><div class="example-media">
+              <img
+                src="/media/art/skater.jpg"
+                alt="Made to move"
+                loading="lazy"
+                width="1280"
+                height="720"
+              /><span class="card-action">Explore ↗</span>
+            </div>
+            <div class="example-copy">
+              <h3>Made to move</h3>
+              <p>Create a frame, then give it a camera move.</p>
+            </div></a
+          >
+        </div>
+        <div class="tool-strip">
+          <a href="/image?panel=camera"
+            ><span>01</span><strong>Cinematic cameras</strong
+            ><small>Choose your lens and point of view.</small><b>↗</b></a
+          ><a href="/image?panel=scene"
+            ><span>02</span><strong>Light & atmosphere</strong
+            ><small>Build the mood before the shot.</small><b>↗</b></a
+          ><a href="/image?model=comfy"
+            ><span>03</span><strong>Bring your own model</strong
+            ><small>Connect your ComfyUI workflow.</small><b>↗</b></a
+          >
+        </div>
+        <a class="wide-feature website-feature" href="/demo-site/"
+          ><img
+            src="/media/website/pavilion.jpg"
+            alt="Form and Field architecture website"
+          />
+          <div>
+            <p class="eyebrow">FROM GENERATED IMAGE TO REAL WEBSITE</p>
+            <h2>Built from our<br />own imagination.</h2>
+            <p>
+              Explore Form & Field. Three original images, made inside Massless,
+              brought together in an interactive website.
+            </p>
+            <span class="btn-accent">Explore the website ↗</span>
+          </div></a
+        >
+      </section>
+    </main>
+    <footer class="showcase-footer">
+      <a href="/">MASSLESS / OPEN CREATIVE TOOLS</a>
+      <p>Your idea. Your next experiment.</p>
+      <a href="https://github.com/ChuckGPTX/massless">Explore the source ↗</a>
+    </footer>
+    <dialog class="cinema-dialog">
+      <div class="cinema-heading">
+        <h2 id="cinema-title">Motion study</h2>
+        <button type="button" class="cinema-close" aria-label="Close video">
+          ×
+        </button>
+      </div>
+      <video
+        controls
+        playsinline
+        preload="none"
+        aria-labelledby="cinema-title"
+      ></video>
+      <p id="cinema-credit"></p>
+    </dialog>
+  </body>
+</html>

@@ -899,7 +899,7 @@ function rowFor(item, fresh = false) {
   const name = `${item.file}-${item.id.slice(-5)}.wav`;
   const row = el('div', { class: `hrow${fresh ? ' fresh' : ''}`, 'data-id': item.id },
     play,
-    el('div', { class: 't' }, el('strong', { title: item.title }, item.title), el('span', {}, `${item.type === 'voice' ? 'Voiceover' : 'Sound bed'} · ${item.sub}`)),
+    el('div', { class: 't' }, el('strong', { title: item.title }, item.title), el('span', {}, item.unsaved ? 'Not saved — download before leaving' : `${item.type === 'voice' ? 'Voiceover' : 'Sound bed'} · ${item.sub}`)),
     canvas,
     el('a', { href: url, download: name }, 'Download WAV'));
   requestAnimationFrame(() => drawWave(canvas, item.peaks || []));
@@ -908,13 +908,14 @@ function rowFor(item, fresh = false) {
 async function addItem(data, autoplay) {
   const item = { id: `audio-${Date.now()}-${Math.floor(Math.random() * 1e4)}`, kind: 'audio', created: Date.now(), ...data };
   item.peaks = await peaks(item.blob);
-  await store.put(item).catch(() => {});
+  try { await store.put(item); } catch { item.unsaved = true; }
   const row = rowFor(item, true);
   $('#history').prepend(row);
   syncHistory();
   if (autoplay) playUrl(URL.createObjectURL(item.blob), row.querySelector('.play'));
   row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  toast(`${item.type === 'voice' ? 'Voiceover' : 'Sound bed'} ready: ${item.duration.toFixed(1)} s WAV.`);
+  if (item.unsaved) toast('Browser storage could not save this audio. Download the WAV before leaving.', 'error');
+  else toast(`${item.type === 'voice' ? 'Voiceover' : 'Sound bed'} ready: ${item.duration.toFixed(1)} s WAV.`);
 }
 function syncHistory() {
   const n = $('#history').children.length;
@@ -1008,7 +1009,8 @@ function init() {
   else if (location.hash === '#captions' || p.get('tab') === 'captions') showTab('cap');
   else if (location.hash === '#extract' || p.get('tab') === 'extract') showTab('ext');
   else showTab('voice');
-  if (p.get('engine') === 'melo' || p.get('lang')) selectEngine('melo');
+  if (['kokoro', 'melo'].includes(p.get('engine'))) selectEngine(p.get('engine'));
+  else if (p.get('lang')) selectEngine('melo');
   if (p.get('lang') && MELO_LANGS.some((l) => l.id === p.get('lang'))) selectLang(p.get('lang'));
   if (p.get('text')) { $('#script').value = p.get('text').slice(0, 2000); chars(); }
   restoreHistory();

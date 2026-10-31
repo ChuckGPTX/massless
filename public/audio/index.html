@@ -24,16 +24,19 @@
   <link rel="stylesheet" href="/css/site.css">
   <link rel="stylesheet" href="/css/studio.css">
   <link rel="stylesheet" href="/css/audio.css">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <script type="module" src="/js/navigation.js"></script>
 </head>
 <body class="studio-body" data-human="lazy">
   <header class="nav">
     <a class="nav-logo" href="/" aria-label="Massless home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
     <nav class="nav-links" aria-label="Main">
       <a href="/">Explore</a>
-      <a href="/image">Image</a>
-      <a href="/video">Video</a>
+      <a href="/studios/image/">Image</a>
+      <a href="/studios/video/">Video</a>
       <a href="/audio" aria-current="page">Audio</a>
-      <a href="/office">Office</a>
+      <a href="/studios/3d/">3D</a>
+      <a href="/studios/office/">Office</a>
     </nav>
     <div class="nav-right">
       <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">$0 FOREVER</span></button>
@@ -230,7 +233,7 @@
 
   <dialog class="sheet" id="how">
     <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Voiceover in your browser uses Kokoro-82M, an 82-million-parameter open-weight text-to-speech model (Apache-2.0), run through kokoro-js on WebGPU or WebAssembly. Text is split into sentences, spoken chunk by chunk and joined into one 24 kHz WAV. Nothing leaves your device.</p>
+    <p>Voiceover in your browser uses Kokoro-82M, an 82-million-parameter open-weight text-to-speech model (Apache-2.0), running locally through kokoro-js. Text is split into sentences, spoken chunk by chunk and joined into one 24 kHz WAV. Nothing leaves your device.</p>
     <p>For Spanish, French, Chinese, Japanese and Korean, pick MeloTTS (MIT). Your script is sent to Cloudflare Workers AI in chunks under 1,000 characters, and the audio comes back and is joined here into one 44.1 kHz WAV. Nothing is stored there.</p>
     <p>Captions use Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Your file is decoded in this tab and only the audio is sent, as 16 kHz mono WAV, when you press Transcribe. Files over about nine minutes go in parts of up to eight minutes, and the timestamps are joined back together. It is not stored.</p>
     <p>Sound beds are built from noise, filters and envelopes in an OfflineAudioContext and exported as 48 kHz stereo WAV. They are made in this tab; nothing is uploaded.</p>
