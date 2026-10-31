@@ -891,12 +891,31 @@ export async function convert(item, settings, { onProgress, signal } = {}) {
     remember(item.id, buf);
   }
   const rate = buf.sampleRate;
-  const src = buf.numberOfChannels;
   const a = Math.max(0, Math.min(buf.length - 1, Math.round(item.start * rate)));
   const b = Math.max(a + 1, Math.min(buf.length, Math.round(item.end * rate)));
-  const frames = b - a;
-  const outChannels = settings.mono ? 1 : Math.min(2, src);
-  const cfg = { format: fmt.id, kbps: settings.kbps || fmt.def, rate, outChannels, frames, fadeIn: settings.fadeIn || 0, fadeOut: settings.fadeOut || 0, normalize: !!settings.normalize, codec: settings.codec };
+  const read = (off, n) => {
+    const chans = [];
+    for (let c = 0; c < buf.numberOfChannels; c++) {
+      const d = new Float32Array(n);
+      buf.copyFromChannel(d, c, a + off);
+      chans.push(d);
+    }
+    return chans;
+  };
+  return encode({ rate, channels: buf.numberOfChannels, frames: b - a, read }, settings, { onProgress, signal });
+}
+
+/**
+ * Encode any audio the page can produce in slices. src: { rate, channels, frames, read(offset, n) -> planar
+ * Float32Arrays of n frames }. Used by convert() above and by Edit by text and Master, so every tool shares
+ * one encoder path. settings: { format, kbps, mono, fadeIn, fadeOut, normalize, bits (WAV: 16 or 24), codec? }.
+ */
+export async function encode(src, settings, { onProgress, signal } = {}) {
+  const fmt = FORMATS[settings.format];
+  if (!fmt) throw new Error(`Unknown format ${settings.format}`);
+  const { rate, frames } = src;
+  const outChannels = settings.mono ? 1 : Math.min(2, src.channels);
+  const cfg = { format: fmt.id, kbps: settings.kbps || fmt.def, rate, outChannels, frames, fadeIn: settings.fadeIn || 0, fadeOut: settings.fadeOut || 0, normalize: !!settings.normalize, codec: settings.codec, bits: settings.bits === 24 ? 24 : 16 };
   onProgress?.(0, settings.normalize ? PASS_LABEL.measure : PASS_LABEL.encode);
   let r = await call('begin', { cfg });
   let sims = 0;
@@ -907,12 +926,7 @@ export async function convert(item, settings, { onProgress, signal } = {}) {
       for (let off = 0; off < frames; off += CHUNK) {
         if (signal?.aborted) throw abortError();
         const n = Math.min(CHUNK, frames - off);
-        const chans = [];
-        for (let c = 0; c < src; c++) {
-          const d = new Float32Array(n);
-          buf.copyFromChannel(d, c, a + off);
-          chans.push(d);
-        }
+        const chans = src.read(off, n).map((d) => (d.length === n && d.byteOffset === 0 && d.buffer.byteLength === n * 4 ? d : d.slice(0, n)));
         await call('chunk', { channels: chans }, chans.map((d) => d.buffer));
         onProgress?.(span[0] + (span[1] - span[0]) * ((off + n) / frames), PASS_LABEL[r.pass]);
       }

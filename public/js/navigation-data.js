@@ -91,7 +91,7 @@ export const STUDIOS = [
     engineTitle: "Effects & engines",
     note: "Create camera motion and visual effects directly in your browser.",
     features: [
-      item("Caption & trim", "Style captions and export a finished clip", "/cut/", "text", "NEW"),
+      item("Caption & trim", "Edit by text, style captions and export a finished clip", "/cut/", "text", "NEW"),
       item(
         "Camera moves",
         "Push, orbit, crane and glide through a still",
@@ -185,7 +185,9 @@ export const STUDIOS = [
     engineTitle: "Models & engines",
     note: "Voice and sound can run locally. MeloTTS and Whisper send input to Cloudflare.",
     features: [
-      item("Captioned video", "Burn subtitle files into your video", "/cut/", "text", "NEW"),
+      item("Edit by text", "Cut speech by deleting words; remove ums and pauses", "/cut/", "text", "NEW"),
+      item("Master a track", "Loudness, tone and true peak for streaming or podcasts", "/audio?tab=master", "sliders", "NEW"),
+      item("Captioned video", "Burn subtitle files into your video", "/cut/", "text"),
       item(
         "Text to speech",
         "Turn a script into a voiceover",
@@ -252,6 +254,13 @@ export const STUDIOS = [
         "Convert media without uploading it",
         "/audio?tab=extract",
         "download",
+        "LOCAL",
+      ),
+      item(
+        "Massless master",
+        "BS.1770 loudness and a true-peak limiter",
+        "/audio?tab=master",
+        "sliders",
         "LOCAL",
       ),
     ],

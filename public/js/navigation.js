@@ -16,6 +16,7 @@ const PATHS = {
   mic: "M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0z M5 10v2a7 7 0 0 0 14 0v-2 M12 19v3 M8 22h8",
   text: "M4 4h16 M12 4v16 M8 20h8",
   wave: "M3 10v4 M7 5v14 M12 2v20 M17 7v10 M21 10v4",
+  sliders: "M5 3v18 M12 3v18 M19 3v18 M2.5 14h5 M9.5 8h5 M16.5 16h5",
   download: "M12 2v13 M7 10l5 5 5-5 M3 17v4h18v-4",
   globe:
     "M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0 M3 12h18 M12 3c-5 5-5 13 0 18 M12 3c5 5 5 13 0 18",

@@ -3,6 +3,7 @@ import * as T from '../transcribe.js';
 import * as X from '../extract.js';
 import * as store from '../store.js';
 import { warmHuman } from '../human.js';
+import { createMaster } from './audio-master.js';
 import { bindDialogs, toast, el, download } from '../ui.js';
 
 const $ = (s) => document.querySelector(s);
@@ -15,14 +16,18 @@ let playingBtn = null;
 const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 const load = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
 
+// Master (its own module); setBusy and progress are function declarations, so they exist already
+const master = createMaster({ $, state, setBusy: (...a) => setBusy(...a), progress: (...a) => progress(...a) });
+
 // ---------- tabs ----------
 const COPY = {
   voice: ['Turn text<br>into voiceover', 'Eight English voices on your own device, or six languages with MeloTTS on Cloudflare. Pair a voice with a sound bed and drop both under a clip from Video.'],
   cap: ['Captions from<br>any clip', 'Drop audio or video and get an editable transcript, plus .srt and .vtt captions with timestamps. Whisper large-v3-turbo, free.'],
   bed: ['Score the<br>scene', 'Rain, wind, ocean and city ambience synthesized from scratch in seconds. Fades at both ends, so it loops under any clip.'],
   ext: ['Extract audio<br>from video', 'Drop a video or audio file, pick MP3, M4A or WAV and press Convert. It all runs in this tab, so nothing is uploaded.'],
+  master: ['Master<br>your mix', 'Drop a finished mix, read the report in plain words, pick a character and where it is going. Fair A/B, 24-bit WAV or MP3. It all runs in this tab.'],
 };
-const TABS = ['voice', 'cap', 'bed', 'ext'];
+const TABS = ['voice', 'cap', 'bed', 'ext', 'master'];
 function showTab(which) {
   state.tab = which;
   for (const t of TABS) {
@@ -32,12 +37,17 @@ function showTab(which) {
     $(`#foot-${t}`).hidden = !on;
     $(`#p-${t}`).classList.toggle('on', on);
   }
-  const files = which === 'cap' || which === 'ext';
+  const files = which === 'cap' || which === 'ext' || which === 'master';
+  if (which !== 'master') master.stop();
   $('#voice-view-cards').hidden = files;
   if (which === 'cap') warmHuman(); // Captions uses Whisper on Cloudflare
   $('#history-view').hidden = files;
   $('#cap-view').hidden = which !== 'cap';
   $('#ext-view').hidden = which !== 'ext';
+  $('#master-view').hidden = which !== 'master';
+  const tabBtn = $(`#t-${which}`);
+  const row = tabBtn.parentElement;
+  if (row.scrollWidth > row.clientWidth) row.scrollLeft += tabBtn.getBoundingClientRect().left - row.getBoundingClientRect().left - 12;
   $('#voice-view').hidden = which !== 'voice';
   $('#stage-title').innerHTML = COPY[which][0];
   $('#stage-sub').textContent = COPY[which][1];
@@ -47,7 +57,7 @@ function showTab(which) {
 function syncSource() {
   let s;
   if (state.tab === 'cap') s = 'Whisper large-v3-turbo on Cloudflare Workers AI';
-  else if (state.tab === 'ext') s = 'Runs in your browser · nothing is uploaded';
+  else if (state.tab === 'ext' || state.tab === 'master') s = 'Runs in your browser · nothing is uploaded';
   else if (state.tab === 'voice' && state.engine === 'melo') s = 'MeloTTS on Cloudflare Workers AI';
   else s = voiceBackend() ? `Kokoro-82M on ${voiceBackend()}` : 'Kokoro-82M · loads on first use';
   $('#src-label').textContent = s;
@@ -154,7 +164,7 @@ function buildBeds() {
 }
 
 // ---------- generation ----------
-const LABELS = { voice: 'Generate voice', bed: 'Render bed', cap: 'Transcribe', ext: 'Convert' };
+const LABELS = { voice: 'Generate voice', bed: 'Render bed', cap: 'Transcribe', ext: 'Convert', master: 'Master' };
 function progress(f, label) {
   const lbl = $(`#gen-${state.tab}-label`);
   lbl.textContent = label ? `${label}${f != null ? ` ${Math.round(f * 100)}%` : ''}` : 'Working…';
@@ -163,7 +173,7 @@ function setBusy(on, label) {
   state.busy = on;
   for (const t of TABS) {
     const b = $(`#gen-${t}`);
-    b.disabled = on || (t === 'cap' && !cap.prep) || (t === 'ext' && !extTodo().length);
+    b.disabled = on || (t === 'cap' && !cap.prep) || (t === 'ext' && !extTodo().length) || (t === 'master' && !master.ready());
     b.classList.toggle('busy', on);
     $(`#gen-${t}-label`).textContent = on && state.tab === t ? label || 'Working…' : t === 'ext' ? extLabel() : LABELS[t];
   }
@@ -171,6 +181,7 @@ function setBusy(on, label) {
   $('#cap-go-inline').disabled = on;
   $('#cap-go-inline').textContent = on && state.tab === 'cap' ? label || 'Working…' : 'Transcribe';
   syncExtInline();
+  master.sync();
   if (!on) syncSource();
 }
 
@@ -345,6 +356,7 @@ function bindDrop() {
     depth = 0;
     stage.classList.remove('dragging');
     if (state.tab === 'ext') extAdd(e.dataTransfer.files);
+    else if (state.tab === 'master') master.add(e.dataTransfer.files[0]);
     else pickFile(e.dataTransfer.files[0]);
   });
 }
@@ -976,7 +988,7 @@ function init() {
   bindDialogs();
   for (const t of TABS) {
     $(`#t-${t}`).addEventListener('click', () => showTab(t));
-    $(`#p-${t}`).addEventListener('click', () => showTab(t));
+    $(`#p-${t}`)?.addEventListener('click', () => showTab(t));
   }
   document.querySelectorAll('#engines .engine').forEach((b) => b.addEventListener('click', () => selectEngine(b.dataset.id)));
   $('#voice-sel').addEventListener('click', () => $('#voices-head').scrollIntoView({ behavior: 'smooth', block: 'start' }));
@@ -1003,11 +1015,13 @@ function init() {
   $('#clear-history').addEventListener('click', clearHistory);
   bindDrop();
   bindExtract();
+  master.bind();
   restoreDraft();
   const p = new URLSearchParams(location.search);
   if (location.hash === '#beds' || p.get('tab') === 'beds') showTab('bed');
   else if (location.hash === '#captions' || p.get('tab') === 'captions') showTab('cap');
   else if (location.hash === '#extract' || p.get('tab') === 'extract') showTab('ext');
+  else if (location.hash === '#master' || p.get('tab') === 'master') showTab('master');
   else showTab('voice');
   if (['kokoro', 'melo'].includes(p.get('engine'))) selectEngine(p.get('engine'));
   else if (p.get('lang')) selectEngine('melo');
@@ -1015,10 +1029,10 @@ function init() {
   if (p.get('text')) { $('#script').value = p.get('text').slice(0, 2000); chars(); }
   restoreHistory();
   animateCards();
-  window.massless = { state: { ...state, recording: false }, genVoice, genBed, genCaptions, genExtract, selectEngine, selectLang, showTab, cap, ext, extract: X };
+  window.massless = { state: { ...state, recording: false }, genVoice, genBed, genCaptions, genExtract, selectEngine, selectLang, showTab, cap, ext, extract: X, master: master.m };
 }
 
 init();
 
 const incomingMediaId=new URLSearchParams(location.search).get('shot');
-if(incomingMediaId)store.get(incomingMediaId).then(item=>{if(item?.blob&&(item.blob.type.startsWith('audio/')||item.blob.type.startsWith('video/')))pickFile(new File([item.blob],item.name||'Saved media',{type:item.blob.type}));}).catch(()=>toast('Could not load the saved media.', 'error'));
+if(incomingMediaId)store.get(incomingMediaId).then(item=>{if(item?.blob&&(item.blob.type.startsWith('audio/')||item.blob.type.startsWith('video/'))){const f=new File([item.blob],item.name||'Saved media',{type:item.blob.type});if(state.tab==='master')master.add(f,item.id);else pickFile(f);}}).catch(()=>toast('Could not load the saved media.', 'error'));

@@ -8,10 +8,11 @@
     <link rel="stylesheet" href="/css/site.css" />
     <link rel="stylesheet" href="/css/navigation.css" />
     <link rel="stylesheet" href="/css/workbench.css" />
+    <link rel="stylesheet" href="/css/cut.css" />
     <script type="module" src="/js/navigation.js"></script>
     <script type="module" src="/js/pages/cut.js"></script>
   </head>
-  <body>
+  <body data-human="lazy">
     <header class="nav">
       <a class="nav-logo" href="/" aria-label="Massless home"
         ><svg viewBox="0 0 32 32" aria-hidden="true">
@@ -41,17 +42,18 @@
         <p class="eyebrow">CLIP WORKROOM / CAPTIONS & CUTS</p>
         <h1>Make every word land.</h1>
         <p>
-          Trim your clip and burn styled captions into the picture. Your file
-          stays on this device.
+          Cut audio or video by editing its words, trim it, and burn styled
+          captions into the picture. Your file stays on this device; only its
+          sound goes to Whisper, and only when you ask for a transcript.
         </p>
       </section>
       <div class="workroom">
         <aside class="controls">
           <label class="btn-accent"
-            >Open video<input
+            >Open audio or video<input
               id="file"
               type="file"
-              accept="video/*"
+              accept="video/*,audio/*,.mp3,.wav,.m4a,.mp4,.mov,.webm,.ogg,.opus,.flac,.aac"
               hidden /></label
           ><a href="/library/">Choose from library ↗</a
           ><label
@@ -59,8 +61,27 @@
               <option value="lidar">LiDAR reveal</option>
               <option value="music">Glass tide film sample</option>
             </select></label
-          ><a href="/audio?tab=captions">Create a transcript ↗</a
-          ><label
+          >
+          <section class="te-side" aria-labelledby="te-side-title">
+            <h2 id="te-side-title">Edit by text</h2>
+            <p>
+              Transcribe, then delete words to cut them from the sound and the
+              picture.
+            </p>
+            <label
+              >Spoken language<select id="te-lang"></select
+            ></label>
+            <button id="te-go" class="btn-accent" type="button">
+              Transcribe for editing
+            </button>
+            <p id="te-privacy">
+              Only the sound, as 16 kHz mono, goes to Cloudflare's Whisper
+              (open weights) and it is not stored. Cutting, playback and export
+              happen on this device.
+            </p>
+          </section>
+          <h2 class="te-side-h">Captions &amp; trim</h2>
+          <label
             >Start · seconds<input
               id="start"
               type="number"
@@ -102,9 +123,9 @@
           ><button id="export" class="btn-accent">Export captioned clip</button
           ><button id="cancel" class="btn-ghost" hidden>Cancel export</button>
           <p>
-            Exports play through in real time, up to two minutes. Keep this tab
-            visible while recording. Sound is included when the source has an
-            audio track.
+            Captioned clips play through in real time, up to two minutes. Keep
+            this tab visible while recording. Sound is included when the source
+            has an audio track. Edit by text works on the whole file.
           </p>
         </aside>
         <section class="stage">
@@ -123,6 +144,42 @@
           ></canvas>
           <p id="status" role="status"></p>
           <div class="actions" id="result"></div>
+          <section class="te" id="te" aria-label="Edit by text" hidden>
+            <div class="te-bar">
+              <button type="button" class="te-play" id="te-play" aria-label="Play the edit"></button>
+              <output id="te-time">0:00.0 / 0:00.0</output>
+              <span class="te-sp"></span>
+              <button type="button" class="btn-ghost" id="te-strike" title="Delete or Backspace">Cut words</button>
+              <button type="button" class="btn-ghost" id="te-restore">Restore</button>
+              <button type="button" class="btn-ghost" id="te-undo" title="Ctrl or Cmd + Z">Undo</button>
+              <button type="button" class="btn-ghost" id="te-redo" title="Ctrl or Cmd + Shift + Z">Redo</button>
+            </div>
+            <div class="te-tools" role="group" aria-label="Clean up">
+              <button type="button" class="te-tool" id="te-fillers"><strong>Remove fillers</strong><span>um, uh, “like”</span><output>0</output></button>
+              <button type="button" class="te-tool" id="te-repeats"><strong>Remove repeats</strong><span>“I I”, “the the”</span><output>0</output></button>
+              <button type="button" class="te-tool" id="te-pauses"><strong>Shorten pauses</strong><span>to <select id="te-cap" aria-label="Longest pause"><option value="0.3">0.3 s</option><option value="0.5" selected>0.5 s</option><option value="0.8">0.8 s</option><option value="1">1 s</option></select></span><output>0</output></button>
+            </div>
+            <div class="te-review" id="te-review" hidden>
+              <div class="te-review-head"><strong id="te-review-title"></strong><span class="te-sp"></span><button type="button" class="btn-ghost" id="te-review-cancel">Cancel</button><button type="button" class="btn-accent" id="te-review-apply">Apply</button></div>
+              <p id="te-review-note"></p>
+              <ol id="te-review-list"></ol>
+            </div>
+            <p class="te-summary" id="te-summary" role="status"></p>
+            <div class="te-words" id="te-words" tabindex="0" aria-label="Transcript. Select words, then press Delete to cut them."></div>
+            <p class="te-hint">Click a word to jump there. Select words and press Delete to cut them; press it again to bring them back. Dotted words are fillers, a dashed underline means Whisper was unsure.</p>
+            <div class="te-export">
+              <button type="button" class="btn-accent" id="te-mp3">Edited MP3</button>
+              <button type="button" class="btn-ghost" id="te-wav">WAV</button>
+              <button type="button" class="btn-ghost" id="te-video" hidden>Edited video MP4</button>
+              <button type="button" class="btn-ghost" id="te-srt">SRT</button>
+              <button type="button" class="btn-ghost" id="te-vtt">VTT</button>
+              <button type="button" class="btn-ghost" id="te-edl">Edit list (EDL)</button>
+              <button type="button" class="btn-ghost" id="te-cancel" hidden>Cancel</button>
+            </div>
+            <label class="check te-burn" id="te-burn-row" hidden><input type="checkbox" id="te-burn" checked /> Burn captions from the edited transcript into the video, in the caption color and size set on the left</label>
+            <p class="te-hint" id="te-export-note">Exports are made on this device. Cuts land on the quietest moment near each word and get a short crossfade, so there are no clicks.</p>
+            <div class="actions" id="te-result"></div>
+          </section>
         </section>
       </div>
     </main>

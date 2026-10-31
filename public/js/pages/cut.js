@@ -1,12 +1,15 @@
 import * as T from "../transcribe.js";
 import { parseCaptions, activeCaption, validateTrim } from "../captions.js";
 import { retainExport, selectedAsset, downloadBlob } from "../assets.js";
+import { warmHuman } from "../human.js";
+import { createTextEdit } from "./cut-text.js";
 const $ = (s) => document.querySelector(s),
   video = $("#source"),
   canvas = $("#caption-canvas"),
   ctx = canvas.getContext("2d");
 let cues = [],
   sourceId,
+  isAudio = false,
   url,
   raf,
   controller,
@@ -14,12 +17,22 @@ let cues = [],
   audioSource,
   recording = false;
 const message = (t) => ($("#status").textContent = t);
-function draw() {
-  if (video.readyState >= 2)
+const captionStyle = () => ({
+  color: $("#color").value,
+  size: Number($("#size").value),
+});
+// One frame: the picture (black for audio) and a caption. Edit by text passes the caption of the edited
+// timeline while it plays (page.overlay) and while it exports.
+function draw(_t, override, style = captionStyle()) {
+  if (isAudio) {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (video.readyState >= 2)
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const text = activeCaption(cues, video.currentTime);
+  const text =
+    override ?? page.overlay ?? activeCaption(cues, video.currentTime);
   if (!text) return;
-  const size = (canvas.width * Number($("#size").value)) / 100;
+  const size = (canvas.width * style.size) / 100;
   ctx.font = `700 ${size}px sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -41,7 +54,7 @@ function draw() {
     top = canvas.height * 0.88 - height;
   ctx.fillStyle = "rgba(0,0,0,.76)";
   ctx.fillRect(canvas.width * 0.05, top, canvas.width * 0.9, height);
-  ctx.fillStyle = $("#color").value;
+  ctx.fillStyle = style.color;
   shown.forEach((l, i) =>
     ctx.fillText(l, canvas.width / 2, top + size * 0.9 + i * size * 1.2),
   );
@@ -50,35 +63,75 @@ function preview() {
   draw();
   raf = requestAnimationFrame(preview);
 }
+// What Edit by text needs from this page.
+const page = {
+  video,
+  canvas,
+  message,
+  drawFrame: draw,
+  captionStyle,
+  cues: () => {
+    try {
+      return parseCaptions($("#cues").value);
+    } catch {
+      return [];
+    }
+  },
+  overlay: null,
+  lockPage: (on) => {
+    $("#export").disabled = on;
+    for (const e of document.querySelectorAll(
+      "#file, #sample, #srt, #use-transcript",
+    ))
+      e.disabled = on;
+  },
+};
+const textEdit = createTextEdit(page);
+textEdit.bind();
 raf = requestAnimationFrame(preview);
-async function open(blob, id) {
-  if (recording) return;
+async function open(blob, id, name = blob.name || "media") {
+  if (recording || textEdit.busy()) return;
   if (url) URL.revokeObjectURL(url);
   url = URL.createObjectURL(blob);
   sourceId = id;
+  isAudio = /^audio\//.test(blob.type) || /\.(mp3|wav|m4a|aac|ogg|opus|flac)$/i.test(name);
+  textEdit.setSource(null);
   video.src = url;
   await new Promise((resolve, reject) => {
     video.onloadedmetadata = resolve;
     video.onerror = () =>
-      reject(new Error("This video format cannot be decoded here."));
+      reject(new Error("This file cannot be decoded here. Try mp4, webm, mp3, wav or m4a."));
   });
-  const scale = Math.min(
-    1,
-    1280 / Math.max(video.videoWidth, video.videoHeight),
-  );
-  canvas.width = Math.max(2, Math.round((video.videoWidth * scale) / 2) * 2);
-  canvas.height = Math.max(2, Math.round((video.videoHeight * scale) / 2) * 2);
+  if (!isAudio && !video.videoWidth) isAudio = true; // a video container with sound only
+  $(".stage").classList.toggle("audio-only", isAudio);
+  if (isAudio) {
+    canvas.width = 1280;
+    canvas.height = 720;
+  } else {
+    const scale = Math.min(
+      1,
+      1280 / Math.max(video.videoWidth, video.videoHeight),
+    );
+    canvas.width = Math.max(2, Math.round((video.videoWidth * scale) / 2) * 2);
+    canvas.height = Math.max(2, Math.round((video.videoHeight * scale) / 2) * 2);
+  }
   $("#start").value = 0;
   $("#end").value = Math.min(120, video.duration).toFixed(2);
   video.currentTime = 0;
+  textEdit.setSource({ blob, name, id: id || null, isVideo: !isAudio });
   message(
-    "Ready. Set the trim and add captions, or export a clean trimmed clip.",
+    isAudio
+      ? "Ready. Transcribe to edit the sound by its words, or add captions for an audiogram clip."
+      : "Ready. Transcribe to edit by text, or set the trim and add captions.",
   );
 }
 $("#file").onchange = async (e) => {
   try {
     const f = e.target.files[0];
-    if (f) await open(f);
+    if (f) {
+      warmHuman(); // Edit by text may transcribe this with Whisper on Cloudflare
+      await open(f, null, f.name);
+    }
   } catch (e) {
     message(e.message);
   }
@@ -113,7 +166,8 @@ $("#export").onclick = async () => {
     destination,
     oldTime = video.currentTime;
   try {
-    if (recording) return;
+    if (recording || textEdit.busy()) return;
+    textEdit.stop();
     if (!video.src || !Number.isFinite(video.duration))
       throw new Error("Open a video first.");
     const trim = validateTrim(
@@ -260,16 +314,19 @@ $("#export").onclick = async () => {
 };
 try {
   const it = await selectedAsset();
-  if (it?.blob?.type.startsWith("video/")) await open(it.blob, it.id);
-  else {
+  if (/^(video|audio)\//.test(it?.blob?.type || "")) {
+    warmHuman();
+    await open(it.blob, it.id, it.name || "Saved media");
+  } else {
     const r = await fetch("/media/clips/effect-lidar.mp4");
-    await open(await r.blob());
+    await open(await r.blob(), null, "LiDAR reveal.mp4");
   }
 } catch (e) {
   message(e.message);
 }
 addEventListener("pagehide", () => {
   controller?.abort();
+  textEdit.stop();
   video.pause();
   cancelAnimationFrame(raf);
   if (url) URL.revokeObjectURL(url);
@@ -302,7 +359,7 @@ $("#sample").onchange = async (e) => {
         : "/media/clips/effect-lidar.mp4";
     const r = await fetch(path);
     if (!r.ok) throw new Error("Could not load this sample.");
-    await open(await r.blob());
+    await open(await r.blob(), null, path.split("/").pop());
   } catch (e) {
     message(e.message);
   }
