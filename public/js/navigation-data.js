@@ -19,6 +19,7 @@ export const STUDIOS = [
     engineTitle: "Image models",
     note: "Choose a model or connect your own workflow.",
     features: [
+      item("Image workroom", "Reframe, grade and compose a new take", "/edit/", "pen", "NEW"),
       item(
         "Create image",
         "Turn a scene into your next hero frame",
@@ -90,6 +91,7 @@ export const STUDIOS = [
     engineTitle: "Effects & engines",
     note: "Create camera motion and visual effects directly in your browser.",
     features: [
+      item("Caption & trim", "Style captions and export a finished clip", "/cut/", "text", "NEW"),
       item(
         "Camera moves",
         "Push, orbit, crane and glide through a still",
@@ -183,6 +185,7 @@ export const STUDIOS = [
     engineTitle: "Models & engines",
     note: "Voice and sound can run locally. MeloTTS and Whisper send input to Cloudflare.",
     features: [
+      item("Captioned video", "Burn subtitle files into your video", "/cut/", "text", "NEW"),
       item(
         "Text to speech",
         "Turn a script into a voiceover",
@@ -268,6 +271,9 @@ export const STUDIOS = [
     engineTitle: "Models & engines",
     note: "Explore depth scenes, complete objects and imported 3D files.",
     features: [
+      item("Scene studio", "Stage objects, lights and cameras; export GLB", "/scene/", "cube", "NEW"),
+      item("Game templates", "Customize and export a playable arcade game", "/build/?template=game", "game", "NEW"),
+      item("Website builder", "Make and export an original studio website", "/build/?template=website", "window", "NEW"),
       item(
         "Image to 3D scene",
         "Build a depth scene from a still",

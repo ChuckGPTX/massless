@@ -1,4 +1,8 @@
 export const WORKFLOWS = [
+  {id:'image-workroom',name:'Image to campaign frame',tag:'IMAGE + DESIGN',image:'/media/website/ceramics.jpg',description:'Reframe an image, adjust its finish and add a headline. Save a new take, ready for motion.',output:'PNG + saved take',steps:[['Choose or create an image','/image'],['Compose a new take','/edit/'],['Use the saved take in your next tool','/library/']]},
+  {id:'scene-stage',name:'Objects to a 3D scene',tag:'3D + IMAGE',image:'/media/art/observatory.jpg',description:'Stage real objects and lights, orbit the camera, and export a complete editable scene.',output:'GLB + PNG frame',steps:[['Stage your objects','/scene/'],['Set lighting and camera','/scene/'],['Export GLB or save a frame','/scene/']]},
+  {id:'website-template',name:'A studio website of your own',tag:'IMAGE + WEBSITE',image:'/media/website/pavilion.jpg',description:'Use your imagery in an original responsive studio website. Edit the copy and export a standalone page.',output:'Offline HTML website',steps:[['Create your featured image','/image'],['Choose images and edit your website','/build/?template=website'],['Preview and export HTML','/build/?template=website']]},
+  {id:'arcade-template',name:'Customize a playable arcade',tag:'GAME + DESIGN',image:'/media/art/astronaut.jpg',description:'Change the title, color and difficulty of an original arcade game, then export it to share.',output:'Offline HTML game',steps:[['Set up the game','/build/?template=game'],['Play and tune difficulty','/build/?template=game'],['Export your game','/build/?template=game']]},
   {
     id: "release-teaser",
     name: "Artwork to release teaser",
@@ -48,11 +52,11 @@ export const WORKFLOWS = [
     image: "/media/art/train.jpg",
     description:
       "Transcribe your recording, correct the words and timings, then export a caption file.",
-    output: "SRT / VTT captions",
+    output: "SRT / VTT + captioned clip",
     steps: [
       ["Upload and transcribe your recording", "/audio?tab=captions"],
       ["Review words and timings", "/audio?tab=captions"],
-      ["Export captions for your editor", "/audio?tab=captions"],
+      ["Burn captions into your video and export", "/cut/"],
     ],
   },
   {
@@ -108,12 +112,13 @@ export function validatePlan(value) {
     shotId: typeof value.shotId === "string" ? value.shotId.slice(0, 100) : "",
   };
 }
-export function stepURL(href, shotId) {
+export function stepURL(href, shotId, brief = "") {
   const u = new URL(href, "https://massless.invalid");
   if (
     shotId &&
-    ["/video", "/music", "/3d"].includes(u.pathname.replace(/\/$/, ""))
+    ["/video", "/music", "/3d", "/film", "/edit"].includes(u.pathname.replace(/\/$/, ""))
   )
     u.searchParams.set("shot", shotId);
+  if (brief && u.pathname === "/film") u.searchParams.set("brief", brief.slice(0,600));
   return u.pathname + u.search;
 }

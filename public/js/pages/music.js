@@ -250,6 +250,7 @@ $("#export-music").addEventListener("click", async () => {
       draw: (c, t) => draw(t, c),
       onProgress: (p) => message(`Rendering MP4 · ${Math.round(p * 100)}%`),
     });
+    try { const {saveAsset}=await import('../assets.js');await saveAsset(blob,{name:config().title+' teaser.mp4',engine:'music-visualizer',settings:config()}); } catch { message('Video ready; local saving failed. Download before leaving.'); }
     resultURL = URL.createObjectURL(blob);
     $("#download-music").href = resultURL;
     $("#download-music").hidden = false;

@@ -83,8 +83,8 @@ $("#showtime-play").addEventListener("click", () => {
   $("#reference-dialog-title").textContent = "Tone Da Boss · Showtime";
   $("#reference-provider-note").hidden = true;
   $("#character-reference").hidden = true;
-  $("#reference-credit").textContent = "Genjutsu Light · animated source motion by Kling 4.0 · user-provided photograph · original Massless demo instrumental, no artist vocals.";
-  $("#reference-player").src = "/media/music/showtime-transfer.mp4";
+  $("#reference-credit").textContent = "Made in Massless Music Preview · original demo instrumental, no artist vocals.";
+  $("#reference-player").src = "/media/music/showtime-preview.mp4";
   $("#reference-dialog").showModal();
   $("#reference-player").play().catch(() => {});
 });

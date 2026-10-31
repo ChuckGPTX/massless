@@ -35,7 +35,7 @@ function renderSteps() {
       };
       label.append(check, document.createTextNode(i + 1 + ". " + name));
       const a = make("a", "", "Open tool ↗");
-      a.href = stepURL(href, plan.shotId);
+      a.href = stepURL(href, plan.shotId, plan.brief);
       row.append(label, a);
       return row;
     }),
@@ -106,6 +106,7 @@ $("#shot-list").prepend(none);
 $("#run-brief").oninput = () => {
   plan.brief = $("#run-brief").value;
   persist();
+  renderSteps();
 };
 $("#shot-list").onchange = () => {
   plan.shotId = $("#shot-list").value;
