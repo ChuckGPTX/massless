@@ -775,15 +775,179 @@
 }
 
 /* The session film is itself the hero, with an explicit sound action. */
-.feature-music { background: #0c1110; }
-.feature-music:after { display:none; }
-.music-watch { display:block; padding:0; width:100%; height:100%; border:0; background:transparent; color:white; text-align:left; cursor:pointer; }
-.music-watch video { object-fit:cover; }
-.music-play-label, .music-create { position:absolute; z-index:3; bottom:18px; font-size:11px; background:#16221be8; border:1px solid #ffffff38; border-radius:24px; padding:10px 13px; }
-.music-play-label { left:16px; pointer-events:none; }
-.music-create { right:16px; color:#ead393; }
-.music-watch:focus-visible { outline:3px solid var(--accent); outline-offset:-4px; }
-.mini-art { position:absolute; right:14px; top:22px; width:43%; height:83%; object-fit:cover; border-radius:48% 48% 0 0; }
-.mini-hero b { font-size:clamp(28px,3vw,48px); max-width:52%; }
-.mini-work>div>img { width:calc(50% - 5px); height:85px; object-fit:cover; }
-@media(max-width:600px){ .feature-music { height:270px; } .music-play-label,.music-create { font-size:9px; padding:9px 10px; bottom:12px; } .music-create{right:10px}.music-play-label{left:10px}.mini-hero b{font-size:40px} }
+.feature-music {
+  background: #0c1110;
+}
+.feature-music:after {
+  display: none;
+}
+.music-watch {
+  display: block;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+}
+.music-watch video {
+  object-fit: cover;
+}
+.music-play-label,
+.music-create {
+  position: absolute;
+  z-index: 3;
+  bottom: 18px;
+  font-size: 11px;
+  background: #16221be8;
+  border: 1px solid #ffffff38;
+  border-radius: 24px;
+  padding: 10px 13px;
+}
+.music-play-label {
+  left: 16px;
+  pointer-events: none;
+}
+.music-create {
+  right: 16px;
+  color: #ead393;
+}
+.music-watch:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -4px;
+}
+.mini-art {
+  position: absolute;
+  right: 14px;
+  top: 22px;
+  width: 43%;
+  height: 83%;
+  object-fit: cover;
+  border-radius: 48% 48% 0 0;
+}
+.mini-hero b {
+  font-size: clamp(28px, 3vw, 48px);
+  max-width: 52%;
+}
+.mini-work > div > img {
+  width: calc(50% - 5px);
+  height: 85px;
+  object-fit: cover;
+}
+@media (max-width: 600px) {
+  .feature-music {
+    height: 270px;
+  }
+  .music-play-label,
+  .music-create {
+    font-size: 9px;
+    padding: 9px 10px;
+    bottom: 12px;
+  }
+  .music-create {
+    right: 10px;
+  }
+  .music-play-label {
+    left: 10px;
+  }
+  .mini-hero b {
+    font-size: 40px;
+  }
+}
+
+.moss-feature {
+  display: grid;
+  grid-template-columns: minmax(200px, 0.7fr) 1.3fr;
+  gap: 5vw;
+  align-items: center;
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+.moss-feature img {
+  display: block;
+  width: 100%;
+  max-height: 650px;
+  object-fit: contain;
+  border-radius: 18px;
+}
+.moss-feature h2 {
+  font-family: var(--display);
+  font-size: clamp(42px, 5vw, 76px);
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 20px 0;
+}
+.moss-feature p {
+  max-width: 620px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.moss-feature .btn-accent,
+.moss-feature .btn-ghost {
+  display: inline-flex;
+  margin: 15px 12px 10px 0;
+}
+@media (max-width: 650px) {
+  .moss-feature {
+    grid-template-columns: 1fr;
+  }
+  .moss-feature img {
+    max-height: 530px;
+  }
+}
+
+.workflow-concepts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  padding-bottom: 45px;
+}
+.workflow-concepts > a {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #161618;
+}
+.workflow-concepts img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s;
+}
+.workflow-concepts a:hover img {
+  transform: scale(1.025);
+}
+.workflow-concepts span {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, #000);
+  padding: 65px 25px 25px;
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 800;
+}
+.workflow-concepts small {
+  display: block;
+  font: 13px var(--ui);
+  color: #ddd;
+  margin-top: 7px;
+}
+@media (max-width: 650px) {
+  .workflow-concepts {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workflow-concepts img {
+    transition: none;
+  }
+  .workflow-concepts a:hover img {
+    transform: none;
+  }
+}

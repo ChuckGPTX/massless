@@ -24,6 +24,10 @@ test("new studio routes serve real pages and pin their scripts and styles", asyn
   try {
     for (const route of [
       "/",
+      "/workflows",
+      "/workflows/",
+      "/projects",
+      "/projects/",
       "/music",
       "/music/",
       "/music/index.html",

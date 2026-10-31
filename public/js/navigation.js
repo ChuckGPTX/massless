@@ -77,6 +77,12 @@ export function initNavigation() {
   explore.href = "/";
   if (path === "/") explore.setAttribute("aria-current", "page");
   nav.replaceChildren(explore);
+  const workflows = node("a", "studio-explore", "Workflows"); workflows.href="/workflows/";
+  if(path==="/workflows")workflows.setAttribute("aria-current","page");
+  nav.append(workflows);
+  const projects = node("a", "btn-ghost", "My projects"); projects.href="/projects/";
+  const mobileProjects=node("a","studio-explore mobile-projects","My projects");mobileProjects.href="/projects/";nav.append(mobileProjects);
+  header.querySelector(".nav-right")?.prepend(projects);
   nav.id = "studio-navigation";
 
   const toggle = node("button", "studio-mobile-toggle");
@@ -85,7 +91,7 @@ export function initNavigation() {
   toggle.setAttribute("aria-controls", nav.id);
   toggle.setAttribute("aria-label", "Browse studios");
   toggle.append(
-    node("span", "", active?.label || "Explore"),
+    node("span", "", active?.label || (path === "/workflows" ? "Workflows" : path === "/projects" ? "Projects" : "Explore")),
     node("span", "studio-mobile-label", "Studios"),
     icon("chevron"),
   );

@@ -1,0 +1,118 @@
+[
+  {
+    "order": 1,
+    "id": "walk-of-fire",
+    "name": "Walk of Fire",
+    "category": "Elements",
+    "icon": "flame",
+    "description": "A night walk down a wet industrial street that bursts into a full-body blaze mid-stride.",
+    "modes": [
+      "scene",
+      "own_image",
+      "video"
+    ],
+    "duration": 6,
+    "wardrobe": {
+      "man": "a long black wool coat open over a black t-shirt, black trousers and black boots",
+      "woman": "a long black wool coat over a black turtleneck, black trousers and black boots",
+      "person": "a long black wool coat over black clothes and black boots"
+    },
+    "scene_prompt": "Create a new cinematic film still in {aspect_words} format. {references} The {subject} is the only person in the new still, with exactly {their} face, eyes, nose, jaw, hairline, hairstyle, hair colour{facial_hair}, skin tone and build{identity_notes}. The clothing, the place and the light come only from this description. The {subject} walks straight toward the camera down the middle of an empty industrial street at night, mid-stride, wearing {wardrobe}, hands loose at the sides. Red-brick warehouses line both sides, sodium streetlights cast pools of orange light, steam rises from a grate in the distance, and the wet asphalt holds long glossy reflections. Low-angle wide shot from knee height, symmetrical one-point perspective with the street vanishing behind {them}, the full body filling the middle third of the frame height. Cinematic night photography, anamorphic look, deep shadows with warm sodium highlights and a cool blue moonlight rim on the shoulders. Correct human anatomy, natural skin texture, sharp focus on the {subject}, plain unmarked brick walls throughout.",
+    "effect_prompt": "Use the provided start image as the first frame. The {subject} is ALREADY walking toward the camera in a calm, heavy, unhurried \"funeral march\" stride, weight landing on each heel, shoulders level, arms swinging loose, and keeps walking at exactly the same pace for the whole shot. On the second step, fire erupts from {their} shoulders and spreads over the whole body in a single roaring burst, and the {subject} walks on fully engulfed in tall orange flames, the fire streaming backward like a cape, while {their} face stays clear, calm and unharmed inside the blaze. Every footstep leaves a burning footprint on the wet asphalt, and the flames throw dancing orange light across the brick walls and long fire reflections across the puddles. {Their} eyes stay locked on a point just past the camera, one slow deliberate blink when the flames reach the collar, and the stride never breaks. The camera holds a low angle and slowly dollies backward at walking pace, keeping the {subject} centered and the same size in frame. Sound: a deep whoomph as the fire ignites, then a steady roaring blaze, heavy footsteps on wet asphalt and a low distant city hum. Photorealistic, cinematic night visual effects, fire with real weight and turbulence, sharp detail, stable picture.",
+    "generic_prompt": "Use the provided start image as the first frame. The {subject} in the frame carries on with exactly the same action and pace. Within the first second, fire erupts from {their} shoulders and spreads over {their} whole body in a single roaring burst, tall orange flames streaming upward and backward with real weight and turbulence, while {their} face stays clear, calm and unharmed inside the blaze. Embers drift upward, dark smoke rises, and the firelight throws flickering orange light across everything around {them}. The camera keeps the same framing and the same movement it already has. Sound: a deep whoomph as the fire ignites, then a steady roaring blaze and crackling embers. Photorealistic, cinematic visual effects, sharp detail, stable picture.",
+    "comfy_app": "https://cloud.comfy.org/?share=21dcb7ff424d"
+  },
+  {
+    "order": 2,
+    "id": "liquid-chrome",
+    "name": "Liquid Chrome",
+    "category": "Transformations",
+    "icon": "drop",
+    "description": "A living sculpture in a white gallery turns to mirror chrome and melts into a rippling pool.",
+    "modes": [
+      "scene",
+      "own_image",
+      "video"
+    ],
+    "duration": 6,
+    "wardrobe": {
+      "man": "a sleek black tailored suit over a black shirt",
+      "woman": "a sleek floor-length black satin evening dress with thin straps",
+      "person": "sleek all-black formal clothes"
+    },
+    "scene_prompt": "Create a new cinematic film still in {aspect_words} format. {references} The {subject} is the only person in the new still, with exactly {their} face, eyes, nose, jaw, hairline, hairstyle, hair colour{facial_hair}, skin tone and build{identity_notes}. The clothing, the place and the light come only from this description. The {subject} stands upright and still in the exact center of a vast white minimalist art gallery, like an exhibit, wearing {wardrobe}, arms relaxed at the sides, chin slightly raised. The floor is polished white marble that mirrors {them}, the walls are bare white, and a tall window on the left lets in soft diffused daylight. Wide symmetrical shot from a low camera close to the floor, the full body in the center filling about half of the frame height, a wide expanse of reflective marble in the foreground. Clean high-key editorial fashion photography, cool neutral whites, soft shadows. Correct human anatomy, natural skin texture, sharp focus on the {subject}, bare white walls throughout.",
+    "effect_prompt": "Use the provided start image as the first frame. The {subject} ALREADY stands perfectly still in the gallery like a living sculpture, holding the pose with quiet pride, chin raised, eyes fixed on a point just past the camera, one slow calm blink. Starting at the fingertips, {their} skin, hair and clothes turn into flawless mirror-bright liquid chrome that spreads up the arms and over the whole body in two seconds, reflecting the white gallery and the window. Then the chrome figure melts from the top down like liquid mercury, flowing down in heavy glossy waves and pooling on the marble, and the pool of liquid metal runs across the white floor toward the camera in shining rippling streams, until only a wide mirror-like puddle of chrome remains, reflecting the gallery and still rippling gently. The liquid metal has real weight, surface tension and perfect reflections. The camera stays low near the floor and pushes in very slowly. Sound: a crystalline metallic shimmer as the chrome spreads, then a deep liquid pour, heavy metallic drips and a soft wash of liquid across marble in a quiet echoing gallery. Photorealistic, cinematic visual effects, liquid metal simulation, sharp detail, stable picture.",
+    "generic_prompt": "Use the provided start image as the first frame. The {subject} in the frame ALREADY holds still. Immediately, starting at the fingertips, {their} skin, hair and clothes turn into flawless mirror-bright liquid chrome that spreads over the whole body in under two seconds, reflecting everything around {them}. Then the chrome figure melts from the top down like liquid mercury, flowing down in heavy glossy waves, and the liquid metal pools on the ground and runs outward in shining rippling streams until only a wide mirror-like puddle remains, still rippling gently. The liquid metal has real weight, surface tension and perfect reflections. The camera keeps the same framing and pushes in very slowly. Sound: a crystalline metallic shimmer, a deep liquid pour, heavy metallic drips and a soft wash of liquid. Photorealistic, cinematic visual effects, liquid metal simulation, sharp detail, stable picture.",
+    "comfy_app": "https://cloud.comfy.org/?share=f7c6dae7ac7f"
+  },
+  {
+    "order": 5,
+    "id": "disintegrate",
+    "name": "Disintegrate",
+    "category": "Elements",
+    "icon": "wind",
+    "description": "On a rooftop at golden hour the body breaks apart into glittering particles carried off by the wind.",
+    "modes": [
+      "scene",
+      "own_image",
+      "video"
+    ],
+    "duration": 6,
+    "wardrobe": {
+      "man": "a long charcoal wool coat",
+      "woman": "a long charcoal wool coat",
+      "person": "a long charcoal wool coat"
+    },
+    "scene_prompt": "Create a new cinematic film still in {aspect_words} format. {references} The {subject} is the only person in the new still, with exactly {their} face, eyes, nose, jaw, hairline, hairstyle, hair colour{facial_hair}, skin tone and build{identity_notes}. The clothing, the place and the light come only from this description. The {subject} stands at the edge of a flat concrete rooftop at golden hour, seen in three-quarter profile, looking out over a vast city skyline, wearing {wardrobe}, the hair lifted by the wind toward the left of the frame. The low sun sits behind on the right, outlining the {subject} in a warm golden rim light; the sky is amber and hazy. Medium-wide shot at eye level, the {subject} on the right third of the frame, the left two thirds open sky and skyline. Cinematic photography, warm backlight, soft haze, a gentle lens flare. Correct human anatomy, natural skin texture, sharp focus on the {subject}, blank rooftops and a clean skyline throughout.",
+    "effect_prompt": "Use the provided start image as the first frame. The {subject} ALREADY stands at the edge of the rooftop looking out over the city, calm, the hair moving in the wind. One slow breath, and starting at the fingertips of {their} left hand the body breaks apart into millions of fine ash-grey particles that the wind carries away to the left across the sky; the dissolving spreads up the arm, across the coat and shoulders and finally over the face as {their} eyes close, until by the last second the {subject} is gone and only a drifting cloud of glowing particles remains above the empty rooftop edge. The particles catch the golden backlight and glitter as they swirl and thin out over the skyline. The camera holds a steady medium-wide shot and drifts very slowly to the left with the particles. Sound: a soft rising wind, a fine granular hiss like sand pouring, a low warm ambient hum. Photorealistic, cinematic visual effects, particle simulation, sharp detail, stable picture.",
+    "generic_prompt": "Use the provided start image as the first frame. The {subject} in the frame stays calm and still. Starting at the fingertips of one hand, {their} body breaks apart into millions of fine ash-grey particles that a wind carries away to one side; the dissolving spreads up the arm, across the clothes and shoulders and finally over the face as {their} eyes close, until by the last second the {subject} is gone and only a drifting cloud of glowing particles remains. The particles catch the light and glitter as they swirl and thin out. The camera keeps the same framing and drifts slowly with the particles. Sound: a soft rising wind, a fine granular hiss like sand pouring, a low ambient hum. Photorealistic, cinematic visual effects, particle simulation, sharp detail, stable picture.",
+    "comfy_app": "https://cloud.comfy.org/?share=008993e9af4f"
+  },
+  {
+    "order": 7,
+    "id": "zero-gravity",
+    "name": "Zero Gravity",
+    "category": "Physics",
+    "icon": "orbit",
+    "description": "Gravity switches off in an old library: books, dust and the subject float up into the light.",
+    "modes": [
+      "scene",
+      "own_image",
+      "video"
+    ],
+    "duration": 6,
+    "wardrobe": {
+      "man": "a cream cable-knit sweater, dark green corduroy trousers and brown leather boots",
+      "woman": "a cream cable-knit sweater, a long dark green skirt and brown leather boots",
+      "person": "a cream cable-knit sweater, dark green trousers and brown leather boots"
+    },
+    "scene_prompt": "Create a new cinematic film still in {aspect_words} format. {references} The {subject} is the only person in the new still, with exactly {their} face, eyes, nose, jaw, hairline, hairstyle, hair colour{facial_hair}, skin tone and build{identity_notes}. The clothing, the place and the light come only from this description. The {subject} stands in the center aisle of an old library, towering dark wooden bookshelves on both sides receding into the distance, wearing {wardrobe}, looking down at {their} open hands. Warm light from brass reading lamps and shafts of late daylight from a high window cut through floating dust. A wooden chair and a small stack of books stand on the floor nearby. Wide symmetrical shot at eye level down the aisle, the full body in the center filling about forty percent of the frame height. Cinematic photography, warm amber tones, volumetric light shafts. Correct human anatomy, natural skin texture, sharp focus on the {subject}, book spines plain and unlettered throughout.",
+    "effect_prompt": "Use the provided start image as the first frame. The {subject} ALREADY stands in the aisle looking down at {their} open hands when gravity switches off: the loose papers lift first, then the books slide out of the shelves and drift upward, the wooden chair rises and slowly turns, dust motes swirl in the light shafts, and {their} hair floats up as if underwater. The feet leave the floor and the {subject} rises gently about a metre into the air, arms opening slightly for balance, eyes moving from the hands to the floating books with quiet wonder, one slow blink, lips parting. Everything drifts slowly and weightlessly, turning in the warm light. The camera holds a wide symmetrical shot down the aisle and cranes up slowly. Sound: a deep soft whoosh as gravity lets go, pages fluttering, wood creaking, a low airy hum. Photorealistic, cinematic visual effects, zero gravity, sharp detail, stable picture.",
+    "generic_prompt": "Use the provided start image as the first frame. Gravity switches off around the {subject} in the frame: loose objects nearby lift and drift upward, dust swirls in the light, and {their} hair and clothes float as if underwater. The feet leave the ground and the {subject} rises gently about a metre into the air, arms opening slightly for balance, eyes moving across the floating objects with quiet wonder, one slow blink. Everything drifts slowly and weightlessly. The camera keeps the same framing and cranes up slowly. Sound: a deep soft whoosh as gravity lets go, objects creaking and tumbling softly, a low airy hum. Photorealistic, cinematic visual effects, zero gravity, sharp detail, stable picture.",
+    "comfy_app": "https://cloud.comfy.org/?share=65b9ff6fe880"
+  },
+  {
+    "order": 29,
+    "id": "lidar-scan",
+    "name": "Lidar Scan",
+    "category": "Worlds",
+    "icon": "layers",
+    "description": "In a night parking garage a laser sweep turns the whole scene, and the subject, into a glowing point cloud.",
+    "modes": [
+      "scene",
+      "own_image",
+      "video"
+    ],
+    "duration": 6,
+    "experimental": true,
+    "wardrobe": {
+      "man": "a black bomber jacket, a white t-shirt and black trousers",
+      "woman": "a black bomber jacket, a white t-shirt and black trousers",
+      "person": "a black bomber jacket, a white t-shirt and black trousers"
+    },
+    "scene_prompt": "Create a new cinematic film still in {aspect_words} format. {references} The {subject} is the only person in the new still, with exactly {their} face, eyes, nose, jaw, hairline, hairstyle, hair colour{facial_hair}, skin tone and build{identity_notes}. The clothing, the place and the light come only from this description. The {subject} walks toward the camera through an empty underground parking garage at night, mid-stride, wearing {wardrobe}. Rows of concrete pillars, painted floor lines, a few parked cars on both sides and long fluorescent tubes on the ceiling that fade into darkness. Medium-wide shot at eye level, symmetrical, the {subject} centered, full body visible. Cinematic night photography, cold fluorescent top light, green-tinted shadows. Correct human anatomy, natural skin texture, sharp focus on the {subject}, plain pillars and unbranded cars throughout.",
+    "effect_prompt": "Use the provided start image as the first frame. The {subject} ALREADY walks toward the camera at a steady pace, eyes on a point just past the camera. A thin bright green laser line sweeps across the garage from left to right, and everything it passes, the pillars, the cars, the floor and the {subject}, turns into a glowing three-dimensional point cloud of millions of tiny dots floating in black space, holding the exact shapes and depth of the scene, until by the last second the whole garage is a luminous point cloud and the {subject} keeps walking as a figure made of glowing points. The camera dollies backward at walking pace. Sound: a rising electronic sweep, rapid clicking scan ticks, a low digital hum. Photorealistic, cinematic visual effects, a dense lidar point cloud with real depth, sharp detail, stable picture.",
+    "generic_prompt": "Use the provided start image as the first frame. A thin bright green laser line sweeps across the frame from left to right, and everything it passes, including the {subject}, turns into a glowing three-dimensional point cloud of millions of tiny dots floating in black space, holding the exact shapes and depth of the scene, while the {subject} keeps moving as a figure made of glowing points. The camera keeps the same framing and the same movement it already has. Sound: a rising electronic sweep, rapid clicking scan ticks, a low digital hum. Photorealistic, cinematic visual effects, a dense lidar point cloud with real depth, sharp detail, stable picture.",
+    "comfy_app": "https://cloud.comfy.org/?share=a3cdf65cedc8"
+  }
+]

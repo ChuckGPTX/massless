@@ -165,3 +165,7 @@ Inspired by Comfy's Open Source Higgsfield challenge and by REA (Reverse Enginee
 ## Motion-first Explore
 
 Explore now leads with Showtime music-video previews, native effects, five distinct studio landing pages and live browser demos. The camera library has 28 distinct scene artworks, including four new original studies. The Music Preview tool renders artwork and audio locally; Form & Field uses images generated through Massless. The Orbit game and Form & Field website are original, small open-source demos. The gallery's commissioned Kling/Wan/Genjutsu films are visual references, not outputs of the current Massless tools. No paid generation API is required to run the site. See [release notes and GPU roadmap](docs/MOTION-RELEASE.md) and [artwork provenance](docs/asset-provenance.md).
+
+## Workflows, private projects and MOSS Image
+
+The top-level **Workflows** page connects six practical creator tasks with reusable plans and exports. **My projects** adds optional Supabase sign-in, private files and saved workflow plans. **MOSS Image SFT** is available through a limited, authenticated Runpod preview; other browser tools remain usable without an account. Five curated VFX4All presets and the official FLUX 3 Klein ComfyUI template are downloadable, with separate setup and license requirements clearly identified. See [setup, verification and budget details](docs/WORKFLOWS-CLOUD-MOSS.md).

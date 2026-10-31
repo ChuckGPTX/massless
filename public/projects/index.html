@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Your projects — Massless studio</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <link rel="stylesheet" href="/css/hubs.css" />
+    <script type="module" src="/js/navigation.js"></script>
+    <script type="module" src="/js/pages/projects.js"></script>
+  </head>
+  <body class="hub">
+    <header class="nav">
+      <a class="nav-logo" href="/" aria-label="Massless home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle
+            cx="16"
+            cy="16"
+            r="11.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+          <path
+            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
+            stroke="currentColor"
+            stroke-width="3"
+          /></svg
+      ></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/">Explore</a><a href="/studios/image/">Image</a
+        ><a href="/studios/video/">Video</a><a href="/studios/audio/">Audio</a
+        ><a href="/studios/3d/">3D</a><a href="/studios/office/">Office</a>
+      </nav>
+      <div class="nav-right">
+        <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless"
+          >GitHub</a
+        ><a class="btn-accent" href="/image">Create an image ↗</a>
+      </div>
+    </header>
+    <main class="hub-main">
+      <section class="hub-intro">
+        <p class="eyebrow">YOUR PRIVATE WORKSPACE</p>
+        <h1>Keep the idea.<br /><em>Build the next one.</em></h1>
+        <p>
+          Save images, audio, films and workflow plans in private projects. Your
+          existing local library stays on this device until you choose to
+          upload.
+        </p>
+      </section>
+      <section class="hub-panel" id="account">
+        <h2>Sign in to your workspace</h2>
+        <p id="cloud-status" role="status">Connecting…</p>
+        <form id="auth-form" hidden>
+          <label
+            >Email<input
+              id="email"
+              type="email"
+              autocomplete="email"
+              required /></label
+          ><label
+            >Password<input
+              id="password"
+              type="password"
+              autocomplete="current-password"
+              minlength="8"
+              required
+          /></label>
+          <div class="hub-actions">
+            <button class="btn-accent" type="submit">Sign in</button
+            ><button class="btn-ghost" id="signup" type="button">
+              Create account
+            </button>
+          </div>
+          <p class="quiet-note">
+            Use your existing account if you already use Gorilla City. If a
+            confirmation email is required, confirm it and return here to sign
+            in.
+          </p>
+        </form>
+        <button id="signout" class="btn-ghost" hidden>Sign out</button>
+      </section>
+      <section id="workspace" hidden>
+        <div class="hub-panel">
+          <form id="new-project">
+            <label
+              >New project name<input
+                id="project-name"
+                maxlength="120"
+                required
+                placeholder="My next release" /></label
+            ><button class="btn-accent">Create project</button>
+          </form>
+          <label>Open project<select id="project-list"></select></label>
+        </div>
+        <div class="hub-panel">
+          <h2>Add to this project</h2>
+          <label
+            >Choose a file<input
+              id="upload"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,audio/mpeg,audio/wav,audio/mp4,video/mp4,application/pdf,application/json"
+          /></label>
+          <p class="quiet-note">
+            Up to 30 MB per file. Files stay private; download links expire
+            after five minutes.
+          </p>
+          <label
+            >Or choose an image from this browser<select
+              id="local-list"
+            ></select></label
+          ><button id="upload-local" class="btn-ghost">
+            Save selected image
+          </button>
+          <p id="project-status" role="status"></p>
+        </div>
+        <div id="asset-list" class="hub-grid"></div>
+      </section>
+    </main>
+    <footer class="hub-footer">
+      <a href="/">MASSLESS / OPEN CREATIVE TOOLS</a
+      ><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
+    </footer>
+  </body>
+</html>

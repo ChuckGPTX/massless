@@ -2,6 +2,7 @@
   // Massless on Cloudflare Workers: static app + /api Worker
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "massless",
+  "keep_vars": true,
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   // With Wrangler the app is served as Workers Static Assets and the Worker only runs for /api/*.
@@ -38,5 +39,7 @@
     // Public Turnstile site key for massless.chucksi.com.
     "TURNSTILE_SITEKEY": "0x4AAAAAAFtDPWdw4pzGXhHG"
   },
+  "durable_objects": { "bindings": [{ "name": "GENERATION_LEDGER", "class_name": "GenerationLedger" }] },
+  "migrations": [{ "tag": "massless-generations-v1", "new_sqlite_classes": ["GenerationLedger"] }],
   "observability": { "enabled": true }
 }

@@ -1,0 +1,41 @@
+[
+  {
+    "file": "moss-chrome-poster.jpg",
+    "model": "OpenMOSS-Team/MOSS-Image-SFT",
+    "revision": "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+    "seed": 42031,
+    "seconds": 77.571,
+    "prompt": "A polished editorial poster photographed in a dark architectural gallery. In the center a flowing sculpture of liquid chrome forms a delicate human silhouette, surrounded by suspended droplets. Warm amber light from the left, cool blue light from the right, deep black background, realistic mirrored metal. At the top, clean large ivory typography reads exactly \"MAKE IT MOVE\" on three short stacked lines. At the bottom, small amber typography reads exactly \"MASSLESS\". Strong readable hierarchy, generous negative space, refined independent design studio art direction.",
+    "width": 768,
+    "height": 1024,
+    "steps": 50,
+    "guidance": 3,
+    "role": "MOSS Image concept artwork; not a generated VFX video"
+  },
+  {
+    "file": "moss-fire.jpg",
+    "model": "OpenMOSS-Team/MOSS-Image-SFT",
+    "revision": "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+    "seed": 42032,
+    "seconds": 81.894,
+    "prompt": "A cinematic fashion still of a confident adult performer in a sculptural flowing amber silk coat, walking down a rain-soaked industrial street at night. A magical ribbon of bright gold fire floats behind the coat without touching the performer. Wet black pavement reflects the flames. Wide full body composition, elegant controlled movement, independent music video aesthetic, deep charcoal shadows, amber and crimson light, no text or logos.",
+    "width": 1024,
+    "height": 768,
+    "steps": 50,
+    "guidance": 3,
+    "role": "MOSS Image concept artwork; not a generated VFX video"
+  },
+  {
+    "file": "moss-gravity.jpg",
+    "model": "OpenMOSS-Team/MOSS-Image-SFT",
+    "revision": "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+    "seed": 42033,
+    "seconds": 80.63,
+    "prompt": "An extraordinary old library with a lone adult woman in an ivory coat floating gently a few inches above the floor. Beautiful antique books and loose ivory pages float around her in zero gravity. Tall dark walnut shelves, warm sunbeams crossing dusty air from high arched windows, symmetrical architectural photography, restrained bronze and jade colors, cinematic wide composition, realistic textures, no text or logos.",
+    "width": 1024,
+    "height": 768,
+    "steps": 50,
+    "guidance": 3,
+    "role": "MOSS Image concept artwork; not a generated VFX video"
+  }
+]

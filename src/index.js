@@ -1,3 +1,5 @@
+import { generationAPI } from './generations.js';
+export { GenerationLedger } from './generations.js';
 // Massless Worker: serves the static app and the free-tier model APIs on Cloudflare Workers AI.
 // /api/shot (images), /api/beats and /api/ask (Llama 3.3), /api/tts (MeloTTS), /api/transcribe (Whisper).
 // Daily caps keep usage inside the 10,000 free Neurons per day, so this costs $0 on any plan.
@@ -383,7 +385,7 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/music': '/music/index.html', '/demo-site': '/demo-site/index.html' };
+const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/demo-site': '/demo-site/index.html' };
 for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studios/${studio}`] = `/studios/${studio}/index.html`;
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
 
@@ -428,7 +430,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
@@ -443,6 +445,7 @@ async function fromOrigin(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.pathname === '/api/config' || url.pathname.startsWith('/api/generations')) return generationAPI(request, env);
     if (url.pathname === '/api/human') return humanPass(request, env);
     if (GATED.has(url.pathname) && request.method === 'POST') {
       const stop = await needsHuman(request, env);
