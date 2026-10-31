@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Scene studio — Massless</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <link rel="stylesheet" href="/css/workbench.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="/js/navigation.js"></script>
+    <script type="module" src="/js/pages/scene.js"></script>
+  </head>
+  <body>
+    <header class="nav">
+      <a class="nav-logo" href="/" aria-label="Massless home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle
+            cx="16"
+            cy="16"
+            r="11.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+          <path
+            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
+            stroke="currentColor"
+            stroke-width="3"
+          /></svg
+      ></a>
+      <nav class="nav-links" aria-label="Main"></nav>
+      <div class="nav-right">
+        <a class="btn-ghost" href="/library/">My library</a
+        ><a class="btn-accent" href="/workflows/">Workflows ↗</a>
+      </div>
+    </header>
+    <main class="bench">
+      <section class="bench-intro">
+        <p class="eyebrow">SCENE STUDIO / REAL EDITABLE 3D</p>
+        <h1>Stage another world.</h1>
+        <p>
+          Build a scene with real objects, materials and lights. Orbit the
+          camera, save a frame and export a GLB for your next project.
+        </p>
+      </section>
+      <div class="workroom">
+        <aside class="controls">
+          <label
+            >Add object<select id="shape">
+              <option>box</option>
+              <option>sphere</option>
+              <option>torus</option>
+              <option>cone</option>
+            </select></label
+          ><button class="btn-accent" id="add">Add to scene</button
+          ><label>Selected object<select id="object"></select></label
+          ><label
+            >Material color<input
+              id="color"
+              type="color"
+              value="#ffc338" /></label
+          ><label
+            >X<input
+              id="x"
+              type="range"
+              min="-5"
+              max="5"
+              value="0"
+              step=".1" /></label
+          ><label
+            >Height<input
+              id="y"
+              type="range"
+              min="0"
+              max="5"
+              value="1"
+              step=".1" /></label
+          ><label
+            >Z<input
+              id="z"
+              type="range"
+              min="-5"
+              max="5"
+              value="0"
+              step=".1" /></label
+          ><label
+            >Size<input
+              id="scale"
+              type="range"
+              min=".2"
+              max="3"
+              value="1"
+              step=".1" /></label
+          ><label
+            >Rotation<input
+              id="rotation"
+              type="range"
+              min="0"
+              max="360"
+              value="0" /></label
+          ><label
+            >Light intensity<input
+              id="light"
+              type="range"
+              min="0"
+              max="8"
+              step=".1"
+              value="4" /></label
+          ><label class="check"
+            ><input id="orbit" type="checkbox" />Orbit preview</label
+          ><button id="remove" class="btn-ghost">Remove selected object</button
+          ><button id="frame" class="btn-ghost">Save frame to library</button
+          ><button id="glb" class="btn-accent">Export GLB</button
+          ><button id="settings" class="btn-ghost">
+            Download scene settings</button
+          ><label
+            >Restore scene<input
+              type="file"
+              id="restore"
+              accept="application/json"
+          /></label>
+          <p>
+            Drag to orbit. Scroll to zoom. Objects and lights export as real
+            scene data. This tool does not generate meshes from a prompt.
+          </p>
+        </aside>
+        <section class="stage">
+          <div
+            id="scene"
+            style="height: 650px; max-height: 75vh"
+            role="img"
+            aria-label="Editable 3D scene"
+          ></div>
+          <p id="status" role="status"></p>
+        </section>
+      </div>
+    </main>
+    <footer class="bench-foot">
+      Made here. Kept here. Free tools, open source.
+      <a href="https://github.com/ChuckGPTX/massless">View source ↗</a>
+    </footer>
+  </body>
+</html>

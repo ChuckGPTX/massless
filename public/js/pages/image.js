@@ -206,6 +206,7 @@ function shotCard(item, fresh = false) {
     el('span', { class: 'tag', title: item.seed != null ? `${label}, seed ${item.seed}` : label }, label),
     el('div', { class: 'acts' },
       item.unsaved ? null : el('a', { class: 'go', href: `/video?shot=${encodeURIComponent(item.id)}` }, 'Animate'),
+      item.unsaved ? null : el('a', { href: `/edit/?shot=${encodeURIComponent(item.id)}` }, 'Edit'),
       item.unsaved ? null : el('a', { href: `/3d?shot=${encodeURIComponent(item.id)}` }, '3D'),
       el('button', { type: 'button', onclick: () => download(item.blob, `${item.id}.jpg`) }, 'Download'),
       item.prompt ? el('button', { type: 'button', onclick: () => { $('#compiled').value = item.prompt; state.edited = true; $('#prompt-peek').open = true; toast('Prompt loaded. Press Generate to shoot it again.'); } }, 'Reuse prompt') : null,

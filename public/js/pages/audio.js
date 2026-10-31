@@ -1019,3 +1019,6 @@ function init() {
 }
 
 init();
+
+const incomingMediaId=new URLSearchParams(location.search).get('shot');
+if(incomingMediaId)store.get(incomingMediaId).then(item=>{if(item?.blob&&(item.blob.type.startsWith('audio/')||item.blob.type.startsWith('video/')))pickFile(new File([item.blob],item.name||'Saved media',{type:item.blob.type}));}).catch(()=>toast('Could not load the saved media.', 'error'));

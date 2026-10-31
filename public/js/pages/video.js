@@ -388,6 +388,7 @@ function timecode(sec, fps) {
   return `00:${p(s)}:${p(f)}`;
 }
 function addClip(blob, ext, label) {
+  import('../assets.js').then(({saveAsset}) => saveAsset(blob, {name:label+'.'+ext, engine:'camera-effects', sourceId:state.current?.ref, settings:{move:state.move, effect:state.effect, effectLook:state.effectLook, intensity:state.intensity, look:{...state.look}, fps:state.fps, duration:state.duration}})).catch(() => toast('Clip ready, but local saving failed. Download it before leaving.', 'error'));
   $('#clips-wrap').hidden = false;
   const url = URL.createObjectURL(blob);
   const v = el('video', { src: url, muted: true, loop: true, playsinline: true, autoplay: true });

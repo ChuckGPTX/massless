@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Clip workroom — Massless</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <link rel="stylesheet" href="/css/workbench.css" />
+    <script type="module" src="/js/navigation.js"></script>
+    <script type="module" src="/js/pages/cut.js"></script>
+  </head>
+  <body>
+    <header class="nav">
+      <a class="nav-logo" href="/" aria-label="Massless home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle
+            cx="16"
+            cy="16"
+            r="11.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+          <path
+            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
+            stroke="currentColor"
+            stroke-width="3"
+          /></svg
+      ></a>
+      <nav class="nav-links" aria-label="Main"></nav>
+      <div class="nav-right">
+        <a class="btn-ghost" href="/library/">My library</a
+        ><a class="btn-accent" href="/workflows/">Workflows ↗</a>
+      </div>
+    </header>
+    <main class="bench">
+      <section class="bench-intro">
+        <p class="eyebrow">CLIP WORKROOM / CAPTIONS & CUTS</p>
+        <h1>Make every word land.</h1>
+        <p>
+          Trim your clip and burn styled captions into the picture. Your file
+          stays on this device.
+        </p>
+      </section>
+      <div class="workroom">
+        <aside class="controls">
+          <label class="btn-accent"
+            >Open video<input
+              id="file"
+              type="file"
+              accept="video/*"
+              hidden /></label
+          ><a href="/library/">Choose from library ↗</a
+          ><label
+            >Try a sample<select id="sample">
+              <option value="lidar">LiDAR reveal</option>
+              <option value="music">Music preview with sound</option>
+            </select></label
+          ><a href="/audio?tab=captions">Create a transcript ↗</a
+          ><label
+            >Start · seconds<input
+              id="start"
+              type="number"
+              min="0"
+              step="0.1"
+              value="0" /></label
+          ><label
+            >End · seconds<input
+              id="end"
+              type="number"
+              min="0.1"
+              step="0.1"
+              value="6" /></label
+          ><label
+            >Import SRT or VTT<input
+              id="srt"
+              type="file"
+              accept=".srt,.vtt,text/plain" /></label
+          ><button id="use-transcript" class="btn-ghost">
+            Use saved transcript</button
+          ><label
+            >Caption timing<textarea
+              id="cues"
+              rows="10"
+              placeholder="1&#10;00:00:00,000 --> 00:00:02,500&#10;Make something move."
+            ></textarea></label
+          ><label
+            >Caption color<input
+              id="color"
+              type="color"
+              value="#ffffff" /></label
+          ><label
+            >Text size<input
+              id="size"
+              type="range"
+              min="3"
+              max="8"
+              value="5" /></label
+          ><button id="export" class="btn-accent">Export captioned clip</button
+          ><button id="cancel" class="btn-ghost" hidden>Cancel export</button>
+          <p>
+            Exports play through in real time, up to two minutes. Keep this tab
+            visible while recording. Sound is included when the source has an
+            audio track.
+          </p>
+        </aside>
+        <section class="stage">
+          <video
+            id="source"
+            controls
+            playsinline
+            preload="metadata"
+            style="width: 100%; max-height: 230px"
+          ></video
+          ><canvas
+            id="caption-canvas"
+            width="1280"
+            height="720"
+            aria-label="Captioned clip preview"
+          ></canvas>
+          <p id="status" role="status"></p>
+          <div class="actions" id="result"></div>
+        </section>
+      </div>
+    </main>
+    <footer class="bench-foot">
+      Made here. Kept here. Free tools, open source.
+      <a href="https://github.com/ChuckGPTX/massless">View source ↗</a>
+    </footer>
+  </body>
+</html>

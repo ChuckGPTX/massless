@@ -55,6 +55,8 @@ const filmDuration = () => Math.max(renderer.duration, state.score ? state.score
 // ---------- stills ----------
 async function stills() {
   if (!$('#use-stills').checked) return [];
+  const selected = new URLSearchParams(location.search).get('shot');
+  if (selected) { const it = await store.get(selected); if (it?.blob?.type.startsWith('image/')) return [URL.createObjectURL(it.blob)]; }
   const mine = (await store.all().catch(() => [])).filter((x) => (x.kind || 'shot') === 'shot').sort((a, b) => b.created - a.created).slice(0, 4);
   const urls = mine.map((it) => URL.createObjectURL(it.blob));
   return urls.length >= 2 ? urls : [...urls, ...SAMPLE_STILLS].slice(0, 4);
@@ -334,6 +336,7 @@ async function exportFilm() {
   }
 }
 function addFilm(blob, W, H) {
+  import('../assets.js').then(({saveAsset}) => saveAsset(blob,{name:(state.spec.title||'Launch')+' film.mp4',engine:'film-composer',settings:state.spec})).catch(()=>toast('Film ready. Download it before leaving; local saving failed.', 'error'));
   $('#clips-wrap').hidden = false;
   const url = URL.createObjectURL(blob);
   const v = el('video', { src: url, controls: true, playsinline: true });
@@ -404,3 +407,6 @@ async function init() {
 }
 
 init();
+
+const incomingBrief = new URLSearchParams(location.search).get('brief');
+if(incomingBrief) $('#brief').value=incomingBrief.slice(0,600);
