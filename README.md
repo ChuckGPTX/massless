@@ -8,13 +8,14 @@ The Higgs field is what gives particles mass. Massless aims to remove the weight
 
 ## The site
 
-Seven pages combine image creation, motion, audio, 3D and document tools:
+Five showcase pages introduce the tools: `/studios/image/`, `/studios/video/`, `/studios/audio/`, `/studios/3d/` and `/studios/office/`. Each navigation label opens its showcase; the separate arrow opens its feature menu. The existing workspaces remain available:
 
 | Page | What it does |
 | --- | --- |
 | **Explore** (`/`) | Original cinematic artwork, clear starting points, launch rail, tool tiles, the moves showcase and a wall of clips made in Massless. |
 | **Image** (`/image`) | Cinema Studio, the shot designer. Camera body, lens, focal length (8–135mm), aperture (f/1.4–f/11), shot size, angle, light, film stock, aspect ratio, genre and palette compile into a prompt you can read and edit. Up to four takes per prompt with FLUX.1 schnell. |
 | **Video** (`/video`) | 28 camera moves on any still (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time), with lens and film finish, plus one-tap effects: LiDAR scan, Vanish, Bullet time freeze and Clones. Render a clip, or add shots to a storyboard, reorder them and export one stitched MP4. |
+| **Music Preview** (`/music`) | Turn artwork and a short audio clip into a beat-grid music teaser. Local upload, playback, landscape/portrait/square layouts and MP4 with audio. |
 | **Launch Film** (`/film`) | Build a kinetic launch film from a brief, with typography, scenes, music and export. |
 | **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
 | **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
@@ -109,7 +110,7 @@ git clone https://github.com/speridlabs/idol-sdk && pip install -e idol-sdk
 python comfy/idol_server.py          # http://127.0.0.1:7861, allows massless.chucksi.com and localhost:8787
 ```
 
-Open `/3d`, choose **Idol on your GPU** and press **Build 3D**. The page posts the still to `/generate` and shows the returned `.ply`. No GPU: Idol's Hugging Face demo exports a `.ply` that **Open .ply** loads.
+Open `/3d`, choose **Full object** and press **Build 3D**. The page posts the still to `/generate` and shows the returned `.ply`. No GPU: Idol's Hugging Face demo exports a `.ply` that **Open .ply** loads.
 
 ## Tests
 
@@ -163,4 +164,4 @@ Inspired by Comfy's Open Source Higgsfield challenge and by REA (Reverse Enginee
 
 ## Motion-first Explore
 
-Explore now leads with native effects, live browser demos and a credited reference-film gallery. The Orbit game and Form & Field website are original, small open-source demos. The gallery's commissioned Kling/Wan/Genjutsu films are visual references, not outputs of the current Massless tools. No paid generation API is required to run the site. See [release notes and GPU roadmap](docs/MOTION-RELEASE.md) and [artwork provenance](docs/asset-provenance.md).
+Explore now leads with Showtime music-video previews, native effects, five distinct studio landing pages and live browser demos. The camera library has 28 distinct scene artworks, including four new original studies. The Music Preview tool renders artwork and audio locally; Form & Field uses images generated through Massless. The Orbit game and Form & Field website are original, small open-source demos. The gallery's commissioned Kling/Wan/Genjutsu films are visual references, not outputs of the current Massless tools. No paid generation API is required to run the site. See [release notes and GPU roadmap](docs/MOTION-RELEASE.md) and [artwork provenance](docs/asset-provenance.md).

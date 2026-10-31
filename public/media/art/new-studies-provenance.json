@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-30",
+  "generator": "Built-in image generation",
+  "notice": "Original promotional artwork created in ChatGPT. These stills are scene illustrations, not output examples of the Massless image model. No input image was used.",
+  "prompts": {
+    "velvet": "Use case: photorealistic-natural. A cinematic landscape 16:9 photograph for a camera-movement example. An empty small vintage velvet cinema, emerald upholstered seats, warm illuminated aisle, a single art deco golden wall lamp in the foreground, deep stage curtains in the distance. Strong foreground middle ground and background separation, atmospheric fine haze, warm tungsten practical lighting and cool shadows, refined film photography, no people, no text, no logos, no watermark. A finished photographic artwork, not a website mockup.",
+    "botanical": "Use case: photorealistic-natural. A cinematic landscape 16:9 photograph for a rack-focus camera example: an exquisite pale ivory magnolia blossom with fine water droplets in the left foreground, a quiet glass conservatory with verdant ferns and a curved path receding to the right background. Fresh morning light, delicate peach and mint palette, realistic organic texture, layered depth, dreamlike yet photographic, crisp blossom and softly separated greenhouse. No people, words, logos, watermark or interface.",
+    "skater": "Use case: photorealistic-natural. A cinematic landscape 16:9 photograph for a handheld camera example: an adult female skateboarder in a cobalt blue jacket and cream trousers holding her skateboard, paused at a sunlit concrete skatepark. Low angle, full body subject just right of center, sculptural ramps and palms, pale coral sky, golden late-afternoon rim light, authentic editorial action-sports photography, clean composition with foreground concrete texture and deep background. No brands, writing, logos, watermark or UI.",
+    "observatory": "Use case: stylized-concept. A stunning cinematic landscape 16:9 image for a floating camera movement demo. A tiny polished copper observatory on a dark volcanic island hovering above a vast sea of clouds at blue hour. Warm window glow, a huge peach moon, fine suspended stones, gentle mist between clear foreground and background layers, premium tactile miniature-set photography with sophisticated realistic materials. No people, text, logos, watermark or UI. Original finished artwork."
+  },
+  "files": [
+    {
+      "path": "media/art/botanical.jpg",
+      "bytes": 368311,
+      "sha256": "782b4ccbe901b1a62d726158bf2f23e7faf8a62490f063b8a6813b92feae8cd3"
+    },
+    {
+      "path": "media/art/observatory.jpg",
+      "bytes": 250826,
+      "sha256": "e36ef2865e8dacfb0236b07de4b9c16cb4c85c8cc6b7ac30d8e217cf3a01b721"
+    },
+    {
+      "path": "media/art/skater.jpg",
+      "bytes": 239803,
+      "sha256": "7b44332104efc7757a4696cddf0faa8a735eaf75a135c1383ad3913a06db4143"
+    },
+    {
+      "path": "media/art/velvet.jpg",
+      "bytes": 252496,
+      "sha256": "eaf68d45def645574a39afab20b0d3358849a15a95aae4fae11fc596d77949d0"
+    }
+  ]
+}

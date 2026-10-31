@@ -57,6 +57,8 @@
     />
     <link rel="stylesheet" href="/css/site.css" />
     <link rel="stylesheet" href="/css/explore.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <script type="module" src="/js/navigation.js"></script>
   </head>
   <body>
     <header class="nav">
@@ -79,11 +81,11 @@
       ></a>
       <nav class="nav-links" aria-label="Main">
         <a href="/" aria-current="page">Explore</a>
-        <a href="/image">Image</a>
-        <a href="/video">Video</a>
-        <a href="/audio">Audio</a>
-        <a href="/3d">3D</a>
-        <a href="/office">Office</a>
+        <a href="/studios/image/">Image</a>
+        <a href="/studios/video/">Video</a>
+        <a href="/studios/audio/">Audio</a>
+        <a href="/studios/3d/">3D</a>
+        <a href="/studios/office/">Office</a>
       </nav>
       <div class="nav-right">
         <button type="button" class="pill-link" data-dialog="ledger">
@@ -123,66 +125,15 @@
             From a first frame to a whole new world.<br />Open tools. A little
             curiosity. Your imagination.
           </p>
-          <button
-            class="btn-ghost"
-            id="motion-toggle"
-            type="button"
-            aria-pressed="false"
-          >
-            Pause previews
-          </button>
         </div>
       </section>
       <section class="wrap featured-grid" aria-label="Featured moving examples">
-        <a class="feature feature-wide" href="/video?effect=lidar"
-          ><video
-            muted
-            loop
-            playsinline
-            preload="none"
-            poster="/media/clips/effect-lidar-active.jpg"
-            data-src="/media/clips/effect-lidar.mp4"
-            aria-label="A canyon transformed into a laser-swept point cloud"
-          ></video
-          ><span class="media-label">MADE IN MASSLESS · EFFECT</span>
-          <div class="feature-copy">
-            <span class="eyebrow">REIMAGINE EVERY DIMENSION</span>
-            <h2>SEE THE<br />UNSEEN.</h2>
-            <span class="feature-link">Try LiDAR scan ↗</span>
-          </div></a
-        >
-        <a class="feature" href="/video?effect=vanish"
-          ><video
-            muted
-            loop
-            playsinline
-            preload="none"
-            poster="/media/clips/effect-vanish-active.jpg"
-            data-src="/media/clips/effect-vanish.mp4"
-            aria-label="A dancer dissolving into particles"
-          ></video
-          ><span class="media-label">MADE IN MASSLESS</span>
-          <div class="feature-copy">
-            <h2>HERE.<br />THEN GONE.</h2>
-            <span class="feature-link">Try Vanish ↗</span>
-          </div></a
-        >
-        <a class="feature" href="#references"
-          ><video
-            muted
-            loop
-            playsinline
-            preload="none"
-            poster="/media/showcase/glass-tide.jpg"
-            data-src="/media/showcase/glass-tide.mp4"
-            aria-label="A glass koi swimming through a coral dreamscape"
-          ></video
-          ><span class="media-label">KLING 4.0 · REFERENCE</span>
-          <div class="feature-copy">
-            <h2>IMPOSSIBLE.<br />IN MOTION.</h2>
-            <span class="feature-link">Explore the motion studies ↓</span>
-          </div></a
-        >
+        <article class="feature feature-wide feature-music">
+          <button id="showtime-play" class="music-watch" type="button" aria-label="Watch the Showtime music preview with sound"><video muted loop playsinline preload="none" poster="/media/music/showtime-transfer.jpg" data-src="/media/music/showtime-transfer.mp4" aria-label="Tone Da Boss Showtime performance in a wrestling ring"></video><span class="media-label">TONE DA BOSS · SHOWTIME</span><span class="music-play-label">▶ Watch with sound</span></button>
+          <a class="music-create" href="/studios/video/">Explore Video studio ↗</a>
+        </article>
+        <a class="feature" href="/video?effect=lidar"><video muted loop playsinline preload="none" poster="/media/clips/effect-lidar-active.jpg" data-src="/media/clips/effect-lidar.mp4" aria-label="A canyon transformed into a laser-swept point cloud"></video><span class="media-label">MADE IN MASSLESS · EFFECT</span><div class="feature-copy"><h2>SEE THE<br>UNSEEN.</h2><span class="feature-link">Try LiDAR scan ↗</span></div></a>
+        <a class="feature" href="/video?effect=vanish"><video muted loop playsinline preload="none" poster="/media/clips/effect-vanish-active.jpg" data-src="/media/clips/effect-vanish.mp4" aria-label="A dancer dissolving into particles"></video><span class="media-label">MADE IN MASSLESS</span><div class="feature-copy"><h2>HERE.<br>THEN GONE.</h2><span class="feature-link">Try Vanish ↗</span></div></a>
       </section>
       <section class="wrap discovery" aria-labelledby="discovery-title">
         <div class="section-heading">
@@ -231,17 +182,17 @@
               <div class="mini-page">
                 <div class="mini-nav">
                   FORM & FIELD
-                  <span>Work&nbsp;&nbsp; Studio&nbsp;&nbsp; Contact</span>
+                  <span>Work&nbsp;&nbsp; Studio</span>
                 </div>
                 <div class="mini-hero">
                   <small>INDEPENDENT DESIGN STUDIO</small
                   ><b>Space for<br />something<br /><em>different.</em></b>
-                  <div class="mini-orb"></div>
+                  <img class="mini-art" src="/media/website/pavilion.jpg" alt="" loading="lazy">
                   <span>Explore our work ↗</span>
                 </div>
                 <div class="mini-work">
                   <b>Ideas, made tangible.</b>
-                  <div><i></i><i></i><i></i></div>
+                  <div><img src="/media/website/ceramics.jpg" alt="" loading="lazy"><img src="/media/website/lounge.jpg" alt="" loading="lazy"></div>
                 </div>
               </div>
               <svg class="demo-cursor" viewBox="0 0 24 30" aria-hidden="true">
@@ -255,7 +206,7 @@
             </div>
             <div class="card-copy">
               <h3>From idea to interaction <span>↗</span></h3>
-              <p>A living website with scroll, color and cursor movement.</p>
+              <p>Original design. Fresh imagery made in our own Image Studio.</p>
             </div></a
           >
         </div>
@@ -267,8 +218,7 @@
             <h2 id="reference-title">Different worlds. No repeated frames.</h2>
           </div>
           <p class="muted section-note">
-            Commissioned reference films for our next workflows.<br />Model and
-            source are shown on every card.
+            Fresh motion, characters and impossible worlds.<br />Find a spark for your next creation.
           </p>
         </div>
         <div class="filter-bar" role="group" aria-label="Filter motion studies">
@@ -298,13 +248,12 @@
           <div>
             <p class="eyebrow">MARKETING STUDIO IMAGE · ORIGINAL CHARACTER</p>
             <h3>Meet the next moving part.</h3>
-            <p>Our character reference for the motion-transfer study.</p>
+            <p>Our original character, ready for a new scene.</p>
             <span>Open the artwork ↗</span>
           </div></a
         >
         <p class="reference-note">
-          These films are visual references, generated with the named external
-          models. Massless’s current video tool animates still images with
+          These films were generated with the credited models. Massless’s current video tool animates still images with
           depth, camera moves and effects.
           <button class="text-button" data-dialog="ledger">
             What runs where ↗
@@ -372,7 +321,7 @@
               <path d="M12 2.5l8.5 4.75v9.5L12 21.5l-8.5-4.75v-9.5z" />
               <path d="M12 12l8.5-4.75M12 12L3.5 7.25M12 12v9.5" /></svg
             ><strong>Image to 3D<span class="badge-new">NEW</span></strong
-            ><span>Orbit any still as a splat, or run Idol</span></a
+            ><span>Explore scenes and complete 3D objects</span></a
           >
           <a
             class="tool"
@@ -382,7 +331,7 @@
               <rect x="3" y="4" width="18" height="12" rx="2" />
               <path d="M8 20h8M12 16v4M7 8h3M7 11h6" /></svg
             ><strong>ComfyUI Mode</strong
-            ><span>Run every shot on your own GPU</span></a
+            ><span>Create with your own connected workflow</span></a
           >
         </div>
       </section>
@@ -464,12 +413,11 @@
           loading="lazy"
         />
         <figcaption>
-          Original character artwork · Marketing Studio Image
+          Character artwork · Marketing Studio Image
         </figcaption>
       </figure>
-      <p class="muted">
-        Commissioned reference media. This model is not connected to Massless’s
-        generation tools.
+      <p class="muted" id="reference-provider-note">
+        Generated with the model credited above.
       </p>
     </dialog>
     <dialog class="sheet" id="ledger">
@@ -479,7 +427,7 @@
       </form>
       <p>
         Massless uses open-weight models. Browser tools have no service charge.
-        Hosted AI shares a daily allowance; your own GPU or third-party
+        Hosted AI shares a daily allowance; connected services and third-party
         providers can have compute costs and separate terms.
       </p>
       <div class="scroll">
@@ -552,10 +500,10 @@
       </div>
       <p>
         Massless code is MIT licensed. Model weights have their own licenses.
-        LiDAR, Vanish and camera clips were rendered by Massless. The reference
+        LiDAR, Vanish and camera clips were rendered by Massless. The film
         gallery was commissioned through Higgsfield using Kling 4.0, Wan 3.0
         Prime, Genjutsu Light and Marketing Studio Image. Those are paid
-        reference assets, not open-source models or outputs of the current
+        gallery assets, not open-source models or outputs of the current
         Massless tools. Games and website previews are small open-source demos,
         not full AI builders.
       </p>

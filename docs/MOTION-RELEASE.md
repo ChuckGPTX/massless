@@ -1,51 +1,44 @@
-# Motion-first Explore
+# Studios, Showtime and motion-first Explore
 
-This release brings examples above the fold: native LiDAR and Vanish effects, a commissioned cinematic reference, a live 3D projection, a playable original arcade game, and a working responsive website study. The example website is a small HTML/CSS demo, not an AI website builder. Orbit is a small browser game, not an AI game studio.
+This release leads with a Showtime music-video preview, native LiDAR and Vanish effects, live browser demos and distinct starting pages for Image, Video, Audio, 3D and Office. The application code remains MIT licensed. Model weights, user artwork and commissioned media have their own rights and licenses.
 
 ## What ships
 
-- Compact introduction and three moving feature cards, with distinct imagery.
-- Six completed commissioned reference videos and one original Marketing Studio character image are integrated, including the single requested Genjutsu Light transfer. One additional Kling lunar-rover job was submitted but could not be recovered after the provider request-history page returned HTTP 403. It is excluded from the gallery until its output is downloaded and verified.
-- Model credits on every reference card and an explanatory model/artwork dialog. No proprietary generation API is added to Massless.
-- Canvas 3D rotation study with actual perspective projection and sorted polygon faces.
-- Orbit game: keyboard/pointer control, collectible stars, collision, score and restart.
-- Form & Field website example: responsive layout, working section navigation, scrolling, original CSS shapes and subtle motion.
-- Gallery filters and a full video viewer.
-- A global preview pause control, lazy video sources, offscreen pausing, hidden-tab suspension, modal suspension, reduced-motion and data-saver defaults. Explicit play is supported when the default is paused.
-- Eight varied camera-library thumbnails using existing Massless renders matched to their camera moves. Choosing a move retains the user's current image.
+- The navigation labels open `/studios/image/`, `/studios/video/`, `/studios/audio/`, `/studios/3d/` and `/studios/office/`. Separate arrow buttons open Features and Models menus. Existing workspaces and deep links continue to work.
+- Five different visual directions: an image gallery, Showtime screening room, audio listening space, live 3D playground and a paper-inspired document studio. Each includes multiple examples and direct links to working tools.
+- Two new wrestling-ring Showtime clips: a Kling 4.0 animated performance and a Genjutsu Light photo-based motion transfer using that performance. The project owner supplied the performer photo. Published audio is an original Massless instrumental, not the artist's recording or vocals.
+- A local Music Preview tool at `/music`: artwork and audio upload, artist/title, tempo and color controls, landscape/portrait/square layouts, sound playback, seeking and H.264/AAC MP4 export. Audio up to 60 seconds stays on the device. The cut grid follows the user-set tempo; the waveform follows measured audio energy. Automatic beat detection is not claimed.
+- Four new original camera-scene artworks. All 28 camera presets now have distinct scene artwork: seven existing motion clips and 21 illustrative stills. Selecting a move retains the user's current input image.
+- Form & Field at `/demo-site/`: a responsive editorial website study with three images generated through Massless's own Image tool, project details, section navigation and image-prompt remix links. This is a small working website example, not an AI website builder.
+- Original browser demos: a rotating 3D projection and the playable Orbit arcade game. Orbit is a small game, not an AI game studio.
+- Existing LiDAR, Vanish, freeze and clone effects remain available. LiDAR is a visual effect based on estimated depth, not a physical scan.
+- Customer-facing infrastructure labels are simplified, including “Full object” and “Reconstruction service.” Technical setup remains in developer documentation.
+- The requested preview-pause control and visible “reference” card badges are removed. Model credits and honest media descriptions remain in the details. Offscreen/hidden-tab pausing, reduced-motion preferences and data-saver defaults remain automatic.
 
 ## Media boundary
 
-The code is MIT licensed. Pre-rendered paid references are optional media assets; the application does not call Higgsfield at runtime. Kling, Wan 3.0 Prime, Genjutsu Light and Marketing Studio are not described as open-source models. Their outputs do not demonstrate the current Massless generation capabilities. The native effects are labeled separately.
+The six earlier commissioned gallery clips and the two Showtime clips are optional pre-rendered showcase media. Kling, Wan 3.0 Prime, Genjutsu Light and Marketing Studio are not described as open-source implementations. Their outputs are not demonstrations of the current Massless generation models. No proprietary generation API is added to the runtime.
 
-Model weights and assets do not automatically inherit the software license. See `asset-provenance.md` and the model ledger. New image/video generation integrations require their own model-license review.
+See [asset provenance](asset-provenance.md), `public/media/showcase/provenance.json`, `public/media/music/provenance.json`, `public/media/website/provenance.json` and `public/media/art/new-studies-provenance.json` for prompts, settings, attribution and checksums. Original downloads are retained outside the repository. One earlier lunar-rover request could not be recovered from the provider's request history and is excluded from the gallery.
 
-## GPU development priorities
+## Next development priorities
 
-1. **Image editing:** masked inpainting, background replacement, clean product shots and upscaling. Start with one license-checked model and a fixed evaluation set rather than an untested model picker.
-2. **True video generation:** open-weight image-to-video plus reproducible seeds and short duration presets. Current camera moves animate a still; this would add independent subject and scene motion.
-3. **Audio finishing:** word-level alignment for edit-by-text, speech denoising and source separation. Preserve the original and store an editable cut list.
-4. **3D reconstruction:** multi-view/depth reconstruction and downloadable scene assets. Distinguish estimated geometry from measured LiDAR data.
-5. **Motion transfer:** pose extraction plus controlled character animation, after the basic video job pipeline is reliable.
+1. **Audio-reactive music video:** evaluate an image + song + video workflow with ACE-Step and LTX, using fixed inputs, duration limits and quality comparisons. Review each weight/adapter license separately; LTX weights use a custom community license. The published ComfyUI workflow is inspiration, not a workflow we have validated on this account.
+2. **Editing and finishing:** word-level caption alignment, editable transcript cuts, speech cleanup and stem separation. Preserve originals and export editable decisions.
+3. **Image editing:** masked inpainting, background replacement and upscaling with one license-checked model and a repeatable evaluation pack.
+4. **Video and character consistency:** open-weight image-to-video, controlled pose/motion and reproducible seeds; distinguish independent subject motion from camera animation over a still.
+5. **3D, websites and games:** improve reconstruction imports, add scene export, turn the website study into a section editor, and expand reusable game templates after the basic examples are reliable.
 
-LiDAR-style scans, Vanish, basic camera movement, game previews and scrolling web demos already run in the browser. They should not occupy a rented GPU just to animate the homepage.
+Sources: [ComfyUI audio-reactive workflow](https://comfy.org/hub/workflows/image-song-audio-reactive-video-977fefa2b934/), [ACE-Step code license](https://github.com/ace-step/ACE-Step-1.5/blob/main/LICENSE), [LTX-2 weight license](https://github.com/Lightricks/LTX-2/blob/main/LICENSE).
 
-## Cloudflare + Runpod path
+## Cloudflare + Runpod
 
-Use Cloudflare for the site, authenticated job submission, budgets and status; use Runpod for asynchronous model execution. Store job/ownership metadata transactionally (D1 or a Durable Object), large inputs/outputs in R2 with bounded signed access, and queue long jobs with explicit retries and idempotency. Avoid a non-atomic KV counter as the authoritative spend limit. Use separate preview and production environments.
+Keep the site, authenticated submission, limits and job status on Cloudflare; run long model jobs asynchronously on Runpod. Use transactional job/ownership and budget reservations (D1 or Durable Objects), R2 for large media with bounded signed access, and explicit retries/idempotency. Current KV counters are best-effort request limits, not a guaranteed spending ceiling.
 
-Pin the worker image, model revision and workflow JSON. Store seed, dimensions, prompt, workflow version, execution time, cost and artifact checksum for every completed job. Provide cancel, retry and download without re-running a successful job. Begin with scale-to-zero and a concurrency cap; do not keep a development GPU running between experiments.
+Pin worker images, model revisions and workflow JSON. Record prompt, seed, dimensions, execution time, cost and artifact checksum. Support cancel, retry and download without rerunning successful work. Start with scale-to-zero and a concurrency cap. The browser handles homepage effects, games and scrolling demos without rented inference hardware. No Runpod resource was provisioned in this release.
 
-The account audit found no deployed Runpod workload for Massless. No GPU resource has been purchased or deployed as part of this media release. The $10 authorization applies only to the requested Higgsfield references.
+## Release and validation
 
-## Development workflow
+Production retains the existing GitHub-backed Cloudflare Worker architecture. Merge the reviewed source and assets to `main`, then upload `src/index.js` with the existing bindings, secrets, limits and observability preserved. `ASSET_REF=main` resolves to a commit for each page; the existing short ref-cache can delay new assets about a minute. Do not accidentally switch this deployment to a new assets binding.
 
-Keep work in feature branches with isolated ownership when multiple assistants are active. Require passing tests and a working preview before promotion. Preserve existing unfinished Claude work; screenshots of planned features are not evidence that their code is in the repository. Build one complete path per release, while maintaining parallel backlogs for creator tools, websites, games and office workflows.
-
-Every new model should have a small evaluation pack: fixed inputs, expected constraints, example outputs, median/tail latency, failure rate, GPU memory, cost per useful output and a verified license link. Every homepage claim should link to a working tool, be labeled as a prototype, or be labeled as reference media.
-
-## Verification
-
-- `npm test`: library persistence and preview behavior, including accessibility defaults, visibility suspension and late-play races.
-- Browser checks: desktop/mobile layout, actual video playback, pause/resume, filtering, modal video, game scoring/collision/restart, website navigation and source page links.
-- Assets: local H.264 MP4, 24 fps, no audio on autoplay previews, fast-start metadata, JPEG posters. The original downloads are kept outside the application repository.
+`npm test` covers saved-library retention/failures, preview motion lifecycle, audio analysis and the new Worker routes. Browser checks cover desktop/phone layouts, navigation/menus, video and audio playback, local upload/export, gallery filtering, Orbit controls and website interactions. Exported MP4s are checked for valid H.264/AAC streams. Manual browser checks complement the automated tests; hosted paid inference is not exercised during release verification.

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createPreviewMotion } from "../public/js/preview-motion.js";
-function setup({ reduced = false, saveData = false } = {}) {
+function setup({ reduced = false, saveData = false, withButton = true } = {}) {
   const pref = new EventTarget();
   pref.matches = reduced;
   const connection = new EventTarget();
@@ -44,7 +44,7 @@ function setup({ reduced = false, saveData = false } = {}) {
   let suspended = false;
   const control = createPreviewMotion({
     videos,
-    button,
+    button: withButton ? button : undefined,
     root,
     isSuspended: () => suspended,
   });
@@ -138,4 +138,14 @@ test("changed accessibility and data preferences stop active previews", () => {
   f.connection.saveData = true;
   f.connection.dispatchEvent(new Event("change"));
   assert.equal(f.videos[0].paused, true);
+});
+
+test("homepage motion works without a global control and respects accessibility", () => {
+  const f = setup({ withButton: false });
+  f.visible(0, true);
+  assert.equal(f.videos[0].paused, false);
+  f.pref.matches = true;
+  f.pref.dispatchEvent(new Event("change"));
+  assert.equal(f.videos[0].paused, true);
+  assert.equal(f.control.playing, false);
 });

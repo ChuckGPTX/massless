@@ -357,10 +357,13 @@ function autoGrow() {
 
 async function init() {
   state.rig = await loadRig();
+  const params = new URLSearchParams(location.search);
   // Remembered model; earlier visits stored an engine instead.
   const legacy = { pollinations: 'sana', comfy: 'comfy' }[ls.get('massless.engine')];
   const saved = ls.get('massless.image-model') || legacy;
-  if (MODELS[saved]) state.model = saved;
+  if (Object.hasOwn(MODELS, saved)) state.model = saved;
+  const linkedModel = params.get('model');
+  if (Object.hasOwn(MODELS, linkedModel)) state.model = linkedModel;
   updateChips();
   refreshPrompt(true);
   buildInspo();
@@ -381,8 +384,15 @@ async function init() {
   // A click inside a popover that rebuilt itself (ComfyUI settings) lands on a detached node: not outside.
   document.addEventListener('click', (e) => { if (popOwner && e.target.isConnected && !$('#pop').contains(e.target) && !popOwner.contains(e.target)) closePop(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && popOwner) { const c = popOwner; closePop(); c.focus(); } });
-  const params = new URLSearchParams(location.search);
   if (params.get('prompt')) { $('#subject').value = params.get('prompt'); refreshPrompt(true); autoGrow(); }
+  const panel = params.get('panel');
+  if (panel === 'prompt') $('#subject').focus();
+  else if (['model', 'camera', 'lens', 'aspect', 'scene'].includes(panel) || linkedModel === 'comfy') {
+    const kind = linkedModel === 'comfy' ? 'model' : panel;
+    const chip = document.querySelector(`[data-pop="${kind}"]`);
+    chip.focus();
+    openPop(kind, chip);
+  }
   window.massless = { state };
 }
 

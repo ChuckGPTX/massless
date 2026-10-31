@@ -1009,7 +1009,8 @@ function init() {
   else if (location.hash === '#captions' || p.get('tab') === 'captions') showTab('cap');
   else if (location.hash === '#extract' || p.get('tab') === 'extract') showTab('ext');
   else showTab('voice');
-  if (p.get('engine') === 'melo' || p.get('lang')) selectEngine('melo');
+  if (['kokoro', 'melo'].includes(p.get('engine'))) selectEngine(p.get('engine'));
+  else if (p.get('lang')) selectEngine('melo');
   if (p.get('lang') && MELO_LANGS.some((l) => l.id === p.get('lang'))) selectLang(p.get('lang'));
   if (p.get('text')) { $('#script').value = p.get('text').slice(0, 2000); chars(); }
   restoreHistory();

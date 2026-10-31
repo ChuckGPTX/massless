@@ -23,7 +23,7 @@ Keep headline and navigation as live HTML. Provide descriptive alternative text.
 
 The `public/media/showcase/` files were commissioned for the Explore gallery using the exact Higgsfield API model endpoints requested by the project owner. They are reference media, not demonstrations of Massless model output. No API key, provider job URL or private account metadata is shipped to the browser. `provenance.json` records prompts, model endpoints, settings, checksums and web asset sizes.
 
-Downloaded originals are converted to H.264 MP4 at 24 fps and 960 pixels wide with audio removed, plus JPEG posters extracted from their actual frames. The Marketing Studio character image is used as the target for the single requested Genjutsu Light transfer. The source dance was generated with Kling 4.0. No real-person reference was uploaded.
+Downloaded originals are converted to H.264 MP4 at 24 fps and 960 pixels wide with audio removed, plus JPEG posters extracted from their actual frames. The Marketing Studio character image is used as the target for the single requested Genjutsu Light transfer. The source dance was generated with Kling 4.0. No real-person reference was uploaded for this earlier robot/dancer batch. The later Showtime batch below uses the user-supplied performer photo.
 
 The native LiDAR and Vanish active posters are frames extracted from Massless's existing effect clips at 1.8 and 1.3 seconds, respectively. Original Canvas game/3D demos and the HTML/CSS website study are included under the repository's MIT code license.
 
@@ -35,3 +35,19 @@ The native LiDAR and Vanish active posters are frames extracted from Massless's 
 - [Marketing Studio Image](https://open.higgsfield.ai/models/marketing-studio/image/playground)
 
 Pre-rendered references do not make these model implementations open source and do not inherit the repository's software license automatically. Consult the provider terms for generated asset use. The site can run without a Higgsfield account.
+
+## Showtime and Music Preview
+
+The user supplied the Tone Da Boss Showtime photograph and explicitly requested a music-video preview and publication on the site. The original photograph stays outside the public repository. Kling 4.0 generated a stylized animated wrestling-ring performance from a text description. Genjutsu Light transferred that motion to the supplied performer image. These are commissioned previews, not outputs of Massless's native video renderer. Provider-generated audio was replaced with an original Massless synthesized instrumental; no artist vocals or original Showtime recording are included.
+
+`showtime-preview.mp4` was rendered by the local Massless Music Preview tool from the generated animated clip’s poster and that instrumental. The new paid clip batch used about $2.24 of the separately authorized $5, measured by the provider's rounded balance change. Prompt/settings/checksum records are in `public/media/music/provenance.json`. Provider job URLs, credentials and account records are not shipped.
+
+## New camera-scene studies
+
+Four original images were generated in ChatGPT: velvet cinema, botanical conservatory, skateboard portrait and floating observatory. They are illustrative promotional artwork, not claimed output of Massless's image models. No input images were supplied for this batch. Web delivery uses JPEG at up to 1280 pixels. Exact prompts and hashes are in `public/media/art/new-studies-provenance.json`.
+
+The 28 camera presets use distinct scene assets. Seven cards use existing motion clips; the other 21 use still images. A scene thumbnail is not a rendered demonstration of that camera movement. Selecting a preset keeps the user's current input image.
+
+## Form & Field website images
+
+The pavilion, ceramics and lounge images in `public/media/website/` were generated through the live Massless Image tool with FLUX.1 schnell. The responsive site uses those images in an original HTML/CSS layout and offers prompt-remix links. See the folder's provenance JSON for known seeds and file checksums; missing original metadata is explicitly marked.

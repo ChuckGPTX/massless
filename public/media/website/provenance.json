@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-30",
+  "generator": "Massless Image studio using Cloudflare Workers AI",
+  "model": "FLUX.1 schnell",
+  "notice": "Original images generated through the live Massless Image tool for the Form & Field website study. Prompt-remix controls are in demo-site/studio.js.",
+  "images": [
+    {
+      "name": "pavilion",
+      "seed": 454972609,
+      "description": "Sunlit architectural pavilion with an oculus and reflecting pool; full original prompt was not retained."
+    },
+    {
+      "name": "ceramics",
+      "seed": 359217594
+    },
+    {
+      "name": "lounge",
+      "seed": null,
+      "note": "Original seed was not retained."
+    }
+  ],
+  "files": [
+    {
+      "path": "media/website/ceramics.jpg",
+      "bytes": 106861,
+      "sha256": "919b8b459029ecc6354c42db9dc7a4b13c82e8b5c69c502d71ead56053345c42"
+    },
+    {
+      "path": "media/website/lounge.jpg",
+      "bytes": 133466,
+      "sha256": "423a7524f7b8e99faf4a6681dad57c6d35723b1e9a6942a37c6842748843a485"
+    },
+    {
+      "path": "media/website/pavilion.jpg",
+      "bytes": 209161,
+      "sha256": "5c826823ed182428813a561b239633176b51148a70eb697a9effb17ab361de24"
+    }
+  ]
+}

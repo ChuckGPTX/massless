@@ -3,6 +3,8 @@ import { createPreviewMotion } from "../preview-motion.js";
 import { drawCrystal, createOrbitGame } from "../studio-demos.js";
 const $ = (s) => document.querySelector(s);
 const studies = [
+  ["showtime-animated", "Showtime, animated", "Kling 4.0", "animation", "A championship moment in a whole new style."],
+  ["glass-tide", "Glass tide", "Kling 4.0", "cinema", "A glass koi swimming through a coral dreamscape."],
   [
     "paper-city",
     "Paper city",
@@ -22,7 +24,7 @@ const studies = [
     "Borrow a little motion",
     "Genjutsu Light",
     "character",
-    "The dance reference, recast as our original robot.",
+    "One dance, recast as our original robot.",
   ],
   [
     "clay-garden",
@@ -43,11 +45,13 @@ const studies = [
     "The starting move",
     "Kling 4.0",
     "character",
-    "The original six-second motion-transfer source.",
+    "The original six-second dance.",
   ],
 ];
 // Publish only downloaded and verified outputs. Pending provider jobs stay off the page.
 const published = new Set([
+  "showtime-animated",
+  "glass-tide",
   "paper-city",
   "clay-garden",
   "frost-bloom",
@@ -56,16 +60,18 @@ const published = new Set([
 ]);
 for (const [id, title, model, category, description] of studies) {
   if (!published.has(id)) continue;
+  const folder = id === "showtime-animated" ? "music" : "showcase";
   const card = document.createElement("button");
   card.type = "button";
   card.className = "study";
   card.dataset.category = category;
-  card.innerHTML = `<div class="study-visual"><video muted loop playsinline preload="none" poster="/media/showcase/${id}.jpg" data-src="/media/showcase/${id}.mp4" aria-label="${title}"></video><span class="media-label">${model.toUpperCase()} · REFERENCE</span><span class="study-play" aria-hidden="true">▶</span></div><h3>${title}</h3><p>${description}</p>`;
+  card.innerHTML = `<div class="study-visual"><video muted loop playsinline preload="none" poster="/media/${folder}/${id}.jpg" data-src="/media/${folder}/${id}.mp4" aria-label="${title}"></video><span class="media-label">${model.toUpperCase()}</span><span class="study-play" aria-hidden="true">▶</span></div><h3>${title}</h3><p>${description}</p>`;
   card.addEventListener("click", () => {
     $("#reference-dialog-title").textContent = title;
+    $("#reference-provider-note").hidden = false;
     $("#character-reference").hidden = id !== "robot-dance";
     $("#reference-credit").textContent = `${model} · ${description}`;
-    $("#reference-player").src = `/media/showcase/${id}.mp4`;
+    $("#reference-player").src = `/media/${folder}/${id}.mp4`;
     $("#reference-dialog").showModal();
     $("#reference-player")
       .play()
@@ -73,6 +79,15 @@ for (const [id, title, model, category, description] of studies) {
   });
   $("#reference-grid").append(card);
 }
+$("#showtime-play").addEventListener("click", () => {
+  $("#reference-dialog-title").textContent = "Tone Da Boss · Showtime";
+  $("#reference-provider-note").hidden = true;
+  $("#character-reference").hidden = true;
+  $("#reference-credit").textContent = "Genjutsu Light · animated source motion by Kling 4.0 · user-provided photograph · original Massless demo instrumental, no artist vocals.";
+  $("#reference-player").src = "/media/music/showtime-transfer.mp4";
+  $("#reference-dialog").showModal();
+  $("#reference-player").play().catch(() => {});
+});
 $("#reference-dialog").addEventListener("close", () =>
   $("#reference-player").pause(),
 );
@@ -91,7 +106,6 @@ let previewTime = 0,
   last = performance.now();
 const motion = createPreviewMotion({
   videos: document.querySelectorAll("video[data-src]"),
-  button: $("#motion-toggle"),
   isSuspended: () => !!document.querySelector("dialog[open]"),
 });
 const observer = new IntersectionObserver(

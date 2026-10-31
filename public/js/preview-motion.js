@@ -18,8 +18,10 @@ export function createPreviewMotion({
       "previews-paused",
       paused || document.hidden || isSuspended(),
     );
-    button.textContent = paused ? "Play previews" : "Pause previews";
-    button.setAttribute("aria-pressed", String(paused));
+    if (button) {
+      button.textContent = paused ? "Play previews" : "Pause previews";
+      button.setAttribute("aria-pressed", String(paused));
+    }
     for (const video of media) {
       if (allowed(video)) {
         if (!video.getAttribute("src")) video.src = video.dataset.src;
@@ -44,7 +46,7 @@ export function createPreviewMotion({
     { threshold: [0, 0.15] },
   );
   media.forEach((video) => observer.observe(video));
-  button.addEventListener("click", () => {
+  button?.addEventListener("click", () => {
     paused = !paused;
     sync();
   });

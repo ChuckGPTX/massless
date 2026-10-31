@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-30",
+  "notice": "Commissioned showcase media, not output of the Massless video renderer. The app has no runtime Higgsfield dependency. The user supplied and authorized the performer photo for these previews; the original photo is retained privately outside the public repository. Model and image rights do not inherit the MIT code license.",
+  "audio": "Original Massless synthesized instrumental; no artist vocals or original Showtime recording. Replaces provider-generated audio in the published clips.",
+  "generations": [
+    {
+      "name": "showtime-animated",
+      "provider": "Higgsfield API",
+      "model": "kling-video/v4.0/text-to-video",
+      "prompt": "Premium stylized 3D animated hip-hop music video, one continuous full-body shot inside a professional wrestling ring. A confident Black male hip-hop performer with long braids, trimmed beard, black sunglasses, white number 41 sports jersey with dark green sleeves, dark trousers and a large gold championship belt over his left shoulder. He bounces to a 120 BPM beat, takes two smooth steps forward, gestures rhythmically with his free right hand, then lifts the championship belt in celebration. Colorful clay-like 3D character design, cinematic gold and emerald arena lighting, red ring ropes, soft cheering crowd bokeh, low-angle gentle camera push-in. Keep one performer clearly visible from head to feet for the whole shot, stable anatomy, no cuts, no logos, no captions. Playful triumphant energy, polished animated music-video quality.",
+      "duration_requested_seconds": 6,
+      "duration_actual_seconds": 6.041667,
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "input": "Text description only"
+    },
+    {
+      "name": "showtime-transfer",
+      "provider": "Higgsfield API",
+      "model": "higgsfield/genjutsu-light/motion-transfer/v1.0",
+      "prompt": "Recast the central animated wrestler as the real performer shown in the attached photo. Preserve his face, dark skin tone, long braids, sunglasses, white number 41 jersey with dark green sleeves and gold championship belt. Photorealistic premium hip-hop music video in a wrestling ring, emerald and amber arena lighting, red ring ropes, enthusiastic crowd softly out of focus. Follow the source performance, rhythmic hand gestures and belt celebration, same steady camera push. One consistent performer, natural anatomy, energetic and triumphant. No captions or added logos.",
+      "resolution": "720p",
+      "duration_actual_seconds": 7,
+      "input": "User-supplied Tone Da Boss Showtime photo plus the animated clip as the motion source"
+    }
+  ],
+  "local_preview": {
+    "name": "showtime-preview",
+    "renderer": "Massless Music Preview (Canvas + WebCodecs)",
+    "score": {
+      "style": "trap",
+      "bpm": 120,
+      "beats": 32,
+      "dropBeat": 8,
+      "endBeat": 28,
+      "seed": 410041
+    },
+    "duration_seconds": 16,
+    "artwork": "Poster from the generated animated Showtime clip; original supplied photo is not published."
+  },
+  "files": [
+    {
+      "path": "media/music/demo-instrumental.mp3",
+      "bytes": 259732,
+      "sha256": "c814a48f08b4883f5c742db275b5d3d2634f1d223d53b675bf6d020fb5c0ed5b"
+    },
+    {
+      "path": "media/music/showtime-animated.jpg",
+      "bytes": 36583,
+      "sha256": "d531fc34e21d4ca27db5ec151b782dfe9f35b4ea7cfe0327f4152cd0ee03c2a5"
+    },
+    {
+      "path": "media/music/showtime-animated.mp4",
+      "bytes": 904382,
+      "sha256": "e8f782fc70b9e80d8421c23513d6bc06a06d42301b1f4d5a9d5a664ed7611052"
+    },
+    {
+      "path": "media/music/showtime-preview.jpg",
+      "bytes": 59980,
+      "sha256": "1a1dbb54391179c5fe33af4121157ce2cf043fcaf51065f868e8da263e411a0d"
+    },
+    {
+      "path": "media/music/showtime-preview.mp4",
+      "bytes": 1043043,
+      "sha256": "9ca5b71f964314b1efa9329583340dc589016d428e6dff785416ce17cb745adc"
+    },
+    {
+      "path": "media/music/showtime-transfer.jpg",
+      "bytes": 39266,
+      "sha256": "86dad400f890befa8ba25a35484341922bb7578c8f9d8c5d07c1cf74b2cb6087"
+    },
+    {
+      "path": "media/music/showtime-transfer.mp4",
+      "bytes": 1398901,
+      "sha256": "5d034a6fbe7eb88710470adc1dedb26cb89e7c7dde3a882e3ac32e173754b7bd"
+    }
+  ]
+}
