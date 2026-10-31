@@ -335,6 +335,14 @@ async function selectEffect(id, look, { scroll = false } = {}) {
   startLoop();
 }
 
+// Existing Massless-rendered demonstrations, curated by the move they show.
+// Keep the selected user image unchanged when choosing a move.
+const MOVE_DEMOS = {
+  'crash-zoom': 'samurai', 'pan-right': 'diner', 'crane-up': 'jellyfish',
+  'dolly-zoom': 'train', 'float': 'fisherman', 'truck-right': 'bmx',
+  'dolly-out': 'summit', 'bullet-time': 'dancer',
+};
+
 function buildLibrary() {
   const groups = $('#groups');
   const lib = $('#lib');
@@ -355,8 +363,11 @@ function buildLibrary() {
     lib.append(card);
   }
   for (const m of MOVES) {
+    const sample = MOVE_DEMOS[m.id];
+    const preview = sample ? `/media/clips/wall-${sample}.mp4` : `/media/clips/move-${m.id}.mp4`;
+    const poster = sample ? `/media/art/${sample}.jpg` : `/media/clips/move-${m.id}.jpg`;
     const card = el('button', { type: 'button', class: 'mcard', role: 'radio', 'aria-checked': String(m.id === state.move), 'data-key': m.id, 'data-group': m.group, title: m.hint },
-      el('div', { class: 'frame' }, el('video', { muted: true, loop: true, playsinline: true, preload: 'none', poster: `/media/clips/move-${m.id}.jpg`, 'data-src': `/media/clips/move-${m.id}.mp4` }), el('span', { class: 'use' }, m.id === state.move ? 'Selected' : 'Use move')),
+      el('div', { class: 'frame' }, el('video', { muted: true, loop: true, playsinline: true, preload: 'none', poster, 'data-src': preview }), el('span', { class: 'use' }, m.id === state.move ? 'Selected' : 'Use move')),
       el('strong', {}, m.name), el('span', {}, `${GROUP_LABEL[m.group]} · ${m.hint}`));
     card.addEventListener('click', () => selectMove(m.id, { scroll: true }));
     lib.append(card);

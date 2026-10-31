@@ -1,110 +1,145 @@
-import { MOVES } from '../moves.js';
-import { autoplayVideos, bindDialogs } from '../ui.js';
-
+import { bindDialogs } from "../ui.js";
+import { createPreviewMotion } from "../preview-motion.js";
+import { drawCrystal, createOrbitGame } from "../studio-demos.js";
 const $ = (s) => document.querySelector(s);
-const GROUP_LABEL = { push: 'Push and pull', orbit: 'Orbit', rise: 'Crane and tilt', slide: 'Slide and pan', feel: 'Texture' };
-const TRENDING = ['dolly-zoom', 'crash-zoom', 'bullet-time', 'fpv', 'wide-orbit', 'crane-up', 'snorricam', 'rack-focus', 'truck-right', 'dutch-roll', 'earthquake', 'handheld'];
-
-function buildTrending() {
-  const row = $('#move-row');
-  for (const id of TRENDING) {
-    const m = MOVES.find((x) => x.id === id);
-    if (!m) continue;
-    const a = document.createElement('a');
-    a.className = 'mv';
-    a.href = `/video?move=${m.id}`;
-    a.innerHTML = `<div class="frame"><video muted loop playsinline preload="none" poster="/media/clips/move-${m.id}.jpg" data-src="/media/clips/move-${m.id}.mp4"></video><span class="cta">Use move</span></div><strong>${m.name}</strong><span>${GROUP_LABEL[m.group] || ''}</span>`;
-    row.append(a);
-  }
-}
-
-const MADE = [
-  ['samurai', 'Samurai in a rain-soaked neon alley', 'Crash zoom in'],
-  ['diner', 'Waitress pouring coffee in a neon-lit diner', 'Pan right'],
-  ['jellyfish', 'Diver among glowing jellyfish', 'Crane up'],
-  ['train', 'Retro-futuristic train at a desert station', 'Dolly zoom in'],
-  ['fisherman', 'Old fisherman mending nets at dawn', 'Float'],
-  ['bmx', 'Kid jumping a BMX bike over a puddle at sunset', 'Truck right'],
-  ['summit', 'Mountaineer on a ridge above the clouds', 'Dolly out'],
-  ['dancer', 'Ballet dancer leaping in an abandoned theater', 'Bullet time'],
+const studies = [
+  [
+    "paper-city",
+    "Paper city",
+    "Wan 3.0 Prime",
+    "animation",
+    "A handmade world, one tiny tram at a time.",
+  ],
+  [
+    "lunar-rally",
+    "Lunar rally",
+    "Kling 4.0",
+    "cinema",
+    "Dust, speed and a sky full of possibility.",
+  ],
+  [
+    "robot-dance",
+    "Borrow a little motion",
+    "Genjutsu Light",
+    "character",
+    "The dance reference, recast as our original robot.",
+  ],
+  [
+    "clay-garden",
+    "A little sunshine",
+    "Wan 3.0 Prime",
+    "animation",
+    "A clay character. A flower. A small surprise.",
+  ],
+  [
+    "frost-bloom",
+    "Frost bloom",
+    "Wan 3.0 Prime",
+    "cinema",
+    "Glass petals, growing into the light.",
+  ],
+  [
+    "motion-source",
+    "The starting move",
+    "Kling 4.0",
+    "character",
+    "The original six-second motion-transfer source.",
+  ],
 ];
-
-// Stills from real projects by the Massless maker, moved by Massless's camera. tall = 9:16.
-const PROJECTS = [
-  ['tp-greenhouse', 'Tiny Prompters', 'https://tinyprompters.com', 'Robots tending a seedling in a dome greenhouse on the Moon', 'Dolly in'],
-  ['tp-city', 'Tiny Prompters', 'https://tinyprompters.com', 'Kids and a robot walking through a green future city', 'Crane up', true],
-  ['t1-keyart', 'T1 Vendetta', '', 'T1 Vendetta 16-bit fighting game key art', 'Dolly in'],
-  ['t1-skywalk', 'T1 Vendetta', '', 'Pixel-art skywalk over a neon street at night', 'Crane up', true],
-  ['tp-crew', 'Tiny Prompters', 'https://tinyprompters.com', 'Astra, Rivet and Quark, the Tiny Prompters robot crew', 'Arc right'],
-  ['tp-garden', 'Tiny Prompters', 'https://tinyprompters.com', 'A little robot beside a sprout in a space garden', 'Dolly zoom', true],
-  ['t1-navypier', 'T1 Vendetta', '', 'Pixel-art pier with a Ferris wheel on a snowy night', 'Arc right'],
-];
-
-function hoverCard(a) {
-  const v = a.querySelector('video');
-  const start = () => {
-    if (!v.src) v.src = v.dataset.src;
-    v.play().then(() => a.classList.add('playing')).catch(() => {});
-  };
-  const stop = () => { v.pause(); a.classList.remove('playing'); };
-  a.addEventListener('pointerenter', start);
-  a.addEventListener('pointerleave', stop);
-  a.addEventListener('focus', start);
-  a.addEventListener('blur', stop);
+// Publish only downloaded and verified outputs. Pending provider jobs stay off the page.
+const published = new Set([
+  "paper-city",
+  "clay-garden",
+  "frost-bloom",
+  "motion-source",
+  "robot-dance",
+]);
+for (const [id, title, model, category, description] of studies) {
+  if (!published.has(id)) continue;
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "study";
+  card.dataset.category = category;
+  card.innerHTML = `<div class="study-visual"><video muted loop playsinline preload="none" poster="/media/showcase/${id}.jpg" data-src="/media/showcase/${id}.mp4" aria-label="${title}"></video><span class="media-label">${model.toUpperCase()} · REFERENCE</span><span class="study-play" aria-hidden="true">▶</span></div><h3>${title}</h3><p>${description}</p>`;
+  card.addEventListener("click", () => {
+    $("#reference-dialog-title").textContent = title;
+    $("#character-reference").hidden = id !== "robot-dance";
+    $("#reference-credit").textContent = `${model} · ${description}`;
+    $("#reference-player").src = `/media/showcase/${id}.mp4`;
+    $("#reference-dialog").showModal();
+    $("#reference-player")
+      .play()
+      .catch(() => {});
+  });
+  $("#reference-grid").append(card);
 }
-
-function buildProjects() {
-  const box = $('#projects');
-  if (!box) return;
-  for (const [key, project, site, alt, move, tall] of PROJECTS) {
-    const a = document.createElement('a');
-    a.className = tall ? 'reel-card tall' : 'reel-card';
-    a.href = site || '/video';
-    if (site) a.rel = 'noopener';
-    a.innerHTML = `<video muted loop playsinline preload="none" poster="/media/art/${key}.jpg" data-src="/media/clips/wall-${key}.mp4" aria-label="${alt}"></video><span class="cap">${project} · ${move}</span>`;
-    box.append(a);
+$("#reference-dialog").addEventListener("close", () =>
+  $("#reference-player").pause(),
+);
+const crystal = $("#crystal-preview"),
+  preview = $("#game-preview"),
+  gameCanvas = $("#game-canvas");
+const game = createOrbitGame(gameCanvas, {
+  status: $("#game-status"),
+  onEnd: () => {
+    $("#game-start").textContent = "Play again";
+  },
+});
+const attract = createOrbitGame(preview);
+const visible = new Set();
+let previewTime = 0,
+  last = performance.now();
+const motion = createPreviewMotion({
+  videos: document.querySelectorAll("video[data-src]"),
+  button: $("#motion-toggle"),
+  isSuspended: () => !!document.querySelector("dialog[open]"),
+});
+const observer = new IntersectionObserver(
+  (entries) => {
+    for (const e of entries)
+      e.isIntersecting ? visible.add(e.target) : visible.delete(e.target);
+  },
+  { threshold: 0.05 },
+);
+[crystal, preview].forEach((c) => observer.observe(c));
+drawCrystal(crystal);
+attract.render(0, true);
+game.render();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  if (motion.playing) {
+    previewTime += dt;
+    if (visible.has(crystal)) drawCrystal(crystal, previewTime);
+    if (visible.has(preview)) attract.render(previewTime, true);
   }
-}
-
-function buildMade() {
-  const box = $('#masonry');
-  for (const [key, alt, move] of MADE) {
-    const a = document.createElement('a');
-    a.href = `/video?sample=${key}`;
-    a.innerHTML = `<img loading="lazy" src="/media/art/${key}.jpg" alt="${alt}"><video muted loop playsinline preload="none" data-src="/media/clips/wall-${key}.mp4" data-hover></video><span class="cap">${move}</span>`;
-    hoverCard(a);
-    box.append(a);
+  if ($("#game-dialog").open && !document.hidden) {
+    game.step(dt);
+    game.render(previewTime);
   }
+  requestAnimationFrame(frame);
 }
-
-function bindRail() {
-  const rail = $('#rail');
-  const prev = $('#rail-prev');
-  const next = $('#rail-next');
-  const step = () => (rail.querySelector('.launch')?.getBoundingClientRect().width || 400) + 18;
-  next.addEventListener('click', () => rail.scrollBy({ left: step(), behavior: 'smooth' }));
-  prev.addEventListener('click', () => rail.scrollBy({ left: -step(), behavior: 'smooth' }));
-  const sync = () => {
-    prev.hidden = rail.scrollLeft < 8;
-    next.hidden = rail.scrollLeft + rail.clientWidth > rail.scrollWidth - 8;
-  };
-  rail.addEventListener('scroll', sync, { passive: true });
-  window.addEventListener('resize', sync);
-  sync();
-}
-
-buildTrending();
-buildProjects();
-buildMade();
-bindRail();
+requestAnimationFrame(frame);
+$("#game-start").addEventListener("click", () => {
+  game.start();
+  $("#game-start").textContent = "Restart";
+});
+$("#game-dialog").addEventListener("close", () => {
+  game.stop();
+  $("#game-start").textContent = "Start game";
+});
+for (const button of document.querySelectorAll("[data-filter]"))
+  button.addEventListener("click", () => {
+    for (const b of document.querySelectorAll("[data-filter]")) {
+      b.classList.toggle("active", b === button);
+      b.setAttribute("aria-pressed", String(b === button));
+    }
+    for (const card of document.querySelectorAll(".study"))
+      card.hidden =
+        button.dataset.filter !== "all" &&
+        card.dataset.category !== button.dataset.filter;
+    motion.sync();
+  });
 bindDialogs();
-autoplayVideos(document.querySelectorAll('video[data-src]:not([data-hover])'));
-
-// the trailer opens in a dialog with sound; it stops when the dialog closes
-const trailer = document.getElementById('trailer');
-const trailerVideo = document.getElementById('trailer-video');
-if (trailer && trailerVideo) {
-  document.getElementById('trailer-card')?.addEventListener('click', () => { trailerVideo.currentTime = 0; trailerVideo.muted = false; trailerVideo.play().catch(() => {}); });
-  trailer.addEventListener('close', () => trailerVideo.pause());
-  if (location.hash === '#trailer') { trailer.showModal(); }
-}
+for (const dialog of document.querySelectorAll("dialog"))
+  dialog.addEventListener("toggle", () => motion.sync());

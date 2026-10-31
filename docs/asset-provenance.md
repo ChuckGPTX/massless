@@ -4,8 +4,8 @@ Created October 30, 2026 using the built-in OpenAI image-generation tool in gene
 
 | Web asset | Role | Dimensions | Delivery |
 | --- | --- | --- | --- |
-| `public/media/art/massless-portal-v1.jpg` | Homepage hero and social preview | 1536 × 1024 | High-priority hero |
-| `public/media/art/massless-world-v1.jpg` | Image-to-motion workflow promotion | 1536 × 1024 | Lazy-loaded |
+| `public/media/art/massless-portal-v1.jpg` | Original brand artwork and social preview | 1536 × 1024 | Social preview |
+| `public/media/art/massless-world-v1.jpg` | Original floating-world brand artwork | 1536 × 1024 | Retained asset |
 
 ## Portal prompt
 
@@ -18,3 +18,20 @@ Use case: stylized-concept. Asset type: landscape 3:2 editorial artwork for a pr
 ## Presentation
 
 Keep headline and navigation as live HTML. Provide descriptive alternative text. Maintain the distinction between brand artwork and the “Made in Massless” clips, whose motion is rendered by Massless. No image-generation API dependency is added to the app.
+
+## Commissioned motion references (October 30, 2026)
+
+The `public/media/showcase/` files were commissioned for the Explore gallery using the exact Higgsfield API model endpoints requested by the project owner. They are reference media, not demonstrations of Massless model output. No API key, provider job URL or private account metadata is shipped to the browser. `provenance.json` records prompts, model endpoints, settings, checksums and web asset sizes.
+
+Downloaded originals are converted to H.264 MP4 at 24 fps and 960 pixels wide with audio removed, plus JPEG posters extracted from their actual frames. The Marketing Studio character image is used as the target for the single requested Genjutsu Light transfer. The source dance was generated with Kling 4.0. No real-person reference was uploaded.
+
+The native LiDAR and Vanish active posters are frames extracted from Massless's existing effect clips at 1.8 and 1.3 seconds, respectively. Original Canvas game/3D demos and the HTML/CSS website study are included under the repository's MIT code license.
+
+### Reference model sources
+
+- [Kling 4.0 text-to-video](https://open.higgsfield.ai/models/kling-video/v4.0/text-to-video/playground)
+- [Wan 3.0 Prime text-to-video](https://open.higgsfield.ai/models/alibaba/wan-3.0-prime/text-to-video/playground)
+- [Genjutsu Light motion transfer](https://open.higgsfield.ai/models/higgsfield/genjutsu-light/motion-transfer/v1.0/playground)
+- [Marketing Studio Image](https://open.higgsfield.ai/models/marketing-studio/image/playground)
+
+Pre-rendered references do not make these model implementations open source and do not inherit the repository's software license automatically. Consult the provider terms for generated asset use. The site can run without a Higgsfield account.

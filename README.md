@@ -160,3 +160,7 @@ Games, a website builder, expanded contract/e-sign workflows and hosted Runpod i
 MIT, see [LICENSE](LICENSE). Uses FLUX.1 [schnell] by Black Forest Labs (Apache-2.0), Depth Anything V2 Small (Apache-2.0), Transformers.js by Hugging Face (Apache-2.0), mp4-muxer by Vanilagy (MIT), Big Shoulders Display and Instrument Sans (SIL Open Font License).
 
 Inspired by Comfy's Open Source Higgsfield challenge and by REA (Reverse Engineer Anything). Massless contains no code, prompts, assets or branding from Higgsfield; features were rebuilt from public descriptions of their behavior.
+
+## Motion-first Explore
+
+Explore now leads with native effects, live browser demos and a credited reference-film gallery. The Orbit game and Form & Field website are original, small open-source demos. The gallery's commissioned Kling/Wan/Genjutsu films are visual references, not outputs of the current Massless tools. No paid generation API is required to run the site. See [release notes and GPU roadmap](docs/MOTION-RELEASE.md) and [artwork provenance](docs/asset-provenance.md).
