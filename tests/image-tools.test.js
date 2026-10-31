@@ -269,11 +269,13 @@ test("every downloaded file is permissive, pinned and has a SHA-256; the served 
     assert.match(f.sha256, /^[0-9a-f]{64}$/);
     assert.ok(f.size > 0);
     if (f.url.startsWith("https://huggingface.co/")) assert.match(f.url, /\/resolve\/[0-9a-f]{40}\//);
+    else if (f.url.startsWith("https://cdn.jsdelivr.net/gh/")) assert.match(f.url, /^https:\/\/cdn\.jsdelivr\.net\/gh\/ChuckGPTX\/massless@[0-9a-f]{40}\/public\/models\/[\w.-]+\.onnx$/);
     else if (f.url.startsWith("https://cdn.jsdelivr.net/")) assert.match(f.url, /@\d+\.\d+\.\d+\//);
-    else assert.match(f.url, /^\/models\/[\w.-]+\.onnx$/);
+    else assert.fail(`unpinned ${f.url}`);
   }
   const local = MODELS.esrgan.files.wasm;
-  const bytes = await readFile(new URL(`../public${local.url}`, import.meta.url));
+  // the CDN serves this repo's own copy at a pinned commit; the file in public/models must match it
+  const bytes = await readFile(new URL(`../public/models/${local.url.split("/").pop()}`, import.meta.url));
   assert.equal(bytes.length, local.size);
   assert.equal(createHash("sha256").update(bytes).digest("hex"), local.sha256);
 });
