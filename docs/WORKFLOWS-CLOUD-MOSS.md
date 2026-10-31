@@ -12,6 +12,8 @@ FLUX 3 Image Klein's official ComfyUI distilled template is included from `Comfy
 
 ## Supabase
 
+**Update 2026-10-31:** accounts and private projects moved to a dedicated Supabase project, `chucksi` (ref `njiwcpzqefgrmhbcjnxn`, us-east-2), created fresh with the schema in `supabase/schema.sql`. The shared `gorilla-city-2032` project was paused at the owner's request and no longer serves this site. The paragraphs below describe the original setup.
+
 The user selected the existing `gorilla-city-2032` project in ChuckGPTX's Org after the free-project limit prevented a new dedicated project. Changes are limited to `massless_projects`, `massless_assets`, `massless_workflow_runs` and the private `massless-private` storage bucket. `supabase/schema.sql` records the applied schema. Existing game tables, functions and auth settings were not changed.
 
 Every Chucksi table has owner-based RLS and authenticated grants; anonymous table access is revoked. Composite foreign keys prevent assigning assets/runs to someone else's project. Storage policies restrict paths to the signed-in user's UUID folder. Uploads are capped at 30 MB and allowed MIME types; signed downloads expire after five minutes. The browser receives only a Supabase publishable key. No service-role key is used. Sign-out targets only the current session, so another app's sessions are not globally revoked.

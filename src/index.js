@@ -465,6 +465,11 @@ async function fromOrigin(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // The site lives at chucksi.com. Old and www addresses redirect there with the same path (and the
+    // browser keeps any #fragment, so signing links still work). APIs answer on every host so open tabs keep working.
+    if ((url.hostname === 'massless.chucksi.com' || url.hostname === 'www.chucksi.com') && !url.pathname.startsWith('/api/') && (request.method === 'GET' || request.method === 'HEAD')) {
+      return new Response(null, { status: 301, headers: { location: `https://chucksi.com${url.pathname}${url.search}`, 'cache-control': 'public, max-age=3600' } });
+    }
     if (url.pathname === '/api/config' || url.pathname.startsWith('/api/generations')) return generationAPI(request, env);
     if (url.pathname === '/api/human') return humanPass(request, env);
     if ((GATED.has(url.pathname) || signGated(url.pathname)) && request.method === 'POST') {
