@@ -20,6 +20,9 @@ export const STUDIOS = [
     note: "Choose a model or connect your own workflow.",
     features: [
       item("Image workroom", "Reframe, grade and compose a new take", "/edit/", "pen", "NEW"),
+      item("Remove background", "Cut out any subject, free and on your device", "/edit/?tool=remove-bg", "cutout", "NEW"),
+      item("Upscale 2× / 4×", "Sharper, bigger images without the blur", "/edit/?tool=upscale", "expand", "NEW"),
+      item("Erase objects", "Brush out what does not belong", "/edit/?tool=erase", "eraser", "NEW"),
       item(
         "Create image",
         "Turn a scene into your next hero frame",

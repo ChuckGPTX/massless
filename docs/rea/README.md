@@ -84,6 +84,11 @@ Verdicts: **Use** = load or bundle in the MIT site; **Service** = run only as a 
 | [google-ai-edge/mediapipe](https://github.com/google-ai-edge/mediapipe), Selfie Segmenter | Apache-2.0 | Apache-2.0 (model card) | Use |
 | [ZHKKKe/MODNet](https://github.com/ZHKKKe/MODNet), `Xenova/modnet` | Apache-2.0 | Apache-2.0 | Use |
 | [ZhengPeng7/BiRefNet](https://github.com/ZhengPeng7/BiRefNet), `BiRefNet`, `BiRefNet_lite`, `onnx-community/BiRefNet_lite-ONNX` | MIT | MIT | Use / Service (video) |
+| `studioludens/birefnet-lite-512` (512 × 512 export of BiRefNet_lite; the 1024 exports run out of memory in browsers) | — | MIT (LICENSE in repo) | Use (Edit page) |
+| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN), `realesr-general-x4v3.pth` (v0.2.5.0) | BSD-3-Clause | BSD-3-Clause (release asset) | Use (Edit page, converted to ONNX and served by us) |
+| [mv-lab/swin2sr](https://github.com/mv-lab/swin2sr), `caidas/swin2SR-*`, `Xenova/swin2SR-*` | Apache-2.0 | Apache-2.0 | Use (not chosen: the x4 model was about 18× slower per pixel than Real-ESRGAN x4v3 on WebAssembly in our test) |
+| [Picsart-AI-Research/MI-GAN](https://github.com/Picsart-AI-Research/MI-GAN), `andraniksargsyan/migan` | MIT | MIT (`LICENSE-WEIGHTS`) | Use (Edit page) |
+| [advimman/lama](https://github.com/advimman/lama), `Carve/LaMa-ONNX` | Apache-2.0 | Apache-2.0 | Use (208 MB fixed 512 × 512 ONNX: too big for the browser tool) |
 | [facebookresearch/segment-anything](https://github.com/facebookresearch/segment-anything) | Apache-2.0 | Apache-2.0 | Use / Service |
 | [facebookresearch/sam2](https://github.com/facebookresearch/sam2), `facebook/sam2.1-hiera-tiny` | Apache-2.0 | Apache-2.0 | Use / Service |
 | `Xenova/slimsam-77-uniform` | — | Apache-2.0 | Use |

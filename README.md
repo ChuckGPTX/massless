@@ -19,6 +19,7 @@ Five showcase pages introduce the tools: `/studios/image/`, `/studios/video/`, `
 | **Launch Film** (`/film`) | Build a kinetic launch film from a brief, with typography, scenes, music and export. |
 | **3D** (`/3d`) | Image to 3D. Any still becomes a Gaussian splat you can orbit, built in the browser from its depth map, or a full object from Idol (speridlabs, Apache-2.0) running on your own GPU. Opens and exports standard 3DGS `.ply`. |
 | **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
+| **Image workroom** (`/edit`) | Reframe, grade and compose a product visual, plus three image AI tools that run on the visitor's device. **Remove background** (`/edit/?tool=remove-bg`): BiRefNet lite for any subject or MODNet for people; transparent PNG, or replace with a color, a blur of the original or a backdrop, with an edge-softness slider. **Upscale 2× / 4×** (`/edit/?tool=upscale`): Real-ESRGAN, tiled so memory stays bounded. **Erase object** (`/edit/?tool=erase`): brush over it, then MI-GAN fills the gap (or a no-download PatchMatch texture copy). Before/after slider, save to the library, PNG download; results carry from one tool to the next. |
 | **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Extract audio: drop a video or audio file you have the rights to and get MP3 (128–320 kbps), M4A or WAV, with trim, fades and loudness levelling, all in the browser. Deep links: `/audio?tab=captions`, `/audio?tab=extract`, `/audio?engine=melo&lang=es`. |
 
 Saved shots and audio live in the visitor's browser (IndexedDB). New saves never automatically delete older originals. The Image page loads older shots in batches of 24. If a save fails, the result stays available for download in that session and is visibly marked as unsaved. There are no accounts or cloud backups; browser data can still be cleared or evicted, so download work you want to keep.
@@ -38,6 +39,9 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 | Captions | Whisper large-v3-turbo | MIT | Cloudflare Workers AI free daily allocation (`/api/transcribe`, capped); audio is downmixed to 16 kHz mono in the browser first |
 | Sound beds | Massless synth (Web Audio) | MIT | The visitor's browser |
 | Video to MP3 | LAME 3.100 via wasm-media-encoders 0.7.0 (MP3), WebCodecs + mp4-muxer (M4A) | LGPL-2.0 / MIT | The visitor's browser; the encoder is loaded unmodified from jsDelivr and checked by SHA-256 |
+| Remove background | BiRefNet lite (512 × 512 ONNX) or MODNet | MIT / Apache-2.0 | The visitor's browser, WebGPU or WebAssembly, via ONNX Runtime Web |
+| Upscale 2× / 4× | Real-ESRGAN general x4v3 | BSD-3-Clause | The visitor's browser, WebGPU or WebAssembly |
+| Erase object | MI-GAN (512, Places2), or PatchMatch texture copy | MIT | The visitor's browser |
 | 3D, in the browser | Depth Anything V2 + Massless splat builder, rendered with Spark | Apache-2.0 / MIT | The visitor's browser |
 | 3D, full object | Idol (speridlabs) | Apache-2.0 | Your own NVIDIA GPU, through `comfy/idol_server.py` |
 
@@ -68,6 +72,23 @@ The effects need no video model either. They start from the same depth map:
 6. **Clones.** The camera slides sideways and copies of the subject from earlier in the move trail behind it: natural, rainbow or ghost glow.
 
 Every frame is a function of time only, so the preview, the MP4 and the tests see the same picture. The finish (lens, film, grade) and the recorder are the ones the moves use.
+
+## How the image tools work
+
+The Remove background, Upscale and Erase tools on `/edit` cost nothing per use: the model runs in the visitor's browser and the image never leaves the device. A module worker (`public/js/image-ai-worker.js`) runs ONNX Runtime Web 1.30.0 on WebGPU when the browser has it and on WebAssembly otherwise, so the page stays responsive. Every runtime and model file is pinned to an exact version or revision, checked against its SHA-256 before it runs (`public/js/image-models.js`) and stored in the browser's Cache API, so it downloads once. The page states the download size before first use, shows progress, and has a button to remove the downloaded files.
+
+| Tool | Model | Source (pinned) | License | Download |
+| --- | --- | --- | --- | --- |
+| Runtime | ONNX Runtime Web 1.30.0 (`ort.webgpu.bundle.min.mjs` + asyncify WASM) | jsDelivr, npm `onnxruntime-web@1.30.0` | MIT | 27 MB |
+| Remove background, any subject | BiRefNet lite, 512 × 512 ONNX re-export of `ZhengPeng7/BiRefNet_lite` | Hugging Face `studioludens/birefnet-lite-512` @ `962e679` | MIT | 98 MB (fp16, WebGPU) or 192 MB (fp32, WebAssembly) |
+| Remove background, people | MODNet, 8-bit ONNX | Hugging Face `Xenova/modnet` @ `fa2fa54` | Apache-2.0 | 6.6 MB |
+| Upscale 2× / 4× | Real-ESRGAN general x4v3 (`realesr-general-x4v3.pth`, release v0.2.5.0), converted to ONNX without changing the weights by `tools/convert_realesrgan.py` | This site, `public/models/realesr-general-x4v3.onnx` | BSD-3-Clause, see `LICENSES/` | 4.9 MB |
+| Erase object | MI-GAN 512 Places2 ONNX pipeline (the file the MI-GAN README links) | Hugging Face `andraniksargsyan/migan` @ `406830d` | MIT | 28 MB |
+
+- **Remove background** resizes the image to the model's input (512 × 512 for BiRefNet; short side 512 for MODNet), turns the output into an 8-bit matte, scales it back to full size, softens the edge on request and composites over the chosen background. Nothing else runs again when you change the background or the softness.
+- **Upscale** always runs the 4× model; 2× is its output halved with a box filter. The image goes through in tiles that each carry 34 pixels of context, exactly the network's reach (34 stacked 3 × 3 convolutions), so the stitched result is identical to one full-image pass: no seams. Inputs are capped at 1024 px (2×) and 768 px (4×) on the long side.
+- **Erase** turns brush strokes into a hole mask grown by a few pixels, crops around it and lets MI-GAN repaint only the hole. The no-download option reuses the coarse-to-fine PatchMatch inpainting from the Video page's clean plate (`inpaint` in `public/js/effects.js`).
+- Without WebGPU, BiRefNet needs about 3 GB of memory and up to a minute; MODNet is the light option for portraits. RMBG-2.0 is not used: its weights are non-commercial.
 
 ## Run it
 
@@ -125,6 +146,8 @@ python3 tests/pages_test.py voice audio   # also generates a Kokoro voiceover (d
 python3 tests/audio_test.py           # audio engine: every voice and every bed
 python3 tests/audio_page_test.py      # Audio page: MeloTTS chunking, Captions (short, CJK, 10-minute split) against mocks
 python3 tests/extract_audio_test.py   # Extract audio: MP3, WAV and M4A out, trim, fades, loudness, a queue, unreadable files
+python3 tests/edit_tools_test.py      # Edit: remove background, upscale, erase with real models, library, download, 390 px
+python3 tests/edit_tools_test.py heavy  # also BiRefNet (192 MB, about 3 GB of memory without WebGPU)
 python3 tests/office_test.py          # Office: every convert operation, edit and save, and Ask against a mock
 python3 tests/human_test.py           # the Turnstile human check: one check for concurrent calls, retries, readable failures
 python3 tests/three_d_test.py         # 3D: depth splat from a sample, then the Idol path against a mock server
@@ -158,7 +181,7 @@ Games, a website builder, expanded contract/e-sign workflows and hosted Runpod i
 
 ## Credits and license
 
-MIT, see [LICENSE](LICENSE). Uses FLUX.1 [schnell] by Black Forest Labs (Apache-2.0), Depth Anything V2 Small (Apache-2.0), Transformers.js by Hugging Face (Apache-2.0), mp4-muxer by Vanilagy (MIT), Big Shoulders Display and Instrument Sans (SIL Open Font License).
+MIT, see [LICENSE](LICENSE); third-party notices for the image tools' models are in [LICENSES/](LICENSES/). Uses FLUX.1 [schnell] by Black Forest Labs (Apache-2.0), Depth Anything V2 Small (Apache-2.0), Transformers.js by Hugging Face (Apache-2.0), ONNX Runtime Web by Microsoft (MIT), BiRefNet (MIT), MODNet (Apache-2.0), Real-ESRGAN (BSD-3-Clause), MI-GAN by Picsart AI Research (MIT), mp4-muxer by Vanilagy (MIT), Big Shoulders Display and Instrument Sans (SIL Open Font License).
 
 Inspired by Comfy's Open Source Higgsfield challenge and by REA (Reverse Engineer Anything). Massless contains no code, prompts, assets or branding from Higgsfield; features were rebuilt from public descriptions of their behavior.
 
