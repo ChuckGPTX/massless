@@ -1,0 +1,216 @@
+{
+  "id": "earnest-money-receipt",
+  "version": 1,
+  "title": "Earnest Money Receipt",
+  "category": "real-estate",
+  "summary": "Acknowledge receipt of an earnest money deposit and state how it will be held and released.",
+  "useWhen": "A title company, escrow agent, attorney or seller receives the buyer's deposit under a purchase contract.",
+  "watchOuts": [
+    "Licensees and escrow agents must follow state trust-account rules for holding deposits, including deposit deadlines and separate accounts. Sellers holding deposits themselves is risky for buyers.",
+    "If there is a dispute, most holders will not release the deposit without joint instructions or a court order. Some states have specific release procedures.",
+    "Confirm wiring instructions by phone using a known number. Earnest money wires are a top target for fraud."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "holder",
+      "label": "Escrow holder"
+    },
+    {
+      "id": "buyer",
+      "label": "Buyer"
+    }
+  ],
+  "variables": [
+    {
+      "id": "receipt_date",
+      "label": "Date received",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date funds were received."
+    },
+    {
+      "id": "holder_name",
+      "label": "Escrow holder",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Title company, attorney, broker or seller holding the deposit."
+    },
+    {
+      "id": "holder_address",
+      "label": "Holder address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Address."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Who paid the deposit."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Seller under the contract."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Property address."
+    },
+    {
+      "id": "contract_date",
+      "label": "Purchase contract date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Contract the deposit relates to."
+    },
+    {
+      "id": "amount",
+      "label": "Amount",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Deposit amount."
+    },
+    {
+      "id": "form",
+      "label": "Form of payment",
+      "type": "select",
+      "required": true,
+      "default": "wire transfer",
+      "options": [
+        "wire transfer",
+        "official bank check",
+        "personal check",
+        "ACH",
+        "other"
+      ],
+      "help": "How it was paid."
+    },
+    {
+      "id": "reference",
+      "label": "Check or reference number",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Check number or wire reference."
+    },
+    {
+      "id": "account_type",
+      "label": "Funds held in",
+      "type": "text",
+      "required": true,
+      "default": "a federally insured escrow or trust account",
+      "options": [],
+      "help": "Where the funds are held."
+    },
+    {
+      "id": "interest",
+      "label": "Interest-bearing account?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "If on, say who gets the interest."
+    },
+    {
+      "id": "interest_to",
+      "label": "Interest belongs to",
+      "type": "select",
+      "required": false,
+      "default": "Buyer",
+      "options": [
+        "Buyer",
+        "Seller",
+        "the party who receives the deposit"
+      ],
+      "help": "Who receives interest."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Receipt",
+      "body": "{{holder_name}}, {{holder_address}} (\"Holder\") acknowledges receiving {{amount}} from {{buyer_name}} (\"Buyer\") on {{receipt_date}} by {{form}} (reference {{reference}}), as earnest money under the purchase contract dated {{contract_date}} between Buyer and {{seller_name}} (\"Seller\") for {{property_address}}. Receipt of a check is subject to collection. If a check is dishonored, Holder will notify both parties promptly.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Holding the deposit",
+      "body": "Holder will keep the deposit in {{account_type}}, separate from Holder's own funds, as the law requires.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Interest",
+      "body": "The account bears interest. Interest belongs to {{interest_to}}. Buyer will provide a Form W-9 if requested.",
+      "optional": true,
+      "showIf": "interest == true"
+    },
+    {
+      "id": "s4",
+      "title": "4. Release",
+      "body": "Holder will release the deposit (a) at closing, as a credit to Buyer, (b) according to joint written instructions signed by Buyer and Seller, (c) as the purchase contract clearly provides after notice to both parties where the law allows, or (d) under a court order. If Buyer and Seller dispute who is entitled to the deposit, Holder may keep it until the dispute is resolved, or deposit it with a court and ask the court to decide (interpleader), as allowed by state law.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Holder's role",
+      "body": "Holder is a stakeholder only, does not represent either party, and is not liable for acting in good faith under this receipt. This receipt does not change the purchase contract.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Wire fraud",
+      "body": "**Wire fraud warning.** Criminals send fake wiring instructions by email that look like they come from title companies, attorneys and agents. Before wiring any money, call the recipient at a phone number you get independently, not from the email, and confirm the instructions. Never trust a last-minute change to wiring instructions.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "Signatures",
+      "body": "Signed by Holder, and acknowledged by Buyer:\n\n**Escrow holder** — {{holder_name}}\n\n[[sig:holder]]\n\nPrinted name: [[name:holder]]\nTitle (if signing for a company): [[text:holder:Title]]\nDate: [[date:holder]]\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nDate: [[date:buyer]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "FBI IC3 public service announcement: Business email compromise (Sept. 2024)",
+      "url": "https://www.ic3.gov/PSA/2024/PSA240911"
+    },
+    {
+      "title": "CFPB: Mortgage closing scams",
+      "url": "https://www.consumerfinance.gov/about-us/blog/mortgage-closing-scams-how-protect-yourself-and-your-closing-funds/"
+    },
+    {
+      "title": "Texas Real Estate Commission: contract forms",
+      "url": "https://www.trec.texas.gov/agency-information/contracts"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

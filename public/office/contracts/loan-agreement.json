@@ -1,0 +1,338 @@
+{
+  "id": "loan-agreement",
+  "version": 1,
+  "title": "Loan Agreement",
+  "category": "everyday",
+  "summary": "A fuller loan contract than a note: purpose, disbursement, repayment, promises, default, and optional collateral.",
+  "useWhen": "A person or business lends a meaningful amount and wants promises from the borrower and remedies beyond a simple note. Use with the promissory note template if you want a separate note.",
+  "watchOuts": [
+    "Usury: every state caps interest on some loans, and penalties can include losing all interest. The cap depends on the state, the loan type and whether the borrower is a consumer or a business. Verify locally before setting the rate.",
+    "E-signatures: the federal E-SIGN Act excludes UCC Article 3 (negotiable instruments). An e-signed note is still an enforceable promise to pay, but it may not qualify as a negotiable instrument that can be transferred to a holder in due course. If you may sell or pledge the note, consider a wet-ink original.",
+    "Family and low-interest loans: for loans over $10,000 charging less than the IRS applicable federal rate, the IRS may impute interest and treat the forgone interest as a gift. Talk to a tax adviser.",
+    "Consumer loans made regularly as a business may need a state lender license and Truth in Lending disclosures.",
+    "Collateral: to secure personal property collateral against other creditors, the lender usually must 'perfect' a security interest, typically by filing a UCC-1 financing statement with the state. For vehicles, the lien goes on the title. Real estate collateral needs a recorded mortgage or deed of trust.",
+    "Personal guarantees should be in a separate signed guaranty. Spouses' signatures may be needed in community property states."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "lender",
+      "label": "Lender"
+    },
+    {
+      "id": "borrower",
+      "label": "Borrower"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of the agreement."
+    },
+    {
+      "id": "lender_name",
+      "label": "Lender: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "lender_address",
+      "label": "Lender: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "lender_email",
+      "label": "Lender: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "borrower_name",
+      "label": "Borrower: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "borrower_address",
+      "label": "Borrower: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "borrower_email",
+      "label": "Borrower: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "amount",
+      "label": "Loan amount",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total principal."
+    },
+    {
+      "id": "purpose",
+      "label": "Purpose of the loan",
+      "type": "text",
+      "required": false,
+      "default": "general business or personal purposes",
+      "options": [],
+      "help": "What the money will be used for."
+    },
+    {
+      "id": "disbursement",
+      "label": "Disbursement",
+      "type": "text",
+      "required": true,
+      "default": "in one payment within 5 business days after signing",
+      "options": [],
+      "help": "How and when the money is delivered."
+    },
+    {
+      "id": "interest_rate",
+      "label": "Annual interest rate",
+      "type": "percent",
+      "required": true,
+      "default": "8",
+      "options": [],
+      "help": "Within your state's usury limit."
+    },
+    {
+      "id": "term_months",
+      "label": "Term (months)",
+      "type": "number",
+      "required": true,
+      "default": "24",
+      "options": [],
+      "help": "Months until the final payment."
+    },
+    {
+      "id": "payment_amount",
+      "label": "Monthly payment",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Fully amortizing payment amount."
+    },
+    {
+      "id": "first_payment",
+      "label": "First payment date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "First due date."
+    },
+    {
+      "id": "late_fee_percent",
+      "label": "Late fee (% of payment)",
+      "type": "percent",
+      "required": false,
+      "default": "5",
+      "options": [],
+      "help": "Charged if a payment is more than 10 days late. Check state caps."
+    },
+    {
+      "id": "secured",
+      "label": "Secured by collateral?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Borrower grants a security interest in personal property."
+    },
+    {
+      "id": "collateral",
+      "label": "Collateral description",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Describe the collateral specifically, e.g. '2022 Ford F-150, VIN ...' or 'all equipment and inventory of Borrower's bakery business'."
+    },
+    {
+      "id": "financial_reports",
+      "label": "Borrower provides financial updates?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Borrower provides annual financial statements or tax returns."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Lender:** {{lender_name}}, {{lender_address}} ({{lender_email}})\n\n**Borrower:** {{borrower_name}}, {{borrower_address}} ({{borrower_email}})\n\nEffective {{effective_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. The loan",
+      "body": "Lender will lend Borrower {{amount}} (the \"Loan\") for {{purpose}}. Lender will disburse the Loan {{disbursement}}. Borrower will sign a promissory note for the Loan if Lender asks. If the note and this agreement conflict, this agreement controls.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Interest and repayment",
+      "body": "Interest accrues on the unpaid principal at {{interest_rate}}% per year, simple interest on a 365-day year. Borrower will repay the Loan in monthly payments of {{payment_amount}}, starting {{first_payment}}, for {{term_months}} months. Any remaining balance is due with the final payment. Borrower may prepay at any time without penalty. Payments apply to fees, then interest, then principal. A payment more than 10 days late incurs a late fee of {{late_fee_percent}}% of the payment, to the extent allowed by law. Interest will never exceed the legal maximum.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Borrower's statements",
+      "body": "Borrower confirms that: (a) Borrower has full power to sign and perform this agreement, and if a business, it is in good standing and this agreement is authorized; (b) the information Borrower gave Lender is true and complete; and (c) no lawsuit or financial condition known to Borrower would materially impair Borrower's ability to repay.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Borrower's ongoing promises",
+      "body": "Until the Loan is repaid, Borrower will use the money for the stated purpose, pay its taxes, keep any collateral insured and in good condition, and promptly tell Lender in writing about any event that could materially affect its ability to repay.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Financial updates",
+      "body": "Within 120 days after each year-end, Borrower will give Lender its annual financial statements or federal tax return, and other reasonably requested financial information.",
+      "optional": true,
+      "showIf": "financial_reports == true"
+    },
+    {
+      "id": "s7",
+      "title": "7. Collateral",
+      "body": "To secure the Loan, Borrower grants Lender a security interest in the following collateral and its proceeds:\n\n{{collateral}}\n\nBorrower authorizes Lender to file a UCC financing statement and will sign any document reasonably needed to perfect it, including a lien notation on a title. Borrower will not sell, move or encumber the collateral without Lender's written consent. On default, Lender has the rights of a secured party under Article 9 of the Uniform Commercial Code, including the right to take and sell the collateral after required notices.",
+      "optional": true,
+      "showIf": "secured == true"
+    },
+    {
+      "id": "s8",
+      "title": "8. Default and remedies",
+      "body": "An Event of Default occurs if (a) Borrower fails to pay any amount within 10 days after its due date and does not cure within 10 days after written notice, (b) Borrower breaches another promise and does not cure within 30 days after written notice, (c) any statement by Borrower was materially false, or (d) Borrower becomes insolvent or files bankruptcy. After an Event of Default, Lender may declare the entire balance immediately due and use any remedy available by law. Borrower will pay Lender's reasonable collection costs and attorney fees, to the extent allowed by law.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Lender** — {{lender_name}}\n\n[[sig:lender]]\n\nPrinted name: [[name:lender]]\nTitle (if signing for a company): [[text:lender:Title]]\nDate: [[date:lender]]\n\n**Borrower** — {{borrower_name}}\n\n[[sig:borrower]]\n\nPrinted name: [[name:borrower]]\nTitle (if signing for a company): [[text:borrower:Title]]\nDate: [[date:borrower]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "E-SIGN exceptions, 15 U.S.C. §7003 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7003"
+    },
+    {
+      "title": "UCC Article 3 (Negotiable Instruments), §3-104 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/ucc/3/3-104"
+    },
+    {
+      "title": "UCC §9-310: when filing is required to perfect a security interest (Cornell LII)",
+      "url": "https://www.law.cornell.edu/ucc/9/9-310"
+    },
+    {
+      "title": "IRS: Applicable federal rates",
+      "url": "https://www.irs.gov/applicable-federal-rates"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

@@ -1,0 +1,344 @@
+{
+  "id": "artist-management-agreement",
+  "version": 1,
+  "title": "Artist Management Agreement",
+  "category": "music",
+  "summary": "Appoint a personal manager, with commission, what income is excluded, term, post-term (sunset) commissions and limits on authority.",
+  "useWhen": "An artist hires a personal manager to guide their career.",
+  "watchOuts": [
+    "California's Talent Agencies Act generally prohibits anyone without a talent agency license, including managers, from procuring employment or engagements for artists. Contracts can be voided and commissions disgorged. New York has related rules. Managers should work with licensed agents for booking.",
+    "Commission base: commission on gross income without excluding recording costs, tour support, producer fees and opening-act buy-ons can leave an artist paying the manager more than they earn. Define exclusions.",
+    "Sunset clauses decide how long the manager keeps earning after the deal ends. Keep them limited and declining.",
+    "Avoid giving the manager a broad power of attorney. Require artist approval for contracts.",
+    "Key-person and performance-based exits protect the artist if the manager leaves their company or the career doesn't progress."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "artist",
+      "label": "Artist"
+    },
+    {
+      "id": "manager",
+      "label": "Manager"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "artist_name",
+      "label": "Artist: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "artist_address",
+      "label": "Artist: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "artist_email",
+      "label": "Artist: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "manager_name",
+      "label": "Manager: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "manager_address",
+      "label": "Manager: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "manager_email",
+      "label": "Manager: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "artist_alias",
+      "label": "Artist professional name",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Stage name."
+    },
+    {
+      "id": "fields",
+      "label": "Fields",
+      "type": "text",
+      "required": true,
+      "default": "music, recording, live performance, publishing, merchandise, brand partnerships and social media",
+      "options": [],
+      "help": "Areas managed."
+    },
+    {
+      "id": "term_years",
+      "label": "Term (years)",
+      "type": "number",
+      "required": true,
+      "default": "2",
+      "options": [],
+      "help": "Initial term."
+    },
+    {
+      "id": "perf_threshold",
+      "label": "Artist may end after year 1 if gross income is below",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Performance-based exit. Leave blank for none."
+    },
+    {
+      "id": "commission",
+      "label": "Commission rate",
+      "type": "percent",
+      "required": true,
+      "default": "15",
+      "options": [],
+      "help": "Typical range is 15-20%."
+    },
+    {
+      "id": "exclusions",
+      "label": "Income excluded from commission",
+      "type": "longtext",
+      "required": true,
+      "default": "Recording costs and advances used to pay for recordings, video costs, tour support, producer and mixer fees, payments to opening acts, sound and lighting and other show costs paid through, refundable deposits, and income from agreements signed before the term (except as listed).",
+      "options": [],
+      "help": "What the manager does not commission."
+    },
+    {
+      "id": "sunset",
+      "label": "Post-term (sunset) commissions",
+      "type": "longtext",
+      "required": true,
+      "default": "On income from agreements entered into or substantially negotiated during the term: full commission for the first year after the term, half commission for the second year, and none after that. Income from recordings released during the term is commissionable for the same periods.",
+      "options": [],
+      "help": "What the manager earns after the term."
+    },
+    {
+      "id": "expense_limit",
+      "label": "Expense approval threshold",
+      "type": "money",
+      "required": true,
+      "default": "250",
+      "options": [],
+      "help": "Manager needs approval for any expense above this."
+    },
+    {
+      "id": "key_person",
+      "label": "Key person",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "If the manager is a company, the person who must personally manage the artist."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Artist:** {{artist_name}}, {{artist_address}} ({{artist_email}}) (professionally known as {{artist_alias}})\n\n**Manager:** {{manager_name}}, {{manager_address}} ({{manager_email}})",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Appointment",
+      "body": "Artist appoints Manager as Artist's exclusive personal manager in {{fields}}, for {{term_years}} years from {{effective_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Manager's duties",
+      "body": "Manager will advise and guide Artist's career, including on releases, image, team (agents, attorneys, business managers, labels, publishers), budgets, touring strategy, marketing and partnerships. Manager will be reasonably available, keep Artist informed, and act in Artist's best interests.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. No employment procurement",
+      "body": "Manager will not procure or attempt to procure employment or engagements where the law requires a talent agency or employment agency license that Manager does not hold. Booking will be handled by a licensed agent where required.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Limits on authority",
+      "body": "Manager may not sign any contract or make any commitment for Artist without Artist's prior written approval of the specific contract. Manager may not receive or hold Artist's money unless Artist agrees in writing, and then only in a separate account with monthly statements.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Commission",
+      "body": "Artist will pay Manager {{commission}}% of Artist's gross income earned during the term from the fields covered, excluding:\n\n{{exclusions}}\n\nCommission is due within 30 days after Artist receives the income.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. After the term",
+      "body": "{{sunset}}\n\nManager will not earn commission on anything else after the term.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Expenses",
+      "body": "Artist will reimburse Manager's reasonable, documented out-of-pocket expenses incurred for Artist, but any single expense over {{expense_limit}}, and all travel, need Artist's prior approval. Manager's general overhead is not reimbursed.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Key person",
+      "body": "If Manager is a company, {{key_person}} will personally manage Artist. If that person stops doing so, Artist may end this agreement on 30 days' notice.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Performance exit",
+      "body": "If Artist's gross income from the covered fields in the first 12 months is below {{perf_threshold}}, Artist may end the term on 30 days' notice given within 60 days after that period.",
+      "optional": true,
+      "showIf": "perf_threshold != ''"
+    },
+    {
+      "id": "s11",
+      "title": "11. Ending early",
+      "body": "Either party may end this agreement for the other's material breach not cured within 30 days after written notice. Artist may end it immediately if Manager commits fraud or misappropriates Artist's money.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Accounting",
+      "body": "Each party will keep records of commissionable income and expenses, provide statements quarterly, and allow the other to audit once a year.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. Independent advice",
+      "body": "Artist has been advised to have an independent entertainment attorney review this agreement and has had the opportunity to do so. Artist: [[initial:artist]]",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "14. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Artist** — {{artist_name}}\n\n[[sig:artist]]\n\nPrinted name: [[name:artist]]\nDate: [[date:artist]]\n\n**Manager** — {{manager_name}}\n\n[[sig:manager]]\n\nPrinted name: [[name:manager]]\nTitle (if signing for a company): [[text:manager:Title]]\nDate: [[date:manager]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Music rights are split between the composition (song) and the sound recording (master); royalties also depend on PRO, publisher, distributor and label agreements that this template does not change. An entertainment attorney should review deals involving advances, ownership transfers or long terms.",
+  "sources": [
+    {
+      "title": "California Labor Code §1700.5 (Talent Agencies Act license requirement)",
+      "url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=1700.5"
+    },
+    {
+      "title": "U.S. Copyright Office Circular 56A: Copyright registration of musical compositions and sound recordings",
+      "url": "https://www.copyright.gov/circs/circ56a.pdf"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

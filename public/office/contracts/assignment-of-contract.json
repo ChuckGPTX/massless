@@ -1,0 +1,383 @@
+{
+  "id": "assignment-of-contract",
+  "version": 1,
+  "title": "Assignment of Real Estate Purchase Contract",
+  "category": "real-estate",
+  "summary": "Transfer a buyer's rights under a purchase contract to a new buyer for an assignment fee, with the disclosures many states now require.",
+  "useWhen": "A buyer under contract (the assignor) transfers the contract to another buyer (the assignee) who will close with the seller.",
+  "watchOuts": [
+    "Many states now regulate wholesaling, including Illinois, Oklahoma, Pennsylvania, Ohio, Oregon, Texas, Virginia, Connecticut, Maryland, Tennessee, Wisconsin, Iowa and others. Rules include licensing after a number of deals, written disclosure to the seller and buyer that you hold only an equitable interest, seller cancellation rights and registration. Check the state notes and verify locally before marketing or assigning.",
+    "Marketing the property itself, rather than the contract, before you own it can be unlicensed brokerage in many states.",
+    "Check that the purchase contract allows assignment. Many contracts and all FHA/VA-related and REO contracts prohibit it or require seller consent.",
+    "Assignment fees are often visible to the seller on the closing statement. Some states now require the fee, or its existence, to be disclosed.",
+    "The assignor usually remains liable under the original contract unless the seller releases the assignor (a novation)."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "assignor",
+      "label": "Assignor (original buyer)"
+    },
+    {
+      "id": "assignee",
+      "label": "Assignee (new buyer)"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "assignment_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of the assignment."
+    },
+    {
+      "id": "assignor_name",
+      "label": "Assignor name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Buyer named in the purchase contract."
+    },
+    {
+      "id": "assignor_email",
+      "label": "Assignor email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "assignee_name",
+      "label": "Assignee name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "New buyer."
+    },
+    {
+      "id": "assignee_email",
+      "label": "Assignee email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller name",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Seller under the purchase contract."
+    },
+    {
+      "id": "contract_date",
+      "label": "Purchase contract date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Effective date of the original contract."
+    },
+    {
+      "id": "property_address",
+      "label": "Property address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Property under contract."
+    },
+    {
+      "id": "contract_price",
+      "label": "Contract purchase price",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Price the assignee will pay the seller at closing."
+    },
+    {
+      "id": "assignment_fee",
+      "label": "Assignment fee",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Amount the assignee pays the assignor."
+    },
+    {
+      "id": "fee_deposit",
+      "label": "Assignee's deposit toward the fee",
+      "type": "money",
+      "required": false,
+      "default": "0",
+      "options": [],
+      "help": "Paid at signing to the closing agent."
+    },
+    {
+      "id": "deposit_refundable",
+      "label": "Is the assignee's deposit refundable?",
+      "type": "select",
+      "required": true,
+      "default": "refundable only if the seller fails to close",
+      "options": [
+        "refundable only if the seller fails to close",
+        "refundable for any reason until the inspection deadline",
+        "non-refundable"
+      ],
+      "help": "When the deposit comes back."
+    },
+    {
+      "id": "earnest_reimbursed",
+      "label": "Reimburse assignor's earnest money at closing?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "Assignee reimburses the earnest money the assignor deposited, or replaces it."
+    },
+    {
+      "id": "assignor_earnest",
+      "label": "Assignor's earnest money amount",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Amount deposited under the purchase contract."
+    },
+    {
+      "id": "closing_agent",
+      "label": "Closing agent",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Title company or attorney closing the sale."
+    },
+    {
+      "id": "closing_date",
+      "label": "Closing date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "From the purchase contract."
+    },
+    {
+      "id": "consent_status",
+      "label": "Seller consent",
+      "type": "select",
+      "required": true,
+      "default": "the purchase contract allows assignment without consent",
+      "options": [
+        "the purchase contract allows assignment without consent",
+        "written seller consent is attached",
+        "seller consent will be obtained before closing"
+      ],
+      "help": "Check the contract's assignment clause."
+    },
+    {
+      "id": "disclosure_given",
+      "label": "Seller received a wholesaler or equitable-interest disclosure?",
+      "type": "select",
+      "required": true,
+      "default": "yes, a written disclosure was given before the contract",
+      "options": [
+        "yes, a written disclosure was given before the contract",
+        "not required in this state (verify locally)"
+      ],
+      "help": "Several states require written disclosure to the seller and to buyers."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Assignor:** {{assignor_name}} ({{assignor_email}})\n\n**Assignee:** {{assignee_name}} ({{assignee_email}})",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Contract assigned",
+      "body": "Assignor is the buyer under a purchase contract with {{seller_name}} (\"Seller\") dated {{contract_date}} for the property at {{property_address}} in {{state}} (the \"Purchase Contract\"), at a price of {{contract_price}}. A copy of the Purchase Contract and its amendments has been given to Assignee. Assignee initials to confirm receipt: [[initial:assignee]]",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Assignment",
+      "body": "Effective on {{assignment_date}}, Assignor assigns to Assignee all of Assignor's rights under the Purchase Contract, and Assignee accepts the assignment and assumes all of the buyer's obligations under it from that date, including closing on or before {{closing_date}} and paying the purchase price.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Assignment fee",
+      "body": "Assignee will pay Assignor an assignment fee of {{assignment_fee}}, payable through {{closing_agent}} at closing. Assignee deposits {{fee_deposit}} toward the fee with the closing agent on signing. This deposit is {{deposit_refundable}}. If the sale does not close because Seller defaults, or because of a contingency in the Purchase Contract that Assignee properly exercises, the deposit is returned to Assignee, unless it is non-refundable.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Earnest money",
+      "body": "At closing, Assignee will reimburse Assignor for the {{assignor_earnest}} earnest money that Assignor deposited under the Purchase Contract, or Assignee will deposit replacement earnest money so Assignor's deposit is returned.",
+      "optional": true,
+      "showIf": "earnest_reimbursed == true"
+    },
+    {
+      "id": "s6",
+      "title": "6. Seller consent",
+      "body": "Status: {{consent_status}}. If consent is required and not obtained before closing, either party may cancel this assignment and Assignee's deposit is returned.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Nature of assignor's interest",
+      "body": "Assignee understands that Assignor (a) does not own the property, (b) holds only an equitable interest as the buyer under the Purchase Contract, (c) is not acting as Assignee's real estate agent or broker, and (d) is profiting from this assignment through the assignment fee. Assignor may not be able to deliver title. Title will come from Seller at closing. Assignee: [[initial:assignee]]",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Disclosure to seller",
+      "body": "Assignor states that: {{disclosure_given}}. Assignor is responsible for complying with any wholesaling, licensing, disclosure or registration law of {{state}} that applies to Assignor.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Assignor's promises",
+      "body": "Assignor promises that (a) the Purchase Contract is in effect and has not been amended except as disclosed, (b) Assignor has not previously assigned it, (c) Assignor has not received notice of any default, and (d) Assignor will not amend or terminate the Purchase Contract without Assignee's consent.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Assignee's independent evaluation",
+      "body": "Assignee has relied on its own inspection, valuation and due diligence, not on statements by Assignor. Assignor makes no promise about the property's value, condition, rents, repair costs or after-repair value.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Liability",
+      "body": "Assignee will indemnify Assignor against claims arising from Assignee's failure to perform the buyer's obligations under the Purchase Contract after the assignment. Assignor remains liable to Seller unless Seller releases Assignor in writing.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. State-specific requirements",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. General",
+      "body": "This assignment is governed by the law of {{state}}. It is the entire agreement about the assignment. It may be signed electronically and in counterparts. The closing agent may rely on it to disburse the assignment fee.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Assignor** — {{assignor_name}}\n\n[[sig:assignor]]\n\nPrinted name: [[name:assignor]]\nTitle (if signing for a company): [[text:assignor:Title]]\nDate: [[date:assignor]]\n\n**Assignee** — {{assignee_name}}\n\n[[sig:assignee]]\n\nPrinted name: [[name:assignee]]\nTitle (if signing for a company): [[text:assignee:Title]]\nDate: [[date:assignee]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "Squatters.io: cited 50-state wholesaling law tracker (2026)",
+      "url": "https://squatters.io/blog/wholesaling-laws-by-state"
+    },
+    {
+      "title": "225 ILCS 454/1-10 (Illinois brokerage definition including assignable contracts)",
+      "url": "https://www.ilga.gov/Documents/legislation/ilcs/documents/022504540K1-10.htm"
+    },
+    {
+      "title": "Tex. Occ. Code §1101.0045 (wholesaling disclosure)",
+      "url": "https://statutes.capitol.texas.gov/Docs/OC/htm/OC.1101.htm"
+    },
+    {
+      "title": "Oklahoma SB 1075 (2025) enrolled text",
+      "url": "https://www.oklegislature.gov/cf_pdf/2025-26%20ENR/SB/SB1075%20ENR.PDF"
+    },
+    {
+      "title": "Ohio Rev. Code §5301.95 (wholesaler disclosure)",
+      "url": "https://codes.ohio.gov/ohio-revised-code/section-5301.95"
+    },
+    {
+      "title": "Pennsylvania SB 1173 of 2023-24 (Act 52 of 2024)",
+      "url": "https://www.palegis.us/legislation/bills/2023/sb1173"
+    },
+    {
+      "title": "Oregon Real Estate Agency: residential property wholesaling",
+      "url": "https://www.oregon.gov/rea/pages/residential-property-wholesaling.aspx"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

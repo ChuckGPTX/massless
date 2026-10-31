@@ -1,0 +1,809 @@
+{
+  "id": "residential-purchase-agreement",
+  "version": 1,
+  "title": "Residential Purchase Agreement",
+  "category": "real-estate",
+  "summary": "A plain-English contract to buy and sell a home, with financing, inspection, title and closing terms, plus hooks for state addenda.",
+  "useWhen": "A buyer and seller are dealing directly (for example a for-sale-by-owner or investor purchase) and no licensee is required to use a state form. Pick the property's state so the state notes and addenda apply.",
+  "watchOuts": [
+    "If a real estate licensee is involved, check whether the state requires its own form. Texas (TREC) and Colorado (Commission-approved forms) require licensees to use state forms, and Utah and Wisconsin also have state-approved forms. In other states, agents usually use copyrighted association forms.",
+    "Required seller disclosures vary widely. Some states have a mandatory form (for example California, Texas, New York and Ohio). Others, such as Alabama, Arkansas and Georgia, have no general disclosure statute but still prohibit fraud and concealment. Federal law separately requires the lead-based paint disclosure for most homes built before 1978.",
+    "Attorney states: in several states, for example Georgia, Massachusetts, South Carolina and Connecticut, closings are conducted or supervised by attorneys. Sources differ on the exact list, so verify locally.",
+    "Deadlines run from the effective date. Count days carefully and put the effective date in writing.",
+    "All owners on title must sign. In some states a non-owner spouse must also sign to release homestead or marital rights.",
+    "If the seller is a foreign person, the buyer may have to withhold tax under FIRPTA (generally 15% of the amount realized) unless an exemption applies.",
+    "Never wire earnest money or closing funds without confirming the instructions by phone with a known number. Real estate wire fraud is common."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "buyer",
+      "label": "Buyer"
+    },
+    {
+      "id": "seller",
+      "label": "Seller"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date the last party signs. Deadlines are counted from this date."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer name(s)",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Everyone who will take title."
+    },
+    {
+      "id": "buyer_address",
+      "label": "Buyer address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "buyer_email",
+      "label": "Buyer email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller name(s)",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Everyone on title."
+    },
+    {
+      "id": "seller_address",
+      "label": "Seller address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "seller_email",
+      "label": "Seller email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "property_address",
+      "label": "Property address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Street address, city, ZIP."
+    },
+    {
+      "id": "county",
+      "label": "County",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "County where recorded."
+    },
+    {
+      "id": "legal_description",
+      "label": "Legal description",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "From the deed or title commitment, e.g. 'Lot 4, Block 2, Oak Hills Subdivision...'."
+    },
+    {
+      "id": "parcel_number",
+      "label": "Parcel or tax ID number",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Assessor's parcel number."
+    },
+    {
+      "id": "included_items",
+      "label": "Included items",
+      "type": "longtext",
+      "required": false,
+      "default": "All fixtures and attached items, including window coverings, ceiling fans, built-in appliances, and the following: ",
+      "options": [],
+      "help": "Personal property included in the sale."
+    },
+    {
+      "id": "excluded_items",
+      "label": "Excluded items",
+      "type": "longtext",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "Items the seller keeps."
+    },
+    {
+      "id": "price",
+      "label": "Purchase price",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total price."
+    },
+    {
+      "id": "earnest_money",
+      "label": "Earnest money",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Deposit showing good faith."
+    },
+    {
+      "id": "escrow_holder",
+      "label": "Earnest money held by",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Title company, escrow agent or closing attorney (name and address)."
+    },
+    {
+      "id": "earnest_days",
+      "label": "Days to deliver earnest money",
+      "type": "number",
+      "required": true,
+      "default": "3",
+      "options": [],
+      "help": "Business days after the effective date."
+    },
+    {
+      "id": "financing",
+      "label": "How the buyer pays",
+      "type": "select",
+      "required": true,
+      "default": "new loan",
+      "options": [
+        "cash",
+        "new loan",
+        "seller financing",
+        "subject to existing financing"
+      ],
+      "help": "Seller financing and subject-to require the matching addendum."
+    },
+    {
+      "id": "loan_amount",
+      "label": "Loan amount",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Amount of the buyer's new loan."
+    },
+    {
+      "id": "loan_type",
+      "label": "Loan type",
+      "type": "select",
+      "required": false,
+      "default": "conventional",
+      "options": [
+        "conventional",
+        "FHA",
+        "VA",
+        "USDA",
+        "other"
+      ],
+      "help": "FHA and VA loans have required addenda and appraisal rules."
+    },
+    {
+      "id": "loan_days",
+      "label": "Days to obtain loan approval",
+      "type": "number",
+      "required": false,
+      "default": "30",
+      "options": [],
+      "help": "Financing contingency deadline."
+    },
+    {
+      "id": "proof_days",
+      "label": "Days to provide proof of funds",
+      "type": "number",
+      "required": false,
+      "default": "3",
+      "options": [],
+      "help": "For cash purchases."
+    },
+    {
+      "id": "appraisal",
+      "label": "Include an appraisal contingency?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "If the property appraises below the price, the buyer may renegotiate or terminate."
+    },
+    {
+      "id": "inspection_days",
+      "label": "Inspection period (days)",
+      "type": "number",
+      "required": true,
+      "default": "10",
+      "options": [],
+      "help": "Days to inspect and terminate."
+    },
+    {
+      "id": "inspection_basis",
+      "label": "Buyer may terminate during inspection period",
+      "type": "select",
+      "required": true,
+      "default": "for any reason",
+      "options": [
+        "for any reason",
+        "only for material defects found by inspection"
+      ],
+      "help": "'For any reason' protects the buyer most."
+    },
+    {
+      "id": "as_is",
+      "label": "Sold as is?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "The seller makes no repairs, but disclosure duties still apply."
+    },
+    {
+      "id": "built_before_1978",
+      "label": "Built before 1978?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Triggers the federal lead-based paint disclosure and 10-day inspection opportunity."
+    },
+    {
+      "id": "hoa",
+      "label": "In a homeowners or condo association?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Adds association document review."
+    },
+    {
+      "id": "hoa_review_days",
+      "label": "Days to review association documents",
+      "type": "number",
+      "required": false,
+      "default": "5",
+      "options": [],
+      "help": "After receiving them."
+    },
+    {
+      "id": "deed_type",
+      "label": "Type of deed",
+      "type": "select",
+      "required": true,
+      "default": "general warranty deed",
+      "options": [
+        "general warranty deed",
+        "special warranty deed",
+        "grant deed",
+        "bargain and sale deed",
+        "quitclaim deed"
+      ],
+      "help": "Check what is customary in your state. A quitclaim gives the buyer the least protection."
+    },
+    {
+      "id": "title_days",
+      "label": "Days to deliver title commitment",
+      "type": "number",
+      "required": true,
+      "default": "15",
+      "options": [],
+      "help": "Seller or title company delivers the commitment."
+    },
+    {
+      "id": "objection_days",
+      "label": "Days for buyer's title objections",
+      "type": "number",
+      "required": true,
+      "default": "5",
+      "options": [],
+      "help": "After receiving the commitment."
+    },
+    {
+      "id": "survey",
+      "label": "Buyer will obtain a survey?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "New survey at buyer's cost."
+    },
+    {
+      "id": "closing_date",
+      "label": "Closing date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "On or before this date."
+    },
+    {
+      "id": "closing_agent",
+      "label": "Closing agent",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Title company or closing attorney who will close."
+    },
+    {
+      "id": "closing_costs",
+      "label": "Closing costs",
+      "type": "select",
+      "required": true,
+      "default": "as customary in the county where the property is located",
+      "options": [
+        "as customary in the county where the property is located",
+        "as listed in Additional terms"
+      ],
+      "help": "Who pays which costs."
+    },
+    {
+      "id": "seller_credit",
+      "label": "Seller credit to buyer",
+      "type": "money",
+      "required": false,
+      "default": "0",
+      "options": [],
+      "help": "Credit toward buyer's closing costs, if any."
+    },
+    {
+      "id": "possession",
+      "label": "Possession",
+      "type": "select",
+      "required": true,
+      "default": "at closing",
+      "options": [
+        "at closing",
+        "after closing (seller rent-back)"
+      ],
+      "help": "When the buyer gets the keys."
+    },
+    {
+      "id": "rentback_days",
+      "label": "Seller rent-back days",
+      "type": "number",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Days the seller may stay after closing."
+    },
+    {
+      "id": "rentback_rate",
+      "label": "Rent-back rate per day",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Daily amount."
+    },
+    {
+      "id": "default_remedy",
+      "label": "If the buyer defaults, the seller's remedy is",
+      "type": "select",
+      "required": true,
+      "default": "keep the earnest money as liquidated damages",
+      "options": [
+        "keep the earnest money as liquidated damages",
+        "any remedy allowed by law"
+      ],
+      "help": "Liquidated damages limit the buyer's exposure."
+    },
+    {
+      "id": "attorney_review",
+      "label": "Include an attorney review period?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Common in some states, for example New Jersey and Illinois. Either party's attorney may disapprove within the period."
+    },
+    {
+      "id": "attorney_review_days",
+      "label": "Attorney review period (business days)",
+      "type": "number",
+      "required": false,
+      "default": "3",
+      "options": [],
+      "help": "Length."
+    },
+    {
+      "id": "brokers",
+      "label": "Is any broker or agent involved?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Names and how they are paid."
+    },
+    {
+      "id": "broker_details",
+      "label": "Brokers and compensation",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Each broker, whom they represent, and the compensation agreement."
+    },
+    {
+      "id": "addenda",
+      "label": "Attached addenda",
+      "type": "longtext",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "List every addendum and disclosure attached."
+    },
+    {
+      "id": "additional_terms",
+      "label": "Additional terms",
+      "type": "longtext",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "Anything else agreed."
+    },
+    {
+      "id": "offer_expires",
+      "label": "Offer expires",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date and time this offer expires if not accepted."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Buyer:** {{buyer_name}}, {{buyer_address}} ({{buyer_email}})\n\n**Seller:** {{seller_name}}, {{seller_address}} ({{seller_email}})\n\nSeller agrees to sell and Buyer agrees to buy the Property on these terms. This agreement takes effect on {{effective_date}} (the \"Effective Date\").",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Property",
+      "body": "The real property at {{property_address}}, {{county}} County, {{state}}, legally described as:\n\n{{legal_description}}\n\nParcel number: {{parcel_number}}. The sale includes all improvements, fixtures and these items: {{included_items}}\n\nExcluded: {{excluded_items}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Price",
+      "body": "The purchase price is {{price}}, paid as follows: earnest money of {{earnest_money}}, which is credited to Buyer at closing, the financing described below, and the balance in good funds at closing. Seller will credit Buyer {{seller_credit}} at closing toward Buyer's closing costs, prepaid items and other allowed costs, if a credit is stated and the lender allows it.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Earnest money",
+      "body": "Buyer will deliver the earnest money to {{escrow_holder}} within {{earnest_days}} business days after the Effective Date. It is released only under this agreement, under joint written instructions, or by court order. If Buyer terminates under a right in this agreement, the earnest money is refunded to Buyer.\n\n**Wire fraud warning.** Criminals send fake wiring instructions by email that look like they come from title companies, attorneys and agents. Before wiring any money, call the recipient at a phone number you get independently, not from the email, and confirm the instructions. Never trust a last-minute change to wiring instructions.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Financing: cash",
+      "body": "This is a cash purchase, with no financing contingency. Within {{proof_days}} days after the Effective Date, Buyer will provide reasonable written proof of funds, such as a bank or brokerage statement. If Buyer does not, Seller may terminate by written notice until the proof is delivered.",
+      "optional": true,
+      "showIf": "financing == 'cash'"
+    },
+    {
+      "id": "s6",
+      "title": "6. Financing: new loan",
+      "body": "Buyer's obligation is contingent on Buyer obtaining a {{loan_type}} loan of {{loan_amount}} on terms acceptable to Buyer. Buyer will apply within 5 days after the Effective Date and make good-faith efforts to obtain approval. If Buyer cannot obtain loan approval within {{loan_days}} days after the Effective Date, Buyer may terminate by written notice before that deadline and receive the earnest money. If Buyer does not give notice, this contingency is waived. Any FHA, VA or other lender-required addenda are attached.",
+      "optional": true,
+      "showIf": "financing == 'new loan'"
+    },
+    {
+      "id": "s7",
+      "title": "7. Financing: seller financing",
+      "body": "Seller will finance part of the price on the terms in the attached Seller Financing Addendum. The note will be secured by a mortgage or deed of trust on the Property, recorded at closing. The parties acknowledge that federal and state lending laws may apply to seller financing.",
+      "optional": true,
+      "showIf": "financing == 'seller financing'"
+    },
+    {
+      "id": "s8",
+      "title": "8. Financing: subject to existing financing",
+      "body": "Buyer will take title subject to Seller's existing loan(s) on the terms in the attached Subject-To Addendum and Seller Acknowledgments and Disclosures. **The existing loan stays in Seller's name, and the lender may have the right to call the loan due when title transfers.** Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "financing == 'subject to existing financing'"
+    },
+    {
+      "id": "s9",
+      "title": "9. Appraisal",
+      "body": "If the Property appraises for less than the purchase price, Buyer may, within 5 days after receiving the appraisal, (a) proceed at the contract price, (b) propose a revised price, or (c) terminate and receive the earnest money. If the parties do not agree to a revised price within 3 days after Buyer's proposal, either party may terminate and the earnest money is refunded to Buyer.",
+      "optional": true,
+      "showIf": "appraisal == true"
+    },
+    {
+      "id": "s10",
+      "title": "10. Title and survey",
+      "body": "Seller will convey marketable title by {{deed_type}}, free of liens except those Buyer agrees to in writing, and subject only to recorded easements, restrictions and other matters that do not materially interfere with residential use. Within {{title_days}} days after the Effective Date, Seller will cause the closing agent to deliver a title commitment, with copies of exception documents. Buyer has {{objection_days}} days after receiving them to object in writing. Seller may cure objections before closing. If Seller does not or cannot, Buyer may waive them or terminate and receive the earnest money. Seller will pay off at or before closing all monetary liens not assumed by Buyer.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Survey",
+      "body": "Buyer will obtain a survey at Buyer's expense before the title objection deadline. Survey matters may be objected to as title objections.",
+      "optional": true,
+      "showIf": "survey == true"
+    },
+    {
+      "id": "s12",
+      "title": "12. Seller disclosures",
+      "body": "Within 5 days after the Effective Date (or earlier if the law requires), Seller will deliver all disclosures required by the law of {{state}} and by federal law. Seller will disclose known material defects that are not readily observable, as the law requires. These disclosures are not warranties, and they do not replace Buyer's own inspections. If a required disclosure is delivered late, Buyer has any termination or other rights the law provides.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. Lead-based paint (homes built before 1978)",
+      "body": "The home was built before 1978. Before Buyer is obligated under this agreement, Seller will complete and both parties will sign the federal Lead-Based Paint Disclosure (40 CFR 745.113), and Seller will give Buyer the EPA pamphlet \"Protect Your Family From Lead in Your Home.\" Buyer has 10 days after the Effective Date (or another period the parties agree in writing) to conduct a lead-based paint inspection or risk assessment at Buyer's expense, unless Buyer waives this right in the disclosure. If the inspection shows lead-based paint hazards, Buyer may terminate within that period and receive the earnest money.",
+      "optional": true,
+      "showIf": "built_before_1978 == true"
+    },
+    {
+      "id": "s14",
+      "title": "14. Homeowners or condominium association",
+      "body": "The Property is in an owners' association. Seller will deliver, or cause the association to deliver, the governing documents, budget, current assessments, any special assessments and resale certificate required by law. Buyer may terminate within {{hoa_review_days}} days after receiving them and receive the earnest money. Transfer fees are paid as customary, unless otherwise agreed.",
+      "optional": true,
+      "showIf": "hoa == true"
+    },
+    {
+      "id": "s15",
+      "title": "15. Inspections",
+      "body": "Buyer and its inspectors may inspect the Property, including structural, mechanical, roof, pest, sewer and environmental conditions, during the {{inspection_days}}-day period after the Effective Date (the \"Inspection Period\"). Seller will provide reasonable access with utilities on. Buyer will repair any damage the inspections cause and keep the Property free of liens from them. During the Inspection Period Buyer may terminate {{inspection_basis}} by written notice and receive the earnest money, or ask Seller to make repairs. If Buyer does not terminate in time, Buyer accepts the Property's condition, subject to the rest of this agreement.",
+      "optional": false
+    },
+    {
+      "id": "s16",
+      "title": "16. Sold as is",
+      "body": "Seller will not make repairs. Buyer accepts the Property in its present \"as is\" condition, subject to Buyer's inspection rights, Seller's disclosure obligations under the law, and Seller's duty to keep the Property in its present condition until closing. \"As is\" does not excuse fraud or the concealment of known defects. Buyer: [[initial:buyer]] Seller: [[initial:seller]]",
+      "optional": true,
+      "showIf": "as_is == true"
+    },
+    {
+      "id": "s17",
+      "title": "17. Condition until closing",
+      "body": "Seller will maintain the Property in its present condition, normal wear excepted, keep utilities on, and not make changes to the Property or enter new leases or agreements affecting it without Buyer's written consent. Buyer may do a walk-through within 48 hours before closing.",
+      "optional": false
+    },
+    {
+      "id": "s18",
+      "title": "18. Closing",
+      "body": "Closing will take place on or before {{closing_date}} through {{closing_agent}}, or as the parties agree in writing. Seller will deliver the signed deed and documents customary in {{state}}, including a certificate of non-foreign status or other FIRPTA documentation. Buyer will deliver the balance of the price and loan documents. Closing costs are paid {{closing_costs}}. Property taxes, association dues, rents and utilities are prorated to the closing date. The deed and any security instruments will be notarized and recorded as required by law.",
+      "optional": false
+    },
+    {
+      "id": "s19",
+      "title": "19. Possession: at closing",
+      "body": "Seller will deliver possession, keys and access codes at closing, with the Property vacant and broom-clean, and free of debris and personal property not included in the sale.",
+      "optional": true,
+      "showIf": "possession == 'at closing'"
+    },
+    {
+      "id": "s20",
+      "title": "20. Possession: seller rent-back",
+      "body": "Seller may remain in possession for {{rentback_days}} days after closing, paying Buyer {{rentback_rate}} per day, credited at closing. Seller will maintain the Property and insurance on its belongings, and deliver possession vacant and broom-clean at the end. The parties will sign a separate short-term occupancy agreement.",
+      "optional": true,
+      "showIf": "possession == 'after closing (seller rent-back)'"
+    },
+    {
+      "id": "s21",
+      "title": "21. Risk of loss",
+      "body": "Seller bears the risk of loss until closing. If the Property is materially damaged before closing, Buyer may terminate and receive the earnest money, or close and receive any insurance proceeds for the damage plus a credit for the deductible.",
+      "optional": false
+    },
+    {
+      "id": "s22",
+      "title": "22. Default",
+      "body": "If Seller fails to perform, Buyer may seek specific performance, or terminate and receive the earnest money and pursue other remedies allowed by law. If Buyer fails to perform without a valid right to terminate, Seller's remedy is to {{default_remedy}}. Before declaring a default, the non-defaulting party will give written notice and 3 business days to cure, except for failure to close on the closing date.",
+      "optional": false
+    },
+    {
+      "id": "s23",
+      "title": "23. Attorney review",
+      "body": "Either party's attorney may review this agreement and disapprove it, or propose changes, by written notice delivered within {{attorney_review_days}} business days after the Effective Date. If disapproved and the parties do not agree to changes, this agreement ends and the earnest money is refunded to Buyer.",
+      "optional": true,
+      "showIf": "attorney_review == true"
+    },
+    {
+      "id": "s24",
+      "title": "24. Brokers",
+      "body": "{{broker_details}}\n\nEach party confirms it has not dealt with any other broker, and will indemnify the other against claims for compensation by brokers it engaged.",
+      "optional": true,
+      "showIf": "brokers == true"
+    },
+    {
+      "id": "s25",
+      "title": "25. State-specific requirements",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "optional": false
+    },
+    {
+      "id": "s26",
+      "title": "26. Texas notes",
+      "body": "**Texas.** If a Texas real estate license holder negotiates this transaction, TREC rules generally require the license holder to use the TREC promulgated contract forms instead of this template. For most residential property with one dwelling unit, the seller must give the buyer the Seller's Disclosure Notice described in Texas Property Code §5.008 (or a substantially similar notice). If any recorded lien will stay on the property after the sale (for example a subject-to or wraparound transaction), Texas Property Code §5.016 requires the seller to give the buyer, and each lienholder, a separate written notice at least seven days before the contract is signed or the property is conveyed, whichever is earlier, unless an exception applies.",
+      "optional": true,
+      "showIf": "state == 'TX'"
+    },
+    {
+      "id": "s27",
+      "title": "27. Colorado notes",
+      "body": "**Colorado.** Colorado brokers must use Colorado Real Estate Commission-approved forms when an approved form exists and is appropriate. The Commission publishes a Contract to Buy and Sell Real Estate (Residential) and a Seller's Property Disclosure (Residential) form.",
+      "optional": true,
+      "showIf": "state == 'CO'"
+    },
+    {
+      "id": "s28",
+      "title": "28. Addenda and additional terms",
+      "body": "Attached addenda: {{addenda}}\n\nAdditional terms: {{additional_terms}}",
+      "optional": false
+    },
+    {
+      "id": "s29",
+      "title": "29. General",
+      "body": "Time is of the essence. Deadlines that fall on a weekend or legal holiday move to the next business day. This agreement binds the parties' heirs and successors. Buyer may not assign it without Seller's written consent, unless an addendum says otherwise. The law of {{state}} governs. This agreement is the entire agreement and can be changed only in a signed writing. It may be signed in counterparts and electronically. Electronic signatures do not replace any notarization or recording the law requires for the deed. Notices go to the addresses and emails above.",
+      "optional": false
+    },
+    {
+      "id": "s30",
+      "title": "30. Offer and acceptance",
+      "body": "This document is Buyer's offer. It expires if Seller has not signed it and delivered it to Buyer by {{offer_expires}}.",
+      "optional": false
+    },
+    {
+      "id": "s31",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nDate: [[date:buyer]]\n\n**Seller** — {{seller_name}}\n\n[[sig:seller]]\n\nPrinted name: [[name:seller]]\nDate: [[date:seller]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "Seller's Required Disclosures by Jurisdiction (annual survey, May 2020), distributed by NAR",
+      "url": "https://realtorparty.realtor/download/6643"
+    },
+    {
+      "title": "Texas Real Estate Commission: contract forms",
+      "url": "https://www.trec.texas.gov/agency-information/contracts"
+    },
+    {
+      "title": "Colorado Division of Real Estate: real estate broker contracts and forms",
+      "url": "https://dre.colorado.gov/real-estate-broker-contracts-and-forms"
+    },
+    {
+      "title": "40 CFR 745.113: certification and acknowledgment of disclosure (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.113"
+    },
+    {
+      "title": "EPA: Real estate disclosures about potential lead hazards",
+      "url": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+    },
+    {
+      "title": "IRS: FIRPTA withholding",
+      "url": "https://www.irs.gov/individuals/international-taxpayers/firpta-withholding"
+    },
+    {
+      "title": "E-SIGN exceptions, 15 U.S.C. §7003 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7003"
+    },
+    {
+      "title": "Tex. Prop. Code §5.016: conveyance of residential property encumbered by lien",
+      "url": "https://texas.public.law/statutes/tex._prop._code_section_5.016"
+    },
+    {
+      "title": "Tex. Prop. Code §5.008 seller's disclosure notice",
+      "url": "https://texas.public.law/statutes/tex._prop._code_section_5.008"
+    },
+    {
+      "title": "FBI IC3 public service announcement: Business email compromise (Sept. 2024)",
+      "url": "https://www.ic3.gov/PSA/2024/PSA240911"
+    },
+    {
+      "title": "HomeLight: States that require a real estate attorney at closing (updated Sept 2026)",
+      "url": "https://homelight.com/blog/states-that-require-real-estate-attorney-at-closing"
+    },
+    {
+      "title": "LodeStar: What is an attorney closing state?",
+      "url": "https://support.lodestarss.com/hc/en-us/articles/9787584713243-What-is-an-Attorney-Closing-State"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

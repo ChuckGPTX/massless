@@ -1,0 +1,558 @@
+{
+  "id": "llc-operating-agreement-multi-member",
+  "version": 1,
+  "title": "Multi-Member LLC Operating Agreement",
+  "category": "business",
+  "summary": "A plain-English operating agreement for an LLC with two to four members: ownership, votes, money, exits.",
+  "useWhen": "Two to four people or companies own an LLC together and need clear rules on control, distributions, transfers and buyouts.",
+  "watchOuts": [
+    "An operating agreement does not form the LLC. You must first file articles (or a certificate) of organization with the state and pay its fees and any annual report or franchise tax.",
+    "Keep the LLC separate from your personal finances: its own bank account, signed contracts in the LLC's name, and no mixing of funds. Otherwise a court can 'pierce the veil' and hold members personally liable.",
+    "Some states require an operating agreement or have special rules. New York requires a publication step for new LLCs, and California requires a Statement of Information. Verify locally.",
+    "Tax classification is a federal choice: single-member LLCs default to disregarded entities and multi-member LLCs default to partnerships. Electing S-corporation or C-corporation treatment requires an IRS filing (Form 2553 or 8832). Talk to a tax adviser.",
+    "Bringing in passive investors can make LLC interests 'securities' under federal and state law.",
+    "Make sure percentage interests total 100% and match the capital each member contributed, or say why they differ (for example, sweat equity). Granting a profits interest for services has tax consequences."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "memberA",
+      "label": "Member A"
+    },
+    {
+      "id": "memberB",
+      "label": "Member B"
+    },
+    {
+      "id": "memberC",
+      "label": "Member C"
+    },
+    {
+      "id": "memberD",
+      "label": "Member D"
+    }
+  ],
+  "variables": [
+    {
+      "id": "llc_name",
+      "label": "LLC name",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Exact name as filed."
+    },
+    {
+      "id": "formation_state",
+      "label": "State of formation",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "State where the LLC was formed."
+    },
+    {
+      "id": "formation_date",
+      "label": "Date articles were filed",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Filing date."
+    },
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Effective date of this agreement."
+    },
+    {
+      "id": "principal_office",
+      "label": "Principal office",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Main business address."
+    },
+    {
+      "id": "purpose",
+      "label": "Business purpose",
+      "type": "longtext",
+      "required": false,
+      "default": "Any lawful business for which an LLC may be formed in the state of formation.",
+      "options": [],
+      "help": "General or specific purpose."
+    },
+    {
+      "id": "member_count",
+      "label": "Number of members",
+      "type": "select",
+      "required": true,
+      "default": "2",
+      "options": [
+        "2",
+        "3",
+        "4"
+      ],
+      "help": "This template supports two to four members."
+    },
+    {
+      "id": "member_a_name",
+      "label": "Member A: name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person or company."
+    },
+    {
+      "id": "member_a_address",
+      "label": "Member A: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "member_a_contribution",
+      "label": "Member A: initial contribution",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Cash, property or services and agreed value."
+    },
+    {
+      "id": "member_a_percent",
+      "label": "Member A: percentage interest",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Ownership percentage. All members together should total 100%."
+    },
+    {
+      "id": "member_b_name",
+      "label": "Member B: name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person or company."
+    },
+    {
+      "id": "member_b_address",
+      "label": "Member B: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "member_b_contribution",
+      "label": "Member B: initial contribution",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Cash, property or services and agreed value."
+    },
+    {
+      "id": "member_b_percent",
+      "label": "Member B: percentage interest",
+      "type": "percent",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Ownership percentage. All members together should total 100%."
+    },
+    {
+      "id": "member_c_name",
+      "label": "Member C: name",
+      "type": "party",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person or company."
+    },
+    {
+      "id": "member_c_address",
+      "label": "Member C: address",
+      "type": "address",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "member_c_contribution",
+      "label": "Member C: initial contribution",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Cash, property or services and agreed value."
+    },
+    {
+      "id": "member_c_percent",
+      "label": "Member C: percentage interest",
+      "type": "percent",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Ownership percentage. All members together should total 100%."
+    },
+    {
+      "id": "member_d_name",
+      "label": "Member D: name",
+      "type": "party",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person or company."
+    },
+    {
+      "id": "member_d_address",
+      "label": "Member D: address",
+      "type": "address",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "member_d_contribution",
+      "label": "Member D: initial contribution",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Cash, property or services and agreed value."
+    },
+    {
+      "id": "member_d_percent",
+      "label": "Member D: percentage interest",
+      "type": "percent",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Ownership percentage. All members together should total 100%."
+    },
+    {
+      "id": "management",
+      "label": "Management",
+      "type": "select",
+      "required": true,
+      "default": "member-managed",
+      "options": [
+        "member-managed",
+        "manager-managed"
+      ],
+      "help": "Who runs the business day to day."
+    },
+    {
+      "id": "manager_name",
+      "label": "Manager name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Only if manager-managed."
+    },
+    {
+      "id": "major_vote",
+      "label": "Vote needed for major decisions",
+      "type": "select",
+      "required": true,
+      "default": "unanimous",
+      "options": [
+        "unanimous",
+        "two-thirds by percentage",
+        "majority by percentage"
+      ],
+      "help": "Major decisions are listed in the agreement."
+    },
+    {
+      "id": "spending_limit",
+      "label": "Ordinary spending limit",
+      "type": "money",
+      "required": true,
+      "default": "5000",
+      "options": [],
+      "help": "Single commitments above this are major decisions."
+    },
+    {
+      "id": "distribution_timing",
+      "label": "Distributions",
+      "type": "select",
+      "required": true,
+      "default": "quarterly, as approved by majority vote",
+      "options": [
+        "quarterly, as approved by majority vote",
+        "annually, as approved by majority vote",
+        "as decided by the manager"
+      ],
+      "help": "When cash is distributed."
+    },
+    {
+      "id": "tax_distributions",
+      "label": "Make tax distributions?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "Distribute enough cash for members to pay income tax on their share of profits."
+    },
+    {
+      "id": "valuation_method",
+      "label": "Buyout valuation method",
+      "type": "select",
+      "required": true,
+      "default": "appraisal by an independent appraiser",
+      "options": [
+        "appraisal by an independent appraiser",
+        "book value",
+        "agreed value updated each year"
+      ],
+      "help": "How a departing member's interest is valued."
+    },
+    {
+      "id": "buyout_months",
+      "label": "Buyout payment period (months)",
+      "type": "number",
+      "required": true,
+      "default": "36",
+      "options": [],
+      "help": "Buyout may be paid over this many months."
+    },
+    {
+      "id": "tax_rep",
+      "label": "Partnership representative",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Member who handles IRS partnership audits."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Formation",
+      "body": "{{llc_name}} (the \"Company\") is a limited liability company formed under the laws of {{formation_state}} on {{formation_date}}. This operating agreement is effective {{effective_date}}. Principal office: {{principal_office}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Purpose",
+      "body": "{{purpose}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Members, contributions and percentages",
+      "body": "The members, their initial contributions and percentage interests are:\n\n- **Member A:** {{member_a_name}}, {{member_a_address}}. Contribution: {{member_a_contribution}}. Percentage: {{member_a_percent}}%.\n- **Member B:** {{member_b_name}}, {{member_b_address}}. Contribution: {{member_b_contribution}}. Percentage: {{member_b_percent}}%.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Member C",
+      "body": "- **Member C:** {{member_c_name}}, {{member_c_address}}. Contribution: {{member_c_contribution}}. Percentage: {{member_c_percent}}%.",
+      "optional": true,
+      "showIf": "member_count != '2'"
+    },
+    {
+      "id": "s5",
+      "title": "5. Member D",
+      "body": "- **Member D:** {{member_d_name}}, {{member_d_address}}. Contribution: {{member_d_contribution}}. Percentage: {{member_d_percent}}%.",
+      "optional": true,
+      "showIf": "member_count == '4'"
+    },
+    {
+      "id": "s6",
+      "title": "6. Capital",
+      "body": "No member must contribute more capital without consenting in writing. If additional capital is approved as a major decision and a member does not contribute their share, the percentages will be adjusted in proportion to total capital contributed. No member earns interest on capital or may withdraw it except as provided here. The Company keeps a capital account for each member under federal tax rules.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Management",
+      "body": "The Company is {{management}}. Ordinary business decisions are made by members holding a majority of percentage interests (or by the manager, if manager-managed).",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Manager",
+      "body": "{{manager_name}} is the manager and runs the day-to-day business, subject to the major-decision rules. The manager may be removed or replaced by members holding a majority of percentage interests.",
+      "optional": true,
+      "showIf": "management == 'manager-managed'"
+    },
+    {
+      "id": "s9",
+      "title": "9. Major decisions",
+      "body": "These require approval by a {{major_vote}} vote of the members:\n- any single expense, borrowing or commitment over {{spending_limit}}, or any guarantee;\n- buying, selling or encumbering real estate, or selling substantially all assets;\n- admitting a new member or issuing new interests;\n- additional capital calls;\n- merging, converting or dissolving the Company;\n- amending this agreement or the articles; and\n- transactions between the Company and a member or a member's relative or affiliate.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Distributions and allocations",
+      "body": "Profits and losses are allocated, and distributions are made, in proportion to percentage interests. Distributions of available cash are made {{distribution_timing}}, after reasonable reserves. No distribution may be made if it would leave the Company insolvent.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Tax distributions",
+      "body": "To the extent cash is available, the Company will distribute to each member, by April 1 of each year, an amount at least equal to the member's allocated share of the Company's taxable income for the prior year multiplied by a reasonable assumed combined tax rate set by majority vote. Tax distributions count as advances against other distributions.",
+      "optional": true,
+      "showIf": "tax_distributions == true"
+    },
+    {
+      "id": "s12",
+      "title": "12. Taxes and books",
+      "body": "The Company will be taxed as a partnership unless the members elect otherwise as a major decision. {{tax_rep}} is the partnership representative for IRS purposes and must keep the members informed. The Company will keep complete books, available to every member on reasonable notice, and provide each member a Schedule K-1 each year.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. Duties and conflicts",
+      "body": "Each member will act in good faith and deal fairly with the Company. A member may have other business interests, but may not take a business opportunity that belongs to the Company without first offering it to the Company. Members do not owe duties beyond those in this agreement and non-waivable law.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "14. Limited liability and indemnification",
+      "body": "No member is personally liable for Company debts just because of being a member. The Company will indemnify members and the manager for good-faith acts on its behalf, except for fraud, willful misconduct, knowing violation of law or breach of this agreement. Indemnification is paid only from Company assets.",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "15. Transfers",
+      "body": "A member may not sell, give, pledge or otherwise transfer any interest without the written consent of the other members, except to a trust for estate planning where the member keeps control. Before selling to an outsider, a member must first offer the interest to the Company and then to the other members at the same price and terms (right of first refusal). A transferee who is not admitted as a member receives only economic rights.",
+      "optional": false
+    },
+    {
+      "id": "s16",
+      "title": "16. Buyout events",
+      "body": "If a member dies, becomes permanently disabled, files bankruptcy, divorces and the interest goes to a former spouse, or withdraws, the Company and then the other members have the option, for 90 days, to buy the affected interest. The price is set by {{valuation_method}} as of the event date, payable in cash or over up to {{buyout_months}} months with interest at the applicable federal rate and secured by the purchased interest.",
+      "optional": false
+    },
+    {
+      "id": "s17",
+      "title": "17. Deadlock",
+      "body": "If members cannot reach a required decision after two good-faith meetings, they will mediate with a mutually acceptable mediator before taking other action.",
+      "optional": false
+    },
+    {
+      "id": "s18",
+      "title": "18. Dissolution",
+      "body": "The Company dissolves on a major-decision vote or as required by law. On dissolution, the members will wind up the business, pay creditors, then distribute remaining assets according to positive capital account balances.",
+      "optional": false
+    },
+    {
+      "id": "s19",
+      "title": "19. General",
+      "body": "This agreement is the entire agreement among the members, is governed by the laws of {{formation_state}}, and may be amended only in a writing signed by all members. If any part is unenforceable, the rest remains in effect. Signatures may be electronic and in counterparts.",
+      "optional": false
+    },
+    {
+      "id": "s20",
+      "title": "Signatures — Members A and B",
+      "body": "**Member A** — {{member_a_name}}\n\n[[sig:memberA]]\n\nPrinted name: [[name:memberA]]\nTitle (if signing for a company): [[text:memberA:Title]]\nDate: [[date:memberA]]\n\n**Member B** — {{member_b_name}}\n\n[[sig:memberB]]\n\nPrinted name: [[name:memberB]]\nTitle (if signing for a company): [[text:memberB:Title]]\nDate: [[date:memberB]]",
+      "optional": false
+    },
+    {
+      "id": "s21",
+      "title": "Signatures — Member C",
+      "body": "**Member C** — {{member_c_name}}\n\n[[sig:memberC]]\n\nPrinted name: [[name:memberC]]\nTitle (if signing for a company): [[text:memberC:Title]]\nDate: [[date:memberC]]",
+      "optional": true,
+      "showIf": "member_count != '2'"
+    },
+    {
+      "id": "s22",
+      "title": "Signatures — Member D",
+      "body": "**Member D** — {{member_d_name}}\n\n[[sig:memberD]]\n\nPrinted name: [[name:memberD]]\nTitle (if signing for a company): [[text:memberD:Title]]\nDate: [[date:memberD]]",
+      "optional": true,
+      "showIf": "member_count == '4'"
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "IRS: Limited liability company (LLC)",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/limited-liability-company-llc"
+    },
+    {
+      "title": "IRS: Partnerships",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/partnerships"
+    },
+    {
+      "title": "SBA: Choose a business structure",
+      "url": "https://www.sba.gov/business-guide/launch-your-business/choose-business-structure"
+    },
+    {
+      "title": "SEC (Investor.gov): What is a security? (investment contracts)",
+      "url": "https://www.investor.gov/introduction-investing/investing-basics/glossary/security"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

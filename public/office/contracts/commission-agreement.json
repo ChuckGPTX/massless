@@ -1,0 +1,355 @@
+{
+  "id": "commission-agreement",
+  "version": 1,
+  "title": "Sales Commission Agreement",
+  "category": "business",
+  "summary": "Set out how and when a salesperson or sales representative earns commissions.",
+  "useWhen": "A business pays an employee or independent sales rep commissions on sales.",
+  "watchOuts": [
+    "California requires employers to put commission arrangements for employees in a signed writing that explains how commissions are computed and paid (Cal. Labor Code §2751). Several other states have similar rules or 'sales representative' acts that require prompt payment of commissions after termination, with penalties.",
+    "Decide when a commission is 'earned', for example on signing, invoice or payment received. Ambiguity leads to disputes, especially after the rep leaves.",
+    "Chargebacks and clawbacks of commissions already paid to employees can violate state wage laws if not agreed in advance, or if they push pay below minimum wage.",
+    "For employees, commissions are wages. Final pay deadlines apply when the job ends."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "company",
+      "label": "Company"
+    },
+    {
+      "id": "rep",
+      "label": "Sales representative"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "company_name",
+      "label": "Company: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "company_address",
+      "label": "Company: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "company_email",
+      "label": "Company: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "rep_name",
+      "label": "Sales representative: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "rep_address",
+      "label": "Sales representative: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "rep_email",
+      "label": "Sales representative: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "rep_status",
+      "label": "Representative is",
+      "type": "select",
+      "required": true,
+      "default": "employee",
+      "options": [
+        "employee",
+        "independent contractor"
+      ],
+      "help": "Employment status affects wage-law rules."
+    },
+    {
+      "id": "products",
+      "label": "Products or services",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "What sales earn commissions."
+    },
+    {
+      "id": "territory",
+      "label": "Territory or accounts",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Geographic area, customer segment or named accounts. Leave blank for none."
+    },
+    {
+      "id": "commission_rate",
+      "label": "Commission rate",
+      "type": "percent",
+      "required": true,
+      "default": "10",
+      "options": [],
+      "help": "Percent of the commission base."
+    },
+    {
+      "id": "commission_base",
+      "label": "Commission base",
+      "type": "select",
+      "required": true,
+      "default": "net amounts collected",
+      "options": [
+        "net amounts collected",
+        "net invoiced amounts",
+        "gross profit"
+      ],
+      "help": "What the rate is applied to."
+    },
+    {
+      "id": "earned_when",
+      "label": "Commission is earned when",
+      "type": "select",
+      "required": true,
+      "default": "the customer pays",
+      "options": [
+        "the customer pays",
+        "the order is invoiced",
+        "the contract is signed"
+      ],
+      "help": "Earned on payment is most protective for the company."
+    },
+    {
+      "id": "pay_schedule",
+      "label": "Paid",
+      "type": "select",
+      "required": true,
+      "default": "monthly",
+      "options": [
+        "with each regular paycheck",
+        "monthly",
+        "quarterly"
+      ],
+      "help": "When earned commissions are paid."
+    },
+    {
+      "id": "draw",
+      "label": "Include a draw against commissions?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "An advance against future commissions."
+    },
+    {
+      "id": "draw_amount",
+      "label": "Monthly draw",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Amount advanced each month."
+    },
+    {
+      "id": "draw_recoverable",
+      "label": "Is the draw recoverable?",
+      "type": "select",
+      "required": false,
+      "default": "non-recoverable",
+      "options": [
+        "recoverable",
+        "non-recoverable"
+      ],
+      "help": "Recoverable draws can be offset against future commissions. Recovering them after the job ends may be restricted by state law."
+    },
+    {
+      "id": "post_term_days",
+      "label": "Commission on orders after departure (days)",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "Rep is paid on orders they procured that close within this many days after the relationship ends."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and role",
+      "body": "**Company:** {{company_name}}, {{company_address}} ({{company_email}})\n\n**Sales representative (Rep):** {{rep_name}}, {{rep_address}} ({{rep_email}})\n\nEffective {{effective_date}}. Rep is engaged as an {{rep_status}} of the Company. This agreement sets out how Rep earns commissions. It does not change Rep's other terms of engagement except as stated here.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Covered sales",
+      "body": "Rep earns commissions on sales of the following, made to customers Rep procures:\n\n{{products}}\n\nTerritory or accounts: {{territory}}. Disputes about which rep procured a sale are decided by the Company in good faith, based on its CRM records.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. How commissions are calculated",
+      "body": "The commission is {{commission_rate}}% of {{commission_base}} for each covered sale. 'Net' means amounts after discounts, returns, credits, taxes, shipping and pass-through charges.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. When commissions are earned and paid",
+      "body": "A commission is earned when {{earned_when}}. Earned commissions are paid {{pay_schedule}}, with a statement showing each sale, the base and the commission.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Adjustments",
+      "body": "If a customer receives a refund or credit, or a sale is cancelled within 90 days after Rep was paid, the Company may deduct the commission paid on the refunded amount from future commissions, to the extent the law allows. The Company will not deduct amounts in a way that reduces an employee's pay below minimum wage or violates wage-payment laws.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Draw against commissions",
+      "body": "The Company will advance Rep {{draw_amount}} per month as a draw against future commissions. The draw is {{draw_recoverable}}. If recoverable, the draw is offset against commissions earned in later periods during the engagement. The Company will not seek repayment of an unrecovered draw after the engagement ends, unless the law allows it and Rep agrees in a separate signed writing.",
+      "optional": true,
+      "showIf": "draw == true"
+    },
+    {
+      "id": "s7",
+      "title": "7. After the engagement ends",
+      "body": "If the engagement ends for any reason, Rep will be paid commissions earned through the end date, plus commissions on orders Rep procured that are signed within {{post_term_days}} days after the end date. These are paid when they would otherwise be paid, or sooner if the law requires.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Changes to the plan",
+      "body": "The Company may change commission rates or rules for future periods with at least 30 days' written notice. Changes do not reduce commissions on sales already earned.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Records",
+      "body": "The Company will keep records of commissionable sales. Rep may review the records relating to Rep's commissions on reasonable notice.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Company** — {{company_name}}\n\n[[sig:company]]\n\nPrinted name: [[name:company]]\nTitle (if signing for a company): [[text:company:Title]]\nDate: [[date:company]]\n\n**Sales representative** — {{rep_name}}\n\n[[sig:rep]]\n\nPrinted name: [[name:rep]]\nDate: [[date:rep]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "California Labor Code §2751 (written commission contracts)",
+      "url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=2751"
+    },
+    {
+      "title": "U.S. Department of Labor: Employee or independent contractor classification under the FLSA",
+      "url": "https://www.dol.gov/agencies/whd/flsa/misclassification"
+    },
+    {
+      "title": "IRS: Independent contractor (self-employed) or employee?",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/independent-contractor-self-employed-or-employee"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

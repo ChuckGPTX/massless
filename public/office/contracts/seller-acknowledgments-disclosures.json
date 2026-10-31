@@ -1,0 +1,312 @@
+{
+  "id": "seller-acknowledgments-disclosures",
+  "version": 1,
+  "title": "Seller Acknowledgments and Disclosures (Creative Finance)",
+  "category": "creative-finance",
+  "summary": "Seller confirms, item by item, that they understand the deal, the equity involved, the risks, and that they were advised to get independent counsel.",
+  "useWhen": "Any creative-finance purchase (subject-to, seller financing, wrap, lease-option, contract for deed) from a homeowner, especially an individual or older seller.",
+  "watchOuts": [
+    "Due-on-sale: the existing lender may call the whole loan due when title transfers. Federal law (Garn-St Germain) generally lets it do so, and the transfer exemptions do not cover a sale to an unrelated investor. Have a written plan, and the money, to refinance or pay off the loan if that happens.",
+    "Never misrepresent ownership, occupancy or who is paying to a lender or an insurer. That can be mortgage or insurance fraud.",
+    "Foreclosure rescue and equity purchaser laws: if the seller is behind on payments or in foreclosure, many states impose strict contract language, cancellation rights and prohibitions on buyers. Examples include California Civil Code §1695 et seq., New York Real Property Law §265-a, Maryland, Illinois and Minnesota. Violations can void the deal and create criminal liability.",
+    "Texas: Property Code §5.016 requires a separate seller notice to the buyer and each lienholder at least seven days before contracting or conveying when a lien stays on residential property, unless an exception applies.",
+    "The seller should get independent legal advice. A buyer's attorney or title company does not represent the seller.",
+    "An acknowledgment form does not cure unfair or deceptive conduct. Courts look at the whole transaction, including price, the seller's circumstances and how the deal was presented.",
+    "If the seller is elderly, ill or under stress, slow down: encourage a trusted family member or attorney to be involved, and consider a cooling-off period even if not required.",
+    "Use the seller's preferred language. Some states require contracts to be provided in the language in which they were negotiated, for example Texas for executory contracts and California for some contracts negotiated in Spanish, Chinese, Tagalog, Vietnamese or Korean."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "seller",
+      "label": "Seller"
+    },
+    {
+      "id": "buyer",
+      "label": "Buyer"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "ack_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date signed."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Each owner should sign."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Buyer or buying entity."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Property address."
+    },
+    {
+      "id": "structure",
+      "label": "Transaction type",
+      "type": "select",
+      "required": true,
+      "default": "subject to existing financing",
+      "options": [
+        "subject to existing financing",
+        "seller financing",
+        "wraparound financing",
+        "lease with option to purchase",
+        "contract for deed",
+        "cash sale below market"
+      ],
+      "help": "Main structure."
+    },
+    {
+      "id": "price",
+      "label": "Purchase price",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total price."
+    },
+    {
+      "id": "cash_to_seller",
+      "label": "Cash the seller receives at closing",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Net cash to seller."
+    },
+    {
+      "id": "value_basis",
+      "label": "Seller's estimate of market value",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Seller's own estimate, from an appraisal, broker opinion or online estimate."
+    },
+    {
+      "id": "value_source",
+      "label": "Source of the value estimate",
+      "type": "text",
+      "required": true,
+      "default": "Seller's own estimate",
+      "options": [],
+      "help": "Where the estimate came from."
+    },
+    {
+      "id": "foreclosure_status",
+      "label": "Loan status",
+      "type": "select",
+      "required": true,
+      "default": "current",
+      "options": [
+        "current",
+        "behind on payments, no foreclosure notice",
+        "foreclosure notice received or sale scheduled",
+        "no mortgage"
+      ],
+      "help": "Status of the seller's loans when discussions began."
+    },
+    {
+      "id": "cancel_days",
+      "label": "Seller's cooling-off period (business days)",
+      "type": "number",
+      "required": true,
+      "default": "3",
+      "options": [],
+      "help": "Time the seller has to cancel without penalty. Some states require a specific period, for example 5 business days under California's equity purchaser law."
+    },
+    {
+      "id": "language",
+      "label": "Language the deal was negotiated in",
+      "type": "text",
+      "required": true,
+      "default": "English",
+      "options": [],
+      "help": "Provide documents in this language where required."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Transaction",
+      "body": "Seller: {{seller_name}}. Buyer: {{buyer_name}}. Property: {{property_address}}, {{state}}. Type: {{structure}}. Purchase price: {{price}}. Cash Seller receives at closing: {{cash_to_seller}}. These acknowledgments are part of the purchase contract and its addenda. Negotiated in: {{language}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Capacity and voluntariness",
+      "body": "- I am at least 18 years old, of sound mind, and not under the influence of anything that affects my judgment today. Initials: [[initial:seller]]\n- I am signing voluntarily. No one has threatened me, pressured me, or rushed me to sign. Initials: [[initial:seller]]\n- Every person who owns the Property, and any spouse whose signature the law requires, is signing these documents. Initials: [[initial:seller]]\n- I read and understand English or the language these documents are written in, or a translator I chose explained them to me. Initials: [[initial:seller]]",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Price, value and equity",
+      "body": "- I estimate the Property's market value at {{value_basis}} ({{value_source}}). I understand the price and cash I receive may be less than I could get by selling on the open market with an agent, after time, repairs and costs. Initials: [[initial:seller]]\n- I understand Buyer is an investor who intends to make a profit, for example by renting, reselling or refinancing the Property, and that Buyer may earn more from the Property than I do. Initials: [[initial:seller]]\n- I understand how much equity (value minus what I owe) I am giving up or receiving in this transaction. Initials: [[initial:seller]]\n- I was told I could get an appraisal, list the Property with a licensed agent, or seek other offers before signing. Initials: [[initial:seller]]",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Alternatives and advice",
+      "body": "- I was advised to talk with my own attorney, and a tax adviser, before signing, and I had the chance to do so. Buyer is not my attorney, agent or adviser. Initials: [[initial:seller]]\n- I know that alternatives may exist, such as a loan modification, forbearance, refinancing, a traditional sale, a short sale, or bankruptcy, and that free HUD-approved housing counselors can explain options. Initials: [[initial:seller]]\n- Buyer has not promised me anything that is not written in the signed documents. Initials: [[initial:seller]]",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Structure-specific risks",
+      "body": "- If my mortgage stays in place, I remain liable on it, it stays on my credit, and the lender may call it due because of the sale. Initials: [[initial:seller]]\n- If I am financing the sale, I may not receive all my money for years, Buyer could default, and I may have to foreclose or go to court to recover the Property. Initials: [[initial:seller]]\n- I understand when I give up possession, what happens to my personal property, and when I must move out. Initials: [[initial:seller]]",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Foreclosure or default protections",
+      "body": "**Seller was behind on payments or facing foreclosure when talks began.** Many states have foreclosure-rescue or equity-purchaser laws that require specific contract language, notices and cancellation rights, and that prohibit certain terms such as lease-backs with options to repurchase. The parties confirm they have checked the law of {{state}} and that all required notices and contract terms have been provided and complied with. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "foreclosure_status == 'foreclosure notice received or sale scheduled'"
+    },
+    {
+      "id": "s7",
+      "title": "7. Behind on payments",
+      "body": "Seller is behind on payments. Some state laws apply before a formal foreclosure notice is issued. The parties confirm they have checked the law of {{state}}. Seller: [[initial:seller]] Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "foreclosure_status == 'behind on payments, no foreclosure notice'"
+    },
+    {
+      "id": "s8",
+      "title": "8. Cooling-off period",
+      "body": "Seller may cancel this transaction without penalty by written notice delivered to Buyer by midnight of the {{cancel_days}}th business day after Seller signs, or any longer period required by law. If Seller cancels, Buyer will return any documents Seller signed, and Seller will return any money received from Buyer. Seller: [[initial:seller]]",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Buyer's confirmation",
+      "body": "Buyer confirms that Buyer explained the transaction honestly, did not tell Seller it is the only option, encouraged Seller to seek independent advice, and has made no promises outside the written documents. Buyer: [[initial:buyer]]",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. State-specific requirements",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "Signatures",
+      "body": "Signed on {{ack_date}}:\n\n**Seller** — {{seller_name}}\n\n[[sig:seller]]\n\nPrinted name: [[name:seller]]\nDate: [[date:seller]]\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nTitle (if signing for a company): [[text:buyer:Title]]\nDate: [[date:buyer]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything. Creative-finance transactions (subject-to, seller financing, wraps, lease-options, contracts for deed) can trigger lender due-on-sale rights, federal and state lending and licensing laws (Truth in Lending/Dodd-Frank, SAFE Act), state executory-contract statutes and consumer-protection claims. Each party, and especially the seller, should have independent legal counsel and a tax adviser before signing.",
+  "sources": [
+    {
+      "title": "California Civil Code §1695 (Home Equity Sales Contracts Act)",
+      "url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1695"
+    },
+    {
+      "title": "New York Real Property Law §265-a",
+      "url": "https://www.nysenate.gov/legislation/laws/RPP/265-A"
+    },
+    {
+      "title": "HUD: Find a housing counselor",
+      "url": "https://www.hud.gov/findacounselor"
+    },
+    {
+      "title": "CFPB: Help for homeowners facing foreclosure",
+      "url": "https://www.consumerfinance.gov/housing/"
+    },
+    {
+      "title": "Garn-St Germain Act due-on-sale provisions, 12 U.S.C. §1701j-3 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/12/1701j-3"
+    },
+    {
+      "title": "TexasLawHelp: Executory contracts and lease-to-own real estate (Tex. Prop. Code ch. 5, subch. D)",
+      "url": "https://texaslawhelp.org/article/executory-contracts-and-lease-to-own-real-estate"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

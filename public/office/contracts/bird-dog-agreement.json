@@ -1,0 +1,321 @@
+{
+  "id": "bird-dog-agreement",
+  "version": 1,
+  "title": "Bird Dog (Lead Referral) Agreement",
+  "category": "real-estate",
+  "summary": "Pay a 'bird dog' a fee for finding off-market property leads, while limiting their role to providing information.",
+  "useWhen": "A real estate investor pays someone to find potential properties and owner contact information, but the investor does all negotiation.",
+  "watchOuts": [
+    "Licensing is the main risk. In most states, receiving compensation for procuring, negotiating or helping with a sale on someone else's behalf is brokerage activity that requires a license. A fee that depends on a deal closing looks more like a commission. Licensees are generally prohibited from paying unlicensed people for referrals. Verify locally before paying any fee.",
+    "Some states' wholesaling laws also cover people who market or solicit for wholesalers. Check the state notes.",
+    "Bird dogs must not represent themselves as agents or investors' representatives, negotiate price, or pressure owners. Telemarketing and texting rules (TCPA, Do Not Call) apply to cold outreach.",
+    "Respect privacy: skip-traced data and owner contact information may be subject to state privacy laws and the source's terms of use.",
+    "Collect a Form W-9 and issue Form 1099 as required."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "investor",
+      "label": "Investor"
+    },
+    {
+      "id": "birddog",
+      "label": "Bird dog"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "investor_name",
+      "label": "Investor: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "investor_address",
+      "label": "Investor: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "investor_email",
+      "label": "Investor: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "birddog_name",
+      "label": "Bird dog: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "birddog_address",
+      "label": "Bird dog: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "birddog_email",
+      "label": "Bird dog: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "criteria",
+      "label": "Property criteria",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Areas, property types, condition, price range."
+    },
+    {
+      "id": "lead_info",
+      "label": "What a lead must include",
+      "type": "longtext",
+      "required": true,
+      "default": "Property address, owner name if known, how the bird dog learned of it, property condition notes and photos taken from public places.",
+      "options": [],
+      "help": "Minimum information for a lead."
+    },
+    {
+      "id": "fee_model",
+      "label": "Fee model",
+      "type": "select",
+      "required": true,
+      "default": "flat fee per accepted lead",
+      "options": [
+        "flat fee per accepted lead",
+        "flat fee paid only if investor buys the property"
+      ],
+      "help": "A fee paid only if a deal closes increases licensing risk. Verify locally."
+    },
+    {
+      "id": "lead_fee",
+      "label": "Fee per accepted lead",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Paid for each lead the investor accepts as new and qualifying."
+    },
+    {
+      "id": "closing_fee",
+      "label": "Fee if investor buys",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Flat amount, not a percentage of price."
+    },
+    {
+      "id": "protection_months",
+      "label": "Lead credit period (months)",
+      "type": "number",
+      "required": true,
+      "default": "6",
+      "options": [],
+      "help": "How long a submitted lead stays credited to the bird dog."
+    },
+    {
+      "id": "bird_dog_licensed",
+      "label": "Is the bird dog a licensed real estate professional?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Licensees must follow their brokerage and license-law rules, and fees may need to go through their broker."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Investor:** {{investor_name}}, {{investor_address}} ({{investor_email}})\n\n**Bird dog:** {{birddog_name}}, {{birddog_address}} ({{birddog_email}})\n\nEffective {{effective_date}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. What the bird dog does",
+      "body": "Bird dog will look for properties that match the Investor's criteria:\n\n{{criteria}}\n\nand submit leads in writing that include: {{lead_info}}\n\nBird dog's role is limited to finding and passing along information.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. What the bird dog will not do",
+      "body": "Bird dog will not:\n- negotiate price or terms, make offers, or sign anything for Investor;\n- claim to be a real estate agent, broker or Investor's representative, or say they will be paid if a sale happens;\n- enter property without permission, harass owners, or use deceptive tactics; or\n- contact people in violation of telemarketing, texting, do-not-call or privacy laws.\n\nBird dog: [[initial:birddog]]",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Accepting leads",
+      "body": "Investor will tell Bird dog within 5 business days whether a lead is accepted. A lead is accepted only if Investor did not already know about the property and it meets the criteria. Investor's records decide which leads were already known. An accepted lead stays credited to Bird dog for {{protection_months}} months.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Fee: per accepted lead",
+      "body": "Investor will pay Bird dog {{lead_fee}} for each accepted lead, within 15 days after acceptance, whether or not Investor ever buys the property.",
+      "optional": true,
+      "showIf": "fee_model == 'flat fee per accepted lead'"
+    },
+    {
+      "id": "s6",
+      "title": "6. Fee: if investor buys",
+      "body": "If Investor or its affiliate buys an accepted lead property within the credit period, Investor will pay Bird dog a flat fee of {{closing_fee}} within 10 days after closing. **The parties understand this fee structure may require a real estate license in some states, and each party has checked the law of {{governing_state}}.** Investor: [[initial:investor]] Bird dog: [[initial:birddog]]",
+      "optional": true,
+      "showIf": "fee_model == 'flat fee paid only if investor buys the property'"
+    },
+    {
+      "id": "s7",
+      "title": "7. Licensed bird dog",
+      "body": "Bird dog holds a real estate license. Bird dog will comply with license-law and brokerage rules, disclose their license status to owners as required, and any fee will be paid through Bird dog's broker if required.",
+      "optional": true,
+      "showIf": "bird_dog_licensed == true"
+    },
+    {
+      "id": "s8",
+      "title": "8. Independent contractor",
+      "body": "Bird dog is an independent contractor, uses their own methods, pays their own expenses and taxes, and will provide a Form W-9. This agreement is not exclusive.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Confidentiality",
+      "body": "Each party will keep leads, Investor's criteria and deal terms confidential. Bird dog will not share submitted leads with others during the credit period.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Term",
+      "body": "Either party may end this agreement at any time by written notice. Fees for leads accepted before the end are still payable on the terms above.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Investor** — {{investor_name}}\n\n[[sig:investor]]\n\nPrinted name: [[name:investor]]\nTitle (if signing for a company): [[text:investor:Title]]\nDate: [[date:investor]]\n\n**Bird dog** — {{birddog_name}}\n\n[[sig:birddog]]\n\nPrinted name: [[name:birddog]]\nDate: [[date:birddog]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "Squatters.io: cited 50-state wholesaling law tracker (2026)",
+      "url": "https://squatters.io/blog/wholesaling-laws-by-state"
+    },
+    {
+      "title": "225 ILCS 454/1-10 (Illinois brokerage definition including assignable contracts)",
+      "url": "https://www.ilga.gov/Documents/legislation/ilcs/documents/022504540K1-10.htm"
+    },
+    {
+      "title": "Tex. Occ. Code §1101.0045 (wholesaling disclosure)",
+      "url": "https://statutes.capitol.texas.gov/Docs/OC/htm/OC.1101.htm"
+    },
+    {
+      "title": "FCC: Telephone Consumer Protection Act and robocall/robotext rules",
+      "url": "https://www.fcc.gov/general/telemarketing-and-robocalls"
+    },
+    {
+      "title": "IRS: Independent contractor (self-employed) or employee?",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/independent-contractor-self-employed-or-employee"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

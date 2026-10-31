@@ -1,0 +1,209 @@
+{
+  "id": "real-estate-contract-amendment",
+  "version": 1,
+  "title": "Amendment to Real Estate Purchase Contract",
+  "category": "real-estate",
+  "summary": "Change the price, closing date, repairs or other terms of a signed purchase contract.",
+  "useWhen": "Buyer and seller agree to change a signed purchase contract, for example after inspection, appraisal or a financing delay.",
+  "watchOuts": [
+    "Lenders must approve price and credit changes. Concessions above the loan program's limits can be disallowed.",
+    "Changing the closing date can affect rate locks, loan approval and the seller's next purchase.",
+    "Repair agreements should say who does the work, to what standard, by when, and whether licensed contractors and receipts are required.",
+    "If a licensee is involved, use the state-required amendment form where one exists."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "buyer",
+      "label": "Buyer"
+    },
+    {
+      "id": "seller",
+      "label": "Seller"
+    }
+  ],
+  "variables": [
+    {
+      "id": "amendment_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of this amendment."
+    },
+    {
+      "id": "amendment_number",
+      "label": "Amendment number",
+      "type": "text",
+      "required": true,
+      "default": "1",
+      "options": [],
+      "help": "Sequential number."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Buyer."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Seller."
+    },
+    {
+      "id": "property_address",
+      "label": "Property",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Property address."
+    },
+    {
+      "id": "contract_date",
+      "label": "Original contract date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Effective date of the contract."
+    },
+    {
+      "id": "change_price",
+      "label": "Change the price?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "New purchase price."
+    },
+    {
+      "id": "new_price",
+      "label": "New purchase price",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Revised price."
+    },
+    {
+      "id": "change_closing",
+      "label": "Change the closing date?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "New closing date."
+    },
+    {
+      "id": "new_closing",
+      "label": "New closing date",
+      "type": "date",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Revised date."
+    },
+    {
+      "id": "repairs",
+      "label": "Seller repairs or credits?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Agreed repairs or credits."
+    },
+    {
+      "id": "repair_terms",
+      "label": "Repairs or credits",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "What, by whom, standard, deadline, receipts. Or the amount of the credit."
+    },
+    {
+      "id": "other_changes",
+      "label": "Other changes",
+      "type": "longtext",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "Any other changes to the contract."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Contract amended",
+      "body": "Amendment no. {{amendment_number}}, dated {{amendment_date}}, to the purchase contract dated {{contract_date}} between {{buyer_name}} (\"Buyer\") and {{seller_name}} (\"Seller\") for {{property_address}} (the \"Contract\").",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Price",
+      "body": "The purchase price is changed to {{new_price}}.",
+      "optional": true,
+      "showIf": "change_price == true"
+    },
+    {
+      "id": "s3",
+      "title": "3. Closing date",
+      "body": "The closing date is changed to {{new_closing}}. Other deadlines are not changed unless stated here.",
+      "optional": true,
+      "showIf": "change_closing == true"
+    },
+    {
+      "id": "s4",
+      "title": "4. Repairs and credits",
+      "body": "{{repair_terms}}\n\nRepairs will be completed in a workmanlike manner, by licensed contractors where the law requires, with permits where required, and receipts will be provided to Buyer before closing. Credits are subject to lender approval.",
+      "optional": true,
+      "showIf": "repairs == true"
+    },
+    {
+      "id": "s5",
+      "title": "5. Other changes",
+      "body": "{{other_changes}}",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Everything else stays the same",
+      "body": "Except as changed by this amendment, the Contract remains in full effect. If this amendment and the Contract conflict, this amendment controls. Electronic signatures are valid.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nDate: [[date:buyer]]\n\n**Seller** — {{seller_name}}\n\n[[sig:seller]]\n\nPrinted name: [[name:seller]]\nDate: [[date:seller]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "Texas Real Estate Commission: contract forms",
+      "url": "https://www.trec.texas.gov/agency-information/contracts"
+    },
+    {
+      "title": "Colorado Division of Real Estate: real estate broker contracts and forms",
+      "url": "https://dre.colorado.gov/real-estate-broker-contracts-and-forms"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

@@ -1,0 +1,332 @@
+{
+  "id": "llc-operating-agreement-single-member",
+  "version": 1,
+  "title": "Single-Member LLC Operating Agreement",
+  "category": "business",
+  "summary": "A simple operating agreement for an LLC with one owner, supporting liability protection and succession.",
+  "useWhen": "You own an LLC by yourself and want a written agreement for banks, lenders and the separateness that liability protection depends on.",
+  "watchOuts": [
+    "An operating agreement does not form the LLC. You must first file articles (or a certificate) of organization with the state and pay its fees and any annual report or franchise tax.",
+    "Keep the LLC separate from your personal finances: its own bank account, signed contracts in the LLC's name, and no mixing of funds. Otherwise a court can 'pierce the veil' and hold members personally liable.",
+    "Some states require an operating agreement or have special rules. New York requires a publication step for new LLCs, and California requires a Statement of Information. Verify locally.",
+    "Tax classification is a federal choice: single-member LLCs default to disregarded entities and multi-member LLCs default to partnerships. Electing S-corporation or C-corporation treatment requires an IRS filing (Form 2553 or 8832). Talk to a tax adviser.",
+    "Bringing in passive investors can make LLC interests 'securities' under federal and state law.",
+    "Name a successor or plan for what happens on your death or incapacity. Otherwise the LLC can get stuck in probate."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "member",
+      "label": "Member"
+    }
+  ],
+  "variables": [
+    {
+      "id": "llc_name",
+      "label": "LLC name",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Exact name as filed with the state, including 'LLC'."
+    },
+    {
+      "id": "formation_state",
+      "label": "State of formation",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "State where the articles of organization were filed."
+    },
+    {
+      "id": "formation_date",
+      "label": "Date articles were filed",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Filing date with the Secretary of State."
+    },
+    {
+      "id": "effective_date",
+      "label": "Effective date of this agreement",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Usually the filing date."
+    },
+    {
+      "id": "member_name",
+      "label": "Member name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "The owner. A person or a company."
+    },
+    {
+      "id": "member_address",
+      "label": "Member address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address."
+    },
+    {
+      "id": "principal_office",
+      "label": "Principal office",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Main business address."
+    },
+    {
+      "id": "registered_agent",
+      "label": "Registered agent",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Name and address of the registered agent on file."
+    },
+    {
+      "id": "purpose",
+      "label": "Business purpose",
+      "type": "longtext",
+      "required": false,
+      "default": "Any lawful business for which an LLC may be formed in the state of formation.",
+      "options": [],
+      "help": "General or specific purpose."
+    },
+    {
+      "id": "initial_contribution",
+      "label": "Initial capital contribution",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Cash or property contributed, with value."
+    },
+    {
+      "id": "management",
+      "label": "Management",
+      "type": "select",
+      "required": true,
+      "default": "member-managed",
+      "options": [
+        "member-managed",
+        "manager-managed"
+      ],
+      "help": "Member-managed is typical for one owner."
+    },
+    {
+      "id": "manager_name",
+      "label": "Manager name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Only if manager-managed."
+    },
+    {
+      "id": "tax_treatment",
+      "label": "Federal tax treatment",
+      "type": "select",
+      "required": true,
+      "default": "disregarded entity (default)",
+      "options": [
+        "disregarded entity (default)",
+        "S corporation (election filed)",
+        "C corporation (election filed)"
+      ],
+      "help": "Elections require IRS forms."
+    },
+    {
+      "id": "successor_name",
+      "label": "Successor on death or incapacity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "A person who becomes member (or manages the LLC) if the member dies or is incapacitated. Coordinate with your estate plan."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Formation",
+      "body": "{{llc_name}} (the \"Company\") is a limited liability company formed under the laws of {{formation_state}} by filing articles of organization on {{formation_date}}. This operating agreement takes effect on {{effective_date}}. The Company's principal office is {{principal_office}}, and its registered agent is {{registered_agent}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Purpose and powers",
+      "body": "{{purpose}} The Company may do anything lawful that is necessary or convenient for its purpose.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Sole member",
+      "body": "{{member_name}}, of {{member_address}}, is the sole member and owns 100% of the membership interest.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Capital",
+      "body": "The member's initial capital contribution is {{initial_contribution}}. The member is not required to contribute more. Additional contributions are recorded in the Company's books.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Management",
+      "body": "The Company is {{management}}.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Member management",
+      "body": "The member has full authority to manage the Company and to sign documents for it, and may appoint officers or agents and delegate authority in writing.",
+      "optional": true,
+      "showIf": "management == 'member-managed'"
+    },
+    {
+      "id": "s7",
+      "title": "7. Manager management",
+      "body": "{{manager_name}} is the manager, with authority to run the Company's day-to-day business. The manager serves at the member's discretion and may be removed or replaced by the member in writing. Major decisions (selling substantially all assets, merging, dissolving, borrowing outside the ordinary course) need the member's written approval.",
+      "optional": true,
+      "showIf": "management == 'manager-managed'"
+    },
+    {
+      "id": "s8",
+      "title": "8. Limited liability and separateness",
+      "body": "The member is not personally liable for the Company's debts, obligations or liabilities just because of being a member or manager, except as required by law. To support that protection, the Company will:\n- keep its own bank accounts and records, and not mix its funds with the member's;\n- sign contracts in the Company's name, showing the signer's capacity;\n- maintain adequate capital for its foreseeable obligations; and\n- keep its state filings, registered agent and licenses current.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Distributions",
+      "body": "The member decides when to distribute cash. No distribution may be made if it would leave the Company unable to pay its debts as they come due or make its liabilities exceed its assets.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Taxes",
+      "body": "The Company will be treated for federal income tax purposes as a {{tax_treatment}}. The member will file any required elections and returns.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Indemnification",
+      "body": "The Company will indemnify the member and any manager or officer against losses and expenses from acting for the Company in good faith, except for fraud, willful misconduct, knowing violation of law, or a breach of this agreement. Indemnification is paid only from Company assets.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Transfers and new members",
+      "body": "The member may transfer all or part of the interest. A new member may be admitted only with the member's written consent and an amended operating agreement.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. Death or incapacity",
+      "body": "If the member dies or becomes legally incapacitated, the Company does not dissolve. {{successor_name}} (or, if none is named or able to serve, the member's legal representative or heirs) may continue the Company and exercise the member's rights, including any authority needed to wind up or continue the business.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "14. Dissolution",
+      "body": "The Company dissolves only if the member decides in writing, or as required by law. On dissolution the Company will pay its debts, file articles of dissolution, and distribute any remaining assets to the member.",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "15. General",
+      "body": "This agreement is governed by the laws of {{formation_state}}. It may be amended only in a writing signed by the member. If any part is unenforceable, the rest remains in effect. Electronic signatures are valid.",
+      "optional": false
+    },
+    {
+      "id": "s16",
+      "title": "Signatures",
+      "body": "The sole member adopts this operating agreement.\n\n**Member** — {{member_name}}\n\n[[sig:member]]\n\nPrinted name: [[name:member]]\nTitle (if signing for a company): [[text:member:Title]]\nDate: [[date:member]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "IRS: Limited liability company (LLC)",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/limited-liability-company-llc"
+    },
+    {
+      "title": "SBA: Choose a business structure",
+      "url": "https://www.sba.gov/business-guide/launch-your-business/choose-business-structure"
+    },
+    {
+      "title": "IRS Form 8832: Entity classification election",
+      "url": "https://www.irs.gov/forms-pubs/about-form-8832"
+    },
+    {
+      "title": "SEC (Investor.gov): What is a security? (investment contracts)",
+      "url": "https://www.investor.gov/introduction-investing/investing-basics/glossary/security"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

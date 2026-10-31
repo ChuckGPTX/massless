@@ -1,0 +1,337 @@
+{
+  "id": "bill-of-sale",
+  "version": 1,
+  "title": "Bill of Sale",
+  "category": "everyday",
+  "summary": "Record the sale of a car, boat, equipment or other personal property, with price, condition and title promises.",
+  "useWhen": "One person sells personal property, not real estate, to another and both want proof of the sale and its terms.",
+  "watchOuts": [
+    "Vehicles: the bill of sale does not transfer title. The seller must sign the state title certificate, and most states require an odometer disclosure on the title for vehicles under federal odometer rules. Some states also require a state-specific bill of sale form, a notary or a release of liability filing. Verify with your DMV.",
+    "'As is' sales: for many goods, an 'as is' clause must be conspicuous to disclaim implied warranties under UCC §2-316, and some states limit disclaimers for consumer sales. Used car dealers must use the FTC Buyers Guide.",
+    "Liens: check for loans or liens on the item, for example through a vehicle title search or a UCC filing search, before paying.",
+    "Sales tax may be due when the buyer registers or titles the item."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "seller",
+      "label": "Seller"
+    },
+    {
+      "id": "buyer",
+      "label": "Buyer"
+    }
+  ],
+  "variables": [
+    {
+      "id": "sale_date",
+      "label": "Date of sale",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date of sale and delivery."
+    },
+    {
+      "id": "seller_name",
+      "label": "Seller: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "seller_address",
+      "label": "Seller: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "buyer_address",
+      "label": "Buyer: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "item_type",
+      "label": "Type of item",
+      "type": "select",
+      "required": true,
+      "default": "vehicle",
+      "options": [
+        "vehicle",
+        "boat or trailer",
+        "equipment",
+        "other personal property"
+      ],
+      "help": "Vehicle adds VIN and odometer fields."
+    },
+    {
+      "id": "item_description",
+      "label": "Description",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Make, model, year, color, condition, accessories included."
+    },
+    {
+      "id": "serial",
+      "label": "Serial number, VIN or hull ID",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Identifying number."
+    },
+    {
+      "id": "odometer",
+      "label": "Odometer reading",
+      "type": "number",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Miles shown at sale."
+    },
+    {
+      "id": "odometer_status",
+      "label": "Odometer status",
+      "type": "select",
+      "required": false,
+      "default": "actual mileage",
+      "options": [
+        "actual mileage",
+        "exceeds mechanical limits",
+        "not the actual mileage (warning)"
+      ],
+      "help": "Federal law requires an accurate odometer statement for most vehicle transfers."
+    },
+    {
+      "id": "price",
+      "label": "Sale price",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total price."
+    },
+    {
+      "id": "payment_method",
+      "label": "Payment method",
+      "type": "text",
+      "required": true,
+      "default": "cash",
+      "options": [],
+      "help": "Cash, cashier's check, bank transfer, etc."
+    },
+    {
+      "id": "condition_terms",
+      "label": "Condition",
+      "type": "select",
+      "required": true,
+      "default": "as is",
+      "options": [
+        "as is",
+        "with a written seller warranty"
+      ],
+      "help": "Most private sales are as-is."
+    },
+    {
+      "id": "liens",
+      "label": "Liens or claims on the item",
+      "type": "text",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "List any loan or lien that will be paid off or remain. 'None' if none."
+    },
+    {
+      "id": "warranty_terms",
+      "label": "Seller's warranty",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "What the seller promises and for how long."
+    },
+    {
+      "id": "disclosures",
+      "label": "Known defects",
+      "type": "longtext",
+      "required": false,
+      "default": "None known.",
+      "options": [],
+      "help": "Seller lists known problems."
+    },
+    {
+      "id": "sale_state",
+      "label": "State of sale",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Seller:** {{seller_name}}, {{seller_address}}\n\n**Buyer:** {{buyer_name}}, {{buyer_address}}",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Item sold",
+      "body": "On {{sale_date}}, Seller sells and Buyer buys the following {{item_type}}:\n\n{{item_description}}\n\nIdentification number: {{serial}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Odometer statement",
+      "body": "Seller states that, to the best of Seller's knowledge, the odometer now reads {{odometer}} miles and this reflects the {{odometer_status}}. Federal law (and state law) requires you to state the mileage upon transfer of ownership. Failure to complete or providing a false statement may result in fines and/or imprisonment. Seller: [[initial:seller]]  Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "item_type == 'vehicle'"
+    },
+    {
+      "id": "s4",
+      "title": "4. Price and payment",
+      "body": "Buyer pays Seller {{price}} by {{payment_method}}. Seller acknowledges receiving payment in full.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Title",
+      "body": "Seller promises that Seller owns the item, has the right to sell it, and is transferring it free of any liens, security interests or claims of others, except: {{liens}}. Seller will sign any title certificate or other document needed to transfer ownership.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Condition: as is",
+      "body": "**The item is sold \"AS IS\" and \"WITH ALL FAULTS.\" Seller makes no warranties, express or implied, including any implied warranty of merchantability or fitness for a particular purpose.** Buyer has had the chance to inspect the item. Buyer: [[initial:buyer]]",
+      "optional": true,
+      "showIf": "condition_terms == 'as is'"
+    },
+    {
+      "id": "s7",
+      "title": "7. Condition: seller warranty",
+      "body": "Seller gives this warranty: {{warranty_terms}}. Seller makes no other warranties.",
+      "optional": true,
+      "showIf": "condition_terms == 'with a written seller warranty'"
+    },
+    {
+      "id": "s8",
+      "title": "8. Known defects",
+      "body": "Seller has disclosed these known defects: {{disclosures}}",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Delivery and risk",
+      "body": "Buyer takes possession on the date of sale. From then on, Buyer bears the risk of loss and is responsible for registration, insurance, taxes and fees.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. General",
+      "body": "This bill of sale is governed by the laws of {{sale_state}}. It is the parties' entire agreement about the sale. Electronic signatures are valid.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Seller** — {{seller_name}}\n\n[[sig:seller]]\n\nPrinted name: [[name:seller]]\nDate: [[date:seller]]\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nDate: [[date:buyer]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "UCC Article 2 (sales), §2-312 warranty of title (Cornell LII)",
+      "url": "https://www.law.cornell.edu/ucc/2/2-312"
+    },
+    {
+      "title": "UCC §2-316: exclusion or modification of warranties (Cornell LII)",
+      "url": "https://www.law.cornell.edu/ucc/2/2-316"
+    },
+    {
+      "title": "NHTSA: Odometer fraud and disclosure requirements",
+      "url": "https://www.nhtsa.gov/odometer-fraud"
+    },
+    {
+      "title": "49 CFR Part 580: Odometer disclosure requirements (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-580"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

@@ -1,0 +1,411 @@
+{
+  "id": "services-agreement",
+  "version": 1,
+  "title": "Services Agreement with Statement of Work",
+  "category": "business",
+  "summary": "A master services agreement with general terms, plus a first statement of work for the specific project.",
+  "useWhen": "A business provides services, such as agency, IT, marketing, design or maintenance, to a client and expects more than one project. Add later projects as new statements of work.",
+  "watchOuts": [
+    "If the statement of work and the general terms disagree, decide which one controls. This template lets the statement of work control only where it expressly says it overrides a section.",
+    "Acceptance testing protects both sides. Without a deadline, a client can delay acceptance and payment indefinitely.",
+    "Liability caps and indemnities are the most negotiated terms. Make sure the cap fits the size of the deal.",
+    "If the provider will handle personal data, such as health, financial or children's data, you may need a data processing agreement and sector-specific terms, such as a HIPAA business associate agreement.",
+    "Auto-renewal clauses with consumers are regulated in many states. This template is meant for business-to-business use."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "client",
+      "label": "Client"
+    },
+    {
+      "id": "provider",
+      "label": "Service provider"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date the master agreement starts."
+    },
+    {
+      "id": "client_name",
+      "label": "Client: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "client_address",
+      "label": "Client: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "client_email",
+      "label": "Client: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "provider_name",
+      "label": "Service provider: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "provider_address",
+      "label": "Service provider: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "provider_email",
+      "label": "Service provider: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "sow_title",
+      "label": "Statement of work title",
+      "type": "text",
+      "required": true,
+      "default": "Statement of Work No. 1",
+      "options": [],
+      "help": "Name of the first project."
+    },
+    {
+      "id": "sow_scope",
+      "label": "Scope of services",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "What the provider will do in this project."
+    },
+    {
+      "id": "sow_deliverables",
+      "label": "Deliverables",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "List each deliverable and its format."
+    },
+    {
+      "id": "sow_timeline",
+      "label": "Timeline and milestones",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Key dates, phases and dependencies."
+    },
+    {
+      "id": "sow_client_duties",
+      "label": "Client responsibilities",
+      "type": "longtext",
+      "required": false,
+      "default": "Provide timely feedback, access and materials needed for the services.",
+      "options": [],
+      "help": "What the client must provide, such as content, access, approvals or a point of contact."
+    },
+    {
+      "id": "sow_fees",
+      "label": "Fees for this statement of work",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Amount and structure, e.g. '$12,000 fixed: 50% on signing, 50% on acceptance'."
+    },
+    {
+      "id": "acceptance_days",
+      "label": "Acceptance review period (days)",
+      "type": "number",
+      "required": true,
+      "default": "10",
+      "options": [],
+      "help": "Days the client has to accept or reject a deliverable. If it does neither, the deliverable is accepted."
+    },
+    {
+      "id": "payment_days",
+      "label": "Days to pay invoices",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "Net payment terms."
+    },
+    {
+      "id": "late_interest",
+      "label": "Late interest per month",
+      "type": "percent",
+      "required": false,
+      "default": "1",
+      "options": [],
+      "help": "Interest on overdue amounts, capped at the highest lawful rate. Leave it at or below your state's limit."
+    },
+    {
+      "id": "warranty_days",
+      "label": "Warranty period (days)",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "The provider fixes defects reported within this many days after acceptance."
+    },
+    {
+      "id": "liability_cap",
+      "label": "Liability cap",
+      "type": "select",
+      "required": true,
+      "default": "fees paid in the prior 12 months",
+      "options": [
+        "fees paid in the prior 12 months",
+        "fees under the applicable statement of work",
+        "a fixed amount"
+      ],
+      "help": "Maximum each party can owe for most claims."
+    },
+    {
+      "id": "liability_cap_amount",
+      "label": "Fixed liability cap amount",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Used only if the cap is 'a fixed amount'."
+    },
+    {
+      "id": "ip_model",
+      "label": "Who owns the deliverables?",
+      "type": "select",
+      "required": true,
+      "default": "client owns on payment",
+      "options": [
+        "client owns on payment",
+        "provider owns, client licensed"
+      ],
+      "help": "Who owns the custom work product."
+    },
+    {
+      "id": "termination_days",
+      "label": "Notice to end without cause (days)",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "Either party may end the master agreement with this much notice."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and structure",
+      "body": "**Client:** {{client_name}}, {{client_address}} ({{client_email}})\n\n**Service provider (Provider):** {{provider_name}}, {{provider_address}} ({{provider_email}})\n\nThis master agreement starts on {{effective_date}}. Provider will perform services described in one or more statements of work (\"SOWs\") signed by both parties. Each SOW is part of this agreement. The first SOW is attached as Exhibit A. If an SOW conflicts with these general terms, these terms control unless the SOW expressly says which section it overrides.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Performance",
+      "body": "Provider will perform the services in a professional and workmanlike manner, using qualified personnel, in line with the SOW and generally accepted industry standards. Client will perform the client responsibilities in each SOW. Provider is not responsible for delays caused by Client's failure to do so.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Changes",
+      "body": "Either party may request a change to an SOW. A change takes effect only when both parties sign a written change order describing the change and any adjustment to fees and schedule.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Acceptance",
+      "body": "Client will review each deliverable within {{acceptance_days}} days of delivery and either accept it or describe in writing how it fails to meet the SOW. Provider will fix those failures and redeliver. If Client does not respond within the review period, or uses the deliverable in production, it is accepted.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Fees and payment",
+      "body": "Client will pay the fees in each SOW. Provider will invoice as stated in the SOW. Client will pay undisputed amounts within {{payment_days}} days of the invoice date. Overdue undisputed amounts may bear interest at {{late_interest}}% per month or the highest rate allowed by law, whichever is lower. After 15 days' written notice of non-payment, Provider may pause work until overdue amounts are paid. Fees do not include taxes. Client pays applicable sales and use taxes, but not taxes on Provider's income.",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Independent contractor",
+      "body": "Provider is an independent contractor. Provider is responsible for its personnel, their pay, taxes and benefits, and for directing their work.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Intellectual property: client owns",
+      "body": "When Client has paid for a deliverable in full, Provider assigns to Client all rights in that deliverable, except Provider's pre-existing materials and general tools (\"Provider Materials\"). Provider grants Client a non-exclusive, perpetual, royalty-free license to use Provider Materials built into the deliverables. Each party keeps all rights in its own pre-existing intellectual property.",
+      "optional": true,
+      "showIf": "ip_model == 'client owns on payment'"
+    },
+    {
+      "id": "s8",
+      "title": "8. Intellectual property: provider owns",
+      "body": "Provider owns the deliverables. When Client has paid in full, Provider grants Client a non-exclusive, perpetual, worldwide, royalty-free license to use, copy and modify the deliverables for Client's internal business purposes. Each party keeps all rights in its own pre-existing intellectual property.",
+      "optional": true,
+      "showIf": "ip_model == 'provider owns, client licensed'"
+    },
+    {
+      "id": "s9",
+      "title": "9. Confidentiality",
+      "body": "Each party will keep the other's non-public business information confidential, use it only to perform or receive the services, and protect it with reasonable care. This does not apply to information that is public, already known, independently developed or received from someone free to share it. These duties last three years after this agreement ends, and for trade secrets, for as long as they remain trade secrets.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Warranty",
+      "body": "Provider warrants that the services will conform to the SOW. If Client reports a non-conformity within {{warranty_days}} days after acceptance, Provider will fix it at no charge. If Provider cannot fix it within a reasonable time, Client may end the affected SOW and receive a refund of fees paid for the non-conforming deliverable. EXCEPT AS STATED IN THIS AGREEMENT, PROVIDER MAKES NO OTHER WARRANTIES, EXPRESS OR IMPLIED, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Indemnity",
+      "body": "Provider will defend Client against third-party claims that a deliverable (other than Client-supplied materials) infringes a U.S. intellectual property right, and pay resulting damages and settlements it approves. Client will defend Provider against third-party claims arising from materials Client supplies. The indemnified party must give prompt notice, reasonable cooperation and control of the defense.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Limitation of liability",
+      "body": "Neither party is liable for lost profits or indirect, special or consequential damages. Each party's total liability under this agreement is limited to the {{liability_cap}}. Where the cap is a fixed amount, it is {{liability_cap_amount}}. These limits do not apply to payment obligations, indemnity obligations, breach of confidentiality, or a party's gross negligence or willful misconduct.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. Term and ending",
+      "body": "This master agreement continues until ended. Either party may end it, or any SOW, with {{termination_days}} days' written notice. Either party may end it immediately if the other materially breaches and does not cure within 15 days after notice. When it ends, Client pays for services performed up to the end date, and each party returns the other's confidential information. Sections that by their nature should survive will continue.",
+      "optional": false
+    },
+    {
+      "id": "s14",
+      "title": "14. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "Exhibit A — {{sow_title}}",
+      "body": "This statement of work is issued under the services agreement between {{client_name}} and {{provider_name}} dated {{effective_date}}.\n\n**Scope of services**\n\n{{sow_scope}}\n\n**Deliverables**\n\n{{sow_deliverables}}\n\n**Timeline and milestones**\n\n{{sow_timeline}}\n\n**Client responsibilities**\n\n{{sow_client_duties}}\n\n**Fees and invoicing**\n\n{{sow_fees}}\n\n**Acceptance:** as stated in the Acceptance section of the agreement, with a review period of {{acceptance_days}} days.\n\nClient approval of this statement of work: [[initial:client]]   Provider: [[initial:provider]]",
+      "optional": false
+    },
+    {
+      "id": "s16",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to the services agreement and Exhibit A.\n\n**Client** — {{client_name}}\n\n[[sig:client]]\n\nPrinted name: [[name:client]]\nTitle (if signing for a company): [[text:client:Title]]\nDate: [[date:client]]\n\n**Service provider** — {{provider_name}}\n\n[[sig:provider]]\n\nPrinted name: [[name:provider]]\nTitle (if signing for a company): [[text:provider:Title]]\nDate: [[date:provider]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "UCC §2-316: exclusion or modification of warranties (Cornell LII)",
+      "url": "https://www.law.cornell.edu/ucc/2/2-316"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    },
+    {
+      "title": "Docusign: How to eSign different documents",
+      "url": "https://www.docusign.com/products/electronic-signature/learn/how-to-esign-different-documents"
+    },
+    {
+      "title": "signNow: Top 5 most e-signed documents",
+      "url": "https://www.signnow.com/blog/top-5-most-e-signed-documents-in-2020/"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

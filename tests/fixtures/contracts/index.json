@@ -1,0 +1,5 @@
+[
+  { "id": "mutual-nda", "title": "Mutual Non-Disclosure Agreement", "category": "business", "tags": ["nda", "confidentiality", "startup"], "summary": "Both sides share confidential information and promise to keep it private." },
+  { "id": "split-sheet", "title": "Song Split Sheet", "category": "music", "tags": ["split sheet", "songwriting", "publishing"], "summary": "Writers agree who owns what share of a song's composition." },
+  { "id": "bill-of-sale", "title": "Vehicle Bill of Sale", "category": "everyday", "tags": ["vehicle", "car", "sale"], "summary": "Records the sale of a car, truck or motorcycle between two people." }
+]

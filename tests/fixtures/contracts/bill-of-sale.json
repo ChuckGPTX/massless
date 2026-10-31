@@ -1,0 +1,31 @@
+{
+  "id": "bill-of-sale",
+  "version": 1,
+  "title": "Vehicle Bill of Sale",
+  "category": "everyday",
+  "summary": "Records the sale of a car, truck or motorcycle between two people.",
+  "useWhen": "You are selling or buying a used vehicle privately.",
+  "watchOuts": ["Some states require a notarized bill of sale.", "Write the odometer reading exactly."],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [{ "id": "seller", "label": "Seller" }, { "id": "buyer", "label": "Buyer" }],
+  "variables": [
+    { "id": "seller_name", "label": "Seller name", "type": "party", "role": "seller", "required": true, "default": "" },
+    { "id": "buyer_name", "label": "Buyer name", "type": "party", "role": "buyer", "required": true, "default": "" },
+    { "id": "vehicle", "label": "Year, make and model", "type": "text", "required": true, "default": "" },
+    { "id": "vin", "label": "VIN", "type": "text", "required": true, "default": "" },
+    { "id": "odometer", "label": "Odometer (miles)", "type": "number", "required": true, "default": "" },
+    { "id": "price", "label": "Price", "type": "money", "required": true, "default": "" },
+    { "id": "sale_date", "label": "Date of sale", "type": "date", "required": true, "default": "" },
+    { "id": "condition", "label": "Condition", "type": "select", "required": true, "default": "As is", "options": ["As is", "With a 30-day warranty"] }
+  ],
+  "sections": [
+    { "id": "v", "title": "Vehicle", "body": "{{vehicle}}, VIN {{vin}}, with {{odometer}} miles on the odometer." },
+    { "id": "p", "title": "Price and Payment", "body": "{{seller_name}} sells the vehicle to {{buyer_name}} for {{price}}, paid in full on {{sale_date}}." },
+    { "id": "c", "title": "Condition", "body": "The vehicle is sold {{condition}}. The seller states they own it free of liens.\n\n[[check:buyer:I inspected the vehicle]] [[initial:buyer]]" }
+  ],
+  "disclaimer": "Not legal advice. Check your state's motor vehicle agency for required forms.",
+  "sources": [],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}
