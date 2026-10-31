@@ -1,0 +1,34 @@
+{
+  "id": "split-sheet",
+  "version": 2,
+  "title": "Song Split Sheet",
+  "category": "music",
+  "summary": "Writers agree who owns what share of a song's composition.",
+  "useWhen": "Right after a writing session, before the song is released or registered with a PRO.",
+  "watchOuts": ["Shares must add up to 100%.", "This covers the composition, not the master recording.", "Register the split with each writer's PRO and publisher."],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [{ "id": "writer1", "label": "Writer 1" }, { "id": "writer2", "label": "Writer 2" }],
+  "variables": [
+    { "id": "song_title", "label": "Song title", "type": "text", "required": true, "default": "" },
+    { "id": "session_date", "label": "Session date", "type": "date", "required": true, "default": "" },
+    { "id": "writer1_name", "label": "Writer 1 name", "type": "party", "role": "writer1", "required": true, "default": "" },
+    { "id": "writer1_share", "label": "Writer 1 share", "type": "percent", "required": true, "default": "50" },
+    { "id": "writer1_pro", "label": "Writer 1 PRO", "type": "select", "required": false, "default": "BMI", "options": ["ASCAP", "BMI", "SESAC", "GMR", "None"] },
+    { "id": "writer2_name", "label": "Writer 2 name", "type": "party", "role": "writer2", "required": true, "default": "" },
+    { "id": "writer2_share", "label": "Writer 2 share", "type": "percent", "required": true, "default": "50" },
+    { "id": "writer2_pro", "label": "Writer 2 PRO", "type": "select", "required": false, "default": "ASCAP", "options": ["ASCAP", "BMI", "SESAC", "GMR", "None"] },
+    { "id": "has_sample", "label": "The song uses a sample", "type": "bool", "required": false, "default": false },
+    { "id": "sample_details", "label": "Sample details", "type": "longtext", "required": false, "default": "", "help": "Song, artist and owner of the sampled recording." }
+  ],
+  "sections": [
+    { "id": "a", "title": "Song", "body": "Title: **{{song_title}}**\nWritten on {{session_date}}." },
+    { "id": "b", "title": "Writer Shares", "body": "The writers agree the composition is owned in these shares:\n- {{writer1_name}} ({{writer1_pro}}): {{writer1_share}}\n- {{writer2_name}} ({{writer2_pro}}): {{writer2_share}}\n\nThe shares above add up to 100%." },
+    { "id": "c", "title": "Samples", "showIf": "has_sample", "body": "The song uses this sample, which must be cleared before release: {{sample_details}}\n\n[[check:writer1:I confirm the sample is disclosed]]" },
+    { "id": "d", "title": "Registration", "body": "Each writer may register their own share with their performing rights organization and publisher." }
+  ],
+  "disclaimer": "A split sheet records what the writers agreed. It is not legal advice and does not replace a publishing agreement.",
+  "sources": [],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

@@ -1,0 +1,38 @@
+{
+  "id": "mutual-nda",
+  "version": 1,
+  "title": "Mutual Non-Disclosure Agreement",
+  "category": "business",
+  "summary": "Both sides share confidential information and promise to keep it private.",
+  "useWhen": "Two companies or people will trade sensitive details before a deal, a hire or a partnership.",
+  "watchOuts": ["Name the purpose narrowly; a broad purpose weakens the promise.", "Check how long confidentiality lasts after the agreement ends.", "Trade secrets may need protection for longer than the term."],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [{ "id": "partyA", "label": "First party" }, { "id": "partyB", "label": "Second party" }],
+  "variables": [
+    { "id": "effective_date", "label": "Effective date", "type": "date", "required": true, "default": "", "help": "The day the agreement starts." },
+    { "id": "party_a_name", "label": "First party's legal name", "type": "party", "role": "partyA", "required": true, "default": "", "help": "A person's full name or a company's registered name." },
+    { "id": "party_a_address", "label": "First party's address", "type": "address", "required": false, "default": "" },
+    { "id": "party_b_name", "label": "Second party's legal name", "type": "party", "role": "partyB", "required": true, "default": "" },
+    { "id": "party_b_email", "label": "Second party's notice email", "type": "email", "required": false, "default": "" },
+    { "id": "purpose", "label": "Purpose", "type": "longtext", "required": true, "default": "evaluating a possible business relationship between the parties", "help": "Why the parties are sharing information." },
+    { "id": "term_years", "label": "Term (years)", "type": "number", "required": true, "default": "2" },
+    { "id": "governing_state", "label": "Governing law", "type": "select", "required": true, "default": "Delaware", "options": ["California", "Delaware", "New York", "Texas", "Washington"] },
+    { "id": "include_nonsolicit", "label": "Add a non-solicitation clause", "type": "bool", "required": false, "default": false },
+    { "id": "penalty", "label": "Liquidated damages", "type": "money", "required": false, "default": "" }
+  ],
+  "sections": [
+    { "id": "s1", "title": "1. Parties and Purpose", "body": "This Mutual Non-Disclosure Agreement (the **Agreement**) is made on {{effective_date}} between {{party_a_name}} and {{party_b_name}} (each a **Party**). The Parties want to share information for the purpose of {{purpose}} (the **Purpose**)." },
+    { "id": "s2", "title": "2. Confidential Information", "body": "Confidential Information means any non-public information a Party shares with the other, in any form, that is marked confidential or that a reasonable person would treat as confidential. It does not include information that:\n- is or becomes public through no fault of the receiving Party;\n- the receiving Party already knew without a duty of confidentiality;\n- the receiving Party develops independently; or\n- a third party shares lawfully and without restriction." },
+    { "id": "s3", "title": "3. Obligations", "body": "Each Party will use the other's Confidential Information only for the Purpose, protect it with at least reasonable care, and share it only with employees and advisers who need to know it and are bound by similar duties. A Party may disclose Confidential Information when the law requires it, after giving the other Party prompt notice where allowed." },
+    { "id": "s4", "title": "4. Term", "body": "This Agreement lasts for {{term_years}} years from the effective date. Duties of confidentiality survive for {{term_years}} years after it ends, and for trade secrets, for as long as the information stays a trade secret." },
+    { "id": "s5", "title": "5. Non-Solicitation", "optional": true, "showIf": "include_nonsolicit == true", "body": "During the term and for one year after, neither Party will directly solicit for employment any employee of the other Party it met through the Purpose. General job advertisements are not solicitation." },
+    { "id": "s6", "title": "6. Remedies", "body": "Unauthorized disclosure may cause harm that money cannot fully repair, so either Party may seek an injunction in addition to any other remedy. *Agreed liquidated damages, if any:* {{penalty}}.\n\nInitials of each Party: [[initial:partyA]] [[initial:partyB]]" },
+    { "id": "s7", "title": "7. Governing Law", "body": "The laws of the State of {{governing_state}} govern this Agreement, without regard to its conflict of laws rules." },
+    { "id": "s8", "title": "8. Signatures", "body": "Each Party signs below to show it agrees to this Agreement.\n\n**{{party_a_name}}**\n[[sig:partyA]] [[date:partyA]]\n[[name:partyA]] [[text:partyA:Title]]\n\n**{{party_b_name}}**\n[[sig:partyB]] [[date:partyB]]\n[[name:partyB]] [[text:partyB:Title]]" }
+  ],
+  "disclaimer": "This template is a starting point, not legal advice. Laws differ by state and situation. Have a lawyer review it before you rely on it.",
+  "sources": [{ "title": "Uniform Trade Secrets Act", "url": "https://www.uniformlaws.org/" }],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

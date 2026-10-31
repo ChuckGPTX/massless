@@ -1,0 +1,403 @@
+{
+  "id": "producer-exclusive-license",
+  "version": 1,
+  "title": "Producer Agreement: Exclusive Beat License",
+  "category": "music",
+  "summary": "An artist gets exclusive rights to use a beat, with no caps. The producer stops licensing it, and may keep ownership, take points and receive a SoundExchange share.",
+  "useWhen": "An artist wants a beat for an important release without competing versions, with the producer paid a fee plus optional royalties.",
+  "watchOuts": [
+    "Exclusive license versus ownership: under this template the producer keeps the copyright in the beat but cannot license it to anyone new. If the artist needs to own the beat outright, use the work-for-hire or buyout version.",
+    "Existing leases: earlier non-exclusive leases usually keep running until they expire. Ask the producer for a list.",
+    "Points are a percentage of master royalties. Define the base (for example artist's net master income), whether they are paid from the first unit or after recoupment, and statements and audit rights.",
+    "SoundExchange pays featured artists for non-interactive digital radio. A producer can receive a share only if the featured artist signs a Letter of Direction.",
+    "Exclusive transfers and licenses must be in a signed writing (17 U.S.C. §204)."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "producer",
+      "label": "Producer"
+    },
+    {
+      "id": "artist",
+      "label": "Artist"
+    }
+  ],
+  "variables": [
+    {
+      "id": "agreement_date",
+      "label": "Date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Effective date."
+    },
+    {
+      "id": "producer_name",
+      "label": "Producer legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Producer's legal name."
+    },
+    {
+      "id": "producer_alias",
+      "label": "Producer professional name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Producer name for credits."
+    },
+    {
+      "id": "producer_email",
+      "label": "Producer email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "artist_name",
+      "label": "Artist legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Licensee's legal name."
+    },
+    {
+      "id": "artist_alias",
+      "label": "Artist professional name",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Stage name."
+    },
+    {
+      "id": "artist_email",
+      "label": "Artist email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For notices."
+    },
+    {
+      "id": "beat_title",
+      "label": "Beat title",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Name of the instrumental."
+    },
+    {
+      "id": "song_title",
+      "label": "New song title",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Title of the artist's song using the beat, if known."
+    },
+    {
+      "id": "fee",
+      "label": "License fee",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Amount paid."
+    },
+    {
+      "id": "files",
+      "label": "Files delivered",
+      "type": "select",
+      "required": true,
+      "default": "WAV and MP3",
+      "options": [
+        "MP3 only",
+        "WAV and MP3",
+        "WAV, MP3 and track stems"
+      ],
+      "help": "Delivery format."
+    },
+    {
+      "id": "prior_leases",
+      "label": "Existing non-exclusive leases",
+      "type": "longtext",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "List leases the producer already sold. They continue until they expire."
+    },
+    {
+      "id": "royalty",
+      "label": "Producer royalties (points)?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Ongoing share of master income."
+    },
+    {
+      "id": "royalty_percent",
+      "label": "Producer royalty (% of Artist's net master income)",
+      "type": "percent",
+      "required": false,
+      "default": "3",
+      "options": [],
+      "help": "Common ranges vary. Define the base clearly."
+    },
+    {
+      "id": "recoup",
+      "label": "Royalties paid",
+      "type": "select",
+      "required": false,
+      "default": "from the first unit, after the fee is recouped",
+      "options": [
+        "from the first unit",
+        "from the first unit, after the fee is recouped",
+        "after recording costs are recouped, then retroactive to the first unit"
+      ],
+      "help": "When royalties start."
+    },
+    {
+      "id": "sx_lod",
+      "label": "Artist signs a SoundExchange Letter of Direction?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Directs a share of the featured artist's SoundExchange royalties to the producer."
+    },
+    {
+      "id": "sx_percent",
+      "label": "SoundExchange share (% of featured artist share)",
+      "type": "percent",
+      "required": false,
+      "default": "3",
+      "options": [],
+      "help": "Percent of the featured artist's share."
+    },
+    {
+      "id": "producer_share",
+      "label": "Producer's share of the new composition",
+      "type": "percent",
+      "required": true,
+      "default": "50",
+      "options": [],
+      "help": "Producer's writer and publishing share of the new song (the music). The artist and other writers share the rest. Register it with your PROs and The MLC."
+    },
+    {
+      "id": "producer_pro",
+      "label": "Producer's PRO and IPI",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "E.g. 'BMI, IPI 00123456789'."
+    },
+    {
+      "id": "credit",
+      "label": "Producer credit",
+      "type": "text",
+      "required": true,
+      "default": "Produced by [producer name]",
+      "options": [],
+      "help": "How the producer is credited in titles and metadata."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Producer:** {{producer_name}} ({{producer_alias}}), {{producer_email}}\n\n**Artist:** {{artist_name}} ({{artist_alias}}), {{artist_email}}\n\nDate: {{agreement_date}}. Beat: \"{{beat_title}}\" (the \"Beat\"). New song: \"{{song_title}}\" (the \"New Song\"). Every recorded song has two separate copyrights: the composition (music and lyrics), usually owned by songwriters and their publishers, and the sound recording or master, usually owned by whoever paid for or made the recording (the artist or label). Licenses and splits for one do not cover the other.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Exclusive license",
+      "body": "On payment of {{fee}}, Producer grants Artist an exclusive, worldwide, perpetual license to use the Beat in the New Song and to exploit the New Song master in all media, including streaming, downloads, physical copies, video and live performance. Producer delivers the Beat as {{files}}. Synchronization of the New Song master is included, subject to Producer's share of the composition.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Exclusivity",
+      "body": "From the date above, Producer will not license, sell or give the Beat, or any substantially similar version, to anyone else, and will remove it from stores and beat marketplaces within 7 days. Existing non-exclusive licenses disclosed here continue until they expire: {{prior_leases}}. Producer: [[initial:producer]]",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Ownership",
+      "body": "Producer keeps ownership of the copyrights in the Beat, subject to this exclusive license. Artist owns the New Song master recording and Artist's contributions. Artist may register the New Song master, but not the Beat alone, in Content ID once all disclosed leases have expired or the parties agree in writing on a whitelisting process.",
+      "optional": false
+    },
+    {
+      "id": "s5",
+      "title": "5. Producer royalties",
+      "body": "Artist will pay Producer {{royalty_percent}}% of Artist's net income from the New Song master (all amounts Artist actually receives from exploitation of the master, minus distribution fees), {{recoup}}. Artist will account to Producer twice a year, within 60 days after June 30 and December 31, with a statement. Producer may audit once a year on 30 days' notice. If Artist signs with a label, Artist will ask the label to pay Producer directly at an equivalent rate.",
+      "optional": true,
+      "showIf": "royalty == true"
+    },
+    {
+      "id": "s6",
+      "title": "6. SoundExchange Letter of Direction",
+      "body": "Artist will sign a SoundExchange Letter of Direction directing {{sx_percent}}% of Artist's featured-artist share of SoundExchange royalties for the New Song to Producer.",
+      "optional": true,
+      "showIf": "sx_lod == true"
+    },
+    {
+      "id": "s7",
+      "title": "7. Composition and publishing",
+      "body": "The New Song's composition will be co-owned. Producer owns {{producer_share}}% (as writer of the music, including the corresponding publisher share), and Artist and any other writers own the rest, as recorded in a split sheet signed by all writers. Producer's PRO and IPI: {{producer_pro}}. Each party registers its own share with its PRO and The MLC. Neither party may register the New Song with a different split.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Credit",
+      "body": "Artist will credit Producer as \"{{credit}}\" in the song title or description where customary (for example \"prod. by\"), in streaming and distributor metadata where available, and in physical or digital liner notes. Inadvertent failure to credit is not a breach if Artist fixes it promptly after notice.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Producer's promises",
+      "body": "Producer promises that its contribution is original, or that every sample, interpolation or third-party element in it has been disclosed in writing and is either cleared or will be cleared before release. Producer has not granted rights that conflict with this agreement. Producer owns or controls the Beat and has the right to grant this license.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Artist's promises",
+      "body": "Artist's contributions are original or cleared and will not infringe anyone's rights.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Producer** — {{producer_name}}\n\n[[sig:producer]]\n\nPrinted name: [[name:producer]]\nDate: [[date:producer]]\n\n**Artist** — {{artist_name}}\n\n[[sig:artist]]\n\nPrinted name: [[name:artist]]\nDate: [[date:artist]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Music rights are split between the composition (song) and the sound recording (master); royalties also depend on PRO, publisher, distributor and label agreements that this template does not change. An entertainment attorney should review deals involving advances, ownership transfers or long terms.",
+  "sources": [
+    {
+      "title": "U.S. Copyright Office Circular 56A: Copyright registration of musical compositions and sound recordings",
+      "url": "https://www.copyright.gov/circs/circ56a.pdf"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    },
+    {
+      "title": "17 U.S.C. §201: ownership of copyright, joint works (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/201"
+    },
+    {
+      "title": "17 U.S.C. §204: execution of transfers of copyright ownership (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/204"
+    },
+    {
+      "title": "ASCAP (performing rights organization)",
+      "url": "https://www.ascap.com/"
+    },
+    {
+      "title": "BMI (performing rights organization)",
+      "url": "https://www.bmi.com/"
+    },
+    {
+      "title": "SESAC (performing rights organization)",
+      "url": "https://www.sesac.com/"
+    },
+    {
+      "title": "Global Music Rights (performing rights organization)",
+      "url": "https://globalmusicrights.com/"
+    },
+    {
+      "title": "SoundExchange: Featured Artist Letters of Direction",
+      "url": "https://www.soundexchange.com/what-we-do/for-artists-labels-and-producers/letters-of-direction/"
+    },
+    {
+      "title": "17 U.S.C. §114: sound recording performance rights, incl. §114(g)(5) producer payments (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/114"
+    },
+    {
+      "title": "The MLC: What is a blanket mechanical license?",
+      "url": "https://help.themlc.com/en/support/what-is-a-blanket-mechanical-license"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

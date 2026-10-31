@@ -1,4 +1,5 @@
 import { generationAPI } from './generations.js';
+import { signApi, signGated, signCleanup } from './sign.js';
 export { GenerationLedger } from './generations.js';
 // Massless Worker: serves the static app and the free-tier model APIs on Cloudflare Workers AI.
 // /api/shot (images), /api/beats and /api/ask (Llama 3.3), /api/tts (MeloTTS), /api/transcribe (Whisper).
@@ -35,6 +36,7 @@ const ai = (env, model, input) => (env.AI_GATEWAY ? env.AI.run(model, input, { g
 // { human: true, sitekey }; the page runs Turnstile, posts the token to /api/human and gets a signed
 // cookie for PASS_HOURS. The check is off unless TURNSTILE_SITEKEY, TURNSTILE_SECRET and PASS_KEY are set.
 const GATED = new Set(['/api/shot', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe']);
+// Massless Sign POSTs (create, events, verify) also need a pass; see signGated() in src/sign.js.
 const PASS_COOKIE = 'ml_pass';
 const PASS_HOURS = 6;
 const humanOn = (env) => !!(env.TURNSTILE_SITEKEY && env.TURNSTILE_SECRET && env.PASS_KEY);
@@ -292,9 +294,26 @@ async function transcribe(request, env) {
   b64 = btoa(b64);
   const input = { audio: b64, task: q.get('task') === 'translate' ? 'translate' : 'transcribe', vad_filter: true };
   if (/^[a-z]{2}$/.test(q.get('lang') || '')) input.language = q.get('lang');
+  // ?prompt= becomes Whisper's initial_prompt (Edit by text sends a short disfluent sentence so "um" and "uh"
+  // are written down instead of dropped). Plain text only, at most 240 characters.
+  const prompt = String(q.get('prompt') || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 240);
+  if (prompt) input.initial_prompt = prompt;
   let result;
   try { result = await ai(env, '@cf/openai/whisper-large-v3-turbo', input); } catch (e) { return json({ error: `Workers AI could not transcribe this: ${e.message || e}` }, 502); }
-  return json({ text: result.text || '', vtt: result.vtt || '', segments: (result.segments || []).map((s) => ({ start: s.start, end: s.end, text: s.text })), language: result.transcription_info?.language || input.language || '', duration: result.transcription_info?.duration || null, model: '@cf/openai/whisper-large-v3-turbo' });
+  return json({ text: result.text || '', vtt: result.vtt || '', segments: (result.segments || []).map(segmentOut), language: result.transcription_info?.language || input.language || '', duration: result.transcription_info?.duration || null, model: '@cf/openai/whisper-large-v3-turbo' });
+}
+
+// One Whisper segment for the page: its times and text as before, plus word timings and the confidence numbers
+// when Workers AI sends them (extra fields; older pages ignore them).
+const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : null);
+function segmentOut(s) {
+  const out = { start: s.start, end: s.end, text: s.text };
+  if (Array.isArray(s.words) && s.words.length) {
+    const words = s.words.map((w) => ({ word: String(w.word ?? w.text ?? ''), start: num(w.start), end: num(w.end) })).filter((w) => w.word.trim() && w.start !== null && w.end !== null);
+    if (words.length) out.words = words;
+  }
+  for (const k of ['avg_logprob', 'no_speech_prob', 'compression_ratio']) if (num(s[k]) !== null) out[k] = num(s[k]);
+  return out;
 }
 
 // Daily caps per feature and per visitor keep every endpoint inside the free Workers AI allowance.
@@ -387,6 +406,7 @@ async function fetchFile(ref, path, ctx) {
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
 const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
 for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studios/${studio}`] = `/studios/${studio}/index.html`;
+PAGES['/sign'] = '/sign/index.html';
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
 
 async function page(request, ref, file, ctx) {
@@ -430,7 +450,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects|library|edit|build|cut|scene)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects|library|edit|build|cut|scene|sign)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
@@ -447,7 +467,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/api/config' || url.pathname.startsWith('/api/generations')) return generationAPI(request, env);
     if (url.pathname === '/api/human') return humanPass(request, env);
-    if (GATED.has(url.pathname) && request.method === 'POST') {
+    if ((GATED.has(url.pathname) || signGated(url.pathname)) && request.method === 'POST') {
       const stop = await needsHuman(request, env);
       if (stop) return stop;
     }
@@ -457,9 +477,14 @@ export default {
     if (url.pathname === '/api/tts') return tts(request, env);
     if (url.pathname === '/api/transcribe') return transcribe(request, env);
     if (url.pathname === '/api/health') return health(env);
+    if (url.pathname.startsWith('/api/sign/')) return signApi(request, env, ctx);
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
     if (env.ASSETS) return env.ASSETS.fetch(request);
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
     return fromOrigin(request, env, ctx);
+  },
+  // Daily cron (wrangler.jsonc triggers): delete expired Sign envelopes (30 days unsigned, 90 completed).
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(signCleanup(env, 500));
   },
 };

@@ -1,0 +1,329 @@
+{
+  "id": "profit-share-agreement",
+  "version": 1,
+  "title": "Profit Share Agreement",
+  "category": "joint-venture",
+  "summary": "Give someone a share of a business's or project's net profits without giving them ownership.",
+  "useWhen": "You want to reward a key contributor, partner or service provider with a share of profits from a business line or project, without issuing equity.",
+  "watchOuts": [
+    "Define 'net profit' precisely: which expenses count, who decides, and whether owner salaries are deducted. Vague definitions cause most profit-share disputes.",
+    "If the participant is an employee, profit-share payments are wages and must follow wage-payment and tax-withholding rules.",
+    "If the participant pays money for the profit share, it may be an investment contract (a security).",
+    "Profit-sharing between licensed professionals and unlicensed persons is prohibited in some fields (law, medicine, real estate)."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "owner",
+      "label": "Business owner"
+    },
+    {
+      "id": "participant",
+      "label": "Participant"
+    }
+  ],
+  "variables": [
+    {
+      "id": "effective_date",
+      "label": "Effective date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Start date."
+    },
+    {
+      "id": "owner_name",
+      "label": "Business owner: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "owner_address",
+      "label": "Business owner: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "owner_email",
+      "label": "Business owner: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "participant_name",
+      "label": "Participant: full legal name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Full legal name of the person, or the exact registered name of the company."
+    },
+    {
+      "id": "participant_address",
+      "label": "Participant: address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Mailing address for notices."
+    },
+    {
+      "id": "participant_email",
+      "label": "Participant: email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Email address for notices."
+    },
+    {
+      "id": "scope",
+      "label": "Profits from",
+      "type": "longtext",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "The whole business, a product line, a location or a project."
+    },
+    {
+      "id": "share_percent",
+      "label": "Participant's share of net profit",
+      "type": "percent",
+      "required": true,
+      "default": "10",
+      "options": [],
+      "help": "Percent of net profit."
+    },
+    {
+      "id": "net_profit_definition",
+      "label": "Net profit means",
+      "type": "longtext",
+      "required": true,
+      "default": "Gross revenue actually received from the covered business, minus the direct costs of goods and services, operating expenses, reasonable owner compensation, taxes other than income taxes, and debt service, all determined under the owner's consistently applied accounting method.",
+      "options": [],
+      "help": "Be specific about included and excluded expenses."
+    },
+    {
+      "id": "period",
+      "label": "Calculation period",
+      "type": "select",
+      "required": true,
+      "default": "quarterly",
+      "options": [
+        "monthly",
+        "quarterly",
+        "annually"
+      ],
+      "help": "How often profit is calculated."
+    },
+    {
+      "id": "payment_days",
+      "label": "Paid within (days after period ends)",
+      "type": "number",
+      "required": true,
+      "default": "45",
+      "options": [],
+      "help": "Payment timing."
+    },
+    {
+      "id": "include_cap",
+      "label": "Cap total payments?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Set a maximum total amount payable."
+    },
+    {
+      "id": "cap",
+      "label": "Maximum total payments",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Total payments will not exceed this."
+    },
+    {
+      "id": "term_months",
+      "label": "Term (months)",
+      "type": "number",
+      "required": true,
+      "default": "24",
+      "options": [],
+      "help": "How long the share lasts."
+    },
+    {
+      "id": "conditions",
+      "label": "Conditions to stay eligible",
+      "type": "longtext",
+      "required": false,
+      "default": "Participant continues to provide the services described in the parties' services agreement.",
+      "options": [],
+      "help": "E.g. continued services. Leave blank for none."
+    },
+    {
+      "id": "governing_state",
+      "label": "Governing law (state)",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code of the state whose law governs this agreement. Usually where the parties or the work are located."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties",
+      "body": "**Owner:** {{owner_name}}, {{owner_address}} ({{owner_email}})\n\n**Participant:** {{participant_name}}, {{participant_address}} ({{participant_email}})",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Covered profits",
+      "body": "This agreement covers net profit from: {{scope}}",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Profit share",
+      "body": "For each {{period}} period during the term, Owner will pay Participant {{share_percent}}% of net profit. If net profit for a period is zero or negative, nothing is due for that period, and losses are not carried forward unless both parties agree in writing.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Cap",
+      "body": "Total payments under this agreement will not exceed {{cap}}. Once the cap is reached, Owner's payment obligations end.",
+      "optional": true,
+      "showIf": "include_cap == true"
+    },
+    {
+      "id": "s5",
+      "title": "5. Net profit",
+      "body": "{{net_profit_definition}}",
+      "optional": false
+    },
+    {
+      "id": "s6",
+      "title": "6. Statements and audit",
+      "body": "With each payment, which is due within {{payment_days}} days after each period ends, Owner will provide a statement showing revenue, expenses and the calculation. Once per year, on 30 days' notice, Participant may have an independent accountant review the relevant records at Participant's expense. If the review shows an underpayment of more than 5%, Owner pays for the review and the shortfall.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Eligibility",
+      "body": "{{conditions}}",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. No ownership",
+      "body": "Participant receives a contractual right to payment only. Participant does not own any part of the business, has no vote or management rights, and is not a partner. Owner runs the business in its reasonable discretion but will not take actions intended to avoid profit-share payments.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Term and ending",
+      "body": "This agreement lasts {{term_months}} months from {{effective_date}}. Amounts earned for periods before it ends are still payable. If the covered business is sold, Owner will pay the profit share through the closing date.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Taxes",
+      "body": "Each party is responsible for its own taxes. Owner will issue required tax forms.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. General terms",
+      "body": "- **Whole agreement.** This document (with any attachments named in it) is the parties' entire agreement on its subject and replaces earlier discussions and drafts.\n- **Changes.** It can only be changed in a writing signed by all parties.\n- **Severability.** If a court finds any part unenforceable, that part is limited to the minimum extent needed and the rest stays in effect.\n- **No waiver.** Not enforcing a term once is not a waiver of it later.\n- **Notices.** Notices must be in writing and delivered by hand, by a recognized courier, by certified mail, or by email to the addresses in this document (or a later address a party gives in writing). Email notice is effective when sent unless the sender receives a bounce-back.\n- **Governing law.** The law of the state of {{governing_state}} governs this agreement, without regard to conflict-of-law rules.\n- **Counterparts and electronic signatures.** This agreement may be signed in counterparts and electronically. Each party consents to doing business electronically under the federal E-SIGN Act and the state's version of the Uniform Electronic Transactions Act (or New York's Electronic Signatures and Records Act). An electronic signature has the same effect as a handwritten one.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Owner** — {{owner_name}}\n\n[[sig:owner]]\n\nPrinted name: [[name:owner]]\nTitle (if signing for a company): [[text:owner:Title]]\nDate: [[date:owner]]\n\n**Participant** — {{participant_name}}\n\n[[sig:participant]]\n\nPrinted name: [[name:participant]]\nDate: [[date:participant]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign.",
+  "sources": [
+    {
+      "title": "SEC (Investor.gov): What is a security? (investment contracts)",
+      "url": "https://www.investor.gov/introduction-investing/investing-basics/glossary/security"
+    },
+    {
+      "title": "IRS: Independent contractor (self-employed) or employee?",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/independent-contractor-self-employed-or-employee"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

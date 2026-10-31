@@ -1,0 +1,199 @@
+{
+  "id": "beat-purchase-receipt",
+  "version": 1,
+  "title": "Beat Purchase Receipt and License Summary",
+  "category": "music",
+  "summary": "A short signed receipt for a beat purchase that records what was bought, the license type and its main limits.",
+  "useWhen": "A producer sells a beat online or in person and wants a signed record that points to the full license terms.",
+  "watchOuts": [
+    "A receipt is not the license. Attach or link the full license (non-exclusive lease, exclusive license or work-for-hire agreement), because it controls.",
+    "Make sure the license type and caps on the receipt match the full license.",
+    "Keep transaction IDs. Distributors and platforms often ask for proof of license when a beat is disputed."
+  ],
+  "jurisdiction": "US",
+  "stateAware": false,
+  "roles": [
+    {
+      "id": "producer",
+      "label": "Producer (seller)"
+    },
+    {
+      "id": "buyer",
+      "label": "Buyer"
+    }
+  ],
+  "variables": [
+    {
+      "id": "purchase_date",
+      "label": "Purchase date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Date paid."
+    },
+    {
+      "id": "producer_name",
+      "label": "Producer",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Seller."
+    },
+    {
+      "id": "buyer_name",
+      "label": "Buyer",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Artist or buyer."
+    },
+    {
+      "id": "buyer_email",
+      "label": "Buyer email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Contact."
+    },
+    {
+      "id": "beat_title",
+      "label": "Beat title",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Beat."
+    },
+    {
+      "id": "transaction_id",
+      "label": "Order or transaction ID",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "From the store or payment processor."
+    },
+    {
+      "id": "license_type",
+      "label": "License type",
+      "type": "select",
+      "required": true,
+      "default": "non-exclusive lease",
+      "options": [
+        "non-exclusive lease",
+        "exclusive license",
+        "work for hire / full buyout"
+      ],
+      "help": "Which full agreement applies."
+    },
+    {
+      "id": "price",
+      "label": "Amount paid",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Total."
+    },
+    {
+      "id": "payment_method",
+      "label": "Payment method",
+      "type": "text",
+      "required": true,
+      "default": "online payment",
+      "options": [],
+      "help": "Method."
+    },
+    {
+      "id": "files",
+      "label": "Files delivered",
+      "type": "text",
+      "required": true,
+      "default": "WAV and MP3",
+      "options": [],
+      "help": "Files."
+    },
+    {
+      "id": "caps",
+      "label": "Main limits",
+      "type": "longtext",
+      "required": false,
+      "default": "Streams: 500,000. Sales: 5,000. Music videos: 1. Term: 3 years. No sync. No Content ID.",
+      "options": [],
+      "help": "Summary of caps (for leases)."
+    },
+    {
+      "id": "license_link",
+      "label": "Full license agreement",
+      "type": "text",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Title and date, or link, of the full agreement."
+    },
+    {
+      "id": "producer_share",
+      "label": "Producer's composition share",
+      "type": "percent",
+      "required": true,
+      "default": "50",
+      "options": [],
+      "help": "Writer share of the new song."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Receipt",
+      "body": "{{producer_name}} (\"Producer\") confirms receiving {{price}} from {{buyer_name}} ({{buyer_email}}) on {{purchase_date}} by {{payment_method}}, transaction {{transaction_id}}, for the beat \"{{beat_title}}\". Files delivered: {{files}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. License",
+      "body": "License type: **{{license_type}}**. The full terms are in: {{license_link}}, which controls if anything here differs.\n\nSummary of main limits: {{caps}}\n\nProducer's share of the composition of the new song: {{producer_share}}%.",
+      "optional": false
+    },
+    {
+      "id": "s3",
+      "title": "3. Confirmation",
+      "body": "Buyer confirms receiving the files and the full license terms. Buyer: [[initial:buyer]]",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Producer** — {{producer_name}}\n\n[[sig:producer]]\n\nPrinted name: [[name:producer]]\nDate: [[date:producer]]\n\n**Buyer** — {{buyer_name}}\n\n[[sig:buyer]]\n\nPrinted name: [[name:buyer]]\nDate: [[date:buyer]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Music rights are split between the composition (song) and the sound recording (master); royalties also depend on PRO, publisher, distributor and label agreements that this template does not change. An entertainment attorney should review deals involving advances, ownership transfers or long terms.",
+  "sources": [
+    {
+      "title": "U.S. Copyright Office Circular 56A: Copyright registration of musical compositions and sound recordings",
+      "url": "https://www.copyright.gov/circs/circ56a.pdf"
+    },
+    {
+      "title": "17 U.S.C. §101 definitions, including 'work made for hire' (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/101"
+    },
+    {
+      "title": "17 U.S.C. §201: ownership of copyright, joint works (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/201"
+    },
+    {
+      "title": "17 U.S.C. §204: execution of transfers of copyright ownership (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/17/204"
+    },
+    {
+      "title": "Electronic Signatures in Global and National Commerce Act, 15 U.S.C. §7001 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7001"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}

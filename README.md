@@ -21,6 +21,10 @@ Five showcase pages introduce the tools: `/studios/image/`, `/studios/video/`, `
 | **Office** (`/office`) | A free PDF toolkit in the browser: edit (highlight, text, draw, sign, notes) and save a real PDF; convert images to PDF and back, merge, split, rotate, compress, extract text; ask questions about a PDF with Llama 3.3. Files never leave the browser except the text you choose to ask about. |
 | **Image workroom** (`/edit`) | Reframe, grade and compose a product visual, plus three image AI tools that run on the visitor's device. **Remove background** (`/edit/?tool=remove-bg`): BiRefNet lite for any subject or MODNet for people; transparent PNG, or replace with a color, a blur of the original or a backdrop, with an edge-softness slider. **Upscale 2× / 4×** (`/edit/?tool=upscale`): Real-ESRGAN, tiled so memory stays bounded. **Erase object** (`/edit/?tool=erase`): brush over it, then MI-GAN fills the gap (or a no-download PatchMatch texture copy). Before/after slider, save to the library, PNG download; results carry from one tool to the next. |
 | **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Extract audio: drop a video or audio file you have the rights to and get MP3 (128–320 kbps), M4A or WAV, with trim, fades and loudness levelling, all in the browser. Deep links: `/audio?tab=captions`, `/audio?tab=extract`, `/audio?engine=melo&lang=es`. |
+| **Sign** (`/office?tab=sign`, `/sign`) | Send a contract or your own PDF for signature, DocuSign-style: 59 open (CC0) templates for real estate, creative finance (Subto, wraps, novation, lease-option, contract for deed), music (split sheets, beat leases, producer, sync) and joint ventures, with notes for all 50 states and DC. Signers sign on any phone with no account. Documents are encrypted in the browser; the server only holds ciphertext and a signed audit trail. Templates, not legal advice. |
+| **Audio** (`/audio`) | Voiceover from a script with eight English Kokoro voices in the browser, or six languages (English, Spanish, French, Chinese, Japanese, Korean) with MeloTTS. Captions: drop audio or video, get an editable transcript and `.srt`/`.vtt` from Whisper, with optional translation to English. Sound beds (rain, wind, ocean, city night, room tone, campfire, forest) synthesized from scratch. WAV out. Extract audio: drop a video or audio file you have the rights to and get MP3 (128–320 kbps), M4A or WAV, with trim, fades and loudness levelling, all in the browser. Master: see below. Deep links: `/audio?tab=captions`, `/audio?tab=extract`, `/audio?tab=master`, `/audio?engine=melo&lang=es`. |
+| **Edit by text** (`/cut/`) | On the Cut page (Clip workroom): open audio or video, transcribe it with Whisper, then cut the media by striking words in the transcript. Remove fillers, repeats and long pauses in one tap each, with a review list; undo and redo; play the edit with the current word lit, click a word to jump there. Export the edited MP3 or WAV, the edited video as MP4 (with captions burned in), re-timed `.srt`/`.vtt`, and a CMX 3600 edit list. Only the sound, as 16 kHz mono, leaves the device, and only when you press Transcribe. |
+| **Master** (`/audio?tab=master`) | Drop a finished mix and read a plain-words report: loudness (LUFS), true peak, loudness range, tone against a typical mastered mix, stereo width, clipping. Pick a character (Warm, Balanced, Bright) and a destination (Streaming −14, Podcast −16, Broadcast −23, Loud −9 LUFS, all −1 dBTP), A/B against the original at the same loudness, and export 24-bit WAV or MP3 320, measured again on the file itself. Saves to the library. Nothing is uploaded. |
 
 Saved shots and audio live in the visitor's browser (IndexedDB). New saves never automatically delete older originals. The Image page loads older shots in batches of 24. If a save fails, the result stays available for download in that session and is visibly marked as unsaved. There are no accounts or cloud backups; browser data can still be cleared or evicted, so download work you want to keep.
 
@@ -42,6 +46,8 @@ What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the 
 | Remove background | BiRefNet lite (512 × 512 ONNX) or MODNet | MIT / Apache-2.0 | The visitor's browser, WebGPU or WebAssembly, via ONNX Runtime Web |
 | Upscale 2× / 4× | Real-ESRGAN general x4v3 | BSD-3-Clause | The visitor's browser, WebGPU or WebAssembly |
 | Erase object | MI-GAN (512, Places2), or PatchMatch texture copy | MIT | The visitor's browser |
+| Edit by text | Whisper large-v3-turbo for the words; Massless edit engine (`textedit.js`) for cuts, crossfades and captions | MIT | Whisper: Cloudflare Workers AI (`/api/transcribe`, capped); everything else in the visitor's browser |
+| Mastering | Massless mastering chain (`master.js`, `loudness.js`), encoders as Video to MP3 | MIT | The visitor's browser |
 | 3D, in the browser | Depth Anything V2 + Massless splat builder, rendered with Spark | Apache-2.0 / MIT | The visitor's browser |
 | 3D, full object | Idol (speridlabs) | Apache-2.0 | Your own NVIDIA GPU, through `comfy/idol_server.py` |
 
@@ -51,6 +57,21 @@ Every endpoint that spends the free allowance (`/api/shot`, `/api/beats`, `/api/
 
 - **Turnstile.** Once every six hours a visitor's browser passes a Cloudflare Turnstile check (`public/js/human.js`), trades the token at `/api/human` for a signed cookie, and retries the request. This helps reduce automated abuse; it does not guarantee a spending ceiling. Set `TURNSTILE_SITEKEY` and the secrets `TURNSTILE_SECRET` and `PASS_KEY` to turn it on; without them the check is off.
 - **AI Gateway.** Model calls go through the `massless` gateway (`AI_GATEWAY`) for request analytics and a burst rate limit. Logging and caching are off on that gateway, so scripts, documents and audio are not kept there.
+
+## How Edit by text works
+
+1. **Words.** The Cut page decodes the file in the tab and sends only the sound, as 16 kHz mono WAV, to `/api/transcribe` (Whisper large-v3-turbo on Workers AI, capped). It asks with a short disfluent `initial_prompt` in the chosen language ("Umm, so, uh, I was like…"), which makes Whisper write fillers down instead of dropping them, and keeps Whisper's per-word timings and segment confidence.
+2. **The edit is data.** Striking words and capping pauses only changes a small state (`struck` word indexes, `caps` per gap). `compile()` turns words + state into keep ranges: struck words go together with the silences around them except the longer of the two that touch the kept neighbours, so a deletion never leaves a rushed join; a capped pause is shortened from its middle.
+3. **Clean-up tools.** Fillers come from a per-language list: sounds like "um", "uh", "erm" always count; real words like "like" or "you know" only when a comma or a pause of 150 ms or more sets them off on both sides. Repeats are doubled words or phrases and cut-off words ("th- the"). Pauses are gaps longer than the cap. An energy check on the sound marks fillers with no quiet moment near their edges (left unticked) and pauses that hold sound Whisper did not write down (also left unticked).
+4. **Clean cuts.** Every cut edge moves to the quietest 20 ms moment within 80 ms of it, then each join gets an 8 ms equal-power crossfade centred on the cut, so the edit is exactly as long as the kept ranges and nothing clicks.
+5. **Out.** Playback renders the edit in half-second blocks scheduled back to back in Web Audio; the video follows the sound. Exports share Extract's encoders (LAME MP3, WAV), video export draws every frame of the edit (H.264 with WebCodecs, sound as AAC or Opus, mp4-muxer) with captions built from the edited transcript, and `.srt`/`.vtt` and the EDL come from the same keep ranges, so they always agree.
+
+## How mastering works
+
+1. **Report.** The mix is decoded in the tab and measured in a worker: integrated loudness (ITU-R BS.1770, gated), loudness range (EBU Tech 3342), true peak (4x oversampled, 24-tap interpolators), an octave-band spectrum compared with a typical mastered mix, side-to-mid width, correlation and bass width, and flat-topped clipping. Under −55 LUFS it says "Too quiet to master".
+2. **Chain.** 25 Hz high-pass and 19.5 kHz low-pass; a tilt EQ that corrects about half of what is off and adds the character's lean (Warm: rounder lows, softer highs; Balanced: neutral; Bright: tighter lows, open highs, presence); a slow, stereo-linked, soft-knee glue compressor; optional width on the sides above 150 Hz with the bass kept in the middle (skipped when the mix is already very wide).
+3. **Loudness and true peak.** Gain to the destination, then a look-ahead limiter whose detector watches the peaks between samples (8x oversampled). The gain is corrected (secant steps on the measured result) until the limited output is within 0.15 LU of the target, and the true peak of the actual output is checked; if any in-between peak got through, the ceiling drops and it runs again. MP3 gets its own pass with 1 dB more headroom, because encoders overshoot.
+4. **Fair A/B.** Original and master play in sync and switch by gain, turned to the same loudness unless you untick it, so louder never wins by default. Exports are measured again from the written file (the WAV read back, the MP3 decoded).
 
 ## How the camera moves work
 
@@ -82,7 +103,7 @@ The Remove background, Upscale and Erase tools on `/edit` cost nothing per use: 
 | Runtime | ONNX Runtime Web 1.30.0 (`ort.webgpu.bundle.min.mjs` + asyncify WASM) | jsDelivr, npm `onnxruntime-web@1.30.0` | MIT | 27 MB |
 | Remove background, any subject | BiRefNet lite, 512 × 512 ONNX re-export of `ZhengPeng7/BiRefNet_lite` | Hugging Face `studioludens/birefnet-lite-512` @ `962e679` | MIT | 98 MB (fp16, WebGPU) or 192 MB (fp32, WebAssembly) |
 | Remove background, people | MODNet, 8-bit ONNX | Hugging Face `Xenova/modnet` @ `fa2fa54` | Apache-2.0 | 6.6 MB |
-| Upscale 2× / 4× | Real-ESRGAN general x4v3 (`realesr-general-x4v3.pth`, release v0.2.5.0), converted to ONNX without changing the weights by `tools/convert_realesrgan.py` | This site, `public/models/realesr-general-x4v3.onnx` | BSD-3-Clause, see `LICENSES/` | 4.9 MB |
+| Upscale 2× / 4× | Real-ESRGAN general x4v3 (`realesr-general-x4v3.pth`, release v0.2.5.0), converted to ONNX without changing the weights by `tools/convert_realesrgan.py` | This repo (`public/models/`), served by jsDelivr at a pinned commit | BSD-3-Clause, see `LICENSES/` | 4.9 MB |
 | Erase object | MI-GAN 512 Places2 ONNX pipeline (the file the MI-GAN README links) | Hugging Face `andraniksargsyan/migan` @ `406830d` | MIT | 28 MB |
 
 - **Remove background** resizes the image to the model's input (512 × 512 for BiRefNet; short side 512 for MODNet), turns the output into an 8-bit matte, scales it back to full size, softens the edge on request and composites over the chosen background. Nothing else runs again when you change the background or the softness.
@@ -133,11 +154,19 @@ python comfy/idol_server.py          # http://127.0.0.1:7861, allows massless.ch
 
 Open `/3d`, choose **Full object** and press **Build 3D**. The page posts the still to `/generate` and shows the returned `.ply`. No GPU: Idol's Hugging Face demo exports a `.ply` that **Open .ply** loads.
 
+## How Sign works
+
+The sender's browser encrypts the PDF and every field with a fresh AES-256 key that travels only in the part of each link after `#`, which browsers never send to a server. The Worker stores ciphertext in R2 and bookkeeping (hashed tokens, signing order, event times, fingerprints) in D1, enforces signing order and consent, and signs the audit record with an ECDSA P-256 key. Every signer's browser can rebuild the identical final PDF with a Certificate of Completion; anyone can check a signed PDF at `/sign` (Verify). Unsigned envelopes are deleted after 30 days and completed ones after 90.
+
+The contract library is CC0 JSON in `public/office/contracts/` (regenerate with `python3 tools/contracts/build.py`, check with `python3 tests/contracts_test.py`). Each template lists sources and watch-outs; creative-finance and state-specific terms need review by a local attorney.
+
+Setup: an R2 bucket (`SIGN_BUCKET`), a D1 database (`SIGN_DB`, schema in `migrations/sign/`) and a `SIGN_KEY` secret (`node tools/sign/keygen.mjs`). See `wrangler.jsonc`.
+
 ## Tests
 
 ```bash
 npm ci --ignore-scripts
-npm test                            # saved-library retention, isolation, failures and connection cleanup
+npm test                            # saved-library retention, isolation, failures and connection cleanup; edit-by-text and mastering logic
 pip install playwright && python -m playwright install chromium
 python3 tests/render_test.py          # every move: first, middle and last frame, motion and edge checks
 python3 tests/effects_test.py         # every effect and look: contact sheets, photo in and out, Vanish reveal, MP4 export
@@ -148,6 +177,8 @@ python3 tests/audio_page_test.py      # Audio page: MeloTTS chunking, Captions (
 python3 tests/extract_audio_test.py   # Extract audio: MP3, WAV and M4A out, trim, fades, loudness, a queue, unreadable files
 python3 tests/edit_tools_test.py      # Edit: remove background, upscale, erase with real models, library, download, 390 px
 python3 tests/edit_tools_test.py heavy  # also BiRefNet (192 MB, about 3 GB of memory without WebGPU)
+python3 tests/cut_edit_test.py       # Edit by text: strike/undo, fillers, repeats, pauses, WAV/MP3/MP4 lengths, SRT/VTT timing, no clicks
+python3 tests/master_test.py         # Master: report, four destinations checked with ffmpeg ebur128, 24-bit WAV, MP3, fair A/B
 python3 tests/office_test.py          # Office: every convert operation, edit and save, and Ask against a mock
 python3 tests/human_test.py           # the Turnstile human check: one check for concurrent calls, retries, readable failures
 python3 tests/three_d_test.py         # 3D: depth splat from a sample, then the Idol path against a mock server
@@ -171,7 +202,7 @@ The sample stills in `public/media/art` were generated for the launch page with 
 ## Roadmap
 
 - Shared project and asset library, exportable backups and resumable jobs
-- Transcript-based editing, speech cleanup, beat-aligned cuts and measured mastering
+- Speech cleanup (noise removal), beat-aligned cuts, reference mastering and album mode
 - A versioned model/workflow catalog with license, capability and measured cost information
 - Open video models in ComfyUI for true in-scene motion
 - Shared reels stored in R2 with a D1 index

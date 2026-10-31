@@ -78,11 +78,12 @@ export function partWav(samples, part, rate = ASR_RATE) {
  * done: optional array of earlier results to reuse (a retry skips parts that already came back).
  * Returns { segments, text, language, results }. Segments carry word timings when the server sent them.
  */
-export async function transcribeParts(samples, parts, { lang = '', translate = false, onPart, done = [] } = {}) {
+export async function transcribeParts(samples, parts, { lang = '', translate = false, prompt = '', onPart, done = [] } = {}) {
   const results = done.slice();
   const q = new URLSearchParams();
   if (lang) q.set('lang', lang);
   if (translate) q.set('task', 'translate');
+  if (prompt) q.set('prompt', prompt.slice(0, 240)); // Whisper's initial_prompt
   const qs = q.toString();
   for (let i = 0; i < parts.length; i++) {
     if (results[i]) { onPart?.(i, 'done', results[i]); continue; }
@@ -112,13 +113,29 @@ export async function transcribeParts(samples, parts, { lang = '', translate = f
   return { segments, text: segments.map((s) => s.text).join(' '), language: results.find((r) => r.language)?.language || lang, results };
 }
 
-/** Move one part's segments and words to the file's timeline and attach words to their segments. */
-function shiftResult(data, offset) {
+/**
+ * Move one part's segments and words to the file's timeline and attach words to their segments.
+ * Word timings come from the segment's own words when the server sends them, else from the WebVTT.
+ */
+export function shiftResult(data, offset) {
   const words = parseVtt(data.vtt || '').map((w) => ({ ...w, start: w.start + offset, end: w.end + offset }));
   const segs = (data.segments || []).filter((s) => String(s.text || '').trim());
-  const segments = segs.map((s) => ({ start: round(Number(s.start) + offset), end: round(Number(s.end) + offset), text: String(s.text).trim() }));
+  const segments = segs.map((s) => {
+    const out = { start: round(Number(s.start) + offset), end: round(Number(s.end) + offset), text: String(s.text).trim() };
+    for (const k of ['avg_logprob', 'no_speech_prob']) if (Number.isFinite(s[k])) out[k] = s[k];
+    const own = (Array.isArray(s.words) ? s.words : [])
+      .map((w) => ({ text: String(w.word ?? w.text ?? ''), start: round(Number(w.start) + offset), end: round(Number(w.end) + offset) }))
+      .filter((w) => w.text.trim() && Number.isFinite(w.start) && Number.isFinite(w.end));
+    // Whisper marks word starts with a leading space; if the server trimmed them all, put them back for spaced text
+    const trimmed = own.length > 1 && own.slice(1).every((w) => !/^\s/.test(w.text)) && /\s/.test(out.text);
+    if (own.length) out.words = trimmed ? own.map((w, i) => ({ ...w, text: i ? ` ${w.text}` : w.text })) : own;
+    return out;
+  });
   if (!segments.length && String(data.text || '').trim()) segments.push({ start: round(offset), end: round(offset + (Number(data.duration) || 1)), text: String(data.text).trim() });
+  // prefer the server's words when they spell the segment's text, then the VTT's, then the server's anyway
   for (const s of segments) {
+    const own = s.words;
+    if (own && norm(own.map((w) => w.text).join('')) === norm(s.text)) continue;
     const mine = words.filter((w) => w.start >= s.start - 0.05 && w.start < s.end + 0.05);
     if (mine.length && norm(mine.map((w) => w.text).join('')) === norm(s.text)) s.words = mine;
   }

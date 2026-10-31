@@ -51,7 +51,8 @@
         <button role="tab" aria-selected="true" aria-controls="tab-voice" id="t-voice">Voiceover</button>
         <button role="tab" aria-selected="false" aria-controls="tab-cap" id="t-cap">Captions</button>
         <button role="tab" aria-selected="false" aria-controls="tab-bed" id="t-bed">Sound beds</button>
-        <button role="tab" aria-selected="false" aria-controls="tab-ext" id="t-ext">Extract audio</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-ext" id="t-ext" aria-label="Extract audio">Extract</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-master" id="t-master">Master</button>
       </div>
 
       <div class="side-scroll" id="tab-voice" role="tabpanel" aria-labelledby="t-voice">
@@ -130,11 +131,22 @@
         <p class="side-note">Files are read and converted in this tab. Nothing is uploaded. The only download is the MP3 encoder, once.</p>
       </div>
 
+      <div class="side-scroll" id="tab-master" role="tabpanel" aria-labelledby="t-master" hidden>
+        <div class="f-label">Character</div>
+        <div class="engines mst-chars" id="mst-chars" role="radiogroup" aria-label="Character"></div>
+        <div class="f-label">Destination</div>
+        <div class="engines mst-dests" id="mst-dests" role="radiogroup" aria-label="Destination"></div>
+        <label class="check"><input type="checkbox" id="mst-widen"> <span><strong>Widen stereo</strong><small>A little more space at the sides; bass stays centred</small></span></label>
+        <p class="side-note mst-hint"><strong>LUFS</strong> is how loud a track feels over its whole length. Streaming services turn every song to about −14 LUFS, so louder is not better there.</p>
+        <p class="side-note">Mastering runs in this tab. Nothing is uploaded. The only download is the MP3 encoder, once.</p>
+      </div>
+
       <div class="side-foot">
         <div id="foot-voice"><button type="button" class="go" id="gen-voice"><span id="gen-voice-label">Generate voice</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
         <div id="foot-cap" hidden><button type="button" class="go" id="gen-cap" disabled><span id="gen-cap-label">Transcribe</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
         <div id="foot-bed" hidden><button type="button" class="go" id="gen-bed"><span id="gen-bed-label">Render bed</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
         <div id="foot-ext" hidden><button type="button" class="go" id="gen-ext" disabled><span id="gen-ext-label">Convert</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
+        <div id="foot-master" hidden><button type="button" class="go" id="gen-master" disabled><span id="gen-master-label">Master</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button></div>
       </div>
     </aside>
 
@@ -145,6 +157,7 @@
           <button type="button" class="pill" id="p-cap"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="2"/><path d="M4.5 9.5h3M9.5 9.5h2M4.5 7h7"/></svg>Captions</button>
           <button type="button" class="pill" id="p-bed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8h2l1.5-4 2 8 2-10 2 9 1.5-3h2"/></svg>Sound beds</button>
           <button type="button" class="pill" id="p-ext"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="7" height="9" rx="1.5"/><path d="M8.5 6.5l-2-1.3v5.6l2-1.3M11 6.5v3M13 4.5v7M15 7v2"/></svg>Extract audio</button>
+          <button type="button" class="pill" id="p-master"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5v11M8 2.5v11M13 2.5v11"/><rect x="1.5" y="8.5" width="3" height="2.5" rx="1"/><rect x="6.5" y="4.5" width="3" height="2.5" rx="1"/><rect x="11.5" y="9.5" width="3" height="2.5" rx="1"/></svg>Master</button>
           <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
         </div>
         <span class="src" id="src-label">Kokoro-82M · loads on first use</span>
@@ -223,6 +236,42 @@
         </div>
       </div>
 
+      <div id="master-view" hidden>
+        <div class="dropzone" id="mst-drop">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 34V14M16 38V10M24 32V16M32 36V12M40 30V18"/><path d="M4 24h40" stroke-dasharray="2 3"/></svg>
+          <strong class="display" id="mst-drop-title">Drop a finished mix here</strong>
+          <span class="muted" id="mst-drop-sub">wav, mp3, m4a, flac, ogg, or a video’s sound, up to 20 minutes. Nothing is uploaded.</span>
+          <div class="dz-actions"><label class="btn-accent" for="mst-in" id="mst-choose">Choose file</label></div>
+        </div>
+        <input type="file" id="mst-in" accept="audio/*,video/*,.wav,.mp3,.m4a,.flac,.ogg,.opus,.aac,.aif,.aiff,.mp4,.mov,.webm" hidden>
+        <div class="meter indeterminate" id="mst-meter" hidden><div class="meter-fill"></div></div>
+        <div id="mst-body" hidden>
+          <div class="lib-head"><h2 class="display">Report</h2><span class="muted small" id="mst-file"></span></div>
+          <dl class="mst-report" id="mst-report"></dl>
+          <p class="mst-quiet" id="mst-quiet" role="alert" hidden>Too quiet to master. This file is almost silent, so there is nothing to bring up. Check that it is the right file.</p>
+          <div id="mst-out" hidden>
+            <div class="lib-head"><h2 class="display">Listen</h2><span class="muted small" id="mst-ab-note"></span></div>
+            <div class="mst-ab">
+              <button type="button" class="vplay mst-play" id="mst-play" aria-label="Play"></button>
+              <div class="mst-seg" role="group" aria-label="Hear">
+                <button type="button" id="mst-a" aria-pressed="false">Original</button><button type="button" id="mst-b" aria-pressed="true">Master</button>
+              </div>
+              <label class="mst-fair"><input type="checkbox" id="mst-fair" checked> Same loudness</label>
+              <input type="range" id="mst-pos" min="0" max="1" step="0.01" value="0" aria-label="Position">
+              <output id="mst-time">0:00</output>
+            </div>
+            <p class="side-note">A/B plays both at the same loudness by default, so you judge the tone and not the volume. Untick it to hear the real difference. Press A or B, or Space, while it plays.</p>
+            <dl class="mst-report mst-after" id="mst-after"></dl>
+            <div class="mst-export">
+              <button type="button" class="btn-accent" id="mst-wav">Download WAV · 24-bit</button>
+              <button type="button" class="btn-ghost" id="mst-mp3">Download MP3 · 320 kbps</button>
+              <a class="btn-ghost" href="/library/" id="mst-lib" hidden>Open in library ↗</a>
+            </div>
+            <p class="side-note" id="mst-measured" role="status"></p>
+          </div>
+        </div>
+      </div>
+
       <div id="history-view">
         <div class="lib-head"><h2 class="display">History</h2><button type="button" class="btn-ghost small" id="clear-history" hidden>Clear</button></div>
         <div class="history" id="history"></div>
@@ -239,12 +288,13 @@
     <p>Sound beds are built from noise, filters and envelopes in an OfflineAudioContext and exported as 48 kHz stereo WAV. They are made in this tab; nothing is uploaded.</p>
     <p>Extract audio decodes your file in this tab with the browser's own decoder, at the file's own sample rate. A background worker trims, fades and encodes it. Even out loudness measures the whole file (ITU-R BS.1770), sets it to about −14 LUFS and holds peaks under −1 dB with a look-ahead limiter. Nothing is uploaded.</p>
     <p>MP3 uses LAME 3.100 (LGPL), built for browsers by wasm-media-encoders (MIT). It is loaded unmodified from jsDelivr and checked against a fixed hash before it runs. M4A uses your browser's AAC encoder and mp4-muxer (MIT). WAV is 16-bit PCM. Use it with files you have the rights to; for your own YouTube uploads, download them from YouTube Studio first.</p>
+    <p>Master measures your mix in this tab (ITU-R BS.1770 loudness, loudness range, 4x-oversampled true peak, tone against a typical mastered mix, stereo width, clipping), then runs a fixed chain: a 25 Hz high-pass and 19.5 kHz low-pass, a gentle tilt EQ for the character you pick, slow glue compression, optional width with the bass kept in the middle, and a look-ahead limiter that watches the peaks between samples. The gain is corrected until the result measures on your destination's loudness, and the exported file itself is measured again. Nothing is uploaded.</p>
     <p>Free tools on Cloudflare have a daily cap so they stay at $0. If you hit it, try again after midnight UTC, or use Kokoro, which has no limit.</p>
   </dialog>
 
   <dialog class="sheet" id="ledger">
     <form method="dialog" class="sheet-head"><h2>Models &amp; limits</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Voice: Kokoro-82M (Apache-2.0), in your browser, or MeloTTS (MIT) on Cloudflare Workers AI. Captions: Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Sound beds: Massless synth (MIT), in your browser. Extract audio: LAME 3.100 MP3 encoder (LGPL) via wasm-media-encoders 0.7.0 (MIT), or your browser's AAC encoder with mp4-muxer (MIT), in your browser. Cost: $0.</p>
+    <p>Voice: Kokoro-82M (Apache-2.0), in your browser, or MeloTTS (MIT) on Cloudflare Workers AI. Captions: Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Sound beds: Massless synth (MIT), in your browser. Extract audio: LAME 3.100 MP3 encoder (LGPL) via wasm-media-encoders 0.7.0 (MIT), or your browser's AAC encoder with mp4-muxer (MIT), in your browser. Master: Massless mastering chain (MIT), in your browser. Cost: $0.</p>
   </dialog>
 
   <script type="module" src="/js/pages/audio.js"></script>

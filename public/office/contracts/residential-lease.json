@@ -1,0 +1,573 @@
+{
+  "id": "residential-lease",
+  "version": 1,
+  "title": "Residential Lease Agreement",
+  "category": "real-estate",
+  "summary": "A plain-English lease for a house, apartment or unit: rent, deposit, maintenance, entry, pets and ending the lease.",
+  "useWhen": "Renting an entire home or unit to a tenant for a fixed term or month to month. For renting a room in a shared home, use the room rental agreement.",
+  "watchOuts": [
+    "Security deposit limits, separate-account and interest rules, and return deadlines vary by state and sometimes by city. Check the state notes before setting the deposit.",
+    "Many cities have rent control, just-cause eviction, registration or inspection rules that override lease terms. Verify locally.",
+    "Notices of default, eviction or the right to cure for a primary residence are excluded from the federal E-SIGN Act. Serve those notices the way your state's law requires, usually on paper, even if the lease itself is signed electronically.",
+    "Fair housing: do not screen, advertise or set terms based on race, color, religion, sex (including sexual orientation and gender identity), national origin, familial status or disability, or other classes protected by state and local law. Many places also prohibit discrimination based on source of income.",
+    "Pre-1978 housing needs the federal lead-based paint disclosure and EPA pamphlet before the lease is signed. Many states also require disclosures about mold, flooding, bed bugs, radon or smoking policies.",
+    "Landlords cannot lock out tenants, shut off utilities or remove belongings to force a move-out. Only a court can evict."
+  ],
+  "jurisdiction": "US",
+  "stateAware": true,
+  "roles": [
+    {
+      "id": "landlord",
+      "label": "Landlord"
+    },
+    {
+      "id": "tenant",
+      "label": "Tenant"
+    }
+  ],
+  "variables": [
+    {
+      "id": "state",
+      "label": "State where the property is located",
+      "type": "select",
+      "required": true,
+      "default": "",
+      "options": [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY"
+      ],
+      "help": "Two-letter code. Massless shows the notes for this state from the state reference (states.json): official forms, required disclosures, closing practice, notarization and recording, executory-contract and wholesaling rules."
+    },
+    {
+      "id": "landlord_name",
+      "label": "Landlord name",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Owner or authorized manager."
+    },
+    {
+      "id": "landlord_address",
+      "label": "Landlord address for notices and rent",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Many states require the landlord to give an address for notices."
+    },
+    {
+      "id": "landlord_email",
+      "label": "Landlord email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For routine communications."
+    },
+    {
+      "id": "tenant_name",
+      "label": "Tenant name(s)",
+      "type": "party",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Every adult who will live there should sign."
+    },
+    {
+      "id": "tenant_email",
+      "label": "Tenant email",
+      "type": "email",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "For routine communications."
+    },
+    {
+      "id": "property_address",
+      "label": "Rental property address",
+      "type": "address",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Including unit number."
+    },
+    {
+      "id": "furnished",
+      "label": "Furnished?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "If on, attach an inventory."
+    },
+    {
+      "id": "occupants",
+      "label": "Other occupants",
+      "type": "longtext",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "Names of minors or other people who will live there."
+    },
+    {
+      "id": "term_type",
+      "label": "Lease type",
+      "type": "select",
+      "required": true,
+      "default": "fixed term",
+      "options": [
+        "fixed term",
+        "month to month"
+      ],
+      "help": "Fixed term ends on a date. Month to month continues until notice."
+    },
+    {
+      "id": "start_date",
+      "label": "Start date",
+      "type": "date",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Move-in date."
+    },
+    {
+      "id": "end_date",
+      "label": "End date",
+      "type": "date",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "For fixed-term leases."
+    },
+    {
+      "id": "after_term",
+      "label": "At the end of a fixed term",
+      "type": "select",
+      "required": false,
+      "default": "converts to month to month",
+      "options": [
+        "converts to month to month",
+        "ends unless renewed in writing"
+      ],
+      "help": "What happens when the term ends."
+    },
+    {
+      "id": "rent",
+      "label": "Monthly rent",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Amount."
+    },
+    {
+      "id": "due_day",
+      "label": "Rent due day of month",
+      "type": "number",
+      "required": true,
+      "default": "1",
+      "options": [],
+      "help": "Day of the month."
+    },
+    {
+      "id": "payment_method",
+      "label": "How rent is paid",
+      "type": "text",
+      "required": true,
+      "default": "by electronic transfer or check to the landlord",
+      "options": [],
+      "help": "Methods accepted. Some states require a cash option or prohibit electronic-only payments."
+    },
+    {
+      "id": "grace_days",
+      "label": "Grace period (days)",
+      "type": "number",
+      "required": true,
+      "default": "5",
+      "options": [],
+      "help": "Days before a late fee applies. Some states set a minimum."
+    },
+    {
+      "id": "late_fee",
+      "label": "Late fee",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Must be reasonable. Several states cap late fees."
+    },
+    {
+      "id": "prorated_first",
+      "label": "Prorated first month rent",
+      "type": "money",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "If the lease starts mid-month."
+    },
+    {
+      "id": "deposit",
+      "label": "Security deposit",
+      "type": "money",
+      "required": true,
+      "default": "",
+      "options": [],
+      "help": "Check the state's maximum."
+    },
+    {
+      "id": "deposit_held",
+      "label": "Where the deposit is held",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Some states require the bank name and address, a separate account or interest."
+    },
+    {
+      "id": "utilities_tenant",
+      "label": "Utilities paid by tenant",
+      "type": "longtext",
+      "required": true,
+      "default": "Electricity, gas, internet",
+      "options": [],
+      "help": "List."
+    },
+    {
+      "id": "utilities_landlord",
+      "label": "Utilities paid by landlord",
+      "type": "longtext",
+      "required": true,
+      "default": "Water, sewer, trash",
+      "options": [],
+      "help": "List."
+    },
+    {
+      "id": "pets",
+      "label": "Pets allowed?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Assistance animals for people with disabilities are not pets and cannot be refused just because of a no-pets rule."
+    },
+    {
+      "id": "pet_terms",
+      "label": "Pet terms",
+      "type": "longtext",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Type, number, pet deposit or rent (check state limits)."
+    },
+    {
+      "id": "smoking",
+      "label": "Smoking",
+      "type": "select",
+      "required": true,
+      "default": "not allowed anywhere on the property",
+      "options": [
+        "not allowed anywhere on the property",
+        "allowed only in designated outdoor areas"
+      ],
+      "help": "Includes vaping and cannabis."
+    },
+    {
+      "id": "parking",
+      "label": "Parking",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "options": [],
+      "help": "Assigned spaces, garage, rules."
+    },
+    {
+      "id": "entry_notice_hours",
+      "label": "Notice before landlord entry (hours)",
+      "type": "number",
+      "required": true,
+      "default": "24",
+      "options": [],
+      "help": "Many states require 24 or 48 hours, except emergencies."
+    },
+    {
+      "id": "renters_insurance",
+      "label": "Require renters insurance?",
+      "type": "bool",
+      "required": false,
+      "default": "true",
+      "options": [],
+      "help": "Protects the tenant's belongings and liability."
+    },
+    {
+      "id": "insurance_amount",
+      "label": "Minimum liability coverage",
+      "type": "money",
+      "required": false,
+      "default": "100000",
+      "options": [],
+      "help": "Typical minimum."
+    },
+    {
+      "id": "notice_days",
+      "label": "Notice to end a month-to-month tenancy (days)",
+      "type": "number",
+      "required": true,
+      "default": "30",
+      "options": [],
+      "help": "Check the state's minimum. Some cities require more or require just cause."
+    },
+    {
+      "id": "built_before_1978",
+      "label": "Built before 1978?",
+      "type": "bool",
+      "required": false,
+      "default": "false",
+      "options": [],
+      "help": "Adds the lead warning statement. Also sign the full federal disclosure form."
+    },
+    {
+      "id": "additional_terms",
+      "label": "Additional terms",
+      "type": "longtext",
+      "required": false,
+      "default": "None",
+      "options": [],
+      "help": "Anything else."
+    }
+  ],
+  "sections": [
+    {
+      "id": "s1",
+      "title": "1. Parties and property",
+      "body": "**Landlord:** {{landlord_name}}, {{landlord_address}} ({{landlord_email}})\n\n**Tenant:** {{tenant_name}} ({{tenant_email}})\n\nLandlord rents to Tenant the residence at {{property_address}} (the \"Premises\"), in {{state}}, for use only as a private residence by Tenant and these occupants: {{occupants}}.",
+      "optional": false
+    },
+    {
+      "id": "s2",
+      "title": "2. Furnishings",
+      "body": "The Premises are furnished. The furniture and appliances are listed in an attached inventory that both parties sign at move-in.",
+      "optional": true,
+      "showIf": "furnished == true"
+    },
+    {
+      "id": "s3",
+      "title": "3. Term",
+      "body": "The lease starts on {{start_date}} and is a {{term_type}} tenancy.",
+      "optional": false
+    },
+    {
+      "id": "s4",
+      "title": "4. Fixed term",
+      "body": "The lease ends on {{end_date}}. At the end of the term, the lease {{after_term}}.",
+      "optional": true,
+      "showIf": "term_type == 'fixed term'"
+    },
+    {
+      "id": "s5",
+      "title": "5. Month to month",
+      "body": "Either party may end the tenancy by giving written notice at least {{notice_days}} days before the end of a rental period, or longer if the law requires.",
+      "optional": true,
+      "showIf": "term_type == 'month to month'"
+    },
+    {
+      "id": "s6",
+      "title": "6. Rent",
+      "body": "Rent is {{rent}} per month, due on day {{due_day}} of each month, paid {{payment_method}}. First month's prorated rent, if any: {{prorated_first}}. If rent is not received within {{grace_days}} days after the due date, Tenant will pay a late fee of {{late_fee}}, to the extent allowed by law. A returned payment may result in a fee allowed by law. Landlord will give receipts on request.",
+      "optional": false
+    },
+    {
+      "id": "s7",
+      "title": "7. Security deposit",
+      "body": "Tenant pays a security deposit of {{deposit}} before move-in. It is not a limit on Tenant's liability and may not be used by Tenant as the last month's rent unless Landlord agrees in writing. Deposit held at: {{deposit_held}}. After Tenant moves out and returns the keys, Landlord will return the deposit, with any interest the law requires, minus lawful deductions for unpaid rent and damage beyond normal wear and tear. Landlord will include an itemized statement of deductions within the deadline set by the law of {{state}}, sent to the forwarding address Tenant provides.",
+      "optional": false
+    },
+    {
+      "id": "s8",
+      "title": "8. Move-in and move-out condition",
+      "body": "Before or at move-in, the parties will complete a written move-in checklist, with photos, signed by both. Tenant will leave the Premises clean and in the same condition at move-out, except for normal wear and tear.",
+      "optional": false
+    },
+    {
+      "id": "s9",
+      "title": "9. Utilities",
+      "body": "Tenant pays: {{utilities_tenant}}. Landlord pays: {{utilities_landlord}}. Tenant will set up accounts in Tenant's name for utilities Tenant pays, starting on the start date.",
+      "optional": false
+    },
+    {
+      "id": "s10",
+      "title": "10. Maintenance and repairs",
+      "body": "Landlord will keep the Premises in a safe and habitable condition, comply with building and health codes, and make necessary repairs within a reasonable time after notice, as the law requires. Tenant will keep the Premises clean and sanitary, use appliances and fixtures properly, replace smoke-alarm batteries if applicable, promptly report needed repairs, water leaks and mold in writing, and pay for damage caused by Tenant, occupants or guests beyond normal wear and tear. Tenant will not make alterations, paint or change locks without Landlord's written consent.",
+      "optional": false
+    },
+    {
+      "id": "s11",
+      "title": "11. Landlord entry",
+      "body": "Landlord may enter at reasonable times to inspect, make repairs, or show the Premises, after giving at least {{entry_notice_hours}} hours' notice (or longer if the law requires), and at any time in an emergency.",
+      "optional": false
+    },
+    {
+      "id": "s12",
+      "title": "12. Use and conduct",
+      "body": "Tenant will follow the law and any written community rules, not disturb neighbors, and not allow illegal activity on the Premises. Smoking (including vaping and cannabis) is {{smoking}}. Parking: {{parking}}. Guests staying more than 14 days in any six-month period need Landlord's written consent, to the extent the law allows.",
+      "optional": false
+    },
+    {
+      "id": "s13",
+      "title": "13. Pets",
+      "body": "Pets are allowed on these terms: {{pet_terms}}. Tenant is responsible for any damage or nuisance caused by pets. Assistance animals for people with disabilities are handled under fair housing law, not this section.",
+      "optional": true,
+      "showIf": "pets == true"
+    },
+    {
+      "id": "s14",
+      "title": "14. No pets",
+      "body": "Unless the Pets section is included, no pets are allowed without Landlord's written consent. This does not apply to assistance animals for people with disabilities, which are handled under fair housing law.",
+      "optional": false
+    },
+    {
+      "id": "s15",
+      "title": "15. Renters insurance",
+      "body": "Tenant will keep renters insurance with at least {{insurance_amount}} of personal liability coverage and provide proof on request. Landlord's insurance does not cover Tenant's belongings.",
+      "optional": true,
+      "showIf": "renters_insurance == true"
+    },
+    {
+      "id": "s16",
+      "title": "16. Assignment and subletting",
+      "body": "Tenant may not assign this lease or sublet any part of the Premises, including short-term rentals, without Landlord's written consent, which Landlord will not unreasonably withhold where the law requires.",
+      "optional": false
+    },
+    {
+      "id": "s17",
+      "title": "17. Default and ending the lease",
+      "body": "If Tenant fails to pay rent or materially breaches this lease, Landlord may end the tenancy only by giving the notice and following the court process required by the law of {{state}}. Landlord will not lock out Tenant, shut off utilities or remove Tenant's belongings without a court order. If Tenant moves out early, Tenant remains responsible for rent until the earlier of the end of the term or the date a new tenant begins paying, and Landlord will make reasonable efforts to re-rent, as the law requires. Some states give tenants the right to end a lease early, for example for active military duty (federal Servicemembers Civil Relief Act) or for domestic violence.",
+      "optional": false
+    },
+    {
+      "id": "s18",
+      "title": "18. Lead-based paint warning",
+      "body": "**Lead Warning Statement.** Housing built before 1978 may contain lead-based paint. Lead from paint, paint chips, and dust can pose health hazards if not managed properly. Lead exposure is especially harmful to young children and pregnant women. Before renting pre-1978 housing, lessors must disclose the presence of known lead-based paint and/or lead-based paint hazards in the dwelling. Lessees must also receive a federally approved pamphlet on lead poisoning prevention.\n\nLandlord and Tenant will also sign the full federal Lead-Based Paint Disclosure, and Tenant acknowledges receiving the EPA pamphlet \"Protect Your Family From Lead in Your Home.\" Tenant: [[initial:tenant]]",
+      "optional": true,
+      "showIf": "built_before_1978 == true"
+    },
+    {
+      "id": "s19",
+      "title": "19. Required disclosures",
+      "body": "Landlord will provide all disclosures required by federal, state and local law (see the state notes for {{state}}), for example the identity of the owner or manager, mold, flood, radon or bed bug information, as applicable. Tenant acknowledges receiving any attached disclosures. Tenant: [[initial:tenant]]",
+      "optional": false
+    },
+    {
+      "id": "s20",
+      "title": "20. State-specific requirements",
+      "body": "The property is in {{state}}. The parties will comply with that state's requirements for this transaction, including required seller disclosures and forms, licensing rules, closing and recording requirements, and any mandatory statutory notices. Massless shows a summary of known requirements for {{state}} with this template. That summary is a starting point, may be incomplete or out of date, and is not part of this agreement. Any addendum or disclosure form the state requires will be attached and signed by the parties.",
+      "optional": false
+    },
+    {
+      "id": "s21",
+      "title": "21. Notices",
+      "body": "Routine communications may be sent by email. Legal notices, including notices to pay rent, cure a breach, terminate or vacate, will be delivered as required by the law of {{state}}, which may require paper delivery or posting, and also by email when allowed. Tenant's notice address is the Premises unless Tenant gives another in writing.",
+      "optional": false
+    },
+    {
+      "id": "s22",
+      "title": "22. Additional terms",
+      "body": "{{additional_terms}}",
+      "optional": false
+    },
+    {
+      "id": "s23",
+      "title": "23. General",
+      "body": "This lease is governed by the law of {{state}}, and local ordinances where the Premises are located. Any term that conflicts with mandatory tenant protections is unenforceable to that extent, and the rest of the lease stays in effect. Each tenant who signs is jointly and severally responsible for all obligations. This is the entire agreement and can be changed only in writing signed by both parties. It may be signed electronically and in counterparts.",
+      "optional": false
+    },
+    {
+      "id": "s24",
+      "title": "Signatures",
+      "body": "By signing below, each party agrees to this document.\n\n**Landlord** — {{landlord_name}}\n\n[[sig:landlord]]\n\nPrinted name: [[name:landlord]]\nTitle (if signing for a company): [[text:landlord:Title]]\nDate: [[date:landlord]]\n\n**Tenant** — {{tenant_name}}\n\n[[sig:tenant]]\n\nPrinted name: [[name:tenant]]\nDate: [[date:tenant]]",
+      "optional": false
+    }
+  ],
+  "disclaimer": "This is a starting template from the Massless open contract library. It is not legal advice, and using it does not create an attorney-client relationship. Laws vary by state and change over time. Have a licensed attorney in your state review it before you sign. Real estate contracts carry state-specific disclosure, licensing, closing and recording rules. If a real estate licensee is involved, the licensee may be required to use state-promulgated or approved forms instead of this one (for example in Texas and Colorado). Deeds, mortgages and deeds of trust usually must be notarized and recorded; an electronic signature on this document does not record anything.",
+  "sources": [
+    {
+      "title": "TurboTenant: security deposit laws by state (updated Feb 2026)",
+      "url": "https://www.turbotenant.com/state/security-deposit-laws-by-state/"
+    },
+    {
+      "title": "E-SIGN exceptions, 15 U.S.C. §7003 (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/15/7003"
+    },
+    {
+      "title": "40 CFR 745.113: certification and acknowledgment of disclosure (eCFR)",
+      "url": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-R/part-745/subpart-F/section-745.113"
+    },
+    {
+      "title": "EPA: Protect Your Family From Lead in Your Home (pamphlet)",
+      "url": "https://www.epa.gov/lead/protect-your-family-lead-your-home-real-estate-disclosure"
+    },
+    {
+      "title": "HUD: Fair housing rights and obligations",
+      "url": "https://www.hud.gov/program_offices/fair_housing_equal_opp/fair_housing_rights_and_obligations"
+    },
+    {
+      "title": "42 U.S.C. §3604 discrimination in sale or rental, including advertising (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/42/3604"
+    },
+    {
+      "title": "Servicemembers Civil Relief Act, 50 U.S.C. §3955 (lease termination) (Cornell LII)",
+      "url": "https://www.law.cornell.edu/uscode/text/50/3955"
+    }
+  ],
+  "license": "CC0-1.0",
+  "lastReviewed": "2026-10-30"
+}
