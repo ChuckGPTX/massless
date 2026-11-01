@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Privacy policy · Chucksi</title>
+  <meta name="description" content="How Chucksi handles your data: browser-first tools, minimal accounts, no ads or tracking.">
+  <meta name="theme-color" content="#0b0b0c">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/site.css">
+  <style>
+    .legal { max-width: 720px; margin: 0 auto; padding: 112px 20px 72px; line-height: 1.65; }
+    .legal h1 { font-size: clamp(32px, 6vw, 48px); line-height: 1.1; margin: 0 0 8px; }
+    .legal h2 { font-size: 20px; margin: 36px 0 8px; }
+    .legal p, .legal li { color: var(--muted, #b9b9bf); }
+    .legal ul { padding-left: 20px; }
+    .legal a { color: var(--accent); }
+    .legal .updated { font-size: 14px; opacity: .75; margin-bottom: 28px; }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <a class="nav-logo" href="/" aria-label="Chucksi home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+  </header>
+  <main class="legal">
+    <h1>Privacy policy</h1>
+    <p class="updated">Last updated October 31, 2026</p>
+    <p>Chucksi (chucksi.com) is a free, open-source set of creative tools. The short version: most tools run entirely in your browser, we keep as little as we can, and we never sell your data or use it for advertising. The code that does all of this is public on <a href="https://github.com/ChuckGPTX/massless">GitHub</a>.</p>
+
+    <h2>What stays on your device</h2>
+    <p>Many tools (image cutouts, upscaling, editing, video cutting and more) run on your own device. The files you open in them are not uploaded to us. Some settings and your sign-in session are saved in your browser's local storage, and you can clear them at any time.</p>
+
+    <h2>Account information</h2>
+    <p>You can use most of Chucksi without an account. If you create one, with email or with Google or GitHub, we receive your email address, and from Google or GitHub your name and profile picture. We use this only to sign you in and keep your projects tied to you. We do not get your Google or GitHub password, and we do not ask for access to your files, contacts or repositories.</p>
+
+    <h2>Projects you save</h2>
+    <p>When you save a project to the cloud, its files and settings are stored in our database and private storage so you can open them again. Only your account can read them. You can ask us at any time to delete a project or your whole account and everything in it.</p>
+
+    <h2>Server-run AI tools</h2>
+    <p>Some features (for example speech, transcription, writing help and GPU video) send the text, audio or images you provide to a server to process. That input is used only to produce your result. It is not used to train models, and we do not keep it after the job is done unless you save the result. Our GPU provider holds a finished result only briefly, until it is delivered to you.</p>
+
+    <h2>Chucksi Sign</h2>
+    <p>Documents sent with Chucksi Sign are encrypted in your browser before upload, and the key stays in the link, so we cannot read them. Encrypted envelopes are deleted automatically 30 days after sending if unsigned, and 90 days after completion.</p>
+
+    <h2>Abuse limits and security</h2>
+    <p>To keep free tools free, we count daily use with a one-way hash of your IP address. These counters expire within about two days. We use Cloudflare Turnstile to tell people from bots. Standard request logs are kept briefly by our hosting provider for security and debugging.</p>
+
+    <h2>Service providers</h2>
+    <p>Chucksi runs on these providers, each of which processes data only to deliver the service:</p>
+    <ul>
+      <li>Cloudflare: hosting, security, Turnstile and some AI models</li>
+      <li>Supabase: accounts, saved projects and file storage</li>
+      <li>RunPod: GPU servers for heavier video and audio jobs</li>
+      <li>Google and GitHub: only if you choose to sign in with them</li>
+      <li>GitHub and jsDelivr: delivery of the site's code and open models</li>
+    </ul>
+
+    <h2>Cookies</h2>
+    <p>We do not use advertising or tracking cookies. Cloudflare may set strictly necessary security cookies.</p>
+
+    <h2>Children</h2>
+    <p>Chucksi is not directed to children under 13, and we do not knowingly collect their information.</p>
+
+    <h2>Changes and contact</h2>
+    <p>If this policy changes, we will update the date above. Questions or deletion requests: <a href="mailto:chuckgptx@gmail.com">chuckgptx@gmail.com</a>.</p>
+  </main>
+  <footer class="foot">
+    <span>Chucksi · Open creative tools · MIT licensed code</span>
+    <nav aria-label="Footer"><a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="https://github.com/ChuckGPTX/massless">Source ↗</a></nav>
+  </footer>
+</body>
+</html>

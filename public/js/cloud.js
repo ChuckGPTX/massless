@@ -54,6 +54,56 @@ export async function signUp(email, password) {
     });
   return j;
 }
+/** Which of Google and GitHub are switched on in Supabase, so the page only shows buttons that work. */
+export async function enabledProviders() {
+  const c = await cloudConfig();
+  if (!c.cloud) return [];
+  try {
+    const r = await fetch(c.supabaseUrl + "/auth/v1/settings", { headers: { apikey: c.publishableKey } });
+    const j = r.ok ? await r.json() : {};
+    return ["google", "github"].filter((p) => j.external?.[p] === true);
+  } catch {
+    return [];
+  }
+}
+/** Start Google or GitHub sign-in; Supabase sends the visitor back to returnPath with tokens in the URL fragment. */
+export async function signInWithProvider(provider, returnPath = "/projects/") {
+  if (!["google", "github"].includes(provider)) throw new Error("Unknown sign-in provider.");
+  const c = await cloudConfig();
+  if (!c.cloud) throw new Error("Cloud projects are being connected. Your local tools are ready.");
+  location.href =
+    c.supabaseUrl + "/auth/v1/authorize?provider=" + provider +
+    "&redirect_to=" + encodeURIComponent(location.origin + returnPath);
+}
+/** Finish a Google/GitHub sign-in or an email confirmation link: read the fragment, store the session, tidy the URL. */
+export async function completeRedirect() {
+  if (!location.hash || location.hash.length < 2) return false;
+  const p = new URLSearchParams(location.hash.slice(1));
+  const tidy = () => history.replaceState(null, "", location.pathname + location.search);
+  if (p.get("error") || p.get("error_description")) {
+    tidy();
+    throw new Error((p.get("error_description") || p.get("error")).replace(/\+/g, " "));
+  }
+  const access_token = p.get("access_token");
+  if (!access_token) return false;
+  tidy();
+  const c = await cloudConfig();
+  const r = await fetch(c.supabaseUrl + "/auth/v1/user", {
+    headers: { apikey: c.publishableKey, Authorization: "Bearer " + access_token },
+  });
+  if (!r.ok) throw new Error("Sign-in could not be confirmed. Try again.");
+  const user = await r.json();
+  const expires_in = Number(p.get("expires_in")) || 3600;
+  saveSession({
+    access_token,
+    refresh_token: p.get("refresh_token"),
+    token_type: p.get("token_type") || "bearer",
+    expires_in,
+    expires_at: Number(p.get("expires_at")) || Math.floor(Date.now() / 1000) + expires_in,
+    user,
+  });
+  return true;
+}
 export async function accessToken() {
   let s = session();
   if (!s)
