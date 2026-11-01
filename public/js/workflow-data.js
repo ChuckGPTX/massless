@@ -1,3 +1,5 @@
+import { OPTICAL_EFFECTS } from './effect-presets.js';
+
 export const WORKFLOWS = [
   {id:'image-workroom',name:'Image to campaign frame',tag:'IMAGE + DESIGN',image:'/media/website/ceramics.jpg',description:'Reframe an image, adjust its finish and add a headline. Save a new take, ready for motion.',output:'PNG + saved take',steps:[['Choose or create an image','/image'],['Compose a new take','/edit/'],['Use the saved take in your next tool','/library/']]},
   {id:'scene-stage',name:'Objects to a 3D scene',tag:'3D + IMAGE',image:'/media/art/observatory.jpg',description:'Stage real objects and lights, orbit the camera, and export a complete editable scene.',output:'GLB + PNG frame',steps:[['Stage your objects','/scene/'],['Set lighting and camera','/scene/'],['Export GLB or save a frame','/scene/']]},
@@ -246,7 +248,13 @@ const GAME_CARDS = [
   ["planet-muncher", "Planet muncher", "Eat and grow through space"],
   ["night-circuit", "Night circuit", "A neon match-three"],
 ].map(([id, name, line]) => card(`game-${id}`, "games", name, line, `/games#play=${id}`, "3/4"));
+const OPTICAL_CARDS = OPTICAL_EFFECTS.flatMap((effect) => effect.looks.slice(0, 1).map((look) =>
+  card(`fx-${effect.id}-${look.id}`, "effects", effect.name, effect.hint,
+    `/video?effect=${effect.id}&look=${look.id}&sample=${effect.sample}`,
+    PORTRAIT.has(effect.sample) ? "9/16" : "16/9")));
+
 export const GALLERY = [
+  ...OPTICAL_CARDS,
   ...EFFECT_CARDS,
   ...MOVE_CARDS,
   card("image-compose", "image", "Reframe & grade", "Recompose a photo on a new backdrop", "/edit/", "16/9"),
@@ -268,4 +276,4 @@ export const GALLERY = [
   card("office-templates", "office", "Contract templates", "Pick a contract, fill it in, send it", "/office?tab=sign", "16/9"),
 ];
 // The loops in the moving strip at the top of the page.
-export const FEATURED = ["fx-lidar-cyan", "site-manifesto", "move-arc-right", "design-fest-harbourlight", "fx-vanish-embers", "game-sky-tower", "move-fpv", "design-id-northwind", "fx-clones-rainbow", "site-restaurant", "film-launch", "move-bullet-time", "design-film-tide", "game-star-hornets"];
+export const FEATURED = ["fx-hologram-ion", "fx-shatter-spectrum", "fx-shockwave-water", "fx-portal-cosmic", "fx-lidar-cyan", "site-manifesto", "move-arc-right", "design-fest-harbourlight", "fx-vanish-embers", "game-sky-tower", "move-fpv", "design-id-northwind", "fx-clones-rainbow", "site-restaurant", "film-launch", "move-bullet-time", "design-film-tide", "game-star-hornets"];

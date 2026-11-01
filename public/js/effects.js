@@ -1,4 +1,4 @@
-// One-tap effects for the Video page: LiDAR scan, Vanish, Bullet time freeze and Clones.
+// One-tap effects for the Video page: optical presets plus LiDAR, Vanish, Freeze and Clones.
 // Everything comes from the still and its depth map: a subject matte found in the depth, a clean
 // plate that fills in behind the subject, and a small WebGL2 mesh and point renderer that draws into
 // the same scene target as the camera moves, so the lens and film finish and the recorder are shared.
@@ -8,8 +8,10 @@
 import { mat4 } from './math.js';
 import { REST_FOV, program } from './renderer.js';
 import { maxFilter, minFilter } from './depth.js';
+import { OPTICAL_EFFECTS, opticalEffectById, OpticalEffects } from './optical-effects.js';
 
 export const EFFECTS = [
+  ...OPTICAL_EFFECTS,
   {
     id: 'lidar', name: 'LiDAR scan', hint: 'A laser sweep turns the still into a point cloud', duration: 6,
     looks: [{ id: 'cyan', name: 'Cyan' }, { id: 'thermal', name: 'Thermal' }, { id: 'white', name: 'White' }],
@@ -1816,6 +1818,11 @@ export class EffectEngine {
   draw(id, look, t, ctx, fx, time, duration) {
     const r = this.r;
     const gl = this.gl;
+    if (opticalEffectById(id) && r.hasImage) {
+      this.optical ||= new OpticalEffects(r);
+      this.optical.draw(id, look, t, ctx.k, fx, duration);
+      return;
+    }
     if (!this.prep || !r.hasImage) { r.render(this.camera(id, 0, ctx), fx, time); return; }
     this._grids();
     this.k = ctx.k;
