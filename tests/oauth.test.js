@@ -76,3 +76,17 @@ test("provider check fails closed when Supabase can't be reached", async () => {
   const cloud = await import("../public/js/cloud.js?" + Math.random());
   assert.deepEqual(await cloud.enabledProviders(), []);
 });
+
+test("LinkedIn, X and Facebook are offered when switched on, and unknown providers are refused", async () => {
+  setup("");
+  const base = globalThis.fetch;
+  globalThis.fetch = async (url, init) =>
+    url.endsWith("/auth/v1/settings")
+      ? { ok: true, json: async () => ({ external: { google: true, github: true, linkedin_oidc: true, twitter: true, facebook: true, linkedin: true } }) }
+      : base(url, init);
+  const cloud = await import("../public/js/cloud.js?" + Math.random());
+  assert.deepEqual(await cloud.enabledProviders(), ["google", "github", "linkedin_oidc", "twitter", "facebook"]);
+  await cloud.signInWithProvider("facebook");
+  assert.match(location.href, /authorize\?provider=facebook&redirect_to=/);
+  await assert.rejects(cloud.signInWithProvider("myspace"), /Unknown sign-in provider/);
+});
