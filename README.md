@@ -128,6 +128,8 @@ Deploy to your own Cloudflare account: create a KV namespace, put its id in `wra
 
 How chucksi.com runs today: the Worker in `src/index.js` was uploaded through the Cloudflare API without an assets binding, so it serves the files in `public/` straight from this repo's `main` branch and caches them at Cloudflare's edge. Each page load is pinned to one commit, so a push to `main` goes live within about a minute and a page never mixes two versions; only changes to `src/index.js` need a Worker re-upload (or a switch to `wrangler deploy`, which uses the assets binding instead).
 
+Free site hosting: the Website builder's Publish button puts a site online at `<name>.v2web.site`, served by the same Worker from R2 (`src/sites.js`). Setup, limits, abuse rules and takedowns: [docs/SITE-HOSTING.md](docs/SITE-HOSTING.md).
+
 ## Open weights only, on your GPU (ComfyUI)
 
 `public/comfy/massless_shot_flux_schnell.api.json` is the hero-frame workflow in ComfyUI API format: core nodes only, FLUX.1 [schnell] fp8, no partner nodes.

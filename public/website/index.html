@@ -135,6 +135,7 @@
           <button type="button" class="ws-pill" id="share"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 12l4-4M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2"/></svg>Share</button>
           <button type="button" class="ws-pill" id="preview-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3.5h5.5V9M16.5 3.5L9 11M8 4.5H4.5v11h11V12"/></svg>Preview</button>
           <button type="button" class="ws-pill" id="host-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10a7 7 0 1014 0 7 7 0 00-14 0zM3 10h14M10 3c2 2 2.8 4.4 2.8 7S12 15 10 17c-2-2-2.8-4.4-2.8-7S8 5 10 3z"/></svg>Host it free</button>
+          <button type="button" class="ws-pill" id="publish-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 13.5V3.5M6 7.5l4-4 4 4M4 12.5v3a1.5 1.5 0 001.5 1.5h9a1.5 1.5 0 001.5-1.5v-3"/></svg>Publish</button>
           <button type="button" class="ws-pill accent" id="export-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 16.5h12"/></svg>Export</button>
         </div>
       </div>
@@ -184,6 +185,28 @@
     </div>
   </dialog>
 
+  <dialog class="sheet ws-dialog pub" id="publish-dialog">
+    <form method="dialog" class="sheet-head"><h2>Publish</h2><button class="x" aria-label="Close">×</button></form>
+    <div id="pub-out" hidden>
+      <p>Put your site online free at <b>your-name.v2web.site</b>.</p>
+      <div class="ws-export-acts"><button type="button" class="btn-accent" id="pub-signin">Sign in to publish</button></div>
+    </div>
+    <div id="pub-new" hidden>
+      <label class="ws-h3" for="pub-slug">Address</label>
+      <div class="pub-addr"><input id="pub-slug" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" aria-describedby="pub-check"><span>.v2web.site</span></div>
+      <p class="ws-note pub-check" id="pub-check" aria-live="polite"></p>
+      <div class="ws-export-acts"><button type="button" class="btn-accent" id="pub-go" disabled>Publish</button><span class="ws-note" id="pub-count"></span></div>
+    </div>
+    <div id="pub-live" hidden>
+      <p class="pub-link"><span class="pub-dot" aria-hidden="true"></span><a id="pub-link" target="_blank" rel="noopener"></a></p>
+      <p class="ws-note" id="pub-state"></p>
+      <div class="ws-share"><input type="text" id="pub-url" readonly aria-label="Site address"><button type="button" class="btn-accent" id="pub-copy">Copy</button></div>
+      <div class="ws-export-acts"><button type="button" class="btn-accent" id="pub-update">Update</button><button type="button" class="btn-ghost" id="pub-unpublish">Unpublish</button><button type="button" class="ws-mini" id="pub-other">Publish to another address</button></div>
+    </div>
+    <p class="ws-note pub-msg" id="pub-msg" role="status" hidden></p>
+    <p class="ws-note pub-fine">Free, with a small Chucksi badge. Follow the <a href="/terms.html#hosting">hosting rules</a>.</p>
+  </dialog>
+
   <dialog class="sheet ws-dialog wide" id="host-dialog">
     <form method="dialog" class="sheet-head"><h2>Host it free</h2><button class="x" aria-label="Close">×</button></form>
     <p>Your export is a plain static site, so any static host works. These three are free and need no code. Each also lets you add your own domain later.</p>
@@ -216,7 +239,7 @@
         <p class="ws-note">Live at <code>username.github.io/repository</code> in about a minute. The ZIP includes <code>.nojekyll</code> so GitHub serves it as is.</p>
       </article>
     </div>
-    <p class="ws-note" id="host-hook">Hosting on a Chucksi address is not offered: free hosting for anyone needs abuse safeguards first.</p>
+    <p class="ws-note" id="host-hook">Or use <b>Publish</b> for a free <code>your-name.v2web.site</code> address.</p>
   </dialog>
 
   <dialog class="sheet ws-dialog" id="share-dialog">
