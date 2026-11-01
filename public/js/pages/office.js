@@ -34,9 +34,21 @@ const COPY = {
   convert: ['Convert and<br>combine', 'Images to PDF, PDF to images, merge, split, rotate, compress and pull out text. All of it runs on your device.'],
   ask: ['Ask your<br>PDF', 'Ask a question about the PDF open in Edit. Only its text, up to 12,000 characters, is sent to an open model to answer.'],
   sign: ['Send for<br>signature', 'Start from a contract template or your own PDF, place fields for each signer, then send. Everything is encrypted in this browser before it is uploaded.'],
+  slides: ['Make a<br>deck', 'Describe it, get a designed deck, then edit, present and export.'],
 };
-const TABS = ['edit', 'convert', 'ask', 'sign'];
+const TABS = ['edit', 'convert', 'ask', 'sign', 'slides'];
 let sign = null;
+let slides = null;
+let slidesP = null;
+/** The Slides builder loads on first use (it is a separate module tree). */
+function loadSlides() {
+  slidesP = slidesP || import('../slides/app.js').then(async (m) => {
+    slides = await m.init({ view: $('#view-slides'), side: $('#tab-slides'), tab: () => state.tab, setSrc });
+    $('#sd-present').addEventListener('click', () => slides.present());
+    return slides;
+  }).catch((e) => { slidesP = null; toast(`Slides could not load: ${e.message}`, 'error'); throw e; });
+  return slidesP;
+}
 
 const state = {
   tab: 'edit', tool: 'select', hl: 'amber', ink: 'black', size: 14, pen: 2,
@@ -59,6 +71,9 @@ function showTab(which) {
   }
   $('#stage-title').innerHTML = COPY[which][0];
   $('#stage-sub').textContent = COPY[which][1];
+  $('.stage').classList.toggle('slides-on', which === 'slides');
+  if (which === 'slides') { if (slides) { setSrc('PptxGenJS and pdf-lib · load on export'); slides.onShow(); } else loadSlides().catch(() => {}); }
+  else if (which !== 'sign') setSrc(state.doc ? docLabel() : 'pdf.js and pdf-lib · load on first use');
   if (which === 'ask') { syncAskDoc(); warmHuman(); }
   if (which === 'sign') { sign.onShow(); warmHuman(); }
   if (which === 'edit' && state.doc) requestAnimationFrame(() => (state.fit ? fitZoom() : renderVisible()));
@@ -856,6 +871,7 @@ function handleFiles(files) {
   if (!list.length) return;
   if (state.tab === 'convert') { addToQueue(list); return; }
   if (state.tab === 'sign') { sign.handleFiles(list); return; }
+  if (state.tab === 'slides') { loadSlides().then((s) => s.handleFiles(list)).catch(() => {}); return; }
   const pdf = list.find(T.isPdf);
   if (pdf) { openFile(pdf); return; }
   if (list.some(T.isImage)) {
@@ -963,12 +979,13 @@ function init() {
   window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (state.doc && state.fit && state.tab === 'edit') fitZoom(); }, 150); });
 
   const p = new URLSearchParams(location.search);
-  const tab = p.get('tab') || location.hash.slice(1);
-  if (['convert', 'ask', 'sign'].includes(tab)) showTab(tab);
+  const tab = p.get('tab') || location.hash.slice(1).split('=')[0];
+  if (['convert', 'ask', 'sign', 'slides'].includes(tab)) showTab(tab);
+  else if (/^#d=/.test(location.hash)) showTab('slides');
   if (p.get('op') && OPS.some((o) => o.id === p.get('op'))) selectOp(p.get('op'));
   if (p.has('sample')) openSample();
 
-  window.massless = { state: { ...state, recording: false }, live: state, T, openBytes, makeSample, editedBytes, runConvert, setTool, selectOp, showTab, addToQueue, ask, sign };
+  window.massless = { state: { ...state, recording: false }, live: state, T, openBytes, makeSample, editedBytes, runConvert, setTool, selectOp, showTab, addToQueue, ask, sign, loadSlides, get slides() { return slides; } };
 }
 
 init();
