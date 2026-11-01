@@ -4,32 +4,23 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Workflows — Chucksi studio</title>
+    <meta name="description" content="Pick a workflow, add your photo or words, and get a finished clip, design, website or game in your browser." />
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="/css/site.css" />
     <link rel="stylesheet" href="/css/navigation.css" />
     <link rel="stylesheet" href="/css/hubs.css" />
     <link rel="stylesheet" href="/css/make.css" />
+    <link rel="stylesheet" href="/css/workflows.css" />
     <script type="module" src="/js/navigation.js"></script>
     <script type="module" src="/js/pages/workflows.js"></script>
   </head>
-  <body class="hub">
+  <body class="hub wf-page">
     <header class="nav">
       <a class="nav-logo" href="/" aria-label="Chucksi home"
         ><svg viewBox="0 0 32 32" aria-hidden="true">
-          <circle
-            cx="16"
-            cy="16"
-            r="11.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="3"
-          />
+          <circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3" />
           <circle cx="16" cy="16" r="3.6" fill="currentColor" />
-          <path
-            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
-            stroke="currentColor"
-            stroke-width="3"
-          /></svg
+          <path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3" /></svg
       ></a>
       <nav class="nav-links" aria-label="Main">
         <a href="/">Explore</a><a href="/studios/image/">Image</a
@@ -37,55 +28,28 @@
         ><a href="/studios/3d/">3D</a><a href="/studios/office/">Office</a>
       </nav>
       <div class="nav-right">
-        <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless"
-          >GitHub</a
+        <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless">GitHub</a
         ><a class="btn-accent" href="/image">Create an image ↗</a>
       </div>
     </header>
-    <main class="hub-main">
+    <main class="hub-main wf-main">
       <section id="maker" class="maker" hidden aria-live="polite"></section>
-      <section class="hub-intro workflow-intro">
-        <div>
-          <p class="eyebrow">FROM AN IDEA TO AN EXPORT</p>
-          <h1>Make something.<br /><em>Finish something.</em></h1>
-          <p>
-            Practical steps, connected tools and reusable presets. Start with
-            your own material and leave with a file you can use.
-          </p>
-          <a class="btn-accent" href="#workflow-cards">Find your workflow ↓</a>
-        </div>
-        <a class="workflow-demo" href="/video/?effect=lidar"
-          ><video
-            muted
-            loop
-            playsinline
-            poster="/media/clips/effect-lidar-active.jpg"
-            data-src="/media/clips/effect-lidar.mp4"
-          ></video
-          ><span>STILL → LiDAR SCAN → CLIP ↗</span></a
-        >
+
+      <section class="wf-hero" aria-labelledby="wf-title">
+        <h1 id="wf-title">Workflows</h1>
+        <p>Pick one. Add your photo or words.</p>
       </section>
-      <section class="hub-section make-group" id="design-cards" aria-labelledby="design-title">
-        <p class="eyebrow">ONE CLICK / DESIGN KITS</p>
-        <h2 id="design-title">Press once. Get a finished design.</h2>
-        <p>
-          Each one opens with a complete example you can edit. Change the words and it
-          updates instantly; press Make it for new FLUX frames.
-        </p>
-        <div id="make-cards" class="hub-grid make-grid"></div>
+      <div class="wf-marquee" id="wf-marquee" aria-hidden="true"><div class="wf-track" id="wf-track"></div></div>
+
+      <nav class="wf-chips" id="wf-chips" aria-label="Workflow categories"></nav>
+      <div class="wf-grid" id="wf-grid" role="list"></div>
+
+      <section class="wf-plans-section" aria-labelledby="plans-title">
+        <h2 id="plans-title">Step-by-step plans</h2>
+        <div class="wf-plans" id="workflow-cards"></div>
       </section>
-      <section class="hub-section make-group" id="website-cards" aria-labelledby="website-title">
-        <p class="eyebrow">ONE CLICK / WEBSITES</p>
-        <h2 id="website-title">Start a website from a template.</h2>
-        <div id="site-cards" class="hub-grid make-grid make-grid-4"></div>
-      </section>
-      <section class="hub-section make-group" aria-labelledby="steps-title">
-        <p class="eyebrow">STEP BY STEP</p>
-        <h2 id="steps-title">Connected tools, one plan.</h2>
-      </section>
-      <div id="workflow-cards" class="hub-grid"></div>
       <section class="hub-panel" id="run-panel" hidden>
-        <p class="eyebrow">YOUR WORKFLOW PLAN</p>
+        <p class="eyebrow">YOUR PLAN</p>
         <h2 id="run-title"></h2>
         <label
           >Project brief<textarea
@@ -97,66 +61,52 @@
         ><label>Choose a saved image<select id="shot-list"></select></label>
         <div id="run-steps"></div>
         <div class="hub-actions">
-          <button id="export-run" class="btn-accent">
-            Download workflow plan</button
-          ><button id="save-run" class="btn-ghost">
-            Save plan to a private project</button
+          <button id="export-run" class="btn-accent">Download plan</button
+          ><button id="save-run" class="btn-ghost">Save plan to a private project</button
           ><label class="btn-ghost"
-            >Import a plan<input
-              id="import-run"
-              type="file"
-              accept="application/json"
-              hidden
+            >Import a plan<input id="import-run" type="file" accept="application/json" hidden
           /></label>
         </div>
         <p id="run-status" role="status">Progress saves in this browser.</p>
       </section>
-      <section class="hub-panel" id="flux3">
-        <p class="eyebrow">MODEL WORKFLOW / BLACK FOREST LABS</p>
-        <h2>FLUX 3 Image Klein</h2>
-        <p>
-          Download ComfyUI’s official distilled workflow with prompt expansion.
-          Install the listed weights in your own ComfyUI before running it. This
-          model uses the FLUX Kommunity License and may require Hugging Face
-          access approval.
-        </p>
-        <div class="hub-actions">
-          <a class="btn-accent" href="/comfy/flux3-klein-official.json" download
-            >Download official workflow</a
-          ><a
-            class="btn-ghost"
-            href="https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy"
-            target="_blank"
-            rel="noopener"
-            >Model files and terms ↗</a
-          >
-        </div>
-        <p class="quiet-note">
-          This download prepares a connected workflow. Hosted FLUX 3 generation
-          is not enabled.
-        </p>
-      </section>
-      <section class="hub-section">
-        <p class="eyebrow">COMMUNITY WORKFLOWS</p>
-        <h2>Give the image a new life.</h2>
-        <p>
-          Curated VFX4All presets by Noma Studio. Download the open workflow or
-          open its Comfy Cloud app. These require their own model installation
-          or Comfy Cloud account and credits.
-        </p>
-        <div id="preset-cards" class="hub-grid"></div>
-        <p class="quiet-note">
-          Workflow code: MIT. LTX model weights use separate community terms.
-          Check the included notices before installing.
-          <a href="https://github.com/ChuckGPTX/massless/blob/main/public/comfy/vfx4all/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener"
-            >Read model notices ↗</a
-          >
-        </p>
-      </section>
+
+      <details class="wf-connected" id="connected">
+        <summary>Connected ComfyUI workflows</summary>
+        <section class="hub-panel" id="flux3">
+          <p class="eyebrow">MODEL WORKFLOW / BLACK FOREST LABS</p>
+          <h2>FLUX 3 Image Klein</h2>
+          <p>
+            Download ComfyUI’s official distilled workflow with prompt expansion. Install the listed weights in your
+            own ComfyUI before running it. This model uses the FLUX Kommunity License and may require Hugging Face
+            access approval.
+          </p>
+          <div class="hub-actions">
+            <a class="btn-accent" href="/comfy/flux3-klein-official.json" download>Download official workflow</a
+            ><a class="btn-ghost" href="https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy" target="_blank" rel="noopener"
+              >Model files and terms ↗</a
+            >
+          </div>
+          <p class="quiet-note">This download prepares a connected workflow. Hosted FLUX 3 generation is not enabled.</p>
+        </section>
+        <section class="hub-section">
+          <p class="eyebrow">COMMUNITY WORKFLOWS</p>
+          <p>
+            Curated VFX4All presets by Noma Studio. Download the open workflow or open its Comfy Cloud app. These
+            require their own model installation or Comfy Cloud account and credits.
+          </p>
+          <div id="preset-cards" class="hub-grid"></div>
+          <p class="quiet-note">
+            Workflow code: MIT. LTX model weights use separate community terms. Check the included notices before
+            installing.
+            <a href="https://github.com/ChuckGPTX/massless/blob/main/public/comfy/vfx4all/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener"
+              >Read model notices ↗</a
+            >
+          </p>
+        </section>
+      </details>
     </main>
     <footer class="hub-footer">
-      <a href="/">CHUCKSI / OPEN CREATIVE TOOLS</a
-      ><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
+      <a href="/">CHUCKSI / OPEN CREATIVE TOOLS</a><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
     </footer>
   </body>
 </html>

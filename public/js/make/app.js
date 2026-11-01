@@ -37,6 +37,14 @@ export async function start(id, root) {
   let state = structuredClone(mod.presets[0].state);
   let samples = { ...mod.presets[0].samples };
   const params = new URLSearchParams(location.search);
+  // /workflows?make=<id>&example=<showcase id> opens a Made-with-Chucksi example ready to remix.
+  const exampleId = params.get('example');
+  if (exampleId) {
+    try {
+      const x = (await (await fetch('/data/showcase.json')).json()).find((e) => e.id === exampleId && e.workflow === id);
+      if (x) { state = { ...state, ...structuredClone(x.state) }; samples = { ...x.samples }; }
+    } catch { /* fall back to the default example */ }
+  }
   for (const f of mod.fields) if (params.has(f.key)) state[f.key] = f.type === 'range' ? Number(params.get(f.key)) : params.get(f.key).slice(0, f.max || 400);
 
   const cache = new Map(); // prompt|size|seed -> image
@@ -62,7 +70,7 @@ export async function start(id, root) {
   root.replaceChildren(
     h('div', { class: 'maker-head' },
       h('div', {},
-        h('a', { class: 'maker-back', href: '/workflows#design-cards' }, '← All workflows'),
+        h('a', { class: 'maker-back', href: '/workflows/#design' }, '← All workflows'),
         h('p', { class: 'eyebrow' }, meta.tag),
         h('h1', {}, meta.name),
         h('p', { class: 'maker-lede' }, meta.description)),

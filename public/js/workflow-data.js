@@ -27,7 +27,7 @@ export const WORKFLOWS = [
     output: "Camera clip + launch film",
     steps: [
       ["Create a product visual", "/image"],
-      ["Animate your saved image", "/video?move=orbit-right"],
+      ["Animate your saved image", "/video?move=arc-right"],
       ["Build and export a launch film", "/film"],
     ],
   },
@@ -141,3 +141,131 @@ export function stepURL(href, shotId, brief = "") {
   if (brief && u.pathname === "/film") u.searchParams.set("brief", brief.slice(0,600));
   return u.pathname + u.search;
 }
+
+// ---------- The Workflows gallery ----------
+// Every card is a real, working entry point: it opens a Chucksi tool already set up with the same example the
+// loop shows. Each loop and poster in /media/templates was recorded from that tool (see provenance.json there).
+export const CATEGORIES = [
+  { id: "effects", name: "Video effects" },
+  { id: "moves", name: "Camera moves" },
+  { id: "image", name: "Image edits" },
+  { id: "design", name: "Design & print" },
+  { id: "websites", name: "Websites" },
+  { id: "games", name: "Games" },
+  { id: "film", name: "Film & music" },
+  { id: "office", name: "Office" },
+];
+const PORTRAIT = new Set(["samurai", "fisherman", "jellyfish", "summit"]);
+const card = (id, cat, name, line, href, ar) => ({ id, cat, name, line, href, ar, video: `/media/templates/${id}.mp4`, poster: `/media/templates/${id}.webp` });
+const EFFECT_CARDS = [
+  ["lidar", "cyan", "canyon", "LiDAR scan", "A laser sweep turns your still into a point cloud"],
+  ["lidar", "thermal", "summit", "Thermal scan", "A heat-map sweep across your photo"],
+  ["lidar", "white", "lighthouse", "Point cloud", "Your scene rebuilt from white light points"],
+  ["vanish", "embers", "dancer", "Embers", "The subject burns away into drifting sparks"],
+  ["vanish", "ash", "samurai", "Turn to ash", "The subject crumbles and blows away"],
+  ["vanish", "pixels", "diner", "Pixel dissolve", "The picture breaks into falling pixels"],
+  ["freeze", "", "astronaut", "Bullet freeze", "Push in, freeze, swing around the subject"],
+  ["clones", "rainbow", "neon", "Rainbow clones", "Colour echoes trail the subject"],
+  ["clones", "natural", "bmx", "Clones", "Echoes trail the subject as the camera slides"],
+  ["clones", "ghost", "jellyfish", "Ghost trail", "Glowing afterimages follow every move"],
+].map(([effect, look, sample, name, line]) =>
+  card(`fx-${effect}${look ? "-" + look : ""}`, "effects", name, line, `/video?effect=${effect}${look ? "&look=" + look : ""}&sample=${sample}`, PORTRAIT.has(sample) ? "3/4" : "16/9"));
+// [move id, sample still, name, one line]
+const MOVE_CARDS = [
+  ["dolly-in", "rider", "Dolly in", "Push toward the subject"],
+  ["arc-right", "fisherman", "Arc right", "Swing around the subject"],
+  ["crane-up", "bmx", "Crane up", "Rise and look down"],
+  ["handheld", "samurai", "Handheld", "Operator on their feet"],
+  ["crash-zoom", "train", "Crash zoom", "A violent snap in on the subject"],
+  ["truck-left", "astronaut", "Truck left", "Slide sideways, layers separate"],
+  ["dolly-zoom", "lighthouse", "Dolly zoom", "The subject holds, the world looms in"],
+  ["tilt-up", "diner", "Tilt up", "The camera stays, the view climbs"],
+  ["fpv", "cinema", "FPV dive", "A drone rush with a banking turn"],
+  ["breathe", "dancer", "Breathe", "Locked off, the frame just lives"],
+  ["wide-orbit", "jellyfish", "Wide orbit", "A long swing around the subject"],
+  ["pan-right", "canyon", "Pan right", "Turn the tripod head"],
+  ["bullet-time", "neon", "Bullet time", "The moment freezes, the camera does not"],
+  ["rack-focus", "summit", "Rack focus", "Pull focus from near to far"],
+  ["dolly-out", "rider", "Dolly out", "Pull back to reveal"],
+  ["arc-left", "fisherman", "Arc left", "Swing the other way"],
+  ["crane-down", "bmx", "Crane down", "Descend into the scene"],
+  ["snorricam", "samurai", "Snorricam", "Rig locked on, the world sways"],
+  ["zoom-in", "train", "Zoom in", "The lens zooms, the camera stays put"],
+  ["truck-right", "astronaut", "Truck right", "Slide the other way"],
+  ["float", "lighthouse", "Float", "A slow drifting loop"],
+  ["dutch-roll", "diner", "Dutch roll", "The horizon tips as tension rises"],
+  ["crash-zoom-out", "cinema", "Crash zoom out", "Snap back from a tight detail"],
+  ["tilt-down", "dancer", "Tilt down", "The camera stays, the view drops"],
+  ["earthquake", "jellyfish", "Earthquake", "A hard jolt that settles"],
+  ["pan-left", "canyon", "Pan left", "Turn the tripod head the other way"],
+  ["zoom-out", "neon", "Zoom out", "The lens widens, the camera stays put"],
+  ["dolly-zoom-in", "summit", "Vertigo", "The subject holds, the world falls away"],
+].map(([move, sample, name, line]) => card(`move-${move}`, "moves", name, line, `/video?move=${move}&sample=${sample}`, PORTRAIT.has(sample) ? "3/4" : "16/9"));
+const SHOWCASE_CARDS = [
+  ["map", "map-saltmere", "Island map", "Name a place, get an illustrated map poster", "4/5"],
+  ["map", "map-larkspur", "Valley map", "A painted map with labels, legend and compass", "4/5"],
+  ["map", "map-saltmere-night", "Night map", "The same island after dark", "4/5"],
+  ["identity", "id-pebble", "Bakery brand", "A name and a vibe become a full identity kit", "4/5"],
+  ["identity", "id-northwind", "Bold brand", "Wordmark, palette, type and six applications", "4/5"],
+  ["identity", "id-halcyon", "Calm brand", "A soft identity for a swim club", "4/5"],
+  ["identity", "id-maison", "Luxe brand", "A quiet identity for a perfume atelier", "4/5"],
+  ["identity", "id-lumen", "Tech brand", "A crisp identity for a research lab", "4/5"],
+  ["film-poem", "film-tide", "Film poem", "A few lines become a short film", "4/5"],
+  ["film-poem", "film-tide-cinema", "Cinema poem", "Your words, typed on over moving frames", "16/9"],
+  ["poetry", "poe-small-maps", "Poetry posters", "A poem set as an editorial poster series", "4/5"],
+  ["poetry", "poe-weather", "Weather report", "Big verse, tiny captions, a strict grid", "4/5"],
+  ["poetry", "poe-slow-day", "Slow day", "House rules set as posters", "4/5"],
+  ["festival", "fest-harbourlight", "Festival posters", "Lineup and dates become a poster series", "4/5"],
+  ["festival", "fest-copper-lantern", "Jazz nights", "Two-colour posters, plus feed and story sizes", "4/5"],
+  ["festival", "fest-mustard", "Mustard edition", "The same series in a new palette", "4/5"],
+].map(([make, example, name, line, ar]) => card(`design-${example}`, "design", name, line, `${makeURL(make)}&example=${example}`, ar));
+const SITE_CARDS = [
+  ["editorial-shop", "Editorial shop", "A shop that reads like a magazine"],
+  ["manifesto", "Manifesto", "Big statements over a moving line field"],
+  ["portfolio-timeline", "Portfolio timeline", "Case studies in order, scrolling sideways"],
+  ["ai-product", "AI product launch", "A portrait-led launch page"],
+  ["local-business", "Local business", "Services, reviews and a quote form"],
+  ["photographer", "Photographer", "A calm portfolio with a masonry gallery"],
+  ["app-landing", "App landing", "Features, steps, pricing and FAQ"],
+  ["conference", "Conference", "Speakers, tickets, schedule and venue"],
+  ["restaurant", "Restaurant", "Menu, photos, hours and table requests"],
+  ["book-launch", "Book launch", "Chapters, the author and a free sample"],
+  ["app-waitlist", "App waitlist", "A night-sky page with an early-access form"],
+].map(([id, name, line]) => card(`site-${id}`, "websites", name, line, `/website?template=${id}`, "3/4"));
+const GAME_CARDS = [
+  ["t1-street-run", "Street run", "Hop the cones, stomp the rivals"],
+  ["sky-tower", "Sky tower", "Stack a skyscraper floor by floor"],
+  ["star-hornets", "Star hornets", "Fly, dodge and fire on your own"],
+  ["tp-robot-match", "Robot match", "Swap tiles, match three"],
+  ["deep-snack", "Deep snack", "Eat smaller fish, dodge bigger ones"],
+  ["cheese-quest", "Cheese quest", "Grab every key, find the door"],
+  ["dune-rover", "Dune rover", "Jump the dunes in a desert run"],
+  ["pancake-panic", "Pancake panic", "Drop the stack, line it up"],
+  ["jelly-storm", "Jelly storm", "A shooter in deep water"],
+  ["crystal-caves", "Crystal caves", "A maze of gems and keys"],
+  ["planet-muncher", "Planet muncher", "Eat and grow through space"],
+  ["night-circuit", "Night circuit", "A neon match-three"],
+].map(([id, name, line]) => card(`game-${id}`, "games", name, line, `/games#play=${id}`, "3/4"));
+export const GALLERY = [
+  ...EFFECT_CARDS,
+  ...MOVE_CARDS,
+  card("image-compose", "image", "Reframe & grade", "Recompose a photo on a new backdrop", "/edit/", "16/9"),
+  card("image-remove-bg", "image", "Remove background", "Cut out any subject on your device", "/edit/?tool=remove-bg", "16/9"),
+  card("image-upscale", "image", "Upscale", "Sharper, bigger images without the blur", "/edit/?tool=upscale", "16/9"),
+  card("image-erase", "image", "Erase objects", "Brush out what does not belong", "/edit/?tool=erase", "16/9"),
+  card("image-depth", "image", "Photo to 3D", "Turn a still into a scene you can orbit", "/3d?sample=samurai", "16/9"),
+  card("image-scene", "image", "3D scene", "Stage objects and lights, export GLB", "/scene/", "16/9"),
+  ...SHOWCASE_CARDS,
+  ...SITE_CARDS,
+  ...GAME_CARDS,
+  card("film-launch", "film", "Launch film", "A brief becomes a scored, beat-cut film", "/film", "16/9"),
+  card("film-music", "film", "Music visualizer", "Artwork and your track, cut to the beat", "/music", "16/9"),
+  card("film-captions", "film", "Captions", "Edit by text and burn in styled captions", "/cut/", "16/9"),
+  card("film-voice", "film", "Voiceover", "Turn a script into a voice", "/audio?tab=voice", "16/9"),
+  card("film-beds", "film", "Sound beds", "Rain, wind and city ambience", "/audio?tab=beds", "16/9"),
+  card("office-annotate", "office", "Annotate a PDF", "Highlight, write, draw and sign", "/office?sample=1", "16/9"),
+  card("office-sign", "office", "Send for signature", "Contract templates, signers and an audit trail", "/office?tab=sign", "16/9"),
+  card("office-templates", "office", "Contract templates", "Pick a contract, fill it in, send it", "/office?tab=sign", "16/9"),
+];
+// The loops in the moving strip at the top of the page.
+export const FEATURED = ["fx-lidar-cyan", "site-manifesto", "move-arc-right", "design-fest-harbourlight", "fx-vanish-embers", "game-sky-tower", "move-fpv", "design-id-northwind", "fx-clones-rainbow", "site-restaurant", "film-launch", "move-bullet-time", "design-film-tide", "game-star-hornets"];
