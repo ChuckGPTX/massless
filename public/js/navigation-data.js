@@ -359,6 +359,13 @@ export const STUDIOS = [
     note: "Editing and conversion stay local. Ask PDF sends selected document text to Cloudflare. Sign uploads only encrypted envelopes.",
     features: [
       item(
+        "Slide decks",
+        "Describe a pitch, get an animated deck",
+        "/office?tab=slides",
+        "window",
+        "NEW",
+      ),
+      item(
         "Edit & annotate PDF",
         "Add text, highlights, drawings and signatures",
         "/office",
