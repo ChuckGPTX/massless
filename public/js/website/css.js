@@ -627,6 +627,10 @@ figcaption{font-size:.9rem;color:var(--muted);margin-top:.7em}
 .v-ambient .actions{justify-content:center}
 .gen{position:absolute;inset:0;z-index:-1;overflow:hidden;color:var(--text);pointer-events:none}
 .gen svg,.gen canvas{position:absolute;inset:0;width:100%;height:100%}
+.amb-photo{position:absolute;inset:0;overflow:hidden}
+.amb-photo .media{height:100%;border-radius:0;border:0;background:none}
+.amb-photo img{opacity:.62}
+.amb-photo::after{content:'';position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 45%,transparent 30%,var(--bg) 92%),linear-gradient(180deg,transparent 60%,var(--bg))}
 .amb path{fill:none;stroke:color-mix(in srgb,var(--text) 30%,transparent);stroke-width:1;vector-effect:non-scaling-stroke}
 .gen canvas{opacity:0;transition:opacity 1.4s}
 .gen.live canvas{opacity:1}
@@ -756,6 +760,12 @@ figcaption{font-size:.9rem;color:var(--muted);margin-top:.7em}
 [data-style="editorial-shop"] .f-brand{font-size:clamp(1.6rem,1rem + 3vw,3.6rem)}
 [data-style="editorial-shop"] .f-about .muted{text-transform:none;letter-spacing:0;font-size:.92rem}
 [data-style="editorial-shop"] .sform input{border-radius:2px}
+[data-style="editorial-shop"] .s-logos{padding-block:14px;border-block:1px solid var(--line)}
+[data-style="editorial-shop"] .logos{gap:0}
+[data-style="editorial-shop"] .logos li{font:600 .7rem/1 var(--font-b);letter-spacing:.09em;text-transform:uppercase;color:var(--text);padding-inline:clamp(18px,2.4vw,34px)}
+[data-style="editorial-shop"] .logos li::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--text);margin-right:clamp(18px,2.4vw,34px);vertical-align:middle}
+[data-style="editorial-shop"] .marquee{-webkit-mask-image:none;mask-image:none}
+[data-style="editorial-shop"] .runway-media .media,[data-style="editorial-shop"] .lb-full .media{background:var(--surface-2)}
 [data-style="editorial-shop"] .s-signup .h2{font-size:clamp(1.4rem,1rem + 1.6vw,2.4rem)}
 
 /* Manifesto: black, light statements, one gradient, line art */
@@ -794,6 +804,8 @@ figcaption{font-size:.9rem;color:var(--muted);margin-top:.7em}
 [data-style="portfolio-timeline"] .stmt-t{font-size:clamp(1.6rem,1.05rem + 2.2vw,3.1rem);line-height:1.18;max-width:24ch}
 [data-style="portfolio-timeline"] .card,[data-style="portfolio-timeline"] .bento-cell{border-color:transparent}
 [data-style="portfolio-timeline"] .cta-card{background:var(--surface)}
+[data-style="portfolio-timeline"] :is(.case-media,.about-media) img{mix-blend-mode:multiply}
+[data-style="portfolio-timeline"] .case-media{background:var(--bg)}
 [data-style="portfolio-timeline"] .s-footer .f-brand{font-weight:400}
 
 /* Product (ai-product): warm white, tight grotesk, pill controls, a dark band for proof */
@@ -840,6 +852,19 @@ html[data-motion="lively"]{--rv-d:42px}
   html.rv [data-rv]:not(.in){opacity:0;transform:translateY(var(--rv-d));animation:mz-show 0s 3s forwards}
   html.rv [data-rv]{transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 90ms)}
   html.rv[data-motion="lively"] [data-rv]:not(.in){transform:translateY(var(--rv-d)) scale(.97)}
+  /* hero entrance: masked headline, clip-revealed image, slow Ken Burns; scroll parallax on hero and lookbook photos */
+  html:not([data-motion="none"]):not(.editing) .s-hero .h1{animation:mz-mask 1.15s cubic-bezier(.2,.7,.2,1) .06s both}
+  html:not([data-motion="none"]):not(.editing) .s-hero :is(.hero-art,.runway-media,.portrait-stage,.cover-media,.ed-media,.hero-shot) .media{animation:mz-clip 1.5s cubic-bezier(.7,0,.2,1) .12s both}
+  html:not([data-motion="none"]) .s-hero :is(.hero-art,.runway-media,.portrait-stage,.cover-media,.amb-photo) .media img{animation:mz-kb 28s ease-in-out infinite alternate;transform-origin:50% 40%}
+  html.rv [data-scrub="par"] .media img{scale:1.08;translate:0 calc((var(--p,.5) - .5) * 7%)}
+  html.rv [data-scrub="par"].lb-item .media img{scale:1.12;translate:0 calc((var(--p,.5) - .5) * 12%)}
+  /* photos open up as their section arrives */
+  html.rv [data-rv]:not(.in) .media img{clip-path:inset(14% 0 0 0);scale:1.1}
+  html.rv [data-rv] .media img{transition:clip-path 1.3s cubic-bezier(.2,.7,.2,1),scale 1.7s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 90ms)}
+  html:not([data-motion="none"]) .prod:hover .media img,html:not([data-motion="none"]) .case:hover .media img,html:not([data-motion="none"]) .lb-item:hover .media img,html:not([data-motion="none"]) .person:hover .media img{transform:scale(1.04)}
+  html:not([data-motion="none"]) .btn:active{transform:scale(.97);transition-duration:.08s}
+  html:not([data-motion="none"]) .f-links a,html:not([data-motion="none"]) .mlink{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .35s cubic-bezier(.2,.7,.2,1),color .2s,background-color .2s}
+  html:not([data-motion="none"]) .f-links a:hover,html:not([data-motion="none"]) .mlink:hover{background-size:100% 1px;text-decoration:none}
   html:not([data-motion="none"]) .spin{animation:mz-spin 1s linear infinite}
   html.rv .stmt[data-scrub] .w{opacity:clamp(.14,calc((var(--p,0) * (var(--n) + 8) - var(--k)) / 4),1);transition:opacity .25s}
   html.rv .ann.on .tag{opacity:clamp(0,calc((var(--p,0) * (var(--n) + 1.2) - var(--k) - .25) * 4),1);transform:translateY(calc((1 - clamp(0,calc((var(--p,0) * (var(--n) + 1.2) - var(--k) - .25) * 4),1)) * 10px))}
@@ -855,6 +880,9 @@ html[data-motion="lively"]{--rv-d:42px}
 @keyframes mz-show{to{opacity:1;transform:none}}
 @keyframes mz-marquee{to{transform:translateX(-50%)}}
 @keyframes mz-spin{to{transform:rotate(1turn)}}
+@keyframes mz-mask{from{clip-path:inset(0 0 100% 0);transform:translateY(.32em)}to{clip-path:inset(-10% -5% -25% -5%);transform:none}}
+@keyframes mz-clip{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes mz-kb{from{transform:scale(1.015)}to{transform:scale(1.09) translate(-1.2%,-.8%)}}
 @keyframes mz-cue{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
 @media (prefers-reduced-motion:reduce){.marquee .logos[aria-hidden]{display:none}.marquee .logos{flex-wrap:wrap}.marquee-track{width:auto;justify-content:center}.marquee{-webkit-mask-image:none;mask-image:none}}
 html[data-motion="none"] .marquee .logos[aria-hidden]{display:none}

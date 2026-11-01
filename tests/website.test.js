@@ -156,7 +156,9 @@ test("template sections render with edit hooks and generated art, motion is opti
   const prod = shop.pages[0].sections.find((s) => s.type === "products");
   assert.ok(edit.includes(`data-edit="${prod.id}:items.0.price"`), "prices are editable in place");
   assert.ok(edit.includes(`data-img="${prod.id}:items.0.image"`), "product images open the image dialog");
-  assert.match(edit, /<svg class="art art-(figure|scene)/, "fashion slots get a figure, not an empty box");
+  assert.match(edit, /<img src="\/media\/website\/editorial-shop\/[\w-]+\.webp" srcset="[^"]+-sm\.webp 560w/, "the template ships its own photos, with a small copy");
+  const written = templateSite({ prompt: KINDS.shop.example, kind: "shop" });
+  assert.match(renderPage(written, sitePages(written)[0], { mode: "edit" }), /<svg class="art art-(figure|scene)/, "a described shop keeps generated art in empty slots, not stock photos");
   const live = renderPage(shop, home, { mode: "zip" });
   assert.doesNotMatch(live, /data-edit=|data-img=/, "no editor hooks in the export");
   const man = renderPage(buildTemplate("manifesto"), sitePages(buildTemplate("manifesto"))[0], { mode: "zip" });
@@ -221,4 +223,65 @@ test("placeholder art follows the photo, is deterministic, and fonts stay open-l
   // Archivo at width 125 is requested from Google Fonts through the width axis
   assert.match(fontsHref(themeFor("editorial-shop")), /family=Archivo:wdth,wght@[\d,;]*125,800/);
   for (const id of ["manifesto", "portfolio-timeline", "ai-product"]) assert.match(fontsHref(themeFor(id)), /^https:\/\/fonts\.googleapis\.com\/css2\?family=/);
+});
+
+// ---------------------------------------------------------------------------------------------
+// Template photography and motion
+// ---------------------------------------------------------------------------------------------
+import { PHOTOS } from "../public/js/website/photos.js";
+import { usedPhotos } from "../public/js/website/export.js";
+import { BASE_CSS } from "../public/js/website/css.js";
+import { GEN_JS } from "../public/js/website/render.js";
+
+test("template examples use bundled photos that exist, are small and are recorded", () => {
+  const prov = JSON.parse(readFileSync(new URL("../public/media/website/provenance.json", import.meta.url), "utf8"));
+  const recorded = new Set(prov.template_photography.images.map((x) => `/${x.path}`));
+  for (const t of TEMPLATES_LIST) {
+    const site = buildTemplate(t.id);
+    const srcs = [...usedPhotos(site)];
+    assert.ok(srcs.length >= 2, `${t.id} has photos`);
+    if (site.pages[0].sections[0].variant !== "minimal") assert.ok(site.pages[0].sections[0].image?.src?.startsWith("/media/website/"), `${t.id} hero has a photo`);
+    for (const src of srcs) {
+      const info = PHOTOS[src];
+      assert.ok(info, `${src} is in photos.js`);
+      assert.ok(recorded.has(src), `${src} is in provenance.json`);
+      const big = statSync(new URL(`../public${src}`, import.meta.url)).size;
+      const small = statSync(new URL(`../public${info.sm}`, import.meta.url)).size;
+      assert.ok(big < 185 * 1024 && small < 50 * 1024, `${src}: ${big} / ${small} bytes`);
+    }
+  }
+  for (const kind of Object.keys(KINDS)) {
+    const site = templateSite({ prompt: KINDS[kind].example, kind });
+    assert.equal(usedPhotos(site).size, 0, `a described ${kind} site gets no stock photos`);
+  }
+});
+
+test("photos render with dimensions and a small copy; exports know which to copy", () => {
+  const site = buildTemplate("local-business");
+  const html = renderPage(site, sitePages(site)[0], { mode: "edit" });
+  assert.match(html, /<img src="\/media\/website\/local-business\/hero\.webp" srcset="\/media\/website\/local-business\/hero-sm\.webp 560w, \/media\/website\/local-business\/hero\.webp 1200w" sizes="[^"]+" alt="A freshly striped front lawn[^"]*" width="1200" height="1600" fetchpriority="high"/);
+  const zipped = renderPage(site, sitePages(site)[0], { mode: "zip", src: (src) => (src.includes("hero") ? "assets/img/x.webp" : ""), srcset: () => "" });
+  assert.ok(zipped.includes('src="assets/img/x.webp"'), "the ZIP maps photos to its own files");
+  assert.ok(usedPhotos(site).has("/media/website/local-business/hero.webp"));
+});
+
+test("motion hooks are there when motion is on and gone when it is off or reduced", () => {
+  const site = buildTemplate("editorial-shop");
+  const on = renderPage(site, sitePages(site)[0], { mode: "zip" });
+  assert.match(on, /class="runway-media" data-scrub="par"/, "hero photo parallax");
+  assert.match(on, /class="lb-item" data-scrub="par"/, "lookbook parallax");
+  assert.match(on, /class="marquee"/, "the shop has a ticker");
+  assert.match(renderPage(buildTemplate("conference"), sitePages(buildTemplate("conference"))[0], { mode: "zip" }), /class="marquee"/, "so does the conference");
+  site.theme.motion = "none";
+  assert.doesNotMatch(renderPage(site, sitePages(site)[0], { mode: "zip" }), /data-scrub|data-rv/);
+  // every animation lives inside the reduced-motion guard
+  const guard = BASE_CSS.indexOf("@media (prefers-reduced-motion:no-preference){");
+  const end = BASE_CSS.indexOf("\n}\n@keyframes mz-rise", guard);
+  const outside = BASE_CSS.slice(0, guard) + BASE_CSS.slice(end);
+  assert.doesNotMatch(outside.replace(/@keyframes[^{]+\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, ""), /animation:mz-(kb|mask|clip|spin|marquee)/, "no animation outside the guard");
+  for (const k of ["mz-kb", "mz-mask", "mz-clip"]) assert.ok(BASE_CSS.slice(guard, end).includes(k), k);
+  assert.match(GEN_JS, /prefers-reduced-motion: no-preference/);
+  assert.match(GEN_JS, /data-motion'\)!=='none'/);
+  assert.ok(SITE_JS.length < 6500, `site.js is ${SITE_JS.length} bytes`);
+  assert.ok(SITE_JS.includes(GEN_JS), "the export runs the same canvas code as the editor");
 });

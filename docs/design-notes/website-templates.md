@@ -126,6 +126,22 @@ Rules we use:
 - Thumbnails (`public/media/website/tpl-<id>.webp`, 640 x 400, under 80 KB) are screenshots of the templates
   themselves: `python3 tests/website_thumbs.py`.
 
+## Template photography and motion (November 2026)
+
+- Every template's example site ships real photographs generated with Higgsfield Soul (`soul/v2/standard`,
+  and `soul/cinema` for the manifesto's dark atmospherics), one art direction per site: full-length studio
+  figures and an editorial lookbook on pale grey for the shop, foggy low-key cityscapes for the manifesto,
+  devices on white for the portfolio (blended into the page with `mix-blend-mode: multiply`), one consistent
+  fictional character for the AI product, and warm morning service photos for the local business. Fictional
+  people only, no logos or text; rejects (magazine-page framing, logos, on-screen text) were regenerated.
+  Prompts, seeds and hashes: `public/media/website/provenance.json`. Each photo has a large WebP and a small
+  `-sm` copy used in `srcset`; exports copy both into `assets/img/`, the one-file export embeds them.
+- Sites someone describes keep the generated SVG art in empty slots; photos are only for the examples.
+- Motion: masked headline and clip-revealed hero image on load, a slow Ken Burns on hero photos, scroll
+  parallax (`data-scrub="par"`) on hero and lookbook photos, photos that open up as their section reveals,
+  hover zoom on product, case and gallery images, a ticker for the shop and the conference, underline and
+  press micro-interactions. Transform, opacity and clip-path only; skipped for reduced motion or motion "none".
+
 ## Fonts (all SIL Open Font License, from Google Fonts)
 
 | Template | Display | Body |

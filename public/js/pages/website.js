@@ -6,7 +6,7 @@ import { KINDS, SECTIONS, SECTION_GROUPS, COLLECTIONS, TONES, templateSite, sani
 import { STYLES, PALETTES, FONTS, HEADING_FONTS, BODY_FONTS, themeFor, themeCss, fontsHref, contrastReport, tokens, headingWeight, fontFamily } from '../website/theme.js';
 import { TEMPLATES, TEMPLATES_LIST, buildTemplate } from '../website/templates.js';
 import { MOTIFS } from '../website/art.js';
-import { renderParts, renderSingle, makeContext, usedCollection } from '../website/render.js';
+import { renderParts, renderSingle, makeContext, usedCollection, GEN_JS } from '../website/render.js';
 import { renderSection, inline, paras } from '../website/sections.js';
 import { BASE_CSS, EDIT_CSS } from '../website/css.js';
 import { exportZip, exportSingle, faviconSvg } from '../website/export.js';
@@ -264,6 +264,7 @@ function renderPreview(hint = 'full') {
       if (state.editing && node.contains(state.editing.el)) return;
       node.outerHTML = renderSection(sec, sectionContext(h, sec));
       markSelection();
+      startMotion(doc);
       return;
     }
   }
@@ -276,6 +277,16 @@ function renderPreview(hint = 'full') {
   doc.body.innerHTML = p.body;
   win.scrollTo(0, y);
   markSelection();
+  startMotion(doc);
+}
+
+/** Run the ambient canvas in the preview too (the same code the exported site runs; it skips live canvases). */
+function startMotion(doc) {
+  if (!doc.querySelector('canvas[data-gen]:not([data-live])')) return;
+  const sc = doc.createElement('script');
+  sc.textContent = GEN_JS;
+  doc.body.appendChild(sc);
+  sc.remove();
 }
 
 function markSelection() {
@@ -1286,6 +1297,7 @@ function replayMotion() {
   doc.documentElement.classList.add('rv');
   doc.body.innerHTML = p.body;
   win.scrollTo(0, 0);
+  startMotion(doc);
   const io = new win.IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
   doc.querySelectorAll('[data-rv]').forEach((n) => io.observe(n));
   toast('Scroll the preview to watch sections reveal. Click it to go back to editing.');

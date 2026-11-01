@@ -7,6 +7,7 @@ import { BASE_CSS } from './css.js';
 import { tokens, themeCss, fontsHref, headingWeight, FONTS, fontFamily } from './theme.js';
 import { slugify, COLLECTIONS, SECTIONS } from './spec.js';
 import { esc } from './sections.js';
+import { photoInfo } from './photos.js';
 
 // ---------------------------------------------------------------------------------------------
 // ZIP (PKZIP 2.0: stored or deflated entries, UTF-8 names)
@@ -175,7 +176,38 @@ async function planImages(site, assets, { inline = false } = {}) {
     }
     plan.set(ref, entry);
   }
+  // bundled template photos (/media/website/...): copied as they are, with their small copy for srcset
+  for (const ref of usedPhotos(site)) {
+    try {
+      const info = photoInfo(ref) || {};
+      const big = await (await fetch(ref)).blob();
+      const small = info.sm ? await (await fetch(info.sm)).blob() : null;
+      let base = ref.replace(/^\/media\/website\//, '').replace(/\.[a-z]+$/, '').replace(/[^\w-]+/g, '-');
+      while (names.has(base)) base = `${base}-2`;
+      names.add(base);
+      const ext = (ref.match(/\.([a-z]+)$/) || [])[1] || 'webp';
+      const entry = { kind: 'image', path: `assets/img/${base}.${ext}`, w: info.w || 1600, h: info.h || 1067, files: [{ name: `assets/img/${base}.${ext}`, data: big, compress: false }] };
+      if (inline) entry.dataUrl = await blobToDataUrl(small && big.size > 110 * 1024 ? small : big);
+      else if (small) { entry.small = `assets/img/${base}-sm.${ext}`; entry.smallW = info.smW; entry.files.push({ name: entry.small, data: small, compress: false }); }
+      plan.set(ref, entry);
+    } catch (e) { console.warn('Could not include', ref, e); }
+  }
   return plan;
+}
+
+/** Every bundled photo (/media/...) the visible site uses. */
+export function usedPhotos(site) {
+  const out = new Set();
+  const visit = (o) => {
+    if (Array.isArray(o)) { o.forEach(visit); return; }
+    if (!o || typeof o !== 'object') return;
+    if (typeof o.src === 'string' && /^\/media\/[\w\-/]+\.(jpe?g|png|webp)$/.test(o.src)) out.add(o.src);
+    for (const v of Object.values(o)) if (v && typeof v === 'object') visit(v);
+  };
+  for (const p of site.pages) for (const s of p.sections) if (!s.hidden) visit(s);
+  for (const key of Object.keys(COLLECTIONS)) if (site.pages.some((p) => p.sections.some((s) => !s.hidden && SECTIONS[s.type].collection === key))) visit(site.collections[key]);
+  if (site.seo.image?.src) visit(site.seo.image);
+  return out;
 }
 
 export function blobToDataUrl(blob) {
@@ -229,7 +261,8 @@ export async function ogImage(site, assets, doc = document) {
     const hero = site.pages[0].sections.find((s) => s.type === 'hero');
     ref = hero?.image?.src || '';
   }
-  const a = ref && ref.startsWith('asset:') ? assets.get(ref.slice(6)) : null;
+  let a = ref && ref.startsWith('asset:') ? assets.get(ref.slice(6)) : null;
+  if (!a && ref && ref.startsWith('/media/')) { try { a = { blob: await (await fetch(ref)).blob() }; } catch { a = null; } }
   let ink = tk.text;
   let sub = tk.muted;
   if (a) {

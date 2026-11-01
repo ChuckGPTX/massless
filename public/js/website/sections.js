@@ -90,9 +90,10 @@ R.hero = (s, c) => {
   if (v === 'banner') {
     return `<div class="wrap hero-in">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 h1-sm')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}</div>`;
   }
+  const par = c.motion ? ' data-scrub="par"' : '';
   if (v === 'runway') {
     const chip = s.note || c.edit ? `<p class="chip-note"${c.edit ? ` data-edit="${P(s, 'note')}"${s.note ? '' : ' data-empty="" data-ph="Add small print"'}` : ''}>${inline(s.note, c)}</p>` : '';
-    return `<div class="runway"><div class="runway-copy">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 runway-t')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}${chip}</div><div class="runway-media">${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 900px) 100vw, 60vw', cls: 'runway-img' })}</div></div>`;
+    return `<div class="runway"><div class="runway-copy">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 runway-t')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}${chip}</div><div class="runway-media"${par}>${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 900px) 100vw, 60vw', cls: 'runway-img' })}</div></div>`;
   }
   if (v === 'minimal') {
     const links = [btn(c, s.cta, P(s, 'cta'), 'mlink'), btn(c, s.cta2, P(s, 'cta2'), 'mlink')].join('');
@@ -103,19 +104,20 @@ R.hero = (s, c) => {
   }
   const copy = `${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}${note}`;
   if (v === 'cover') {
-    return `<div class="cover-media">${media(c, s.image, P(s, 'image'), { eager: true, sizes: '100vw' })}</div><div class="cover-shade" aria-hidden="true"></div><div class="wrap hero-in">${copy}</div>`;
+    return `<div class="cover-media"${par}>${media(c, s.image, P(s, 'image'), { eager: true, sizes: '100vw' })}</div><div class="cover-shade" aria-hidden="true"></div><div class="wrap hero-in">${copy}</div>`;
   }
   if (v === 'centered') {
     const m = hasImg(s.image) || c.edit ? `<div class="hero-shot">${media(c, s.image, P(s, 'image'), { ar: '16/9', eager: true, sizes: '(max-width: 1240px) 100vw, 1200px' })}</div>` : '';
     return `<div class="hero-glow" aria-hidden="true"></div><div class="wrap hero-in center">${copy}</div>${m ? `<div class="wrap">${m}</div>` : ''}`;
   }
   if (v === 'portrait') {
-    return `<div class="wrap hero-in center">${copy}</div><div class="portrait-stage">${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 700px) 100vw, 680px', cls: 'portrait-media' })}</div>`;
+    return `<div class="wrap hero-in center">${copy}</div><div class="portrait-stage"${par}>${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 700px) 100vw, 680px', cls: 'portrait-media' })}</div>`;
   }
   if (v === 'ambient') {
-    return `<div class="gen" aria-hidden="true">${ambientSvg(s.id)}<canvas data-gen></canvas></div><div class="wrap hero-in center">${copy}</div><p class="scroll-cue" aria-hidden="true"><span></span>Scroll</p>`;
+    const photo = s.image?.src ? `<div class="amb-photo"${par}>${media(c, s.image, P(s, 'image'), { ratio: 16 / 9, eager: true, sizes: '100vw', cls: 'amb-media' })}</div>` : '';
+    return `<div class="gen" aria-hidden="true">${photo}${ambientSvg(s.id)}<canvas data-gen></canvas></div><div class="wrap hero-in center">${copy}</div><p class="scroll-cue" aria-hidden="true"><span></span>Scroll</p>`;
   }
-  return `<div class="wrap hero-grid"><div class="hero-in">${copy}</div><div class="hero-art">${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 900px) 100vw, 50vw' })}<span class="hero-blob" aria-hidden="true"></span></div></div>`;
+  return `<div class="wrap hero-grid"><div class="hero-in">${copy}</div><div class="hero-art"${par}>${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 900px) 100vw, 50vw' })}<span class="hero-blob" aria-hidden="true"></span></div></div>`;
 };
 
 R.logos = (s, c) => {
@@ -405,7 +407,7 @@ R.lookbook = (s, c) => {
   const figs = s.items.map((it, i) => {
     const ar = v === 'full' ? '16/9' : v === 'pair' ? ['4/5', '3/4', '3/4', '4/5'][i % 4] : ['4/5', '3/4', '1/1'][i % 3];
     const cap = `<figcaption class="lb-cap"><span class="lb-n">${pad(i + 1)} / ${pad(n)}</span>${T(c, it, 'caption', PI(s, 'items', i, 'caption'), 'span', 'lb-t')}${T(c, it, 'note', PI(s, 'items', i, 'note'), 'span', 'lb-note', { ph: 'Add a note' })}</figcaption>`;
-    return `<figure class="lb-item"${v === 'full' ? '' : rv(c, i % 2)}>${media(c, it.image, PI(s, 'items', i, 'image'), { ar, sizes: v === 'full' ? '100vw' : '(max-width: 700px) 100vw, 50vw', cls: 'lb-media' })}${cap}</figure>`;
+    return `<figure class="lb-item"${v === 'full' ? (c.motion ? ' data-scrub="par"' : '') : rv(c, i % 2)}>${media(c, it.image, PI(s, 'items', i, 'image'), { ar, sizes: v === 'full' ? '100vw' : '(max-width: 700px) 100vw, 50vw', cls: 'lb-media' })}${cap}</figure>`;
   }).join('');
   const hd = head(c, s);
   if (v === 'full') return `${hd ? `<div class="wrap">${hd}</div>` : ''}<div class="lb-full">${figs}</div>`;

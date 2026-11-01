@@ -8,8 +8,18 @@ import { BASE_CSS, EDIT_CSS } from './css.js';
 import { themeCss, fontsHref, tokens } from './theme.js';
 import { renderSection, renderItemPage, esc } from './sections.js';
 import { SECTIONS, COLLECTIONS } from './spec.js';
+import { photoInfo } from './photos.js';
 
-/** The runtime every exported page loads (about 4 KB): reveal, scroll scrub, the case-study rail, the ambient canvas. Kept as a string so it can be inlined or saved. */
+/** The ambient canvas (manifesto hero). Standalone so the editor preview can run it too; skips canvases already live. */
+export const GEN_JS = `(function(d){var de=d.documentElement,run=de.getAttribute('data-motion')!=='none'&&!!window.matchMedia&&matchMedia('(prefers-reduced-motion: no-preference)').matches;
+d.querySelectorAll('canvas[data-gen]:not([data-live])').forEach(function(cv){var g=cv.getContext&&cv.getContext('2d');if(!g)return;cv.setAttribute('data-live','');var box=cv.parentNode,col=getComputedStyle(box).color,W,H,t=Math.random()*90,vis=1,dpr=Math.min(2,window.devicePixelRatio||1);
+function size(){if(!cv.isConnected){removeEventListener('resize',size);return}W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);if(!run)draw()}
+function draw(){g.clearRect(0,0,W,H);g.strokeStyle=col;g.lineWidth=1;var n=24,cx=W/2,sp=W*.3;for(var k=0;k<n;k++){var y0=H*.52+(k-n/2)*H*.034;g.beginPath();for(var x=-10;x<=W+10;x+=7){var e=Math.exp(-Math.pow((x-cx)/sp,2)),y=y0-e*(H*.07+k*H*.005)*Math.sin(k*.33+x/(W*.17)+t*(.55+k*.015))-e*H*.035*Math.sin(t*.4+k*.21);if(x<0)g.moveTo(x,y);else g.lineTo(x,y)}g.globalAlpha=.08+.42*Math.exp(-Math.pow((k-n/2)/(n/3.2),2));g.stroke()}g.globalAlpha=1}
+size();box.classList.add('live');addEventListener('resize',size);if(!run)return;
+if('IntersectionObserver'in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting}).observe(cv);
+(function loop(){if(!cv.isConnected)return;if(vis&&!d.hidden){t+=.0055;draw()}requestAnimationFrame(loop)})()})})(document);`;
+
+/** The runtime every exported page loads (about 5 KB): reveal, scroll scrub and parallax, the case-study rail, the ambient canvas. Kept as a string so it can be inlined or saved. */
 export const SITE_JS = `(function(){var d=document,de=d.documentElement;
 if(de.classList.contains('rv')&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{rootMargin:'0px 0px -6% 0px',threshold:.06});d.querySelectorAll('[data-rv]').forEach(function(el){io.observe(el)})}
 var audio,cur;function set(b,on){b.setAttribute('aria-pressed',on?'true':'false')}
@@ -26,14 +36,9 @@ d.querySelectorAll('form[data-unconnected]').forEach(function(f){f.addEventListe
 var rv=de.classList.contains('rv'),wide=matchMedia('(min-width: 900px)'),rails=[].slice.call(d.querySelectorAll('[data-rail]')),scr=[].slice.call(d.querySelectorAll('[data-scrub]')),busy=0;
 function lay(){var on=rv&&wide.matches;rails.forEach(function(r){var tr=r.querySelector('.rail-track');r.classList.toggle('on',on);if(!on){r.style.height='';tr.style.transform='';return}r._d=Math.max(0,tr.scrollWidth-innerWidth);r.style.height=(innerHeight+r._d)+'px'});scr.forEach(function(e){if(e.classList.contains('ann'))e.classList.toggle('on',on)});tick()}
 function tick(){busy=0;var vh=innerHeight;rails.forEach(function(r){if(!r.classList.contains('on'))return;var b=r.getBoundingClientRect(),p=Math.min(1,Math.max(0,-b.top/(r._d||1))),tr=r.querySelector('.rail-track'),y=r.querySelector('[data-year-out]'),cur;tr.style.transform='translate3d('+(-p*r._d).toFixed(1)+'px,0,0)';var tx=innerWidth*(.2+.6*p),bd=1e9;[].forEach.call(tr.children,function(li){var q=li.getBoundingClientRect(),dd=Math.abs(q.left+q.width/2-tx);if(dd<bd){bd=dd;cur=li}});if(y&&cur&&y.textContent!==cur.getAttribute('data-year'))y.textContent=cur.getAttribute('data-year')});
-scr.forEach(function(e){var b=e.getBoundingClientRect(),p=e.classList.contains('on')?-b.top/Math.max(1,b.height-vh):(vh*.92-b.top)/(b.height*.55+vh*.45);e.style.setProperty('--p',Math.min(1,Math.max(0,p)).toFixed(3))})}
+scr.forEach(function(e){var b=e.getBoundingClientRect(),p=e.classList.contains('on')?-b.top/Math.max(1,b.height-vh):e.getAttribute('data-scrub')==='par'?(vh-b.top)/(vh+b.height):(vh*.92-b.top)/(b.height*.55+vh*.45);e.style.setProperty('--p',Math.min(1,Math.max(0,p)).toFixed(3))})}
 if(rv&&(rails.length||scr.length)){addEventListener('scroll',function(){if(!busy){busy=1;requestAnimationFrame(tick)}},{passive:true});addEventListener('resize',lay);if(wide.addEventListener)wide.addEventListener('change',lay);addEventListener('load',lay);lay()}
-d.querySelectorAll('canvas[data-gen]').forEach(function(cv){var g=cv.getContext&&cv.getContext('2d');if(!g)return;var box=cv.parentNode,col=getComputedStyle(box).color,W,H,t=Math.random()*90,vis=1,run=rv&&matchMedia('(prefers-reduced-motion: no-preference)').matches,dpr=Math.min(2,window.devicePixelRatio||1);
-function size(){W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);if(!run)draw()}
-function draw(){g.clearRect(0,0,W,H);g.strokeStyle=col;g.lineWidth=1;var n=24,cx=W/2,sp=W*.3;for(var k=0;k<n;k++){var y0=H*.52+(k-n/2)*H*.034;g.beginPath();for(var x=-10;x<=W+10;x+=7){var e=Math.exp(-Math.pow((x-cx)/sp,2)),y=y0-e*(H*.07+k*H*.005)*Math.sin(k*.33+x/(W*.17)+t*(.55+k*.015))-e*H*.035*Math.sin(t*.4+k*.21);if(x<0)g.moveTo(x,y);else g.lineTo(x,y)}g.globalAlpha=.08+.42*Math.exp(-Math.pow((k-n/2)/(n/3.2),2));g.stroke()}g.globalAlpha=1}
-size();box.classList.add('live');addEventListener('resize',size);if(!run)return;
-if('IntersectionObserver'in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting}).observe(cv);
-(function loop(){if(vis&&!d.hidden){t+=.0055;draw()}requestAnimationFrame(loop)})()});
+${GEN_JS}
 if(location.protocol==='file:')d.querySelectorAll('a[href]').forEach(function(a){var h=a.getAttribute('href');if(!/^[a-z][\\w+.-]*:|^#|^\\/\\//i.test(h)&&/\\/(#.*)?$/.test(h))a.setAttribute('href',h.replace(/\\/(#.*)?$/,'/index.html$1'))});
 })();`;
 
@@ -85,7 +90,8 @@ function navLinksFor(site, here, c) {
   }
   // one-page site: link to the main sections on the page
   const want = ['products', 'lookbook', 'chapters', 'cases', 'annotated', 'features', 'about', 'gallery', 'pricing', 'menu', 'tracks', 'schedule', 'listing', 'faq', 'contact'];
-  const secs = site.pages[0].sections.filter((s) => s.anchor && want.includes(s.type) && !s.hidden);
+  // untitled photo bands (a lookbook used as a breather) are not destinations
+  const secs = site.pages[0].sections.filter((s) => s.anchor && want.includes(s.type) && !s.hidden && !(s.type === 'lookbook' && !s.title));
   return secs.slice(0, 4).map((s) => ({ label: navLabel(s), href: c.href(`#${s.anchor}`), current: false }));
 }
 function navLabel(s) {
@@ -100,12 +106,13 @@ export function makeContext(site, here, opts = {}) {
     site,
     edit: opts.mode === 'edit',
     mode: opts.mode || 'zip',
-    motion: site.theme.motion !== 'none' && opts.mode !== 'edit',
+    motion: site.theme.motion !== 'none' && (opts.mode !== 'edit' || !!opts.forceMotion),
     h1: { used: false },
     here,
     src: (src) => (opts.src ? opts.src(src, here) : /^\/media\//.test(src) ? src : ''),
-    imgInfo: (src) => (opts.imgInfo ? opts.imgInfo(src) : null),
-    srcset: opts.srcset ? (src) => opts.srcset(src, here) : null,
+    imgInfo: (src) => (opts.imgInfo && opts.imgInfo(src)) || photoInfo(src),
+    // bundled template photos carry a small copy; exports map both through their own plan
+    srcset: opts.srcset ? (src) => opts.srcset(src, here) : (src) => { const p = photoInfo(src); return p && opts.mode !== 'single' ? `${c.src(p.sm)} ${p.smW}w, ${c.src(src)} ${p.w}w` : ''; },
     href: (h) => mapHref(h, here, site, opts),
   };
   c.itemHref = (col, it) => c.href(`/${col}/${it.slug}`);
