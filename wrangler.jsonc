@@ -48,7 +48,14 @@
   //               npx wrangler d1 create massless-sign   (paste its database_id below)
   //               npx wrangler d1 migrations apply massless-sign --remote
   //               node tools/sign/keygen.mjs | npx wrangler secret put SIGN_KEY
-  "r2_buckets": [{ "binding": "SIGN_BUCKET", "bucket_name": "massless-sign" }],
+  // Free hosting (<slug>.v2web.site, src/sites.js): files in R2, registry and reports in the Sign D1 database
+  // (schema in migrations/sites). Create once:  npx wrangler r2 bucket create chucksi-sites
+  //   npx wrangler d1 execute massless-sign --remote --file migrations/sites/0001_init.sql
+  // Routes: v2web.site/* and *.v2web.site/* on this Worker. See docs/SITE-HOSTING.md.
+  "r2_buckets": [
+    { "binding": "SIGN_BUCKET", "bucket_name": "massless-sign" },
+    { "binding": "SITES_BUCKET", "bucket_name": "chucksi-sites" }
+  ],
   "d1_databases": [
     { "binding": "SIGN_DB", "database_name": "massless-sign", "database_id": "367039b3-12c6-4c6a-8cd0-632b0012b885", "migrations_dir": "migrations/sign" }
   ],

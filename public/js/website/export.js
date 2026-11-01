@@ -2,7 +2,7 @@
 // or one self-contained HTML file. The ZIP writer is our own (CRC-32 plus the browser's deflate-raw), so
 // nothing is loaded from a CDN. Everything runs in the visitor's browser.
 
-import { renderPage, renderSingle, sitePages, SITE_JS } from './render.js';
+import { renderPage, renderSingle, sitePages, SITE_JS, GENERATOR } from './render.js';
 import { BASE_CSS } from './css.js';
 import { tokens, themeCss, fontsHref, headingWeight, FONTS, fontFamily } from './theme.js';
 import { slugify, COLLECTIONS, SECTIONS } from './spec.js';
@@ -343,15 +343,15 @@ export function robotsTxt(site) {
 
 function notFoundPage(site) {
   const home = site.seo.url ? `${site.seo.url}/` : '/';
-  return `<!doctype html>\n<html lang="${esc(site.seo.lang || 'en')}" data-style="${esc(site.theme.style)}" data-mode="${esc(site.theme.mode)}" data-motion="none">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Page not found | ${esc(site.name)}</title>\n<meta name="robots" content="noindex">\n<link rel="stylesheet" href="${esc(fontsHref(site.theme))}">\n<style>${themeCss(site.theme)}${BASE_CSS}</style>\n</head>\n<body>\n<main id="main" class="sec"><div class="wrap narrow center" style="padding-block:12vh"><p class="eyebrow">404</p><h1 class="h1 h1-sm" style="margin-top:16px">This page is not here.</h1><p class="lead" style="margin-top:20px">It may have moved. The home page is a good place to start.</p><div class="actions center"><a class="btn" href="${esc(home)}">Go to ${esc(site.name)}</a></div></div></main>\n</body>\n</html>\n`;
+  return `<!doctype html>\n<html lang="${esc(site.seo.lang || 'en')}" data-style="${esc(site.theme.style)}" data-mode="${esc(site.theme.mode)}" data-motion="none">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="generator" content="${GENERATOR}">\n<title>Page not found | ${esc(site.name)}</title>\n<meta name="robots" content="noindex">\n<link rel="stylesheet" href="${esc(fontsHref(site.theme))}">\n<style>${themeCss(site.theme)}${BASE_CSS}</style>\n</head>\n<body>\n<main id="main" class="sec"><div class="wrap narrow center" style="padding-block:12vh"><p class="eyebrow">404</p><h1 class="h1 h1-sm" style="margin-top:16px">This page is not here.</h1><p class="lead" style="margin-top:20px">It may have moved. The home page is a good place to start.</p><div class="actions center"><a class="btn" href="${esc(home)}">Go to ${esc(site.name)}</a></div></div></main>\n</body>\n</html>\n`;
 }
 
 // ---------------------------------------------------------------------------------------------
 // The two exports
 // ---------------------------------------------------------------------------------------------
 
-/** Build the ZIP. Returns { blob, files: [names] }. */
-export async function exportZip(site, assets, { doc = document } = {}) {
+/** Every file of the static site: [{ name, data: string | Blob, compress? }]. The ZIP and Publish both use it. */
+export async function exportFiles(site, assets, { doc = document } = {}) {
   const plan = await planImages(site, assets);
   const pages = sitePages(site);
   const rel = (path, here) => `${'../'.repeat(here.depth)}${path}`;
@@ -375,6 +375,12 @@ export async function exportZip(site, assets, { doc = document } = {}) {
   files.push({ name: 'sitemap.xml', data: sitemapXml(site, pages) });
   files.push({ name: 'robots.txt', data: robotsTxt(site) });
   files.push({ name: '.nojekyll', data: '' });
+  return files;
+}
+
+/** Build the ZIP. Returns { blob, files: [names] }. */
+export async function exportZip(site, assets, opts = {}) {
+  const files = await exportFiles(site, assets, opts);
   return { blob: await zip(files), files: files.map((f) => f.name) };
 }
 
@@ -389,11 +395,3 @@ export async function exportSingle(site, assets) {
   });
   return new Blob([html], { type: 'text/html' });
 }
-
-/**
- * Hosting hook. Hosting on a Chucksi domain is off for now (abuse risk); when it ships, a target here
- * will receive the ZIP and return a URL, behind the human check, a size cap, a content scan and takedowns.
- */
-export const HOSTS = [
-  { id: 'chucksi', name: 'Chucksi hosting (not offered)', available: false, publish: async () => { throw new Error('Hosting on a Chucksi domain is not available.'); } },
-];

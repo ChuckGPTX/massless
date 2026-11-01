@@ -10,6 +10,7 @@ import { renderParts, renderSingle, makeContext, usedCollection, GEN_JS } from '
 import { renderSection, inline, paras } from '../website/sections.js';
 import { BASE_CSS, EDIT_CSS } from '../website/css.js';
 import { exportZip, exportSingle, faviconSvg } from '../website/export.js';
+import { initPublish } from '../website/publish.js';
 import { shareUrl, decodeSite } from '../website/share.js';
 import { ICON_NAMES, icon } from '../website/icons.js';
 import { shoot } from '../engines.js';
@@ -1472,6 +1473,17 @@ async function boot() {
     share: () => shareUrl(state.site),
     emptySlots, fillImages, addSection, openImage, save, tokens, headingWeight, openTemplate, templates: TEMPLATES_LIST,
   };
+  window.mzSite.publish = initPublish({
+    getSite: () => state.site,
+    getAssets: () => state.assets,
+    getDoc: () => frame.contentDocument,
+    projectId: () => state.id,
+    // a published site belongs to a saved project (the first example is not saved until it is edited)
+    persist: async () => { commitEdit(); if (state.demo) { state.demo = false; } if (!state.id) { state.id = uid('w'); state.created = Date.now(); } await save(); },
+    commitEdit: () => commitEdit(),
+    toast,
+  });
+  $('#publish-btn').addEventListener('click', () => window.mzSite.publish?.open());
   document.body.dataset.ready = '1';
 }
 
