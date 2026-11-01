@@ -1,0 +1,326 @@
+[
+ {
+  "workflow": "map",
+  "id": "map-saltmere",
+  "title": "Saltmere Island",
+  "note": "Gouache · cream paper",
+  "state": {},
+  "samples": {
+   "base": "/media/make/samples/map-island.webp"
+  },
+  "image": "/media/make/showcase/map-saltmere.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "map",
+  "id": "map-larkspur",
+  "title": "Larkspur Valley",
+  "note": "Watercolour · landscape",
+  "state": {
+   "place": "Larkspur Valley",
+   "scene": "an alpine lake valley with a turquoise lake, pine forests, a small wooden village, a winding trail and snowy patches",
+   "subtitle": "Late spring · lake, forest and the high trail",
+   "coords": "46°31′ N · 8°02′ E",
+   "labels": "Boathouse · Swim\nPine Hollow · Walk\nThe Village · Village\nHigh Pass · Viewpoint\nWaterfall · Viewpoint",
+   "style": "watercolour",
+   "format": "landscape",
+   "title": "italic",
+   "pos": [
+    [
+     0.47,
+     0.52
+    ],
+    [
+     0.2,
+     0.3
+    ],
+    [
+     0.26,
+     0.84
+    ],
+    [
+     0.72,
+     0.16
+    ],
+    [
+     0.8,
+     0.66
+    ]
+   ],
+   "seed": 4
+  },
+  "samples": {
+   "base": "/media/make/samples/map-alpine.webp"
+  },
+  "image": "/media/make/showcase/map-larkspur.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "map",
+  "id": "map-saltmere-night",
+  "title": "Saltmere after dark",
+  "note": "Night lights · ink paper",
+  "state": {
+   "style": "night",
+   "paper": "ink",
+   "title": "grotesk",
+   "subtitle": "Night walks · harbour lights and the old lamp"
+  },
+  "samples": {
+   "base": "/media/make/samples/map-island.webp"
+  },
+  "image": "/media/make/showcase/map-saltmere-night.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "identity",
+  "id": "id-pebble",
+  "title": "Pebble & Pine",
+  "note": "Playful · bakery",
+  "state": {},
+  "samples": {},
+  "image": "/media/make/showcase/id-pebble.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "identity",
+  "id": "id-northwind",
+  "title": "Northwind",
+  "note": "Bold · coffee roasters",
+  "state": {
+   "name": "Northwind",
+   "vibe": "bold",
+   "what": "Coffee roasters",
+   "tagline": "Roasted loud. Brewed slow.",
+   "person": "Sam Adeyemi",
+   "role": "Roaster",
+   "contact": "@northwindroasters · Unit 3, Canal Yard",
+   "seed": 5
+  },
+  "samples": {},
+  "image": "/media/make/showcase/id-northwind.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "identity",
+  "id": "id-halcyon",
+  "title": "Halcyon",
+  "note": "Calm · swim club",
+  "state": {
+   "name": "Halcyon",
+   "vibe": "calm",
+   "what": "Swim and sauna club",
+   "tagline": "Cold water, warm people.",
+   "person": "Ava Lindqvist",
+   "role": "Founder",
+   "contact": "@halcyonswims · The Old Lido",
+   "seed": 2
+  },
+  "samples": {},
+  "image": "/media/make/showcase/id-halcyon.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "identity",
+  "id": "id-maison",
+  "title": "Maison Vale",
+  "note": "Luxe · perfume atelier",
+  "state": {
+   "name": "Maison Vale",
+   "vibe": "luxe",
+   "what": "Perfume atelier",
+   "tagline": "Scents made by hand, in small numbers.",
+   "person": "Céline Morel",
+   "role": "Perfumer",
+   "contact": "@maisonvale · 9 Rue des Tanneurs",
+   "seed": 1
+  },
+  "samples": {},
+  "image": "/media/make/showcase/id-maison.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "identity",
+  "id": "id-lumen",
+  "title": "Lumen Labs",
+  "note": "Tech · research lab",
+  "state": {
+   "name": "Lumen Labs",
+   "vibe": "tech",
+   "what": "Battery research",
+   "tagline": "Energy you can see coming.",
+   "person": "Dr. Priya Nair",
+   "role": "Lead scientist",
+   "contact": "@lumenlabs · Innovation Quarter",
+   "seed": 4
+  },
+  "samples": {},
+  "image": "/media/make/showcase/id-lumen.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "film-poem",
+  "id": "film-tide",
+  "title": "Morning Tide",
+  "note": "Paper · vertical",
+  "state": {},
+  "samples": {
+   "f0": "/media/make/samples/film-1.webp",
+   "f1": "/media/make/samples/film-2.webp",
+   "f2": "/media/make/samples/film-3.webp",
+   "f3": "/media/make/samples/film-4.webp"
+  },
+  "image": "/media/make/showcase/film-tide.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "film-poem",
+  "id": "film-tide-cinema",
+  "title": "Morning Tide, cinema cut",
+  "note": "Cinema · landscape",
+  "state": {
+   "style": "cinema",
+   "format": "landscape",
+   "sound": "wind"
+  },
+  "samples": {
+   "f0": "/media/make/samples/film-1.webp",
+   "f1": "/media/make/samples/film-2.webp",
+   "f2": "/media/make/samples/film-3.webp",
+   "f3": "/media/make/samples/film-4.webp"
+  },
+  "image": "/media/make/showcase/film-tide-cinema.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "poetry",
+  "id": "poe-small-maps",
+  "title": "Small Maps",
+  "note": "Grotesk · black on warm",
+  "state": {},
+  "samples": {
+   "tex": "/media/make/samples/poem-tex.webp"
+  },
+  "image": "/media/make/showcase/poe-small-maps.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "poetry",
+  "id": "poe-weather",
+  "title": "Weather Report",
+  "note": "Serif · ultramarine",
+  "state": {
+   "title": "Weather Report",
+   "source": "A forecast in three parts",
+   "poem": "Light rain over the old harbour,\nclearing by the second coffee.\n\nA high pressure of small talk\nsettles across the market.\n\nTonight: stars, mostly,\nand a chance of staying out.",
+   "type": "serif",
+   "ink": "ultramarine",
+   "paper": "cool",
+   "count": 3,
+   "seed": 1
+  },
+  "samples": {
+   "tex": "/media/make/samples/poem-tex2.webp"
+  },
+  "image": "/media/make/showcase/poe-weather.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "poetry",
+  "id": "poe-slow-day",
+  "title": "Instructions for a Slow Day",
+  "note": "Mono · vermilion",
+  "state": {
+   "title": "Instructions for a Slow Day",
+   "source": "House rules",
+   "poem": "Open the window before the news.\nLet the bread take its time.\n\nWalk to the end of the street\nand back, by the long way.\n\nAnswer nothing until noon.\nWrite one true sentence.",
+   "type": "mono",
+   "ink": "vermilion",
+   "paper": "grey",
+   "count": 3,
+   "seed": 2
+  },
+  "samples": {
+   "tex": "/media/make/samples/poem-tex.webp"
+  },
+  "image": "/media/make/showcase/poe-slow-day.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "festival",
+  "id": "fest-harbourlight",
+  "title": "Harbourlight Jazz Weekend",
+  "note": "Cobalt · printed silhouettes",
+  "state": {},
+  "samples": {
+   "p0": "/media/make/samples/fest-1.webp",
+   "p1": "/media/make/samples/fest-4.webp",
+   "p2": "/media/make/samples/fest-2.webp",
+   "p3": "/media/make/samples/fest-5.webp",
+   "p4": "/media/make/samples/fest-3.webp"
+  },
+  "image": "/media/make/showcase/fest-harbourlight.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "festival",
+  "id": "fest-blue-hour",
+  "title": "Blue Hour Jazz Nights",
+  "note": "Oxblood · two-tone photographs",
+  "state": {
+   "name": "Blue Hour Jazz Nights",
+   "dates": "5–7 October 2027",
+   "venue": "The Corn Exchange, Market Street",
+   "lineup": "Sol Ibarra Sextet\nNight Owl Trio\nGrace Mbeki\nThe Late Set Orchestra",
+   "badges": "Live music · Late bar · All ages",
+   "palette": "oxblood",
+   "type": "grotesk",
+   "treatment": "duotone",
+   "count": 4
+  },
+  "samples": {
+   "p0": "/media/make/samples/fest-1.webp",
+   "p1": "/media/make/samples/fest-4.webp",
+   "p2": "/media/make/samples/fest-2.webp",
+   "p3": "/media/make/samples/fest-5.webp",
+   "p4": "/media/make/samples/fest-3.webp"
+  },
+  "image": "/media/make/showcase/fest-blue-hour.webp",
+  "width": 600,
+  "height": 750
+ },
+ {
+  "workflow": "festival",
+  "id": "fest-mustard",
+  "title": "Harbourlight, mustard edition",
+  "note": "Ink on mustard · serif",
+  "state": {
+   "palette": "mustard",
+   "count": 5
+  },
+  "samples": {
+   "p0": "/media/make/samples/fest-1.webp",
+   "p1": "/media/make/samples/fest-4.webp",
+   "p2": "/media/make/samples/fest-2.webp",
+   "p3": "/media/make/samples/fest-5.webp",
+   "p4": "/media/make/samples/fest-3.webp"
+  },
+  "image": "/media/make/showcase/fest-mustard.webp",
+  "width": 600,
+  "height": 750
+ }
+]

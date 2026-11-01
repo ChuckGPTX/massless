@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/site.css" />
     <link rel="stylesheet" href="/css/navigation.css" />
     <link rel="stylesheet" href="/css/hubs.css" />
+    <link rel="stylesheet" href="/css/make.css" />
     <script type="module" src="/js/navigation.js"></script>
     <script type="module" src="/js/pages/workflows.js"></script>
   </head>
@@ -42,6 +43,7 @@
       </div>
     </header>
     <main class="hub-main">
+      <section id="maker" class="maker" hidden aria-live="polite"></section>
       <section class="hub-intro workflow-intro">
         <div>
           <p class="eyebrow">FROM AN IDEA TO AN EXPORT</p>
@@ -62,6 +64,24 @@
           ></video
           ><span>STILL → LiDAR SCAN → CLIP ↗</span></a
         >
+      </section>
+      <section class="hub-section make-group" id="design-cards" aria-labelledby="design-title">
+        <p class="eyebrow">ONE CLICK / DESIGN KITS</p>
+        <h2 id="design-title">Press once. Get a finished design.</h2>
+        <p>
+          Each one opens with a complete example you can edit. Change the words and it
+          updates instantly; press Make it for new FLUX frames.
+        </p>
+        <div id="make-cards" class="hub-grid make-grid"></div>
+      </section>
+      <section class="hub-section make-group" id="website-cards" aria-labelledby="website-title">
+        <p class="eyebrow">ONE CLICK / WEBSITES</p>
+        <h2 id="website-title">Start a website from a template.</h2>
+        <div id="site-cards" class="hub-grid make-grid make-grid-4"></div>
+      </section>
+      <section class="hub-section make-group" aria-labelledby="steps-title">
+        <p class="eyebrow">STEP BY STEP</p>
+        <h2 id="steps-title">Connected tools, one plan.</h2>
       </section>
       <div id="workflow-cards" class="hub-grid"></div>
       <section class="hub-panel" id="run-panel" hidden>
