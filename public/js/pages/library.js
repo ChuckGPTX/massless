@@ -66,7 +66,7 @@ function render() {
       node("h2", title),
       node(
         "p",
-        `${kind.toUpperCase()} · ${new Date(item.created).toLocaleDateString()} · ${item.model || { "local-composite": "Image workroom", "camera-effects": "Camera & effects", "film-composer": "Launch film", "music-visualizer": "Music preview", "local-caption-render": "Caption & trim", "local-text-edit": "Edit by text", "local-master": "Master", "three-scene": "Scene studio", games: "Games", "design-kit": "Design kits", upload: "Your media" }[item.engine] || "Your media"}`,
+        `${(item.kind === "deck" ? "deck" : kind).toUpperCase()} · ${new Date(item.created).toLocaleDateString()} · ${item.model || { "local-composite": "Image workroom", "camera-effects": "Camera & effects", "film-composer": "Launch film", "music-visualizer": "Music preview", "local-caption-render": "Caption & trim", "local-text-edit": "Edit by text", "local-master": "Master", "three-scene": "Scene studio", games: "Games", "design-kit": "Design kits", slides: "Slides", upload: "Your media" }[item.engine] || "Your media"}`,
       ),
     );
     const link = (label, path) => {
@@ -74,7 +74,11 @@ function render() {
       a.href = assetURL(path, item.id);
       actions.append(a);
     };
-    if (kind === "image") {
+    if (item.kind === "deck") {
+      const a = node("a", "Open in Slides", "btn-ghost");
+      a.href = "/office?tab=slides&deck=" + encodeURIComponent(item.id);
+      actions.append(a);
+    } else if (kind === "image") {
       link("Edit", "/edit/");
       link("Animate", "/video");
       link("Music preview", "/music");
