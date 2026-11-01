@@ -51,8 +51,12 @@
           <h1 class="display">Describe a site.<br><em>Get a fast one.</em></h1>
           <p class="ws-sub">Edit any word in place, swap the style, then export plain HTML you can host free anywhere.</p>
         </div>
+        <section class="ws-tpl-wrap" aria-labelledby="tpl-h">
+          <div class="ws-row-head"><h2 class="ws-h2" id="tpl-h">Start from a template</h2><button type="button" class="ws-mini" id="all-templates">See all</button></div>
+          <div class="ws-tpls" id="tpl-strip"></div>
+        </section>
         <div class="ws-field">
-          <div class="ws-f-head"><label for="prompt">Describe it</label><output id="o-prompt">0 / 600</output></div>
+          <div class="ws-f-head"><label for="prompt">Or describe it</label><output id="o-prompt">0 / 600</output></div>
           <textarea id="prompt" rows="4" maxlength="600" placeholder="A site for my lawn care business in Cedar Rapids…"></textarea>
         </div>
         <fieldset class="ws-group">
@@ -146,6 +150,12 @@
     <div class="ws-lib" id="lib"></div>
   </dialog>
 
+  <dialog class="sheet ws-dialog wide" id="tpl-dialog">
+    <form method="dialog" class="sheet-head"><h2>Start from a template</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Each template is a complete example site. Open one, then click any word or image to make it yours. Your current site stays in Your sites.</p>
+    <div class="ws-tpl-grid" id="tpl-grid"></div>
+  </dialog>
+
   <dialog class="sheet ws-dialog" id="img-dialog">
     <form method="dialog" class="sheet-head"><h2>Image</h2><button class="x" aria-label="Close">×</button></form>
     <div class="ws-img-grid">
@@ -163,7 +173,7 @@
 
   <dialog class="sheet ws-dialog" id="export-dialog">
     <form method="dialog" class="sheet-head"><h2>Export</h2><button class="x" aria-label="Close">×</button></form>
-    <p>A folder of plain HTML and CSS: one page per file, images resized with smaller copies for phones, a sitemap, robots.txt, a social preview image and a favicon. No framework, under 3 KB of JavaScript.</p>
+    <p>A folder of plain HTML and CSS: one page per file, images resized with smaller copies for phones, a sitemap, robots.txt, a social preview image and a favicon. No framework, about 5 KB of JavaScript (and none of it is needed to read the site).</p>
     <h3 class="ws-h3">Before you publish</h3>
     <ul class="ws-checklist" id="checklist"></ul>
     <label class="ws-check"><input type="checkbox" id="credit"> <span><strong>Small “Made with Chucksi” credit</strong><small>In the footer. Optional, and it helps others find a free tool.</small></span></label>
@@ -224,7 +234,8 @@
         <tr><td>Site writing</td><td>Chucksi built-in writer and section library</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
         <tr><td>Editing, preview and export</td><td>Chucksi Website</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
         <tr><td>Images (optional)</td><td>FLUX.1 [schnell]</td><td>Apache-2.0</td><td>Cloudflare Workers AI free tier, Pollinations as backup</td><td>$0</td></tr>
-        <tr><td>Fonts</td><td>Google Fonts families</td><td>SIL Open Font License</td><td>Google Fonts, from your visitors' browsers</td><td>$0</td></tr>
+        <tr><td>Fonts</td><td>Google Fonts families (including Archivo, Inter, Hanken Grotesk and Geist for the templates)</td><td>SIL Open Font License</td><td>Google Fonts, from your visitors' browsers</td><td>$0</td></tr>
+        <tr><td>Templates and placeholder art</td><td>Chucksi templates and generated SVG compositions</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
         <tr><td>Icons</td><td>Chucksi stroke icon set</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
       </tbody>
     </table></div>

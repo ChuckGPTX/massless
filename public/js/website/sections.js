@@ -3,6 +3,7 @@
 
 import { icon } from './icons.js';
 import { SECTIONS, COLLECTIONS, embedFor, safeEmail } from './spec.js';
+import { placeholderArt, motifSvg, ambientSvg } from './art.js';
 
 export const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -48,7 +49,9 @@ function actions(c, s, a = 'cta', b = 'cta2', extra = '') {
   return h ? `<div class="actions${extra}">${h}</div>` : '';
 }
 
-/** An image slot as a framed media box. Empty slots get generated gradient art (decorative). */
+const ratioOf = (ar) => { const m = String(ar || '').match(/^([\d.]+)\s*\/\s*([\d.]+)$/); return m ? +m[1] / +m[2] : 0; };
+
+/** An image slot as a framed media box. Empty slots get generated art that follows the suggested photo (decorative). */
 function media(c, slot, path, o = {}) {
   const ar = o.ar ? ` style="aspect-ratio:${o.ar}"` : '';
   const cls = `media${o.cls ? ` ${o.cls}` : ''}`;
@@ -56,8 +59,9 @@ function media(c, slot, path, o = {}) {
   const hook = c.edit ? ` data-img="${esc(path)}"` : '';
   if (!url) {
     const v = hash(path) % 5;
-    const cta = c.edit ? `<span class="mz-ph-img">${icon('camera', 'mz-ic')}<b>${slot?.prompt ? 'Add image' : 'Add image'}</b></span>` : '';
-    return `<div class="${cls}"${ar}><div class="ph ph-${v}" aria-hidden="true"${hook}>${cta}</div></div>`;
+    const art = placeholderArt(slot?.prompt || slot?.alt || '', path, o.ratio || ratioOf(o.ar) || 1.6, o.art);
+    const cta = c.edit ? `<span class="mz-ph-img">${icon('camera', 'mz-ic')}<b>Add image</b></span>` : '';
+    return `<div class="${cls}"${ar}><div class="ph ph-${v}" aria-hidden="true"${hook}>${art}${cta}</div></div>`;
   }
   const info = c.imgInfo(slot.src) || {};
   const srcset = c.srcset ? c.srcset(slot.src) : '';
@@ -86,6 +90,17 @@ R.hero = (s, c) => {
   if (v === 'banner') {
     return `<div class="wrap hero-in">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 h1-sm')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}</div>`;
   }
+  if (v === 'runway') {
+    const chip = s.note || c.edit ? `<p class="chip-note"${c.edit ? ` data-edit="${P(s, 'note')}"${s.note ? '' : ' data-empty="" data-ph="Add small print"'}` : ''}>${inline(s.note, c)}</p>` : '';
+    return `<div class="runway"><div class="runway-copy">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 runway-t')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}${chip}</div><div class="runway-media">${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 900px) 100vw, 60vw', cls: 'runway-img' })}</div></div>`;
+  }
+  if (v === 'minimal') {
+    const links = [btn(c, s.cta, P(s, 'cta'), 'mlink'), btn(c, s.cta2, P(s, 'cta2'), 'mlink')].join('');
+    return `<div class="wrap min-grid"><div class="min-main">${H(c, s, 'title', P(s, 'title'), 1, 'h1 min-t')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'min-sub')}</div><div class="min-side">${eb}${links ? `<p class="min-links">${links}</p>` : ''}</div></div>`;
+  }
+  if (v === 'editorial') {
+    return `<div class="wrap hero-in">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 h1-xl')}<div class="ed-row">${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}<div>${actions(c, s)}${note}</div></div>${hasImg(s.image) || c.edit ? media(c, s.image, P(s, 'image'), { ar: '21/9', eager: true, sizes: '100vw', cls: 'ed-media' }) : ''}</div>`;
+  }
   const copy = `${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}${note}`;
   if (v === 'cover') {
     return `<div class="cover-media">${media(c, s.image, P(s, 'image'), { eager: true, sizes: '100vw' })}</div><div class="cover-shade" aria-hidden="true"></div><div class="wrap hero-in">${copy}</div>`;
@@ -94,8 +109,11 @@ R.hero = (s, c) => {
     const m = hasImg(s.image) || c.edit ? `<div class="hero-shot">${media(c, s.image, P(s, 'image'), { ar: '16/9', eager: true, sizes: '(max-width: 1240px) 100vw, 1200px' })}</div>` : '';
     return `<div class="hero-glow" aria-hidden="true"></div><div class="wrap hero-in center">${copy}</div>${m ? `<div class="wrap">${m}</div>` : ''}`;
   }
-  if (v === 'editorial') {
-    return `<div class="wrap hero-in">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 h1-xl')}<div class="ed-row">${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}<div>${actions(c, s)}${note}</div></div>${hasImg(s.image) || c.edit ? media(c, s.image, P(s, 'image'), { ar: '21/9', eager: true, sizes: '100vw', cls: 'ed-media' }) : ''}</div>`;
+  if (v === 'portrait') {
+    return `<div class="wrap hero-in center">${copy}</div><div class="portrait-stage">${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 700px) 100vw, 680px', cls: 'portrait-media' })}</div>`;
+  }
+  if (v === 'ambient') {
+    return `<div class="gen" aria-hidden="true">${ambientSvg(s.id)}<canvas data-gen></canvas></div><div class="wrap hero-in center">${copy}</div><p class="scroll-cue" aria-hidden="true"><span></span>Scroll</p>`;
   }
   return `<div class="wrap hero-grid"><div class="hero-in">${copy}</div><div class="hero-art">${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 900px) 100vw, 50vw' })}<span class="hero-blob" aria-hidden="true"></span></div></div>`;
 };
@@ -357,6 +375,87 @@ R.menu = (s, c) => {
   }
   const block = (g, k) => `<div class="mcat"${rv(c, k)}><h3 class="mcat-h">${inline(g.k, c)}</h3><ul>${g.items.map((it) => `<li class="dish"${phAttr(c, it)}><p class="dish-top">${T(c, it, 'title', CP('menu', it, 'title'), 'b')}${it.price || c.edit ? '<span class="leader" aria-hidden="true"></span>' : ''}${T(c, it, 'price', CP('menu', it, 'price'), 'span', 'dish-price', { ph: 'Price' })}</p>${T(c, it, 'text', CP('menu', it, 'text'), 'p', 'muted')}</li>`).join('')}</ul></div>`;
   return `<div class="wrap${s.variant === 'list' ? ' narrow' : ''}">${head(c, s, { center: s.variant === 'list' })}<div class="menu ${s.variant}">${cats.map(block).join('')}</div></div>`;
+};
+
+// ---------------------------------------------------------------------------------------------
+// Template sections: statement, lookbook, products, chapters, case studies, annotated image
+// ---------------------------------------------------------------------------------------------
+
+R.statement = (s, c) => {
+  const v = s.variant;
+  const eb = T(c, s, 'eyebrow', P(s, 'eyebrow'), 'p', 'eyebrow');
+  if (v === 'framed') {
+    const mark = s.mark || c.edit ? `<span class="stmt-mark"${c.edit ? ` data-edit="${P(s, 'mark')}"${s.mark ? '' : ' data-empty="" data-ph="Add a numeral"'}` : ' aria-hidden="true"'}>${esc(s.mark)}</span>` : '';
+    return `<div class="wrap"><figure class="stmt-frame"${rv(c)}>${mark}<div class="stmt-body">${eb}<blockquote>${T(c, s, 'text', P(s, 'text'), 'p', 'stmt-q')}</blockquote>${s.note || c.edit ? `<figcaption>${T(c, s, 'note', P(s, 'note'), 'span', '', { ph: 'Add a name' })}</figcaption>` : ''}</div></figure></div>`;
+  }
+  let text;
+  if (v === 'reveal' && !c.edit) {
+    let i = 0;
+    const html = inline(s.text, c).replace(/(<[^>]+>)|([^\s<]+)/g, (m, tag, w) => tag || `<span class="w" style="--k:${i++}">${w}</span>`);
+    text = `<p class="stmt-t" style="--n:${i}">${html}</p>`;
+  } else text = T(c, s, 'text', P(s, 'text'), 'p', 'stmt-t');
+  const scrub = v === 'reveal' && c.motion ? ' data-scrub=""' : rv(c);
+  return `<div class="wrap stmt${v === 'left' ? '' : ' center'}"${scrub}>${eb}${text}${T(c, s, 'note', P(s, 'note'), 'p', 'stmt-note')}</div>`;
+};
+
+R.lookbook = (s, c) => {
+  const v = s.variant;
+  const n = s.items.length;
+  const pad = (k) => String(k).padStart(2, '0');
+  const figs = s.items.map((it, i) => {
+    const ar = v === 'full' ? '16/9' : v === 'pair' ? ['4/5', '3/4', '3/4', '4/5'][i % 4] : ['4/5', '3/4', '1/1'][i % 3];
+    const cap = `<figcaption class="lb-cap"><span class="lb-n">${pad(i + 1)} / ${pad(n)}</span>${T(c, it, 'caption', PI(s, 'items', i, 'caption'), 'span', 'lb-t')}${T(c, it, 'note', PI(s, 'items', i, 'note'), 'span', 'lb-note', { ph: 'Add a note' })}</figcaption>`;
+    return `<figure class="lb-item"${v === 'full' ? '' : rv(c, i % 2)}>${media(c, it.image, PI(s, 'items', i, 'image'), { ar, sizes: v === 'full' ? '100vw' : '(max-width: 700px) 100vw, 50vw', cls: 'lb-media' })}${cap}</figure>`;
+  }).join('');
+  const hd = head(c, s);
+  if (v === 'full') return `${hd ? `<div class="wrap">${hd}</div>` : ''}<div class="lb-full">${figs}</div>`;
+  return `<div class="wrap">${hd}<div class="lb-${v}">${figs}</div></div>`;
+};
+
+R.products = (s, c) => {
+  const v = s.variant;
+  const n = s.items.length;
+  const cards = s.items.map((it, i) => {
+    const inner = `${media(c, it.image, PI(s, 'items', i, 'image'), { ar: v === 'lineup' ? '9/20' : '3/4', sizes: v === 'lineup' ? '200px' : '(max-width: 700px) 50vw, 25vw', cls: 'prod-media' })}<div class="prod-meta">${T(c, it, 'name', PI(s, 'items', i, 'name'), 'h3', 'prod-name')}${T(c, it, 'price', PI(s, 'items', i, 'price'), 'p', 'prod-price', { ph: 'Price' })}${T(c, it, 'note', PI(s, 'items', i, 'note'), 'p', 'prod-note', { ph: 'Colour or size' })}</div>`;
+    const href = it.link?.href;
+    return `<li class="prod"${phAttr(c, it)}${rv(c, i % 4)}>${href && !c.edit ? `<a class="prod-a" href="${esc(c.href(href))}">${inner}</a>` : inner}</li>`;
+  }).join('');
+  const has = s.eyebrow || s.title || s.subtitle;
+  const count = `<p class="prod-count"><span>${v === 'lineup' ? 'Pieces' : 'Products'}</span><b>${String(n).padStart(2, '0')}</b></p>`;
+  const hd = has || c.edit ? `<div class="prod-head">${head(c, s)}${has ? count : ''}</div>` : '';
+  const more = btn(c, s.cta, P(s, 'cta'), 'btn alt');
+  return `<div class="wrap">${hd}<ul class="prods ${v}${v === 'lineup' ? '' : ` n${Math.min(n, 4)}`}"${v === 'lineup' ? ' tabindex="0"' : ''}>${cards}</ul>${more ? `<div class="actions center">${more}</div>` : ''}</div>`;
+};
+
+R.chapters = (s, c) => {
+  const v = s.variant;
+  const items = s.items.map((it, i) => {
+    const art = it.motif && it.motif !== 'none' ? `<div class="ch-art">${motifSvg(it.motif, `${s.id}${i}`)}</div>` : '';
+    return `<li class="ch"${rv(c)}>${v === 'split' ? `<span class="ch-n" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>` : ''}<div class="ch-body">${art}${T(c, it, 'title', PI(s, 'items', i, 'title'), 'h2', 'ch-t')}${T(c, it, 'text', PI(s, 'items', i, 'text'), 'div', 'ch-p prose', { ml: 'p' })}</div></li>`;
+  }).join('');
+  return `<div class="wrap${v === 'stack' ? ' narrow center' : ''}">${head(c, s, { center: v === 'stack' })}<ol class="chs ${v}">${items}</ol></div>`;
+};
+
+R.cases = (s, c) => {
+  const v = s.variant;
+  const meta = (it, i) => {
+    const credits = String(it.credits || '').split('\n').map((x) => x.trim()).filter(Boolean);
+    const sub = [T(c, it, 'role', PI(s, 'items', i, 'role'), 'span'), T(c, it, 'client', PI(s, 'items', i, 'client'), 'span'), v === 'rail' ? T(c, it, 'year', PI(s, 'items', i, 'year'), 'span') : ''].filter(Boolean).join('');
+    return `<div class="case-meta">${T(c, it, 'title', PI(s, 'items', i, 'title'), 'h3', 'case-t')}${sub ? `<p class="case-sub">${sub}</p>` : ''}${T(c, it, 'text', PI(s, 'items', i, 'text'), 'p', 'case-p')}${credits.length ? `<ul class="case-credits">${credits.map((x) => `<li>${inline(x, c)}</li>`).join('')}</ul>` : ''}${btn(c, it.link, PI(s, 'items', i, 'link'), 'mlink')}</div>`;
+  };
+  if (v === 'list') {
+    const rows = s.items.map((it, i) => `<li class="case-row"${phAttr(c, it)}${rv(c)}>${T(c, it, 'year', PI(s, 'items', i, 'year'), 'p', 'case-year')}<div class="case-main">${media(c, it.image, PI(s, 'items', i, 'image'), { ar: '16/10', sizes: '(max-width: 900px) 100vw, 60vw', cls: 'case-media' })}${meta(it, i)}</div></li>`).join('');
+    return `<div class="wrap">${head(c, s)}<ol class="case-list">${rows}</ol></div>`;
+  }
+  const cards = s.items.map((it, i) => `<li class="case" data-year="${esc(it.year)}"${phAttr(c, it)}>${media(c, it.image, PI(s, 'items', i, 'image'), { ar: i % 3 === 1 ? '3/4' : '4/3', sizes: '(max-width: 900px) 80vw, 46vw', cls: 'case-media' })}${meta(it, i)}</li>`).join('');
+  return `<div class="rail"${c.motion ? ' data-rail=""' : ''}><div class="rail-in"><div class="wrap rail-head">${head(c, s)}<p class="rail-year" aria-hidden="true"><span data-year-out>${esc(s.items[0]?.year || '')}</span></p></div><ol class="rail-track" tabindex="0" aria-label="${esc(String(s.title || 'Case studies').replace(/\*/g, ''))}">${cards}</ol></div></div>`;
+};
+
+R.annotated = (s, c) => {
+  const tags = s.items.map((it, i) => `<li class="tag tg${i % 6}" style="--k:${i}">${icon('check')}${T(c, it, 'label', PI(s, 'items', i, 'label'), 'span')}</li>`).join('');
+  const status = s.status || c.edit ? `<p class="ann-status"><span class="spin" aria-hidden="true"></span>${T(c, s, 'status', P(s, 'status'), 'span', '', { ph: 'Add a status' })}</p>` : '';
+  const ar = s.variant === 'wide' ? '16/9' : '4/5';
+  return `<div class="ann ${s.variant}"${c.motion ? ' data-scrub=""' : ''} style="--n:${s.items.length}"><div class="ann-in"><div class="wrap ann-head">${head(c, s, { center: true })}</div><div class="ann-stage">${status}${media(c, s.image, P(s, 'image'), { ar, sizes: '(max-width: 700px) 100vw, 640px', cls: 'ann-media' })}<ul class="ann-tags">${tags}</ul></div></div></div>`;
 };
 
 R.footer = (s, c) => {

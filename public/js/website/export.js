@@ -4,7 +4,7 @@
 
 import { renderPage, renderSingle, sitePages, SITE_JS } from './render.js';
 import { BASE_CSS } from './css.js';
-import { tokens, themeCss, fontsHref, headingWeight, FONTS } from './theme.js';
+import { tokens, themeCss, fontsHref, headingWeight, FONTS, fontFamily } from './theme.js';
 import { slugify, COLLECTIONS, SECTIONS } from './spec.js';
 import { esc } from './sections.js';
 
@@ -218,10 +218,10 @@ export async function ogImage(site, assets, doc = document) {
   const g = c.getContext('2d');
   const tk = tokens(site.theme).base;
   const hw = headingWeight(site.theme);
-  const hf = `'${site.theme.heading}', ${(FONTS[site.theme.heading] || FONTS.Inter).fb}`;
-  const bf = `'${site.theme.body}', system-ui, sans-serif`;
+  const hf = `'${fontFamily(site.theme.heading)}', ${(FONTS[site.theme.heading] || FONTS.Inter).fb}`;
+  const bf = `'${fontFamily(site.theme.body)}', system-ui, sans-serif`;
   try {
-    await Promise.all([doc.fonts.load(`${hw} 96px '${site.theme.heading}'`), doc.fonts.load(`500 34px '${site.theme.body}'`)]);
+    await Promise.all([doc.fonts.load(`${hw} 96px '${fontFamily(site.theme.heading)}'`), doc.fonts.load(`500 34px '${fontFamily(site.theme.body)}'`)]);
   } catch { /* fall back to system fonts */ }
   // the chosen social image, else the first hero image
   let ref = site.seo.image?.src;

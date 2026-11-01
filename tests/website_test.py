@@ -1,7 +1,8 @@
 """Website builder (/website, the Website tab of Build) in a real browser: the page at desktop and phone width, Generate
 for several kinds of site, edit a heading in place, add and duplicate sections (unique anchors), switch style, undo/redo,
 Fill images through a mocked /api/shot, the share link round trip, and both exports (ZIP and one HTML file, the second
-opened from file:// with the network blocked).
+opened from file:// with the network blocked). Templates: every template's exported site at 1440 and 390, /website?template=<id>,
+the "Start from a template" picker, then edit, restyle, share and export a template.
 python3 tests/website_test.py [out_dir]   (screenshots: tests/out/website/)"""
 import http.server, threading, socketserver, os, sys, functools, json, io, zipfile
 from playwright.sync_api import sync_playwright
@@ -199,6 +200,90 @@ with sync_playwright() as p:
     off.close()
     check('export HTML: one file that works from file:// at phone width (only web fonts need the network)', single['blocks'] >= 1 and single['text'] > 200 and single['sw'] <= 390 and not local_err and all('fonts.g' in u for u in net),
           {**single, 'blocked': net[:4], 'errors': local_err[:3]})
+    ctx.close()
+
+    # ---------- 7. templates: every example site as exported, at desktop and phone width ----------
+    ids = []
+    for label, opts in [('1440', dict(viewport={'width': 1440, 'height': 900})), ('390', dict(viewport={'width': 390, 'height': 844}, device_scale_factor=2, is_mobile=True, has_touch=True))]:
+        ctx = b.new_context(**opts)
+        pg = ctx.new_page()
+        watch(pg, f'template sites {label}')
+        pg.goto(f'{BASE}/privacy.html', wait_until='domcontentloaded')
+        ids = pg.evaluate("import('/js/website/templates-list.js').then(m => m.TEMPLATES_LIST.map(t => t.id))")
+        res = {}
+        for tid in ids:
+            pg.goto(f'{BASE}/privacy.html', wait_until='domcontentloaded')
+            html = pg.evaluate("""async (id) => { const [{ buildTemplate }, { renderSingle }] = await Promise.all([import('/js/website/templates.js'), import('/js/website/render.js')]); return renderSingle(buildTemplate(id), {}); }""", tid)
+            pg.set_content(html, wait_until='load')
+            pg.wait_for_timeout(700)
+            # scroll through so scroll-driven pieces (rail, labels, word reveal) run
+            pg.evaluate("async () => { for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight * .8) { scrollTo(0, y); await new Promise(r => setTimeout(r, 60)); } scrollTo(0, 0); }")
+            pg.wait_for_timeout(300)
+            res[tid] = pg.evaluate("({ sw: document.documentElement.scrollWidth, h1: document.querySelector('[data-page]:not([hidden])').querySelectorAll('h1').length, text: document.body.innerText.length })")
+            pg.screenshot(path=f'{OUT}/template-{tid}-{label}.png')
+        w = opts['viewport']['width']
+        check(f'templates {label}: all {len(ids)} example sites render, one h1 on the home page, no sideways scroll', len(ids) >= 11 and all(v['sw'] <= w and v['h1'] == 1 and v['text'] > 300 for v in res.values()), res)
+        ctx.close()
+
+    # ---------- 8. /website?template=<id> and the picker ----------
+    ctx = b.new_context(viewport={'width': 1440, 'height': 900}, accept_downloads=True)
+    pg = ctx.new_page()
+    watch(pg, 'template param')
+    opened = {}
+    for tid in ['editorial-shop', 'manifesto', 'portfolio-timeline', 'ai-product']:
+        pg.goto(f'{BASE}/website?template={tid}', wait_until='domcontentloaded')
+        pg.wait_for_selector('body[data-ready="1"]', timeout=60000)
+        pg.wait_for_timeout(500)
+        opened[tid] = pg.evaluate("({ style: mzSite.state.site.theme.style, tpl: mzSite.state.template, frame: document.querySelector('#preview').contentDocument.documentElement.dataset.style, query: location.search, sections: document.querySelector('#preview').contentDocument.querySelectorAll('[data-sid]').length })")
+        pg.screenshot(path=f'{OUT}/website-template-{tid}.png')
+    check('templates: /website?template=<id> opens each new template in the editor and tidies the address', all(v['style'] == k and v['tpl'] == k and v['frame'] == k and v['query'] == '' and v['sections'] >= 4 for k, v in opened.items()), opened)
+    pg.goto(f'{BASE}/website?template=not-a-template', wait_until='domcontentloaded')
+    pg.wait_for_selector('body[data-ready="1"]', timeout=60000)
+    check('templates: an unknown id falls back to a normal editor', pg.evaluate('!!mzSite.state.site && mzSite.state.site.pages.length > 0'))
+
+    pg.goto(SITE, wait_until='domcontentloaded')
+    pg.wait_for_selector('body[data-ready="1"]', timeout=60000)
+    pg.wait_for_timeout(600)
+    strip = pg.evaluate("({ cards: document.querySelectorAll('#tpl-strip .ws-tpl').length, loaded: [...document.querySelectorAll('#tpl-strip img')].filter(i => i.complete && i.naturalWidth >= 600).length, heading: document.querySelector('#tpl-h')?.textContent })")
+    pg.click('#all-templates')
+    pg.wait_for_timeout(300)
+    pg.screenshot(path=f'{OUT}/website-template-picker.png')
+    pg.click('#tpl-grid [data-template="ai-product"]')
+    pg.wait_for_timeout(600)
+    picked = pg.evaluate("({ style: mzSite.state.site.theme.style, open: document.querySelector('#tpl-dialog').open, current: document.querySelector('#tpl-strip [aria-current=true]')?.dataset.template })")
+    check('templates: the picker shows every template with its thumbnail and opens one', strip['cards'] >= 11 and strip['loaded'] >= 4 and strip['heading'] == 'Start from a template' and picked['style'] == 'ai-product' and not picked['open'] and picked['current'] == 'ai-product', {**strip, **picked})
+
+    # edit in place inside template sections, then restyle, share and export
+    fr = pg.frame_locator('#preview')
+    lab = fr.locator('.s-annotated .tag [data-edit]').first
+    lab.click()
+    pg.keyboard.press('Control+A')
+    pg.keyboard.type('Freckles kept')
+    pg.evaluate('mzSite.commitEdit()')
+    pg.wait_for_timeout(300)
+    saved = pg.evaluate("({ edited: JSON.stringify(mzSite.state.site).includes('Freckles kept'), demo: mzSite.state.demo, id: !!mzSite.state.id })")
+    pg.click('#t-theme')
+    pg.click('#theme-styles [data-style="manifesto"]')
+    pg.wait_for_timeout(500)
+    restyled = pg.evaluate("document.querySelector('#preview').contentDocument.documentElement.dataset.style")
+    check('templates: edit a label in place (the example becomes a saved site) and restyle it', saved['edited'] and not saved['demo'] and saved['id'] and restyled == 'manifesto', {**saved, 'style': restyled})
+    url = pg.evaluate('mzSite.share()')
+    pg2 = ctx.new_page()
+    watch(pg2, 'template share')
+    pg2.goto(url.replace(f'{BASE}/website#', f'{BASE}/website/#'), wait_until='domcontentloaded')
+    pg2.wait_for_selector('body[data-ready="1"]', timeout=60000)
+    back = pg2.evaluate("({ style: mzSite.state.site.theme.style, text: JSON.stringify(mzSite.state.site).includes('Freckles kept') })")
+    pg2.close()
+    pg.click('#export-btn')
+    with pg.expect_download(timeout=120000) as d:
+        pg.click('#dl-zip')
+    zpath = os.path.join(OUT, 'template-' + d.value.suggested_filename)
+    d.value.save_as(zpath)
+    with zipfile.ZipFile(zpath) as z:
+        names = z.namelist()
+        index = z.read('index.html').decode('utf-8')
+        sitejs = z.read('assets/site.js').decode('utf-8')
+    check('templates: share and export a template-based site', back['style'] == 'manifesto' and back['text'] and 'Freckles kept' in index and 'data-scrub' in index and len(sitejs) < 6500 and 'index.html' in names, {**back, 'files': len(names), 'siteJs': len(sitejs)})
     ctx.close()
     b.close()
 
