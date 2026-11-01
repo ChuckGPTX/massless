@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:BSD;src:url(/fonts/big-shoulders-display-latin-900-normal.woff2)}
+@font-face{font-family:IS;src:url(/fonts/instrument-sans-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:IS;src:url(/fonts/instrument-sans-latin-700-normal.woff2);font-weight:700}
+*{box-sizing:border-box;margin:0}
+body{width:1200px;height:630px;overflow:hidden;background:#0b0b0c;color:#f4f1ea;font-family:IS;position:relative}
+.glow{position:absolute;inset:0;background:radial-gradient(700px 420px at 92% 0%,rgba(255,191,47,.22),transparent 60%),radial-gradient(600px 400px at 0% 110%,rgba(255,191,47,.10),transparent 60%)}
+.left{position:absolute;left:72px;top:0;bottom:0;width:560px;display:flex;flex-direction:column;justify-content:center;gap:22px}
+.logo{display:flex;align-items:center;gap:14px;font:700 22px IS;letter-spacing:.01em;color:#cfc9bd}
+.logo i{width:38px;height:38px;border-radius:10px;background:#fff;display:grid;place-items:center}
+h1{font:900 146px/0.84 BSD;letter-spacing:-.005em;text-transform:uppercase}
+h1 b{color:#ffbf2f}
+.tag{font:700 34px/1.12 IS;letter-spacing:-.01em}
+.tag span{color:#ffbf2f}
+.list{font:500 19px IS;color:#a9a39a;letter-spacing:.01em}
+.grid{position:absolute;right:-70px;top:-40px;width:600px;height:700px;display:grid;grid-template-columns:1fr 1fr;gap:16px;transform:rotate(-6deg)}
+.col{display:flex;flex-direction:column;gap:16px}
+.col:nth-child(2){margin-top:90px}
+.t{border-radius:18px;overflow:hidden;background:#1a1a1d;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.t img{display:block;width:100%;height:100%;object-fit:cover}
+</style></head><body><div class="glow"></div>
+<div class="left">
+ <div class="logo"><i><svg width="26" height="26" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11.5" fill="none" stroke="#0b0b0c" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="#0b0b0c"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="#0b0b0c" stroke-width="3"/></svg></i>chucksi.com</div>
+ <h1>Chucksi<b>.</b></h1>
+ <p class="tag">Your marketing<br><span>super intelligence.</span></p>
+ <p class="list">Video · Images · Websites · Brand kits · Games · Sign</p>
+</div>
+<div class="grid">
+ <div class="col"><div class="t" style="height:300px"><img src="/media/website/editorial-shop/hero.webp"></div><div class="t" style="height:250px"><img src="/media/showcase/clay-garden.jpg"></div><div class="t" style="height:220px"><img src="/media/website/ai-product/rooftop.webp"></div></div>
+ <div class="col"><div class="t" style="height:230px"><img src="/media/make/thumb-festival.webp"></div><div class="t" style="height:260px"><img src="/media/showcase/glass-tide.jpg"></div><div class="t" style="height:230px"><img src="/media/make/thumb-identity.webp"></div></div>
+</div></body></html>
