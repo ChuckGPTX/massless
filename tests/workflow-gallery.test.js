@@ -1,4 +1,5 @@
 import test from "node:test";
+import { EFFECTS } from "../public/js/effects.js";
 import assert from "node:assert/strict";
 import { readFile, stat, access } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -12,11 +13,7 @@ const exists = (p) => access(pub(p)).then(() => true, () => false);
 
 // ---------- what the tools accept, read from the tools themselves ----------
 async function known() {
-  const effects = await text("/js/effects.js");
-  const block = effects.slice(effects.indexOf("export const EFFECTS"), effects.indexOf("];", effects.indexOf("export const EFFECTS")));
-  const fx = {};
-  for (const m of block.matchAll(/id: '([\w-]+)', name: '[^']+', hint[^\n]*\n\s*(?:looks: \[([^\n]*)\])?/g))
-    fx[m[1]] = [...(m[2] || "").matchAll(/id: '([\w-]+)'/g)].map((x) => x[1]);
+  const fx = Object.fromEntries(EFFECTS.map((e) => [e.id, e.looks.map((l) => l.id)]));
   const moves = [...(await text("/js/moves.js")).matchAll(/^\s*id: '([\w-]+)',$/gm)].map((m) => m[1]);
   const samples = [...(await text("/js/ui.js")).matchAll(/\{ key: '([\w-]+)'/g)].map((m) => m[1]);
   const tools = JSON.parse((await text("/js/pages/edit.js")).match(/const TOOLS = (\[[^\]]*\])/)[1]);

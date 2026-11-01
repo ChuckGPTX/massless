@@ -50,7 +50,7 @@ const tighten = (cam, z) => (z > 1 ? { ...cam, fov: (2 * Math.atan(Math.tan((cam
 function updateZoom() { state.zoom = zoomFor(moveById(state.move), liveCtx()); }
 
 function drawFrame(t, time) {
-  if (state.effect && effects?.prep && effects.prep.image === state.current?.image) effects.draw(state.effect, state.effectLook, t, liveCtx(), fx(), time, state.duration);
+  if (state.effect && (effectById(state.effect)?.needsMatte === false || (effects?.prep && effects.prep.image === state.current?.image))) effects.draw(state.effect, state.effectLook, t, liveCtx(), fx(), time, state.duration);
   else renderer.render(tighten(moveById(state.move).fn(state.effect ? 0 : t, liveCtx()), state.zoom), fx(), time);
 }
 
@@ -289,7 +289,7 @@ function markCards(key) {
 // ---------- effects ----------
 async function prepareEffect() {
   const cur = state.current;
-  if (!cur?.depth || !state.effect) return;
+  if (!cur?.depth || !state.effect || effectById(state.effect)?.needsMatte === false) return;
   if (!cur.depth.fxPrep || cur.depth.fxPrep.image !== cur.image) {
     status('Finding the subject', null);
     await new Promise((r) => setTimeout(r, 30));
@@ -359,7 +359,7 @@ function buildLibrary() {
   }
   for (const e of EFFECTS) {
     const card = el('button', { type: 'button', class: 'mcard', role: 'radio', 'aria-checked': 'false', 'data-key': e.id, 'data-group': 'effects', title: e.hint },
-      el('div', { class: 'frame' }, el('video', { muted: true, loop: true, playsinline: true, preload: 'none', poster: `/media/clips/effect-${e.id}.jpg`, 'data-src': `/media/clips/effect-${e.id}.mp4` }), el('span', { class: 'badge' }, 'Effect'), el('span', { class: 'use' }, 'Use effect')),
+      el('div', { class: 'frame' }, el('video', { muted: true, loop: true, playsinline: true, preload: 'none', poster: e.previewPoster || `/media/clips/effect-${e.id}.jpg`, 'data-src': e.previewVideo || `/media/clips/effect-${e.id}.mp4` }), el('span', { class: 'badge' }, 'Effect'), el('span', { class: 'use' }, 'Use effect')),
       el('strong', {}, e.name), el('span', {}, `${GROUP_LABEL.effects} · ${e.hint}`));
     card.addEventListener('click', () => selectEffect(e.id, state.effect === e.id ? state.effectLook : null, { scroll: true }));
     lib.append(card);
@@ -532,7 +532,8 @@ function enterCard(card) {
   renderer.setDepth(card.depth.data, card.depth.w, card.depth.h, card.depth.bg);
   card.ctx = ctxFor(card.depth.stats, card.intensity, card.blur, card.focus);
   card.zoom = zoomFor(moveById(card.move), card.ctx);
-  if (card.effect && effectById(card.effect)) effects.prepare(card.image, card.depth);
+  const effect = effectById(card.effect);
+  if (effect && effect.needsMatte !== false) effects.prepare(card.image, card.depth);
 }
 function drawCard(card, t, time) {
   if (card.effect && effectById(card.effect)) effects.draw(card.effect, card.effectLook, t, card.ctx, card.fx, time, card.duration);
@@ -546,7 +547,7 @@ function enterLive() {
   if (cur.depth) { renderer.setDepth(cur.depth.data, cur.depth.w, cur.depth.h, cur.depth.bg); renderer.setBackgroundColor(cur.depth.bgColor || cur.image); }
   setPreviewSize();
   updateZoom();
-  if (state.effect && cur.depth) effects.prepare(cur.image, cur.depth);
+  if (state.effect && cur.depth && effectById(state.effect)?.needsMatte !== false) effects.prepare(cur.image, cur.depth);
 }
 const markPlaying = (uid) => document.querySelectorAll('.bcard').forEach((x) => x.classList.toggle('playing', x.dataset.uid === uid));
 

@@ -14,7 +14,8 @@
   "music-visualizer": "The Music page's visualizer driving the bundled sample still /media/art/lighthouse.jpg with the bundled synthesized instrumental, stepped with its scrubber.",
   "audio-page": "The Audio page's own animated voice and sound-bed preview cards over the bundled sample stills, with performance.now() stepped 1/24 s per frame (jobs/animated.js).",
   "clip-workroom": "The Clip workroom burning three typed captions into its bundled LiDAR sample clip, seeking the clip frame by frame (jobs/tools.js).",
-  "office": "Chucksi Office on its bundled sample document and contract templates, driven with scripted clicks and typing, captured frame by frame."
+  "office": "Chucksi Office on its bundled sample document and contract templates, driven with scripted clicks and typing, captured frame by frame.",
+  "optical-effects-pack": "15 original browser effects rendered by EffectEngine and the existing recordSegments exporter through tests/optical-effects.html. Bundled sample stills and depth maps only; no external footage, generation API or provider model. Each loop returns to its original frame. Packaged with tools/package_effect_previews.py."
  },
  "files": [
   {
@@ -1472,6 +1473,246 @@
    "card": "office-templates",
    "source": "office",
    "recorded_from": "/office?tab=sign"
+  },
+  {
+   "path": "media/templates/fx-hologram-ion.mp4",
+   "bytes": 247022,
+   "sha256": "cb158ace53d3be04b215a980747e6ea0ffd4cab0a107c6d9727cbc7e05d50b48",
+   "card": "fx-hologram-ion",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=hologram&look=ion&sample=samurai"
+  },
+  {
+   "path": "media/templates/fx-hologram-ion.webp",
+   "bytes": 36878,
+   "sha256": "fab784436210c6760ada40062900605f92938d9a153c2a73f974ae0d8bd5b81d",
+   "card": "fx-hologram-ion",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=hologram&look=ion&sample=samurai"
+  },
+  {
+   "path": "media/templates/fx-shatter-spectrum.mp4",
+   "bytes": 109340,
+   "sha256": "552ef546d1a8e1e3e8fc9503e654b6c8bec20c55a0a586f5c02c8a40a12c6170",
+   "card": "fx-shatter-spectrum",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=shatter&look=spectrum&sample=neon"
+  },
+  {
+   "path": "media/templates/fx-shatter-spectrum.webp",
+   "bytes": 31092,
+   "sha256": "533007c61a7dc78e873f86fa3652038a94bfd063e59ed2a525671258b98d51e9",
+   "card": "fx-shatter-spectrum",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=shatter&look=spectrum&sample=neon"
+  },
+  {
+   "path": "media/templates/fx-shockwave-water.mp4",
+   "bytes": 47152,
+   "sha256": "2983ddb905cbbb48e965e0f7241c0849ae913ce45c722afccba022f99d717b33",
+   "card": "fx-shockwave-water",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=shockwave&look=water&sample=astronaut"
+  },
+  {
+   "path": "media/templates/fx-shockwave-water.webp",
+   "bytes": 8998,
+   "sha256": "b0ed660ee07bd4b13e1a4ff6f6ac99215440d689284e5b9ddd0b9944a3ca9315",
+   "card": "fx-shockwave-water",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=shockwave&look=water&sample=astronaut"
+  },
+  {
+   "path": "media/templates/fx-portal-cosmic.mp4",
+   "bytes": 42613,
+   "sha256": "2ca3a3872dddfa8705001a1c4749254e6544f99415896617cb0e7c2530ad30f9",
+   "card": "fx-portal-cosmic",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=portal&look=cosmic&sample=lighthouse"
+  },
+  {
+   "path": "media/templates/fx-portal-cosmic.webp",
+   "bytes": 6232,
+   "sha256": "79414e7aa0637f1145cac1dcb2030902e6bd03260bc99a4704278164cfa92523",
+   "card": "fx-portal-cosmic",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=portal&look=cosmic&sample=lighthouse"
+  },
+  {
+   "path": "media/templates/fx-melt-signature.mp4",
+   "bytes": 97177,
+   "sha256": "4eaf94075954c17b1f20906c0b434b9cebabf984ae5c00156ae2b93284779e27",
+   "card": "fx-melt-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=melt&look=signature&sample=diner"
+  },
+  {
+   "path": "media/templates/fx-melt-signature.webp",
+   "bytes": 13892,
+   "sha256": "fb1b23d1668424f36479d5478d8c9db44f89e82d6af9e69995a82bcf4313f434",
+   "card": "fx-melt-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=melt&look=signature&sample=diner"
+  },
+  {
+   "path": "media/templates/fx-inflate-signature.mp4",
+   "bytes": 70308,
+   "sha256": "17722ad9899cd3b6ab6ede7d010863cf199ad5002339699cc11191cf9d29f69e",
+   "card": "fx-inflate-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=inflate&look=signature&sample=jellyfish"
+  },
+  {
+   "path": "media/templates/fx-inflate-signature.webp",
+   "bytes": 9866,
+   "sha256": "2d14c0c654bf4b8ccea98f04d7207a25456d39baef5ac296f00367df72befd12",
+   "card": "fx-inflate-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=inflate&look=signature&sample=jellyfish"
+  },
+  {
+   "path": "media/templates/fx-squish-signature.mp4",
+   "bytes": 103713,
+   "sha256": "aba607b2dc2be3e6af69d5adb1d62caac36e30717a300733b665a1d227fcf191",
+   "card": "fx-squish-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=squish&look=signature&sample=bmx"
+  },
+  {
+   "path": "media/templates/fx-squish-signature.webp",
+   "bytes": 13882,
+   "sha256": "253f351e72742e215c5acedec14b010270bc2222a709bdf2ef196c4ce1fc23e3",
+   "card": "fx-squish-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=squish&look=signature&sample=bmx"
+  },
+  {
+   "path": "media/templates/fx-chromatic-signature.mp4",
+   "bytes": 67854,
+   "sha256": "55c21ec8b826b4d1d771858792b090ea0a6af10c657735255d5d19698643863e",
+   "card": "fx-chromatic-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=chromatic&look=signature&sample=train"
+  },
+  {
+   "path": "media/templates/fx-chromatic-signature.webp",
+   "bytes": 11460,
+   "sha256": "4e338df55fe9899b91348bf40d24e82b9370df4a4179136bf5f0f52e54dc40b6",
+   "card": "fx-chromatic-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=chromatic&look=signature&sample=train"
+  },
+  {
+   "path": "media/templates/fx-glitch-signature.mp4",
+   "bytes": 78162,
+   "sha256": "05092092ea913425a2371d4c35f13e75c424c40b67a9baaf071ba13cbc046ca3",
+   "card": "fx-glitch-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=glitch&look=signature&sample=rider"
+  },
+  {
+   "path": "media/templates/fx-glitch-signature.webp",
+   "bytes": 10368,
+   "sha256": "bad6ebc0106b280f10f3b54d1f210ea7096a0be14894921e995b1ba8f0059409",
+   "card": "fx-glitch-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=glitch&look=signature&sample=rider"
+  },
+  {
+   "path": "media/templates/fx-pixel-sort-signature.mp4",
+   "bytes": 32620,
+   "sha256": "ff99cf52cf10f1b2062048134ad3b05a5aa17db38c8a34ca21049c7045e6632b",
+   "card": "fx-pixel-sort-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=pixel-sort&look=signature&sample=neon"
+  },
+  {
+   "path": "media/templates/fx-pixel-sort-signature.webp",
+   "bytes": 6594,
+   "sha256": "cb4ffe8d3994685d9d1590430c72d3e9e39cf029731c5fa1a08753b409f5d273",
+   "card": "fx-pixel-sort-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=pixel-sort&look=signature&sample=neon"
+  },
+  {
+   "path": "media/templates/fx-ink-signature.mp4",
+   "bytes": 102079,
+   "sha256": "97d58849ead659dd165a4e2178fa34679c8117b4e02093767b0f4bd6e52aa6ac",
+   "card": "fx-ink-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=ink&look=signature&sample=fisherman"
+  },
+  {
+   "path": "media/templates/fx-ink-signature.webp",
+   "bytes": 32692,
+   "sha256": "dc9d593d9208b533df68001649ef3fda516d23e8c88f04d605c0e38273e6df78",
+   "card": "fx-ink-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=ink&look=signature&sample=fisherman"
+  },
+  {
+   "path": "media/templates/fx-neon-signature.mp4",
+   "bytes": 189872,
+   "sha256": "5ced98d6a61102dd23e6020210ba243b1faccff28aaea9e3f1bb3447779e459e",
+   "card": "fx-neon-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=neon&look=signature&sample=cinema"
+  },
+  {
+   "path": "media/templates/fx-neon-signature.webp",
+   "bytes": 38842,
+   "sha256": "62c49985148737c19e23c103cbe6c39cab8c812db0349c06acb97d183b5b3c47",
+   "card": "fx-neon-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=neon&look=signature&sample=cinema"
+  },
+  {
+   "path": "media/templates/fx-kaleido-signature.mp4",
+   "bytes": 70365,
+   "sha256": "a18c680c7a3f385d3972904d94d38a07f36eee8dffd6f65e317b86fcdf41def6",
+   "card": "fx-kaleido-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=kaleido&look=signature&sample=summit"
+  },
+  {
+   "path": "media/templates/fx-kaleido-signature.webp",
+   "bytes": 4658,
+   "sha256": "58c4b5bfcf1caede6471dc5d716ecdd104912d6332f93ada742d3b8a99475cbb",
+   "card": "fx-kaleido-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=kaleido&look=signature&sample=summit"
+  },
+  {
+   "path": "media/templates/fx-slit-signature.mp4",
+   "bytes": 57699,
+   "sha256": "6379d93445e68d73b6ccdc811c75037e6b6f7d758040a8acde16d12de8e9c9fa",
+   "card": "fx-slit-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=slit&look=signature&sample=dancer"
+  },
+  {
+   "path": "media/templates/fx-slit-signature.webp",
+   "bytes": 6528,
+   "sha256": "fcfe1550f3f8be237a54b71057c263e4dc4b52e1e6e0fd669c99e33e7a952600",
+   "card": "fx-slit-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=slit&look=signature&sample=dancer"
+  },
+  {
+   "path": "media/templates/fx-fold-signature.mp4",
+   "bytes": 47658,
+   "sha256": "8f1b386b1b5b2b3993cb91c50d121456da4b7c09495089755f133a6e3fe18c69",
+   "card": "fx-fold-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=fold&look=signature&sample=canyon"
+  },
+  {
+   "path": "media/templates/fx-fold-signature.webp",
+   "bytes": 6436,
+   "sha256": "f6ac128088468a60ce8488c21220bbd3798524389fe12f61afdc4106b5b2d37e",
+   "card": "fx-fold-signature",
+   "source": "optical-effects-pack",
+   "recorded_from": "/video?effect=fold&look=signature&sample=canyon"
   }
  ]
 }
