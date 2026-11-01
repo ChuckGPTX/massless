@@ -285,6 +285,45 @@ with sync_playwright() as p:
         sitejs = z.read('assets/site.js').decode('utf-8')
     check('templates: share and export a template-based site', back['style'] == 'manifesto' and back['text'] and 'Freckles kept' in index and 'data-scrub' in index and len(sitejs) < 6500 and 'index.html' in names, {**back, 'files': len(names), 'siteJs': len(sitejs)})
     ctx.close()
+
+    # ---------- 9. template photos survive both exports; reduced motion gets a still, complete page ----------
+    ctx = b.new_context(viewport={'width': 1440, 'height': 900}, accept_downloads=True)
+    pg = ctx.new_page()
+    watch(pg, 'photo export')
+    pg.goto(f'{BASE}/website?template=editorial-shop', wait_until='domcontentloaded')
+    pg.wait_for_selector('body[data-ready="1"]', timeout=60000)
+    pg.wait_for_timeout(800)
+    prev = pg.evaluate("[...document.querySelector('#preview').contentDocument.images].filter(i => i.complete && i.naturalWidth > 0 && i.getAttribute('src').startsWith('/media/website/')).length")
+    pg.click('#export-btn')
+    with pg.expect_download(timeout=120000) as d:
+        pg.click('#dl-zip')
+    zpath = os.path.join(OUT, 'photo-' + d.value.suggested_filename)
+    d.value.save_as(zpath)
+    with zipfile.ZipFile(zpath) as z:
+        names = z.namelist()
+        index = z.read('index.html').decode('utf-8')
+    with pg.expect_download(timeout=120000) as d:
+        pg.click('#dl-html')
+    hpath = os.path.join(OUT, 'photo-' + d.value.suggested_filename)
+    d.value.save_as(hpath)
+    webps = [n for n in names if n.startswith('assets/img/') and n.endswith('.webp')]
+    check('photos: the template shows its photos and the ZIP carries them (with small copies) under assets/img',
+          prev >= 8 and len(webps) >= 20 and any(n.endswith('-sm.webp') for n in webps) and '/media/website/' not in index and 'src="assets/img/editorial-shop-hero.webp"' in index,
+          {'previewPhotos': prev, 'webps': len(webps), 'sample': webps[:4]})
+    ctx.close()
+    off = b.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce')
+    net = []
+    off.route('**/*', lambda r: (net.append(r.request.url), r.abort()) if not r.request.url.startswith(('file:', 'data:', 'blob:')) else r.continue_())
+    op = off.new_page()
+    local_err = []
+    op.on('pageerror', lambda e: local_err.append(str(e)))
+    op.goto('file://' + os.path.abspath(hpath), wait_until='load')
+    op.wait_for_timeout(800)
+    one = op.evaluate("({ data: [...document.images].filter(i => i.src.startsWith('data:image/webp')).length, loaded: [...document.querySelector('[data-page]:not([hidden])').querySelectorAll('img')].filter(i => i.complete && i.naturalWidth > 0).length, rv: document.documentElement.classList.contains('rv'), anim: getComputedStyle(document.querySelector('.runway-media img')).animationName, sw: document.documentElement.scrollWidth, size: document.documentElement.outerHTML.length })")
+    op.screenshot(path=f'{OUT}/photo-single-reduced-390.png')
+    off.close()
+    check('photos: one-file export embeds them and works offline; reduced motion turns off reveals and Ken Burns', one['data'] >= 8 and one['loaded'] >= 8 and not one['rv'] and one['anim'] == 'none' and one['sw'] <= 390 and not local_err and all('fonts.g' in u for u in net),
+          {**one, 'errors': local_err[:3]})
     b.close()
 
 print('errors:', errors)
