@@ -30,4 +30,3 @@ export const OPTICAL_EFFECTS = [
 }));
 
 export const opticalEffectById = (id) => OPTICAL_EFFECTS.find((effect) => effect.id === id) || null;
-
