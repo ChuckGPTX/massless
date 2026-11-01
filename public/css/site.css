@@ -124,6 +124,8 @@ button { cursor: pointer; }
 }
 .foot nav { display: flex; gap: 20px; flex-wrap: wrap; }
 .foot a:hover { color: var(--text); }
+.foot .text-button { background: none; border: 0; padding: 0; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.foot .text-button:hover { color: var(--text); }
 
 /* ---------- dialog (ledger) ---------- */
 .sheet {
@@ -168,3 +170,9 @@ button { cursor: pointer; }
 .gpu-modes [aria-selected="true"] { border-color: rgba(255, 191, 47, 0.8); color: inherit; }
 .gpu-panel .gpu-cost { font-size: 0.85em; opacity: 0.75; margin: 8px 0 0; }
 .gpu-form select[name$="_library"] { max-width: 260px; }
+
+/* Build: the Games and Website tabs (/games/, /website/) */
+.build-tabs { display: flex; justify-content: center; gap: 6px; width: max-content; max-width: calc(100% - 24px); margin: 18px auto 0; padding: 4px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line-2); }
+.build-tabs a { padding: 8px 18px; border-radius: 9px; color: var(--muted); font: 800 16px/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; }
+.build-tabs a[aria-current="page"] { background: var(--text); color: var(--bg); }
+.build-tabs a:hover:not([aria-current="page"]) { color: var(--text); }

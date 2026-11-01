@@ -101,7 +101,7 @@ export function initNavigation() {
   toggle.setAttribute("aria-controls", nav.id);
   toggle.setAttribute("aria-label", "Browse studios");
   toggle.append(
-    node("span", "", active?.label || (path === "/workflows" ? "Workflows" : path === "/projects" ? "Projects" : path === "/library" ? "Library" : ["/edit","/build","/cut","/scene"].includes(path) ? "Create" : "Explore")),
+    node("span", "", active?.label || (path === "/workflows" ? "Workflows" : path === "/projects" ? "Projects" : path === "/library" ? "Library" : path === "/games" ? "Games" : path === "/website" ? "Website" : ["/edit","/build","/cut","/scene"].includes(path) ? "Create" : "Explore")),
     node("span", "studio-mobile-label", "Studios"),
     icon("chevron"),
   );
@@ -213,6 +213,14 @@ export function initNavigation() {
       if (hovered && !wrap.contains(document.activeElement))
         timer = setTimeout(() => close(), 180);
     });
+  }
+
+  // Build: games and websites get their own top-level links (also in the 3D menu, where narrow desktops find them).
+  for (const [label, href] of [["Games", "/games/"], ["Website", "/website/"]]) {
+    const a = node("a", "studio-explore build-link", label);
+    a.href = href;
+    if (path === href.slice(0, -1)) a.setAttribute("aria-current", "page");
+    nav.append(a);
   }
 
   toggle.addEventListener("click", () => {

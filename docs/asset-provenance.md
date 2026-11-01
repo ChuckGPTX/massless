@@ -51,3 +51,12 @@ The 28 camera presets use distinct scene assets. Seven cards use existing motion
 ## Form & Field website images
 
 The pavilion, ceramics and lounge images in `public/media/website/` were generated through the live Chucksi Image tool with FLUX.1 schnell. The responsive site uses those images in an original HTML/CSS layout and offers prompt-remix links. See the folder's provenance JSON for known seeds and file checksums; missing original metadata is explicitly marked.
+
+## Games gallery
+
+`public/media/games/*.mp4` and the matching `.jpg` posters were recorded from the games themselves: `tools/game_previews.py record` opens /games in headless Chromium and captures each gallery game with its own bot playing. The art in them is drawn in code by Chucksi Games, except two games:
+
+- **T1 Vendetta: Street Run** uses `t1-tone.png`, `t1-rivals.png` (sprite strips cut from the T1 Vendetta fighting game's animated sheets) and four stage backgrounds (`t1-jstreet.jpg`, `t1-plaza.jpg`, `t1-navypier.jpg`, `t1-ironbloom.jpg`).
+- **Tiny Prompters: Robot Match** uses `tp-greenhouse.jpg`, a crop of `public/media/art/tp-greenhouse.jpg`.
+
+Both are projects by the Chucksi maker and are used with permission, as with the `t1-*` and `tp-*` stills above. That artwork is not covered by the MIT code license. `tools/game_previews.py assets` regenerates the cut files from a local T1 Vendetta checkout.

@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Website builder — Chucksi</title>
+  <meta name="description" content="Describe your business, event, band or launch and get an editable website. Edit in place, switch styles, then export a fast static site and host it free anywhere. Open source, no account.">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chucksi">
+  <meta property="og:url" content="https://chucksi.com/website">
+  <meta property="og:title" content="Chucksi Website — describe a site, get a fast one">
+  <meta property="og:description" content="Describe it, edit it in place, export a fast static site and host it free anywhere. Open source, no account.">
+  <meta property="og:image" content="https://chucksi.com/media/art/massless-portal-v1.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://chucksi.com/website">
+  <link rel="icon" href="/favicon.svg">
+  <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/instrument-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <link rel="stylesheet" href="/css/website.css">
+  <script type="module" src="/js/navigation.js"></script>
+</head>
+<body class="ws-body">
+  <header class="nav">
+    <a class="nav-logo" href="/" aria-label="Chucksi home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a>
+    <nav class="nav-links" aria-label="Main"></nav>
+    <div class="nav-right">
+      <a class="btn-ghost" href="/library/">My library</a><button type="button" class="btn-accent" id="nav-export">Export site</button>
+    </div>
+  </header>
+
+  <nav class="build-tabs" aria-label="Build">
+    <a href="/games/">Games</a><a href="/website/" aria-current="page">Website</a>
+  </nav>
+
+  <main class="ws">
+    <aside class="ws-side" aria-label="Website builder">
+      <div class="ws-tabs" role="tablist" aria-label="Builder">
+        <button type="button" role="tab" id="t-create" aria-controls="p-create" aria-selected="true">Create</button>
+        <button type="button" role="tab" id="t-page" aria-controls="p-page" aria-selected="false" tabindex="-1">Page</button>
+        <button type="button" role="tab" id="t-theme" aria-controls="p-theme" aria-selected="false" tabindex="-1">Theme</button>
+        <button type="button" role="tab" id="t-cms" aria-controls="p-cms" aria-selected="false" tabindex="-1">Content</button>
+        <button type="button" role="tab" id="t-settings" aria-controls="p-settings" aria-selected="false" tabindex="-1">Settings</button>
+      </div>
+
+      <div class="ws-panel" id="p-create" role="tabpanel" aria-labelledby="t-create">
+        <div class="ws-hero">
+          <p class="ws-eyebrow"><span class="badge-new">NEW</span> Chucksi Website · open source</p>
+          <h1 class="display">Describe a site.<br><em>Get a fast one.</em></h1>
+          <p class="ws-sub">Edit any word in place, swap the style, then export plain HTML you can host free anywhere.</p>
+        </div>
+        <div class="ws-field">
+          <div class="ws-f-head"><label for="prompt">Describe it</label><output id="o-prompt">0 / 600</output></div>
+          <textarea id="prompt" rows="4" maxlength="600" placeholder="A site for my lawn care business in Cedar Rapids…"></textarea>
+        </div>
+        <fieldset class="ws-group">
+          <legend>Kind of site</legend>
+          <div class="ws-chips" id="kinds" role="radiogroup" aria-label="Kind of site"></div>
+        </fieldset>
+        <fieldset class="ws-group">
+          <legend>Style</legend>
+          <div class="ws-styles" id="styles" role="radiogroup" aria-label="Style"></div>
+        </fieldset>
+        <p class="ws-note">The built-in writer turns your words into pages and sections in your browser. Nothing you type is sent anywhere.</p>
+        <button type="button" class="ws-go" id="generate"><span id="generate-label">Generate site</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button>
+        <div class="ws-fill" id="fill-box" hidden>
+          <p><strong id="fill-count">0 images</strong> are waiting for pictures. Fill them with the Image engine (FLUX.1 schnell on Cloudflare's free daily allowance), or click any image to upload your own.</p>
+          <button type="button" class="btn-ghost wide" id="fill-images">Fill images with AI</button>
+        </div>
+        <div class="ws-sites" id="sites-wrap" hidden>
+          <h2 class="ws-h2">Your sites</h2>
+          <p class="ws-note">Saved in this browser only.</p>
+          <ul class="ws-site-list" id="sites"></ul>
+        </div>
+      </div>
+
+      <div class="ws-panel" id="p-page" role="tabpanel" aria-labelledby="t-page" hidden>
+        <div class="ws-row-head"><h2 class="ws-h2">Pages</h2><button type="button" class="ws-mini" id="add-page">+ Page</button></div>
+        <ul class="ws-pagelist" id="pagelist"></ul>
+        <div class="ws-row-head"><h2 class="ws-h2">Sections</h2><button type="button" class="ws-mini" id="add-section">+ Section</button></div>
+        <ol class="ws-seclist" id="seclist"></ol>
+        <div class="ws-inspector" id="inspector"></div>
+      </div>
+
+      <div class="ws-panel" id="p-theme" role="tabpanel" aria-labelledby="t-theme" hidden>
+        <div class="ws-group-h">Style</div>
+        <div class="ws-styles" id="theme-styles" role="radiogroup" aria-label="Style"></div>
+        <div class="ws-group-h">Mode</div>
+        <div class="ws-seg" id="mode" role="radiogroup" aria-label="Mode"></div>
+        <div class="ws-group-h">Palette</div>
+        <div class="ws-palettes" id="palettes" role="radiogroup" aria-label="Palette"></div>
+        <div class="ws-inline"><label for="accent">Brand colour</label><input type="color" id="accent"><output id="o-accent"></output></div>
+        <div class="ws-group-h">Type</div>
+        <label class="ws-sel"><small>Headings</small><select id="font-h"></select></label>
+        <label class="ws-sel"><small>Body text</small><select id="font-b"></select></label>
+        <div class="ws-group-h">Shape and rhythm</div>
+        <label class="ws-range"><span>Corner radius <output id="o-radius"></output></span><input type="range" id="radius" min="0" max="28" step="1"></label>
+        <div class="ws-seg" id="spacing" role="radiogroup" aria-label="Spacing"></div>
+        <div class="ws-group-h">Motion</div>
+        <div class="ws-seg" id="motion" role="radiogroup" aria-label="Motion"></div>
+        <button type="button" class="btn-ghost wide" id="replay">Preview scroll reveal</button>
+        <p class="ws-note">Visitors who ask their device for reduced motion always get a still site.</p>
+        <details class="ws-details"><summary>Contrast check</summary><ul class="ws-contrast" id="contrast"></ul></details>
+      </div>
+
+      <div class="ws-panel" id="p-cms" role="tabpanel" aria-labelledby="t-cms" hidden>
+        <p class="ws-note">Collections are lists of things, each with the same fields. List sections show them, and posts and listings each get their own page.</p>
+        <div class="ws-seg" id="cms-tabs" role="tablist" aria-label="Collections"></div>
+        <div id="cms"></div>
+      </div>
+
+      <div class="ws-panel" id="p-settings" role="tabpanel" aria-labelledby="t-settings" hidden>
+        <div id="settings"></div>
+      </div>
+    </aside>
+
+    <section class="ws-stage" aria-label="Preview">
+      <div class="ws-bar">
+        <div class="ws-bps" role="group" aria-label="Preview width">
+          <button type="button" data-bp="desktop" aria-pressed="true" title="Desktop, 1440 px"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="3.5" width="16" height="10.5" rx="1.5"/><path d="M7 17h6M10 14v3"/></svg><span>Desktop</span></button>
+          <button type="button" data-bp="tablet" aria-pressed="false" title="Tablet, 768 px"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="2" width="12" height="16" rx="1.8"/><path d="M9 15.5h2"/></svg><span>Tablet</span></button>
+          <button type="button" data-bp="phone" aria-pressed="false" title="Phone, 390 px"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="6" y="2" width="8" height="16" rx="1.8"/><path d="M9.2 15.5h1.6"/></svg><span>Phone</span></button>
+        </div>
+        <select id="page-select" class="ws-page-select" aria-label="Page"></select>
+        <div class="ws-acts">
+          <button type="button" class="ws-icon" id="undo" aria-label="Undo" title="Undo (Ctrl+Z)" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5L3.5 9l4 4M4 9h8.5a4 4 0 010 8H10"/></svg></button>
+          <button type="button" class="ws-icon" id="redo" aria-label="Redo" title="Redo (Ctrl+Shift+Z)" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 5l4 4-4 4M16 9H7.5a4 4 0 000 8H10"/></svg></button>
+          <span class="ws-saved" id="saved" aria-live="polite"></span>
+          <button type="button" class="ws-pill" id="share"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 12l4-4M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2"/></svg>Share</button>
+          <button type="button" class="ws-pill" id="preview-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3.5h5.5V9M16.5 3.5L9 11M8 4.5H4.5v11h11V12"/></svg>Preview</button>
+          <button type="button" class="ws-pill" id="host-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10a7 7 0 1014 0 7 7 0 00-14 0zM3 10h14M10 3c2 2 2.8 4.4 2.8 7S12 15 10 17c-2-2-2.8-4.4-2.8-7S8 5 10 3z"/></svg>Host it free</button>
+          <button type="button" class="ws-pill accent" id="export-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 16.5h12"/></svg>Export</button>
+        </div>
+      </div>
+      <div class="ws-canvas" id="canvas">
+        <div class="ws-frame" id="frame-wrap"><iframe id="preview" title="Website preview" src="about:blank"></iframe></div>
+      </div>
+      <div class="ws-status" id="status" role="status" hidden><div class="ws-meter"><i id="meter"></i></div><p id="status-text"></p><button type="button" class="ws-mini" id="status-cancel" hidden>Cancel</button></div>
+    </section>
+  </main>
+
+  <dialog class="sheet ws-dialog" id="add-dialog">
+    <form method="dialog" class="sheet-head"><h2>Add a section</h2><button class="x" aria-label="Close">×</button></form>
+    <div class="ws-lib" id="lib"></div>
+  </dialog>
+
+  <dialog class="sheet ws-dialog" id="img-dialog">
+    <form method="dialog" class="sheet-head"><h2>Image</h2><button class="x" aria-label="Close">×</button></form>
+    <div class="ws-img-grid">
+      <div class="ws-img-prev" id="img-prev"></div>
+      <div class="ws-img-side">
+        <label class="ws-up btn-ghost wide"><input type="file" id="img-file" accept="image/*" hidden>Upload an image</label>
+        <div class="ws-field"><div class="ws-f-head"><label for="img-prompt">Or generate it</label></div><textarea id="img-prompt" rows="3" maxlength="400"></textarea></div>
+        <button type="button" class="btn-accent wide" id="img-gen">Generate with Image</button>
+        <div class="ws-field"><div class="ws-f-head"><label for="img-alt">Alt text</label><span class="ws-hint">What the image shows, for screen readers and search</span></div><input type="text" id="img-alt" maxlength="160"></div>
+        <label class="ws-check sm"><input type="checkbox" id="img-deco"> <span>Decorative (no alt text)</span></label>
+        <div class="ws-img-acts"><button type="button" class="btn-ghost" id="img-remove">Remove image</button><button type="button" class="btn-accent" id="img-done">Done</button></div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="sheet ws-dialog" id="export-dialog">
+    <form method="dialog" class="sheet-head"><h2>Export</h2><button class="x" aria-label="Close">×</button></form>
+    <p>A folder of plain HTML and CSS: one page per file, images resized with smaller copies for phones, a sitemap, robots.txt, a social preview image and a favicon. No framework, under 3 KB of JavaScript.</p>
+    <h3 class="ws-h3">Before you publish</h3>
+    <ul class="ws-checklist" id="checklist"></ul>
+    <label class="ws-check"><input type="checkbox" id="credit"> <span><strong>Small “Made with Chucksi” credit</strong><small>In the footer. Optional, and it helps others find a free tool.</small></span></label>
+    <div class="ws-export-acts">
+      <button type="button" class="btn-accent" id="dl-zip">Download ZIP</button>
+      <button type="button" class="btn-ghost" id="dl-html">Download one HTML file</button>
+      <button type="button" class="btn-ghost" id="to-host">How to host it free</button>
+    </div>
+  </dialog>
+
+  <dialog class="sheet ws-dialog wide" id="host-dialog">
+    <form method="dialog" class="sheet-head"><h2>Host it free</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Your export is a plain static site, so any static host works. These three are free and need no code. Each also lets you add your own domain later.</p>
+    <div class="ws-hosts">
+      <article class="ws-host">
+        <h3>Cloudflare Pages</h3>
+        <ol>
+          <li>Download the ZIP.</li>
+          <li>In the <a href="https://dash.cloudflare.com/" rel="noopener" target="_blank">Cloudflare dashboard</a>, open <b>Workers &amp; Pages</b>, choose <b>Create application</b>, then Pages and <b>Drag and drop your files</b>.</li>
+          <li>Name the project, drop the ZIP (or the unzipped folder) and choose <b>Deploy site</b>.</li>
+        </ol>
+        <p class="ws-note">Live at <code>your-name.pages.dev</code>. Free plan: up to 1,000 files, 25 MiB each.</p>
+      </article>
+      <article class="ws-host">
+        <h3>Netlify Drop</h3>
+        <ol>
+          <li>Download the ZIP.</li>
+          <li>Open <a href="https://app.netlify.com/drop" rel="noopener" target="_blank">app.netlify.com/drop</a>.</li>
+          <li>Drag the ZIP or the unzipped folder onto the page.</li>
+        </ol>
+        <p class="ws-note">Live at a <code>.netlify.app</code> address in seconds. Without an account it is password-protected until you sign up free and claim it.</p>
+      </article>
+      <article class="ws-host">
+        <h3>GitHub Pages</h3>
+        <ol>
+          <li>Unzip the download.</li>
+          <li>Create a public repository on <a href="https://github.com/new" rel="noopener" target="_blank">github.com/new</a>, choose <b>uploading an existing file</b>, drag in everything inside the folder and commit.</li>
+          <li>In <b>Settings</b>, <b>Pages</b>: deploy from the <b>main</b> branch, <b>/ (root)</b>, then Save.</li>
+        </ol>
+        <p class="ws-note">Live at <code>username.github.io/repository</code> in about a minute. The ZIP includes <code>.nojekyll</code> so GitHub serves it as is.</p>
+      </article>
+    </div>
+    <p class="ws-note" id="host-hook">Hosting on a Chucksi address is not offered: free hosting for anyone needs abuse safeguards first.</p>
+  </dialog>
+
+  <dialog class="sheet ws-dialog" id="share-dialog">
+    <form method="dialog" class="sheet-head"><h2>Share a preview</h2><button class="x" aria-label="Close">×</button></form>
+    <p>This link holds the whole site, compressed, in the address itself. Anyone who opens it gets their own copy in the editor. Images you uploaded or generated stay in your browser and are not in the link.</p>
+    <div class="ws-share"><input type="text" id="share-url" readonly aria-label="Share link"><button type="button" class="btn-accent" id="copy-share">Copy</button></div>
+    <p class="ws-note" id="share-size"></p>
+  </dialog>
+
+  <dialog class="sheet" id="ledger">
+    <form method="dialog" class="sheet-head"><h2>Tools, models &amp; artwork</h2><button class="x" aria-label="Close">×</button></form>
+    <div class="scroll"><table>
+      <thead><tr><th>Job</th><th>Model or code</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Site writing</td><td>Chucksi built-in writer and section library</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
+        <tr><td>Editing, preview and export</td><td>Chucksi Website</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
+        <tr><td>Images (optional)</td><td>FLUX.1 [schnell]</td><td>Apache-2.0</td><td>Cloudflare Workers AI free tier, Pollinations as backup</td><td>$0</td></tr>
+        <tr><td>Fonts</td><td>Google Fonts families</td><td>SIL Open Font License</td><td>Google Fonts, from your visitors' browsers</td><td>$0</td></tr>
+        <tr><td>Icons</td><td>Chucksi stroke icon set</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
+      </tbody>
+    </table></div>
+    <p>Images you upload stay in your browser. Exported sites are plain HTML and CSS that you own.</p>
+  </dialog>
+
+  <footer class="foot">
+    <span>Chucksi · Open creative tools · MIT licensed code</span>
+    <nav aria-label="Footer">
+      <button class="text-button" data-dialog="ledger">Models &amp; artwork</button><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
+    </nav>
+  </footer>
+
+  <script type="module" src="/js/pages/website.js"></script>
+</body>
+</html>

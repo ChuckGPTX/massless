@@ -28,7 +28,7 @@ test("new studio routes serve real pages and pin their scripts and styles", asyn
       "/workflows/",
       "/projects",
       "/projects/",
-      "/library", "/edit", "/cut", "/build", "/scene",
+      "/library", "/edit", "/cut", "/build", "/games", "/games/", "/website", "/website/", "/scene",
       "/music",
       "/music/",
       "/music/index.html",
@@ -56,7 +56,7 @@ test("new studio routes serve real pages and pin their scripts and styles", asyn
       assert.match(html, /Music, made visible|FORM|studio|STUDIO|workroom|library|Games/);
       if (route === "/" || route.startsWith("/studios/image")) {
         assert.ok(
-          (html.includes('href="/demo-site/"') || html.includes('href="/build/?template=website"')),
+          (html.includes('href="/demo-site/"') || html.includes('href="/website/"')),
           "page links remain navigable",
         );
         assert.ok(
