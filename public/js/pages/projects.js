@@ -100,6 +100,8 @@ async function action(fn) {
       b.disabled = false;
   }
 }
+for (const b of document.querySelectorAll("#auth-form .oauth"))
+  b.onclick = () => action(() => cloud.signInWithProvider(b.dataset.provider));
 $("#auth-form").onsubmit = (e) => {
   e.preventDefault();
   action(async () => {
@@ -186,7 +188,17 @@ try {
   const c = await cloud.cloudConfig();
   if (!c.cloud)
     message("Cloud projects are being connected. Your local tools are ready.");
-  else await refresh();
+  else {
+    // back from Google/GitHub or an email confirmation link
+    let back = false;
+    try {
+      back = await cloud.completeRedirect();
+    } catch (err) {
+      message(err.message);
+    }
+    await refresh();
+    if (back) message("Signed in as " + (cloud.session()?.user?.email || "you") + ". Welcome to Chucksi.");
+  }
 } catch (e) {
   message(e.message);
 }

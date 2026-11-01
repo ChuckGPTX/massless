@@ -304,3 +304,10 @@
     display: none;
   }
 }
+
+/* Google / GitHub sign-in on the Projects page */
+.oauth-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.oauth-buttons .oauth { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; width: 100%; }
+.oauth-or { display: flex; align-items: center; gap: 12px; margin: 16px 0 6px; color: #8d8d8d; font-size: 13px; }
+.oauth-or::before, .oauth-or::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.12); }
+@media (max-width: 520px) { .oauth-buttons { grid-template-columns: 1fr; } }
