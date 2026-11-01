@@ -284,7 +284,7 @@ export const STUDIOS = [
     note: "Explore depth scenes, complete objects and imported 3D files.",
     features: [
       item("Scene studio", "Stage objects, lights and cameras; export GLB", "/scene/", "cube", "NEW"),
-      item("Game templates", "Customize and export a playable arcade game", "/build/?template=game", "game", "NEW"),
+      item("Games", "Describe a game, play it, remix and share it", "/build/?template=game", "game", "NEW"),
       item("Website builder", "Make and export an original studio website", "/build/?template=website", "window", "NEW"),
       item(
         "Image to 3D scene",

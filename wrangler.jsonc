@@ -27,6 +27,8 @@
     "PER_VISITOR_CAP": "12",
     "BEATS_CAP": "60",
     "PER_VISITOR_BEATS": "10",
+    "GAME_CAP": "60",
+    "PER_VISITOR_GAME": "10",
     "ASK_CAP": "30",
     "PER_VISITOR_ASK": "8",
     "TTS_CAP": "300",

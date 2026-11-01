@@ -1,8 +1,9 @@
 import { generationAPI } from './generations.js';
 import { signApi, signGated, signCleanup } from './sign.js';
+import { GAME_RULES, GENRES, sanitizeRecipe, templateRecipe } from '../public/js/games/recipe.js';
 export { GenerationLedger } from './generations.js';
 // Massless Worker: serves the static app and the free-tier model APIs on Cloudflare Workers AI.
-// /api/shot (images), /api/beats and /api/ask (Llama 3.3), /api/tts (MeloTTS), /api/transcribe (Whisper).
+// /api/shot (images), /api/beats, /api/ask and /api/game (Llama 3.3), /api/tts (MeloTTS), /api/transcribe (Whisper).
 // Daily caps keep usage inside the 10,000 free Neurons per day, so this costs $0 on any plan.
 // /api/human trades a Cloudflare Turnstile token for a pass cookie that the model endpoints ask for.
 
@@ -35,7 +36,7 @@ const ai = (env, model, input) => (env.AI_GATEWAY ? env.AI.run(model, input, { g
 // Endpoints that spend the free allowance ask for a pass cookie. Without one they answer 401
 // { human: true, sitekey }; the page runs Turnstile, posts the token to /api/human and gets a signed
 // cookie for PASS_HOURS. The check is off unless TURNSTILE_SITEKEY, TURNSTILE_SECRET and PASS_KEY are set.
-const GATED = new Set(['/api/shot', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe']);
+const GATED = new Set(['/api/shot', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe', '/api/game']);
 // Massless Sign POSTs (create, events, verify) also need a pass; see signGated() in src/sign.js.
 const PASS_COOKIE = 'ml_pass';
 const PASS_HOURS = 6;
@@ -213,6 +214,36 @@ async function beats(request, env) {
   }
   if (!spec || !Array.isArray(spec.blocks)) return json({ error: 'The model returned something that is not a beat sheet.' }, 502);
   return json({ spec, model: LLM });
+}
+
+// POST /api/game writes a game recipe (Games in Build) with Llama 3.3 70B: { prompt, genre, dims } -> { recipe }.
+// The recipe is sanitized here and again in the page; the page falls back to its built-in writer on any error.
+async function game(request, env) {
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  const origin = request.headers.get('origin');
+  if (origin && new URL(origin).host !== new URL(request.url).host) return json({ error: 'Cross-site requests are not allowed.' }, 403);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Send JSON: { "prompt": "...", "genre": "auto", "dims": "2d" }' }, 400); }
+  const prompt = String(body.prompt || '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 300);
+  const genre = GENRES[body.genre] ? body.genre : 'auto';
+  const dims = body.dims === '3d' ? '3d' : '2d';
+  if (!prompt) return json({ error: 'Describe the game first.' }, 400);
+  const stop = await allow(request, env, 'g', Number(env.GAME_CAP || 60), Number(env.PER_VISITOR_GAME || 10));
+  if (stop) return json({ error: 'The free game writer is resting for today. The built-in writer still works.' }, 429);
+  let result;
+  try {
+    result = await ai(env, LLM, {
+      messages: [{ role: 'system', content: GAME_RULES }, { role: 'user', content: JSON.stringify({ prompt, genre, dims }) }],
+      max_tokens: 900,
+      temperature: 0.8,
+    });
+  } catch (e) {
+    return json({ error: `Workers AI could not write the game: ${e.message || e}` }, 502);
+  }
+  const fallback = templateRecipe(prompt, genre, { dims });
+  const recipe = sanitizeRecipe(result && result.response, fallback);
+  if (recipe === fallback) return json({ error: 'The model returned something that is not a game recipe.' }, 502);
+  return json({ recipe, model: LLM });
 }
 
 // POST /api/ask answers a question about a document's text with Llama 3.3 70B (Office > Ask). Only the text
@@ -404,7 +435,7 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
+const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/games': '/games/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
 for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studios/${studio}`] = `/studios/${studio}/index.html`;
 PAGES['/sign'] = '/sign/index.html';
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
@@ -450,7 +481,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects|library|edit|build|cut|scene|sign)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects|library|edit|build|games|cut|scene|sign)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
@@ -473,6 +504,7 @@ export default {
     }
     if (url.pathname === '/api/shot') return shot(request, env);
     if (url.pathname === '/api/beats') return beats(request, env);
+    if (url.pathname === '/api/game') return game(request, env);
     if (url.pathname === '/api/ask') return ask(request, env);
     if (url.pathname === '/api/tts') return tts(request, env);
     if (url.pathname === '/api/transcribe') return transcribe(request, env);
