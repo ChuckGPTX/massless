@@ -3,106 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Games & websites — Chucksi</title>
+    <title>Build — Chucksi</title>
+    <meta name="theme-color" content="#0b0b0c" />
     <link rel="icon" href="/favicon.svg" />
+    <!-- Build is two tabs: Games (/games/) and Website (/website/). Old links (/build/?template=game|website,
+         with a #g= or #play= game link) land on the right one. -->
+    <script>
+      (function () {
+        var t = new URLSearchParams(location.search).get("template");
+        var games = t !== "website" || /^#(g|play)=/.test(location.hash);
+        location.replace((games ? "/games/" : "/website/") + location.hash);
+      })();
+    </script>
     <link rel="stylesheet" href="/css/site.css" />
-    <link rel="stylesheet" href="/css/navigation.css" />
-    <link rel="stylesheet" href="/css/workbench.css" />
-    <script type="module" src="/js/navigation.js"></script>
-    <script type="module" src="/js/pages/build.js"></script>
   </head>
   <body>
-    <header class="nav">
-      <a class="nav-logo" href="/" aria-label="Chucksi home"
-        ><svg viewBox="0 0 32 32" aria-hidden="true">
-          <circle
-            cx="16"
-            cy="16"
-            r="11.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="3"
-          />
-          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
-          <path
-            d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6"
-            stroke="currentColor"
-            stroke-width="3"
-          /></svg
-      ></a>
-      <nav class="nav-links" aria-label="Main"></nav>
-      <div class="nav-right">
-        <a class="btn-ghost" href="/library/">My library</a
-        ><a class="btn-accent" href="/workflows/">Workflows ↗</a>
-      </div>
-    </header>
-    <main class="bench">
-      <section class="bench-intro">
-        <p class="eyebrow">TEMPLATE STUDIO / PLAY. EDIT. EXPORT.</p>
-        <h1>Make it interactive.</h1>
-        <p>
-          Customize an original website or arcade game. Preview the real result
-          and export a standalone HTML file.
-        </p>
-      </section>
-      <div class="workroom">
-        <aside class="controls">
-          <label
-            >Template<select id="template">
-              <option value="website">Studio website</option>
-              <option value="game">Orbit arcade game</option>
-            </select></label
-          ><label
-            >Name<input id="name" maxlength="60" value="Form & Field" /></label
-          ><label
-            >Headline<input
-              id="headline"
-              maxlength="100"
-              value="Ideas, made tangible." /></label
-          ><label
-            >Description<textarea id="description" maxlength="400">
-An independent studio making room for imagination.</textarea
-            ></label
-          ><label
-            >Accent<input id="accent" type="color" value="#d7e89c" /></label
-          ><label
-            >Image<select id="asset">
-              <option value="">Original pavilion sample</option>
-            </select></label
-          ><label
-            >Game speed<input
-              id="speed"
-              type="range"
-              min="1"
-              max="5"
-              value="2" /></label
-          ><button id="preview" class="btn-accent">Update preview</button
-          ><button id="download" class="btn-ghost">Export HTML</button
-          ><button id="save" class="btn-ghost">Save settings</button
-          ><label
-            >Restore settings<input
-              id="restore"
-              type="file"
-              accept="application/json"
-          /></label>
-          <p>
-            No generated code or external scripts run in this preview. Exported
-            pages include their image and work offline.
-          </p>
-        </aside>
-        <section class="stage">
-          <iframe
-            id="preview-frame"
-            sandbox="allow-scripts"
-            title="Interactive template preview"
-          ></iframe>
-          <p id="status" role="status"></p>
-        </section>
-      </div>
+    <main class="wrap" style="padding: 48px 16px">
+      <h1>Build</h1>
+      <p>Make a game or a website, in your browser.</p>
+      <p><a class="btn-accent" href="/games/">Games</a> <a class="btn-ghost" href="/website/">Website</a></p>
     </main>
-    <footer class="bench-foot">
-      Made here. Kept here. Free tools, open source.
-      <a href="https://github.com/ChuckGPTX/massless">View source ↗</a>
-    </footer>
   </body>
 </html>

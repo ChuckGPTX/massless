@@ -385,3 +385,8 @@
 }
 
 .mobile-projects{display:none}@media(max-width:1080px){.mobile-projects{display:flex}}
+
+/* Games and Website top-level links: on narrow desktops the bar has no room, and both stay in the 3D menu */
+@media (min-width: 761px) and (max-width: 1260px) {
+  .nav-links a.build-link:not([aria-current="page"]) { display: none; }
+}
