@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Camera moves and storyboards from any still | Chucksi</title>
+  <title>Video studio: text to video, camera moves and storyboards | Chucksi</title>
   <meta name="description" content="Turn one still into a shot: 28 camera moves and one-tap effects (LiDAR scan, vanish, bullet time freeze, clones), rendered on your own device. Cut a storyboard and export MP4. $0.">
   <meta name="theme-color" content="#0b0b0c">
   <meta property="og:type" content="website">
@@ -44,7 +44,8 @@
     </div>
   </header>
 
-  <main class="studio">
+  <main class="studio has-prompt">
+    <section class="video-prompt" data-video-prompt aria-label="Text to video" hidden></section>
     <aside class="side" aria-label="Video controls">
       <div class="side-tabs" role="tablist">
         <button role="tab" aria-selected="true" aria-controls="tab-move" id="t-move">Camera move</button>
@@ -151,7 +152,6 @@
       <div class="lib" id="lib" role="radiogroup" aria-label="Camera move"></div>
     </section>
   </main>
-  <section class="gpu-panel promo-panel" data-promo-video aria-label="Free video for members" hidden></section>
   <section class="gpu-panel" data-gpu-panel="animate" aria-label="Hosted GPU" hidden></section>
 
   <dialog class="sheet picker" id="picker">
@@ -181,6 +181,6 @@
 
   <script type="module" src="/js/pages/video.js"></script>
   <script type="module" src="/js/gpu-panel.js"></script>
-  <script type="module" src="/js/promo-video-panel.js"></script>
+  <script type="module" src="/js/video-prompt.js"></script>
 </body>
 </html>

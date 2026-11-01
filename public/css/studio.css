@@ -5,6 +5,22 @@
   display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 12px; padding: 12px;
   height: calc(100vh - var(--nav-h)); height: calc(100dvh - var(--nav-h));
 }
+.studio.has-prompt { grid-template-rows: auto minmax(0, 1fr); }
+.video-prompt { grid-column: 1 / -1; background: linear-gradient(135deg, rgba(255,191,47,.10), rgba(255,191,47,.02) 60%), #111113; border: 1px solid rgba(255,191,47,.35); border-radius: 16px; padding: 14px 16px; }
+.vp-form { display: grid; gap: 10px; }
+.vp-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.vp-kicker { font-family: var(--display, inherit); font-weight: 900; text-transform: uppercase; letter-spacing: .02em; font-size: 20px; color: var(--accent); }
+.vp-hint { color: var(--muted); font-size: 13px; }
+.vp-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
+.vp-row textarea { flex: 1 1 420px; min-height: 56px; resize: vertical; font: inherit; font-size: 15px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line-2, rgba(255,255,255,.16)); background: rgba(0,0,0,.35); color: var(--text); }
+.vp-actions { display: flex; flex-direction: column; gap: 8px; }
+.vp-go { min-height: 56px; padding: 0 22px; font-size: 15px; white-space: nowrap; }
+.vp-opts select { background: var(--surface-2, #1a1a1d); color: var(--text); border: 1px solid var(--line-2, rgba(255,255,255,.16)); border-radius: 10px; padding: 8px 10px; font: inherit; font-size: 13px; }
+.vp-status { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.vp-status a { color: var(--accent); text-decoration: underline; }
+.vp-result { display: grid; gap: 8px; margin-top: 10px; }
+.vp-result video { width: min(100%, 720px); max-height: 46vh; border-radius: 12px; background: #000; }
+.vp-result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .side, .stage { background: #111113; border: 1px solid var(--line); border-radius: 16px; min-height: 0; }
 .side { display: flex; flex-direction: column; overflow: hidden; }
 .stage { overflow: auto; padding: 14px 20px 28px; scrollbar-width: thin; scrollbar-color: #333 transparent; }
@@ -212,6 +228,9 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 @media (max-width: 900px) {
   .studio-body { overflow: auto; }
   .studio { grid-template-columns: 1fr; height: auto; padding: 8px; }
+  .video-prompt { order: 0; }
+  .vp-actions { flex-direction: row; width: 100%; }
+  .vp-go { flex: 1; }
   .side { order: 2; max-height: none; }
   .side-scroll { overflow: visible; }
   .side-foot { position: sticky; bottom: 0; z-index: 5; border-radius: 0 0 16px 16px; }
