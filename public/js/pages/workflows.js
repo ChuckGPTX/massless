@@ -1,5 +1,11 @@
 import { createPreviewMotion } from "../preview-motion.js";
-import { WORKFLOWS, validatePlan, stepURL } from "../workflow-data.js";
+import {
+  WORKFLOWS,
+  DESIGN_WORKFLOWS,
+  WEBSITE_WORKFLOWS,
+  validatePlan,
+  stepURL,
+} from "../workflow-data.js";
 import { all } from "../store.js";
 import * as cloud from "../cloud.js";
 const $ = (s) => document.querySelector(s),
@@ -12,6 +18,40 @@ const make = (tag, cls, text) => {
 };
 let plan;
 let shots = [];
+// One-click design workflows open in place: /workflows?make=<id>
+const makeId = new URLSearchParams(location.search).get("make");
+if (makeId && DESIGN_WORKFLOWS.some((w) => w.id === makeId)) {
+  document.body.classList.add("making");
+  import("../make/app.js")
+    .then((m) => m.start(makeId, $("#maker")))
+    .catch((e) => {
+      document.body.classList.remove("making");
+      $("#maker").hidden = true;
+      console.warn(e);
+    });
+}
+function linkCard(flow, action, container) {
+  const card = make("a", "hub-card make-card");
+  card.href = flow.href;
+  const image = make("img");
+  image.src = flow.image;
+  image.alt = "";
+  image.loading = "lazy";
+  image.width = 800;
+  image.height = 600;
+  const body = make("div", "hub-card-body");
+  body.append(
+    make("small", "eyebrow", flow.tag),
+    make("h3", "", flow.name),
+    make("p", "", flow.description),
+    make("small", "", "YOU LEAVE WITH / " + flow.output),
+    make("span", "btn-accent", action),
+  );
+  card.append(image, body);
+  container.append(card);
+}
+for (const flow of DESIGN_WORKFLOWS) linkCard(flow, "Make it ↗", $("#make-cards"));
+for (const flow of WEBSITE_WORKFLOWS) linkCard(flow, "Use template ↗", $("#site-cards"));
 function persist() {
   try {
     localStorage.setItem(KEY, JSON.stringify(plan));

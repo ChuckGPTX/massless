@@ -1,0 +1,106 @@
+/* One-click design workflows (/workflows?make=<id>) and their cards. */
+
+.make-group { margin-top: 56px; }
+.make-group:first-of-type { margin-top: 0; }
+.make-group > h2 { margin-bottom: 8px; }
+.make-group + #workflow-cards { margin-top: 18px; }
+.make-grid { margin-top: 22px; }
+.make-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.hub .make-card { text-decoration: none; transition: border-color 0.18s, transform 0.18s; }
+.hub .make-card:hover { border-color: #ffc127; transform: translateY(-2px); }
+.hub .make-card img { height: auto; aspect-ratio: 4 / 3; background: #222226; }
+.make-card .btn-accent { margin-top: auto; }
+.make-card small:not(.eyebrow) { margin-bottom: 16px; }
+
+/* maker mode hides the hub around it */
+body.making .hub-main > :not(#maker) { display: none !important; }
+body.making .hub-main { padding-top: 28px; }
+
+.maker { --m-line: #2c2c31; --m-surface: #151518; }
+.maker-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 28px; }
+.maker-head h1 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; text-transform: uppercase; font-size: clamp(46px, 6vw, 92px); line-height: 0.92; letter-spacing: -0.02em; margin: 10px 0 12px; }
+.maker-lede { color: #a9a9b0; max-width: 640px; font-size: 17px; line-height: 1.55; margin: 0; }
+.maker-back { display: inline-block; color: #a9a9b0 !important; font-size: 14px; margin-bottom: 18px; }
+.maker-back:hover { color: #fff !important; }
+.maker-output { margin: 0; text-align: right; font-size: 15px; color: #e8e8e4; max-width: 260px; }
+.maker-output small { display: block; color: #ffc127; letter-spacing: 0.12em; font-size: 11px; margin-bottom: 6px; }
+
+.maker-body { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 28px; align-items: start; }
+.maker-side { position: sticky; top: calc(var(--nav-h, 58px) + 16px); border: 1px solid var(--m-line); border-radius: 18px; background: var(--m-surface); padding: 20px; max-height: calc(100vh - 100px); overflow: auto; }
+.maker-form { display: grid; gap: 14px; }
+.hub .maker-field, .hub .maker-check { margin: 0; font-size: 13px; color: #c9c9cf; }
+.maker-field > span { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; letter-spacing: 0.01em; }
+.maker-field output { color: #ffc127; font-weight: 500; }
+.hub .maker-field input:not([type='range']), .hub .maker-field select, .hub .maker-field textarea { margin-top: 6px; padding: 10px 12px; border-radius: 9px; font-size: 14px; max-width: none; background: #202024; border-color: #36363c; }
+.hub .maker-field textarea { resize: vertical; line-height: 1.45; }
+.hub .maker-field input[type='range'] { width: 100%; margin-top: 10px; accent-color: #ffc127; }
+.maker-field small, .maker-check small { display: block; color: #85858c; font-size: 12px; line-height: 1.45; margin-top: 6px; font-weight: 400; }
+.maker-check { display: flex !important; gap: 4px; align-items: flex-start; font-weight: 600; }
+.maker-check input { margin-top: 3px; }
+.maker-buttons { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+.maker-buttons small { color: #85858c; font-size: 12px; }
+.maker-side-foot { position: sticky; bottom: -20px; margin: 4px -20px -20px; padding: 14px 20px 18px; background: linear-gradient(to bottom, rgba(21,21,24,0.92), #151518 30%); border-top: 1px solid var(--m-line); display: grid; gap: 10px; }
+.maker-budget { margin: 0; color: #85858c; font-size: 12px; line-height: 1.5; }
+
+.maker-stage { min-width: 0; }
+.maker-status { margin: 0 0 14px; min-height: 22px; color: #a9a9b0; font-size: 14px; }
+.maker.is-busy .maker-status::before { content: ''; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #ffc127; margin-right: 8px; animation: maker-pulse 0.9s ease-in-out infinite alternate; }
+@keyframes maker-pulse { from { opacity: 0.25; } to { opacity: 1; } }
+.maker-boards { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); align-items: start; }
+.maker-boards.layout-single { grid-template-columns: 1fr; }
+.maker-boards.layout-board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.maker-boards.layout-series { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.maker-board { margin: 0; min-width: 0; }
+.maker-board.size-hero, .maker-board.size-wide { grid-column: 1 / -1; }
+.maker-canvas { width: 100%; height: auto; border-radius: 4px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05); background: #222; }
+.layout-single .maker-canvas { width: auto; max-width: 100%; max-height: min(78vh, 1100px); margin: 0 auto; }
+.maker-canvas.is-draggable { touch-action: none; }
+.maker-board figcaption { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; font-size: 13px; color: #c9c9cf; }
+.layout-single .maker-board figcaption { max-width: 760px; margin-left: auto; margin-right: auto; }
+.maker-board figcaption small { display: block; color: #75757c; font-size: 11px; }
+.maker-board-acts { display: flex; gap: 6px; flex-shrink: 0; }
+.hub .btn-ghost.small { padding: 5px 11px; font-size: 12px; min-height: 0; }
+.maker-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--m-line); }
+
+.maker-player { margin-bottom: 26px; }
+.maker-film-frame { max-height: 72vh; margin: 0 auto 12px; display: flex; justify-content: center; }
+.maker-film { height: 100%; max-height: 72vh; width: auto; max-width: 100%; border-radius: 4px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45); background: #000; }
+.maker-transport { display: flex; gap: 12px; align-items: center; max-width: 760px; margin: 0 auto 14px; }
+.maker-transport input { flex: 1; accent-color: #ffc127; }
+.maker-transport output { font-variant-numeric: tabular-nums; color: #a9a9b0; font-size: 13px; min-width: 92px; text-align: right; }
+.maker-player > .maker-buttons { justify-content: center; }
+.maker-film-out { max-width: 760px; margin: 16px auto 0; }
+.maker-film-out video { width: 100%; max-height: 60vh; border-radius: 8px; background: #000; }
+.maker-film-out p { color: #a9a9b0; font-size: 14px; }
+.maker-film-out a { color: #ffc127 !important; }
+
+.maker-showcase { margin-top: 64px; }
+.maker-showcase-head h2 { font-family: 'Big Shoulders Display', sans-serif; font-size: 40px; margin: 8px 0 6px; text-transform: uppercase; }
+.maker-showcase-head p:not(.eyebrow) { color: #a9a9b0; margin: 0 0 18px; }
+.maker-showcase-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(180px, 230px); gap: 16px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
+.maker-example { all: unset; cursor: pointer; scroll-snap-align: start; border: 1px solid var(--m-line); border-radius: 14px; overflow: hidden; background: var(--m-surface); display: flex; flex-direction: column; transition: border-color 0.18s; }
+.maker-example:hover, .maker-example:focus-visible { border-color: #ffc127; }
+.maker-example img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; background: #222226; }
+.maker-example span { padding: 12px 14px 14px; display: grid; gap: 3px; }
+.maker-example strong { font-size: 14px; }
+.maker-example small { color: #85858c; font-size: 12px; }
+
+@media (max-width: 1100px) {
+  .make-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .maker-boards.layout-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .maker-body { grid-template-columns: 1fr; }
+  .maker-side { position: static; max-height: none; }
+  .maker-stage { order: -1; }
+  .maker-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .maker-output { text-align: left; }
+}
+@media (max-width: 650px) {
+  .make-grid-4 { grid-template-columns: 1fr; }
+  .maker-boards, .maker-boards.layout-series { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .maker-boards.layout-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .maker-board figcaption { flex-direction: column; align-items: flex-start; }
+  .maker-showcase-row { grid-auto-columns: 62%; }
+  .layout-single .maker-canvas { max-height: none; width: 100%; }
+}

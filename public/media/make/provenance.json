@@ -1,0 +1,21 @@
+{
+  "note": "Sample frames for the one-click design workflows (public/media/make/samples). They let each workflow open with a complete result before any AI call, and are the fallback when the daily FLUX allowance is used up.",
+  "model": "Generated October 31, 2026 with Pollinations' free community API using its `flux` model (served as FLUX.1 [schnell], Apache-2.0), the same community engine the Image studio falls back to; not through chucksi.com's /api/shot.",
+  "processing": "Bottom 8% cropped to remove the provider's corner mark, re-encoded as WebP quality 76. No reference images were supplied.",
+  "files": {
+    "map-island.webp": "hand-painted illustrated aerial map of a small coastal island town seen from directly above, bird's-eye view, gouache and watercolour, turquoise sea, sandy coves, terracotta rooftops, winding roads, olive groves, tiny boats, lighthouse, soft muted vintage palette, flat cartographic illustration, no text, no labels (seed 11)",
+    "map-alpine.webp": "orthographic top-down view straight down of an alpine lake valley, flat 2D illustrated map, hand-painted gouache, no horizon, turquoise lake, pine forests, small wooden village, winding trail, snowy patches, soft vintage palette, no text, no labels (seed 15)",
+    "film-1.webp": "misty sea at dawn, a single small rowing boat on still water, soft pastel light, cinematic film still, 35mm grain, quiet, minimal composition, no text (seed 21)",
+    "film-2.webp": "close-up of hands holding a paper map on a wooden table by a window, morning light, cinematic film still, 35mm grain, muted colours, no text (seed 22)",
+    "film-3.webp": "empty coastal road through dunes at golden hour, wind in long grass, cinematic film still, 35mm grain, muted warm palette, no text (seed 23)",
+    "film-4.webp": "lighthouse beam over a dark ocean at blue hour, stars appearing, cinematic film still, 35mm grain, deep blue palette, no text (seed 24)",
+    "fest-1.webp": "high-contrast black and white photograph of a saxophone player silhouette on stage, dramatic side light, smoke, grainy, 1960s concert photography, no text (seed 31)",
+    "fest-2.webp": "high-contrast black and white photograph of hands on a grand piano keyboard, dramatic light, grainy, 1960s jazz photography, no text (seed 32)",
+    "fest-3.webp": "high-contrast black and white photograph of a drummer with cymbals in motion, dramatic stage light, grainy, 1960s concert photography, no text (seed 33)",
+    "fest-4.webp": "high-contrast black and white photograph of a double bass player silhouette on stage, dramatic back light, smoke, grainy, 1960s jazz club photography, no text (seed 34)",
+    "fest-5.webp": "high-contrast black and white photograph of a trumpet player silhouette, dramatic spotlight, grainy, 1960s jazz photography, no text (seed 35)",
+    "poem-tex.webp": "abstract risograph texture, soft ink bleed, grainy paper, organic shapes, muted ochre and blue, minimal, no text (seed 41)",
+    "poem-tex2.webp": "close-up of handmade cotton paper texture with soft graphite smudges and faint ink wash, minimal, monochrome warm grey, no text (seed 42)"
+  },
+  "derived": "thumb-*.webp, showcase/*.webp: screenshots of the workflows' own output, rendered from these samples. site-*.webp: placeholder previews for the Website templates, drawn in HTML/CSS with the repository's OFL fonts."
+}

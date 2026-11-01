@@ -118,6 +118,12 @@
   object-fit: cover;
   transition: transform 0.4s;
 }
+.design-examples {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.design-examples .example-media {
+  aspect-ratio: 4/3;
+}
 .example:hover .example-media > img {
   transform: scale(1.035);
 }
@@ -1027,6 +1033,9 @@
   }
   .image-examples .example-media {
     aspect-ratio: 4/5;
+  }
+  .design-examples .example-media {
+    aspect-ratio: 4/3;
   }
   .image-examples h3 {
     font-size: 16px;

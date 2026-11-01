@@ -181,3 +181,15 @@ button { cursor: pointer; }
 .build-tabs a { padding: 8px 18px; border-radius: 9px; color: var(--muted); font: 800 16px/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; }
 .build-tabs a[aria-current="page"] { background: var(--text); color: var(--bg); }
 .build-tabs a:hover:not([aria-current="page"]) { color: var(--text); }
+
+/* ---------- links into the one-click design workflows (Image and Film pages) ---------- */
+.kits { margin-top: 64px; }
+.kit-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+.kit-links-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 28px; }
+.kit-link { display: flex; flex-direction: column; border: 1px solid var(--line-2); border-radius: var(--r-md); overflow: hidden; background: var(--surface); transition: border-color 0.18s, transform 0.18s; }
+.kit-link:hover { border-color: var(--accent); transform: translateY(-2px); }
+.kit-link img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--surface-2); }
+.kit-link span { display: grid; gap: 4px; padding: 12px 14px 14px; }
+.kit-link strong { font-size: 15px; }
+.kit-link small { color: var(--muted); font-size: 12px; line-height: 1.45; }
+@media (max-width: 760px) { .kit-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

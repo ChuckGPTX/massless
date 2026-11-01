@@ -66,7 +66,7 @@ function render() {
       node("h2", title),
       node(
         "p",
-        `${kind.toUpperCase()} · ${new Date(item.created).toLocaleDateString()} · ${item.model || { "local-composite": "Image workroom", "camera-effects": "Camera & effects", "film-composer": "Launch film", "music-visualizer": "Music preview", "local-caption-render": "Caption & trim", "local-text-edit": "Edit by text", "local-master": "Master", "three-scene": "Scene studio", games: "Games", upload: "Your media" }[item.engine] || "Your media"}`,
+        `${kind.toUpperCase()} · ${new Date(item.created).toLocaleDateString()} · ${item.model || { "local-composite": "Image workroom", "camera-effects": "Camera & effects", "film-composer": "Launch film", "music-visualizer": "Music preview", "local-caption-render": "Caption & trim", "local-text-edit": "Edit by text", "local-master": "Master", "three-scene": "Scene studio", games: "Games", "design-kit": "Design kits", upload: "Your media" }[item.engine] || "Your media"}`,
       ),
     );
     const link = (label, path) => {
