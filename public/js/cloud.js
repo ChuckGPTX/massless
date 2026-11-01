@@ -397,3 +397,42 @@ export async function gpuJob({ job, input, lab = false, signal, onProgress }) {
     window.dispatchEvent(new Event("massless-gpu"));
   }
 }
+/** The members' free video model (OpenRouter): whether it's on and how many clips this account has left today. */
+export async function promoBudget() {
+  const c = await cloudConfig();
+  if (!c.promoVideo?.on) return { on: false };
+  if (!session()) return { on: true, signedIn: false, model: c.promoVideo.model, perUserDaily: c.promoVideo.perUserDaily };
+  const r = await fetch("/api/promo-video/budget", { headers: { Authorization: "Bearer " + (await accessToken()) } });
+  const j = await r.json().catch(() => ({}));
+  return r.ok ? { ...j, signedIn: true } : { on: true, signedIn: r.status !== 401, error: j.error };
+}
+/** Make one free clip; resolves { blob, costCents, id }. onProgress(message). */
+export async function promoVideoJob({ prompt, duration, resolution, image, signal, onProgress }) {
+  const auth = async () => ({ Authorization: "Bearer " + (await accessToken()) });
+  let r = await fetch("/api/promo-video", {
+    method: "POST",
+    signal,
+    headers: { ...(await auth()), "content-type": "application/json" },
+    body: JSON.stringify({ prompt, duration, resolution, ...(image ? { image } : {}), idempotencyKey: crypto.randomUUID() }),
+  });
+  let j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error || "The clip could not start."), { status: r.status, budget: !!j.budget });
+  const id = j.id, started = Date.now();
+  let delay = 3000;
+  while (!["completed", "failed", "cancelled", "expired", "unknown"].includes(j.status)) {
+    const s = Math.round((Date.now() - started) / 1000);
+    onProgress?.(j.status === "pending" ? `Queued… ${s} s` : `Rendering… ${s} s`);
+    if (Date.now() - started > 10 * 60 * 1000) throw new Error("The clip took too long. Try again later.");
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
+    delay = Math.min(8000, delay * 1.25);
+    r = await fetch("/api/promo-video/" + id, { signal, headers: await auth() });
+    j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || "Could not check the clip.");
+  }
+  if (j.status !== "completed") throw new Error(j.error || "The clip " + j.status + ".");
+  onProgress?.("Downloading…");
+  const f = await fetch("/api/promo-video/" + id + "/file", { signal, headers: await auth() });
+  if (!f.ok) throw new Error("The clip could not be downloaded.");
+  return { blob: await f.blob(), costCents: j.costCents, id };
+}

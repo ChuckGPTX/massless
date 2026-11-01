@@ -470,7 +470,7 @@ export default {
     if ((url.hostname === 'massless.chucksi.com' || url.hostname === 'www.chucksi.com') && !url.pathname.startsWith('/api/') && (request.method === 'GET' || request.method === 'HEAD')) {
       return new Response(null, { status: 301, headers: { location: `https://chucksi.com${url.pathname}${url.search}`, 'cache-control': 'public, max-age=3600' } });
     }
-    if (url.pathname === '/api/config' || url.pathname.startsWith('/api/generations')) return generationAPI(request, env);
+    if (url.pathname === '/api/config' || url.pathname.startsWith('/api/generations') || url.pathname.startsWith('/api/promo-video')) return generationAPI(request, env);
     if (url.pathname === '/api/human') return humanPass(request, env);
     if ((GATED.has(url.pathname) || signGated(url.pathname)) && request.method === 'POST') {
       const stop = await needsHuman(request, env);

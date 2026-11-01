@@ -84,9 +84,18 @@ export function initNavigation() {
   const workflows = node("a", "studio-explore", "Workflows"); workflows.href="/workflows/";
   if(path==="/workflows")workflows.setAttribute("aria-current","page");
   nav.append(workflows);
-  const mobileProjects=node("a","studio-explore mobile-projects","My projects");mobileProjects.href="/projects/";nav.append(mobileProjects);
+  let hasSession=false;try{hasSession=!!JSON.parse(localStorage.getItem("massless.cloud-session")||"null")?.access_token}catch{/* private mode */}
+  const mobileProjects=node("a","studio-explore mobile-projects",hasSession?"My projects":"Sign in");mobileProjects.href=hasSession?"/projects/":"/projects/#account";nav.append(mobileProjects);
   const library=node("a","btn-ghost","My library");library.href="/library/";
   if(!header.querySelector('.nav-right a[href="/library/"]')) header.querySelector(".nav-right")?.prepend(library);
+  // Sign in is one click from every page; once signed in it becomes "My projects".
+  if(!header.querySelector('.nav-right a[href^="/projects/"]')){
+    const signedIn=hasSession;
+    const account=node("a","btn-ghost nav-account",signedIn?"My projects":"Sign in");
+    account.href=signedIn?"/projects/":"/projects/#account";
+    if(path==="/projects")account.setAttribute("aria-current","page");
+    header.querySelector(".nav-right")?.prepend(account);
+  }
   // Every page links to the source, since being open is the point.
   const right=header.querySelector(".nav-right");
   if(right&&!right.querySelector('a[href^="https://github.com/ChuckGPTX/massless"]')){
@@ -142,7 +151,8 @@ export function initNavigation() {
     const wrap = node("div", "studio-menu");
     const top = node("div", "studio-menu-top");
     const destination = node("a", "studio-destination", studio.label);
-    destination.href = `/studios/${studio.id}/`;
+    // the label opens the studio itself; its chevron opens the menu of tools and models
+    destination.href = studio.href;
     if (active === studio) destination.setAttribute("aria-current", "page");
     const button = node("button", "studio-trigger");
     button.type = "button";

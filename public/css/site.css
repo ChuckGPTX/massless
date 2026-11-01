@@ -163,6 +163,11 @@ button { cursor: pointer; }
 .gpu-panel .gpu-note, .gpu-panel .gpu-meter { opacity: 0.8; margin: 4px 0 12px; }
 .gpu-form { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
 .gpu-form label { display: grid; gap: 4px; font-size: 0.9em; }
+.promo-panel .gpu-form > label:first-child { flex: 1 1 100%; }
+.promo-panel textarea { width: 100%; resize: vertical; font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.04); color: inherit; }
+.promo-panel .gpu-meter a { color: var(--accent); text-decoration: underline; }
+.promo-row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.promo-panel .gpu-result video { width: min(100%, 720px); aspect-ratio: 16 / 9; border-radius: 10px; background: #000; display: block; margin: 8px 0; }
 .gpu-form textarea { min-width: 260px; }
 .gpu-result { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
 .gpu-result video { max-width: 100%; border-radius: 10px; }

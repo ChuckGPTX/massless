@@ -2,6 +2,7 @@
 // One ledger for every hosted GPU job: MOSS Image (its own endpoint, a lifetime allowance) and the GPU worker's
 // jobs (workers/gpu: animate, motion, lipsync, upscale_video, music, upscale, and Lab jobs when LAB_ENABLED), all
 // inside one daily budget.
+import { promoAPI, promoConfig } from './promo-video.js';
 import { FOLEY_BLOCKED, LAB_JOBS, QUEUE_SEC, STARTUP_SEC, actualCents, gpuSettings, quotes, reserveCents, utcDay, validateGpuJob } from './gpu-jobs.js';
 const reply = (body, status = 200) =>
   Response.json(body, {
@@ -16,6 +17,7 @@ export function generationConfig(env) {
   const ready = !!(env.GENERATION_LEDGER && env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY);
   return {
     gpu: { on: ready && g.on, lab: ready && g.lab, perUserDaily: g.on ? g.perUser : 0 },
+    promoVideo: ready ? promoConfig(env) : { on: false },
     cloud: !!(env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY),
     supabaseUrl: env.SUPABASE_URL || "",
     publishableKey: env.SUPABASE_PUBLISHABLE_KEY || "",
@@ -73,7 +75,8 @@ async function sha256Hex(text) {
 export async function generationAPI(request, env) {
   const url = new URL(request.url);
   if (url.pathname === "/api/config") return reply(generationConfig(env));
-  if (!env.GENERATION_LEDGER || !env.RUNPOD_API_KEY)
+  const promo = url.pathname.startsWith("/api/promo-video");
+  if (promo ? !env.GENERATION_LEDGER : !env.GENERATION_LEDGER || !env.RUNPOD_API_KEY)
     return reply(
       {
         error:
@@ -88,7 +91,7 @@ export async function generationAPI(request, env) {
     return reply({ error: "Cross-site requests are not allowed." }, 403);
   const bearer = request.headers.get("authorization") || "";
   if (!/^Bearer [A-Za-z0-9._-]+$/.test(bearer))
-    return reply({ error: "Sign in to use hosted GPU models." }, 401);
+    return reply({ error: promo ? "Sign in to make free clips." : "Sign in to use hosted GPU models." }, 401);
   let auth;
   try {
     auth = await fetch(env.SUPABASE_URL + "/auth/v1/user", {
@@ -141,6 +144,13 @@ export class GenerationLedger {
     const url = new URL(request.url),
       owner = request.headers.get("x-owner-id");
     if (!owner) return reply({ error: "Unauthorized" }, 401);
+    if (url.pathname.startsWith("/api/promo-video")) {
+      try {
+        return await promoAPI(this.ctx, this.env, request, owner);
+      } catch (e) {
+        return reply({ error: e.message || "The video request failed." }, 502);
+      }
+    }
     try {
       if (url.pathname === "/api/generations" && request.method === "POST") {
         let body;
