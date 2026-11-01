@@ -54,3 +54,25 @@ test("sign-in goes to Supabase authorize with the provider and a return address"
   assert.equal(location.href, "https://x.supabase.co/auth/v1/authorize?provider=github&redirect_to=" + encodeURIComponent("https://chucksi.com/projects/"));
   await assert.rejects(cloud.signInWithProvider("myspace"), /Unknown/);
 });
+
+test("only providers switched on in Supabase get a button", async () => {
+  setup("");
+  const base = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    if (url.endsWith("/auth/v1/settings")) {
+      assert.equal(init.headers.apikey, "pk");
+      return { ok: true, json: async () => ({ external: { google: true, github: false, email: true } }) };
+    }
+    return base(url, init);
+  };
+  const cloud = await import("../public/js/cloud.js?" + Math.random());
+  assert.deepEqual(await cloud.enabledProviders(), ["google"]);
+});
+
+test("provider check fails closed when Supabase can't be reached", async () => {
+  setup("");
+  const base = globalThis.fetch;
+  globalThis.fetch = async (url, init) => (url.endsWith("/auth/v1/settings") ? Promise.reject(new Error("offline")) : base(url, init));
+  const cloud = await import("../public/js/cloud.js?" + Math.random());
+  assert.deepEqual(await cloud.enabledProviders(), []);
+});

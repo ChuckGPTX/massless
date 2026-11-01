@@ -197,6 +197,10 @@ try {
       message(err.message);
     }
     await refresh();
+    const on = await cloud.enabledProviders();
+    for (const b of document.querySelectorAll("#auth-form .oauth")) b.hidden = !on.includes(b.dataset.provider);
+    document.querySelector("#auth-form .oauth-buttons").hidden = !on.length;
+    document.querySelector("#auth-form .oauth-or").hidden = !on.length;
     if (back) message("Signed in as " + (cloud.session()?.user?.email || "you") + ". Welcome to Chucksi.");
   }
 } catch (e) {

@@ -54,6 +54,18 @@ export async function signUp(email, password) {
     });
   return j;
 }
+/** Which of Google and GitHub are switched on in Supabase, so the page only shows buttons that work. */
+export async function enabledProviders() {
+  const c = await cloudConfig();
+  if (!c.cloud) return [];
+  try {
+    const r = await fetch(c.supabaseUrl + "/auth/v1/settings", { headers: { apikey: c.publishableKey } });
+    const j = r.ok ? await r.json() : {};
+    return ["google", "github"].filter((p) => j.external?.[p] === true);
+  } catch {
+    return [];
+  }
+}
 /** Start Google or GitHub sign-in; Supabase sends the visitor back to returnPath with tokens in the URL fragment. */
 export async function signInWithProvider(provider, returnPath = "/projects/") {
   if (!["google", "github"].includes(provider)) throw new Error("Unknown sign-in provider.");
