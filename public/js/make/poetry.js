@@ -71,7 +71,7 @@ export default {
     { key: 'type', label: 'Type', type: 'select', options: Object.entries(TYPES).map(([k, v]) => [k, v.name]) },
     { key: 'ink', label: 'Ink', type: 'select', options: Object.entries(INKS).map(([k, v]) => [k, v[0]]) },
     { key: 'paper', label: 'Paper', type: 'select', options: Object.entries(PAPERS).map(([k, v]) => [k, v[0]]) },
-    { key: 'texture', label: 'FLUX texture frames', type: 'check', hint: 'One painted texture, cropped into small framed images and printed in the ink.' },
+    { key: 'texture', label: 'Painted textures', type: 'check', hint: 'One painted texture, cropped into small framed images and printed in the ink.' },
     { key: 'seed', label: 'Layout variation', type: 'range', min: 0, max: 4 },
   ],
   presets: [{

@@ -73,7 +73,7 @@ async function writeSpec() {
   const base = templateSpec({ name, brief, style, bpm, palette: state.palette, length, images });
   state.source = 'template';
   if ($('#use-llm').checked && brief) {
-    status('Llama 3.3 is writing the beat sheet', null);
+    status('Writing your script…', null);
     try {
       const r = await apiFetch('/api/beats', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name, brief, length }), signal: AbortSignal.timeout(30000) });
       const j = await r.json();
@@ -81,7 +81,7 @@ async function writeSpec() {
       const spec = sanitizeSpec(j.spec, base);
       if (spec !== base) { spec.title = name; state.source = 'llm'; return spec; }
     } catch (e) {
-      toast(`The script writer is unavailable (${e.message}). Using the built-in template.`, 'error');
+      toast('The script writer is resting. Using the built-in template.', 'error');
     }
   }
   return base;
@@ -95,7 +95,7 @@ async function applySpec(spec, { rescore = true } = {}) {
   if (rescore) await scoreIt();
   renderChecks();
   $('#export').disabled = false;
-  $('#src-label').textContent = `${state.source === 'llm' ? 'Llama 3.3 wrote it' : 'Built-in template'} · ${(FALLBACK_STYLES.find((s) => s.id === spec.style) || {}).name || spec.style} · ${spec.bpm} BPM`;
+  $('#src-label').textContent = `${state.source === 'llm' ? 'Written by AI' : 'Built-in template'} · ${(FALLBACK_STYLES.find((s) => s.id === spec.style) || {}).name || spec.style} · ${spec.bpm} BPM`;
   seek(0);
 }
 
@@ -233,7 +233,7 @@ function renderChecks() {
     ['Longest hold', `${c.longestHold.toFixed(2)} s`, c.longestHold <= 0.8],
     ['Blocks', String(c.blocks), c.blocks >= 6],
     ['Tempo', `${state.spec.bpm} BPM`, true],
-    ['Music', state.score ? 'Scored in your browser' : 'Silent (score unavailable)', !!state.score],
+    ['Music', state.score ? 'Original score' : 'Silent (score unavailable)', !!state.score],
   ];
   $('#checks').replaceChildren(...items.map(([k, v, ok]) => el('div', { class: `chk${ok ? ' ok' : ' warn'}` }, el('strong', {}, v), el('span', {}, k))));
 }
@@ -258,7 +258,7 @@ const yieldTask = () => new Promise((r) => { const ch = new MessageChannel(); ch
 
 async function exportFilm() {
   if (!state.spec || state.recording) return;
-  if (typeof VideoEncoder === 'undefined') { toast('This browser cannot encode video. Use desktop Chrome, Edge or Safari 17+.', 'error'); return; }
+  if (typeof VideoEncoder === 'undefined') { toast('Video export isn’t available here. Try desktop Chrome, Edge or Safari.', 'error'); return; }
   stop();
   state.recording = true;
   const btn = $('#export');
@@ -274,7 +274,7 @@ async function exportFilm() {
   const samples = W * H > 3e6 ? 3 : 5;
   try {
     const vcfg = await pickVideo(W, H, fps);
-    if (!vcfg) throw new Error(`this browser cannot encode ${W}×${H} H.264; try a lower quality`);
+    if (!vcfg) throw new Error('this size isn’t available here; try a lower quality');
     const acfg = state.score ? await pickAudio(state.score.sampleRate) : null;
     const { Muxer, ArrayBufferTarget } = await import('../vendor/mp4-muxer.mjs');
     const muxer = new Muxer({

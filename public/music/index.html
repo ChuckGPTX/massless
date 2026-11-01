@@ -3,11 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Music video preview studio | Chucksi</title>
-    <meta
-      name="description"
-      content="Turn your artwork and audio into a beat-synced music preview. Edit titles and export MP4, entirely in your browser."
-    />
+    <title>Music Preview | Chucksi</title>
+    <meta name="description" content="Turn your artwork and a song into a beat-synced music preview. Export MP4.">
+    <link rel="canonical" href="https://chucksi.com/music">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Chucksi">
+    <meta property="og:url" content="https://chucksi.com/music">
+    <meta property="og:title" content="Music Preview | Chucksi">
+    <meta property="og:description" content="Turn your artwork and a song into a beat-synced music preview. Export MP4.">
+    <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Music Preview | Chucksi">
+    <meta name="twitter:description" content="Turn your artwork and a song into a beat-synced music preview. Export MP4.">
+    <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/css/site.css" />
     <link rel="stylesheet" href="/css/navigation.css" />
@@ -41,10 +53,7 @@
         <a href="/studios/3d/">3D</a>
         <a href="/studios/office/">Office</a>
       </nav>
-      <div class="nav-right">
-        <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless"
-          >GitHub</a
-        ><a class="btn-accent" href="/image">Create artwork</a>
+      <div class="nav-right"><a class="btn-accent" href="/image">Create artwork</a>
       </div>
     </header>
     <main class="music-studio">
@@ -60,7 +69,7 @@
             src="/media/music/showtime-animated.jpg"
             alt="Tone Da Boss Showtime artwork" /><span
             >Change artwork
-            <small>JPG, PNG or WebP · stays on this device</small></span
+            <small>JPG, PNG or WebP</small></span
           ><input
             type="file"
             id="art-file"
@@ -131,7 +140,7 @@
       <section class="music-stage" aria-label="Music preview">
         <div class="music-stage-top">
           <span>ARTWORK VISUALIZER</span
-          ><span>Local rendering · MP4 export</span>
+          ><span>MP4 export</span>
         </div>
         <canvas
           id="music-canvas"
@@ -167,7 +176,7 @@
         </div>
       </section>
     </main>
-  <section class="gpu-panel" data-gpu-panel="music" aria-label="Hosted GPU" hidden></section>
+  <section class="gpu-panel" data-gpu-panel="music" aria-label="Write a song" hidden></section>
     <script type="module" src="/js/pages/music.js"></script>
     <script type="module" src="/js/gpu-panel.js"></script>
 </body>

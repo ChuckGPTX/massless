@@ -191,7 +191,7 @@ with sync_playwright() as p:
     page.set_input_files('#file', AUDIO)
     page.wait_for_function('() => /Ready\\. Transcribe/.test(document.querySelector("#status").textContent)', timeout=30000)
     assert page.eval_on_selector('.stage', 'e => e.classList.contains("audio-only")')
-    assert 'Only the sound' in page.inner_text('#te-privacy')
+    assert 'Whisper' not in page.inner_text('#te-privacy') and 'Cloudflare' not in page.inner_text('#te-privacy')
     page.select_option('#te-lang', 'en')
     page.click('#te-go')
     page.wait_for_selector('#te:not([hidden])', timeout=60000)

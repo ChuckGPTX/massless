@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Free PDF editor, e-signature and slide decks | Chucksi</title>
-  <meta name="description" content="Highlight, write on, draw on and sign PDFs, merge, split, rotate, compress or convert them, send contracts for e-signature, and turn a description into an animated slide deck. Runs in your browser. $0.">
-  <meta name="theme-color" content="#0b0b0c">
+  <title>Office | Chucksi</title>
+  <meta name="description" content="Edit, sign and convert PDFs, send contracts for e-signature and make slide decks.">
+  <link rel="canonical" href="https://chucksi.com/office">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chucksi">
   <meta property="og:url" content="https://chucksi.com/office">
-  <meta property="og:title" content="Free PDF editor and converter | Chucksi">
-  <meta property="og:description" content="Highlight, write on, draw on and sign PDFs, merge, split, rotate, compress or convert them, and send contracts for e-signature with end-to-end encryption. Runs in your browser. $0.">
+  <meta property="og:title" content="Office | Chucksi">
+  <meta property="og:description" content="Edit, sign and convert PDFs, send contracts for e-signature and make slide decks.">
   <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Office | Chucksi">
+  <meta name="twitter:description" content="Edit, sign and convert PDFs, send contracts for e-signature and make slide decks.">
   <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta name="theme-color" content="#0b0b0c">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -42,8 +46,6 @@
       <a href="/office" aria-current="page">Office</a>
     </nav>
     <div class="nav-right">
-      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">OPEN WEIGHTS</span></button>
-      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
       <a class="btn-accent" href="/video">Open Video</a>
     </div>
   </header>
@@ -83,7 +85,7 @@
           <span><small>Signature</small><strong id="sig-name">Not set yet</strong></span>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
         </button>
-        <p class="side-note">Pick a tool above the pages, then click or drag on a page. Select moves things, Delete removes them, Ctrl+Z undoes. Your PDF stays in this browser; nothing is uploaded.</p>
+        <p class="side-note">Pick a tool above the pages, then click or drag on a page. Select moves things, Delete removes them, Ctrl+Z undoes.</p>
       </div>
 
       <div class="side-scroll" id="tab-convert" role="tabpanel" aria-labelledby="t-convert" hidden>
@@ -119,7 +121,7 @@
           <p class="side-note warn">Compressing turns each page into a picture, so text can no longer be selected or searched.</p>
         </div>
         <label class="btn-ghost wide" for="conv-in" id="conv-add">Add files</label>
-        <p class="side-note" id="op-note">Drop images in the order you want the pages. Files stay in this browser.</p>
+        <p class="side-note" id="op-note">Drop images in the order you want the pages.</p>
       </div>
 
       <div class="side-scroll" id="tab-ask" role="tabpanel" aria-labelledby="t-ask" hidden>
@@ -127,11 +129,7 @@
           <div class="f-head"><span>Question</span><output id="o-q">0 / 500</output></div>
           <textarea id="question" maxlength="500" rows="4" aria-label="Question" placeholder="What is this document about?"></textarea>
         </div>
-        <div class="row-sel" aria-label="Model">
-          <span><small>Model</small><strong>Llama 3.3 70B · open weights</strong></span>
-          <span class="badge-new">$0</span>
-        </div>
-        <p class="side-note">Ask reads the PDF open in Edit. Only its text, up to 12,000 characters, is sent to answer the question; the file itself never leaves this browser.</p>
+        <p class="side-note">Ask reads the PDF open in Edit.</p>
       </div>
 
       <div class="side-scroll sg-side" id="tab-sign" role="tabpanel" aria-labelledby="t-sign" hidden>
@@ -175,15 +173,15 @@
           <button type="button" class="pill" id="p-ask"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"/></svg>Ask</button>
           <button type="button" class="pill" id="p-sign"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 11.5c1.5-1 2.8-5 4.3-5S6 11 7.5 11s1.9-2.6 3-2.6.6 1.8 1.6 1.8 1.4-.8 1.9-1.3M2 14h12"/></svg>Sign</button>
           <button type="button" class="pill" id="p-slides"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="8.5" rx="1"/><path d="M8 11v2.5M5.5 13.5h5"/></svg>Slides<span class="badge-new">NEW</span></button>
-          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
+          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>Tips</button>
         </div>
-        <span class="src" id="src-label">pdf.js and pdf-lib · load on first use</span>
+        <span class="src" id="src-label">No PDF open</span>
       </div>
 
       <div class="stage-head">
         <div>
           <h1 class="display" id="stage-title">Edit any<br>PDF</h1>
-          <p id="stage-sub">Highlight, write, draw, sign and leave notes, then save a real PDF. Your file stays in this browser; nothing is uploaded.</p>
+          <p id="stage-sub">Highlight, write, draw, sign and leave notes, then save a real PDF.</p>
         </div>
       </div>
 
@@ -191,7 +189,7 @@
         <div class="dropzone" id="edit-drop">
           <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 5h17l9 9v29H12z"/><path d="M29 5v9h9M19 27l5-5 5 5M24 22v13"/></svg>
           <strong class="display">Drop a PDF here</strong>
-          <span class="muted">It opens right here. Nothing is uploaded.</span>
+          <span class="muted">It opens right here.</span>
           <div class="dz-actions">
             <label class="btn-accent" for="pdf-in">Open PDF</label>
             <button type="button" class="btn-ghost" id="sample">Try a sample</button>
@@ -277,17 +275,12 @@
   </dialog>
 
   <dialog class="sheet" id="how">
-    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
-    <p><strong>Edit:</strong> pdf.js (Apache-2.0) draws each page on your screen. Your highlights, text, ink, signatures and notes sit on top until you press Save, then pdf-lib (MIT) writes them into the PDF itself: highlights as see-through rectangles, text in Helvetica, ink as vector lines, signatures as images and notes as standard PDF comments.</p>
-    <p><strong>Convert:</strong> merge, split, rotate and image to PDF copy pages without re-rendering, so text stays sharp and searchable. PDF to images and Compress render pages with pdf.js; Compress rebuilds the file from JPEGs, so text stops being selectable. Zips are made with fflate (MIT).</p>
-    <p><strong>Ask:</strong> pulls the text out of the PDF in your browser and sends up to 12,000 characters of it, with your question, to Llama 3.3 70B on Cloudflare Workers AI. Edit and Convert never send anything anywhere.</p>
-    <p><strong>Slides:</strong> describe a pitch, launch, sales deck, report, portfolio, event or lesson and a writer in your browser lays out 8 to 12 slides; nothing is sent anywhere. Click any text to edit it, drag slides to reorder, and present full screen with notes and a laser pointer. Images you upload stay in this browser; Generate asks FLUX.1 schnell through Chucksi’s Image route. Share links carry the whole deck in the part of the URL after the #, which browsers never send to a server. PDF export uses pdf-lib and fontkit (MIT) with the theme’s OFL fonts as real text; PowerPoint export uses PptxGenJS (MIT); both load from jsDelivr when you first export.</p>
-    <p><strong>Sign:</strong> fill a contract template or upload a PDF, place fields for each signer and create an envelope. Your browser encrypts the PDF, the fields and the details with a random AES-GCM 256 key and uploads only ciphertext. The key rides in each signer's link after the #, which browsers never send to a server. Chucksi enforces the signing order, logs each step with time, IP and device, and signs the audit trail with an ECDSA P-256 key. The final PDF gets a Certificate of Completion, and Verify proves a file is unchanged. Unsigned envelopes are deleted after 30 days, completed ones after 90. Chucksi Sign provides templates and signing tools, not legal advice.</p>
-  </dialog>
-
-  <dialog class="sheet" id="ledger">
-    <form method="dialog" class="sheet-head"><h2>Models &amp; limits</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Reading and rendering: pdf.js (Apache-2.0), in your browser. Writing: pdf-lib (MIT), in your browser. Zips: fflate (MIT), in your browser. Ask: Llama 3.3 70B (Llama 3.3 Community License) on Workers AI, free within a daily cap. Sign: Web Crypto in your browser, ciphertext in Cloudflare R2 and D1 on the free tier, script fonts from Fontsource (OFL). Slides: written in your browser; PDF with pdf-lib and fontkit (MIT), PowerPoint with PptxGenJS (MIT), fonts SIL OFL; generated images with FLUX.1 schnell (Apache-2.0) on Workers AI. Cost: $0.</p>
+    <form method="dialog" class="sheet-head"><h2>Tips</h2><button class="x" aria-label="Close">×</button></form>
+    <p><strong>Edit:</strong> your highlights, text, drawings, signatures and notes are written into the PDF when you press Save.</p>
+    <p><strong>Convert:</strong> merge, split, rotate and images to PDF keep text sharp and searchable. Compress turns pages into images, so text is no longer selectable.</p>
+    <p><strong>Ask:</strong> reads up to 12,000 characters of the PDF open in Edit.</p>
+    <p><strong>Slides:</strong> describe a pitch, launch, sales deck, report, portfolio, event or lesson and get 8 to 12 slides. Click any text to edit it, drag slides to reorder, and present full screen with notes.</p>
+    <p><strong>Sign:</strong> unsigned envelopes are deleted after 30 days, completed ones after 90. Chucksi Sign provides templates and signing tools, not legal advice.</p>
   </dialog>
 
   <script type="module" src="/js/pages/office.js"></script>

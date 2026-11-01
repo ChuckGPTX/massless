@@ -8,10 +8,10 @@ import { hostedImage } from './cloud.js';
 import { apiFetch } from './human.js';
 
 export const ENGINES = {
-  auto: { name: 'Free cloud', detail: 'Cloudflare Workers AI first, Pollinations as backup' },
-  workers: { name: 'Cloudflare Workers AI', detail: 'Open models on our Worker, daily cap' },
-  pollinations: { name: 'Pollinations', detail: 'Community API, NVIDIA Sana, 1 image per 45 s' },
-  comfy: { name: 'Your ComfyUI', detail: 'Your connected image workflow' },
+  auto: { name: 'Free', detail: 'Free, with a daily limit' },
+  workers: { name: 'Free', detail: 'Free, with a daily limit' },
+  pollinations: { name: 'Backup', detail: 'One image every 45 seconds' },
+  comfy: { name: 'Your workflow', detail: 'Your connected image workflow' },
 };
 
 import { MODELS, DEFAULT_MODEL } from './model-catalog.js';
@@ -53,7 +53,7 @@ export function requestSize(w, h, base = 1024) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function blobToBitmap(blob) {
-  if (!blob.type.startsWith('image/')) throw new Error('The engine did not return an image.');
+  if (!blob.type.startsWith('image/')) throw new Error('Couldn’t create the image. Try again.');
   return await createImageBitmap(blob);
 }
 
@@ -101,15 +101,15 @@ export async function viaPollinations({ prompt, w, h, seed, signal, onWait }) {
       res = await fetch(url, { signal: ctl.signal, mode: 'cors' });
     } catch (e) {
       if (signal?.aborted) throw e;
-      throw new Error('Could not reach Pollinations. Its free tier allows 1 image per 45 seconds, so try again shortly.');
+      throw new Error('Backup is busy. Try again in a moment.');
     }
     if (!res.ok) {
       const retry = Number(res.headers.get('retry-after'));
       if (retry > 0) nextPollinations = Date.now() + retry * 1000;
       const msg = await errorText(res);
-      if (msg) throw Object.assign(new Error(`Pollinations: ${msg}`), { retry: res.status === 402 || res.status === 429 || res.status === 503 });
-      if (res.status === 429 || res.status === 402) throw Object.assign(new Error('Pollinations allows 1 image per 45 seconds. Try again in a moment.'), { retry: true });
-      throw new Error(`Pollinations returned ${res.status}.`);
+      if (msg) throw Object.assign(new Error('Backup is busy. Try again in a moment.'), { retry: res.status === 402 || res.status === 429 || res.status === 503 });
+      if (res.status === 429 || res.status === 402) throw Object.assign(new Error('Backup is busy. Try again in a moment.'), { retry: true });
+      throw new Error('Couldn’t create the image. Try again.');
     }
     const bmp = await blobToBitmap(await res.blob());
     return { image: bmp.width === w && bmp.height === h ? bmp : cropTo(bmp, w, h), engine: 'pollinations', model: 'sana' };
@@ -138,8 +138,8 @@ export async function viaWorkers(opts) {
   });
   if (!res.ok) {
     const msg = await errorText(res);
-    if (res.status === 429) throw Object.assign(new Error(msg || "Today's free Cloudflare frames are used up. Pollinations or your own ComfyUI still work."), { cap: true });
-    throw new Error(msg || `Cloudflare Workers AI returned ${res.status}.`);
+    if (res.status === 429) throw Object.assign(new Error(msg || "Today's free images are used up. Try the Backup style, or come back tomorrow."), { cap: true });
+    throw new Error(msg || 'Couldn’t create the image. Try again.');
   }
   const used = res.headers.get('x-massless-model');
   const model = Object.keys(MODELS).find((k) => MODELS[k].cf && MODELS[k].cf === used) || body.model;

@@ -79,14 +79,14 @@ export function createTextEdit(page) {
     const lang = $('#te-lang').value;
     try {
       const file = S.src.blob instanceof File ? S.src.blob : new File([S.src.blob], S.src.name || 'media', { type: S.src.blob.type });
-      page.message('Reading the sound in this tab…');
+      page.message('Reading the file…');
       S.prep ||= await T.prepareAudio(file);
       S.pcmPromise ||= decodeFull(file);
       const n = S.prep.parts.length;
       const out = await T.transcribeParts(S.prep.samples, S.prep.parts, {
         lang,
         prompt: E.VERBATIM_PROMPTS[lang] || '',
-        onPart: (i, st) => { if (st === 'sending') page.message(n > 1 ? `Transcribing part ${i + 1} of ${n} with Whisper…` : 'Transcribing with Whisper…'); },
+        onPart: (i, st) => { if (st === 'sending') page.message(n > 1 ? `Transcribing part ${i + 1} of ${n}…` : 'Transcribing…'); },
       });
       if (!out.segments.length) throw new Error('No speech was found in this file.');
       S.lang = lang || (E.FILLERS[out.language] ? out.language : 'en');
@@ -322,7 +322,7 @@ export function createTextEdit(page) {
   const TOOL = {
     fillers: { title: (n) => `${n} filler${n === 1 ? '' : 's'} found`, note: 'Unticked ones sit too close to the next word to cut cleanly; tick them to cut anyway.' },
     repeats: { title: (n) => `${n} repeat${n === 1 ? '' : 's'} found`, note: 'The first copy is cut, the second kept.' },
-    pauses: { title: (n) => `${n} long pause${n === 1 ? '' : 's'} found`, note: 'Each is shortened from the middle. Unticked ones hold a sound Whisper did not write down, maybe a word; tick them to shorten anyway.' },
+    pauses: { title: (n) => `${n} long pause${n === 1 ? '' : 's'} found`, note: 'Each is shortened from the middle. Unticked ones may hold a quiet word; tick them to shorten anyway.' },
   };
   function openReview(kind) {
     detect();
@@ -634,7 +634,7 @@ export function createTextEdit(page) {
     const { canvas, video } = page;
     const vcfg = await pickVideoCodec(canvas.width, canvas.height);
     if (!vcfg) {
-      page.message('This browser cannot encode video here. Download the edited audio and the edit list (EDL) instead; any video editor can apply the EDL to your original.');
+      page.message('Video export isn’t available on this device. Download the edited audio and the edit list (EDL) instead; any video editor can apply it to your original.');
       return;
     }
     lock(true);
@@ -724,7 +724,7 @@ export function createTextEdit(page) {
       downloadBlob(blob, name);
       const saved = await save(blob, name, { video: { fps: VIDEO_FPS, width: canvas.width, height: canvas.height, audio: acodec?.mux || null, captions: cues.length } });
       api.last = { kind: 'mp4', name, duration: frames / VIDEO_FPS, size: blob.size, audio: acodec?.mux || null };
-      page.message(`${name}: ${clock(frames / VIDEO_FPS)}${acodec ? '' : ' (this browser could not encode its sound; download the edited audio too)'}${saved ? ', saved to your library' : ''}.`);
+      page.message(`${name}: ${clock(frames / VIDEO_FPS)}${acodec ? '' : ' (without sound here; download the edited audio too)'}${saved ? ', saved to your library' : ''}.`);
     } catch (e) {
       page.message(e.name === 'AbortError' ? 'Export cancelled.' : `Video export failed: ${e.message}. The edited audio and the edit list still work.`);
     } finally {

@@ -1008,7 +1008,7 @@ async function generate() {
     newProject(site);
     hideStatus();
     const n = site.pages.reduce((a, p) => a + p.sections.length, 0);
-    toast(`The built-in writer made ${site.pages.length} page${site.pages.length > 1 ? 's' : ''} and ${n} sections. Click any text to edit it.`);
+    toast(`Made ${site.pages.length} page${site.pages.length > 1 ? 's' : ''} and ${n} sections. Click any text to edit it.`);
     scheduleSave();
   } finally {
     state.busy = false;
@@ -1081,7 +1081,7 @@ async function generateImage(prompt, ratio, signal) {
   const full = `${prompt}, professional photograph, natural light, sharp focus, no text, no watermark`;
   const res = await shoot({
     prompt: full, w, h, seed: Math.floor(Math.random() * 1e9), engine: 'auto', signal,
-    onWait: (ms) => status(`Pollinations allows one image every 45 seconds. Next one in ${Math.ceil(ms / 1000)} s.`, null),
+    onWait: (ms) => status(`Next image in ${Math.ceil(ms / 1000)} s.`, null),
   });
   let c = res.image;
   if (!(c instanceof HTMLCanvasElement)) {
@@ -1142,7 +1142,7 @@ async function renderSites() {
   $('#sites').replaceChildren(...items.map((it) => el('li', { class: `ws-site${it.id === state.id ? ' on' : ''}` },
     el('button', { type: 'button', class: 'open', onclick: () => openProject(it.id) }, el('strong', {}, it.name || 'Untitled'), el('small', {}, `${new Date(it.updated).toLocaleString()}${it.id === state.id ? ' · open' : ''}`)),
     el('button', { type: 'button', class: 'ws-mini danger', 'aria-label': `Delete ${it.name}`, onclick: async () => {
-      if (!confirm(`Delete “${it.name}” from this browser?`)) return;
+      if (!confirm(`Delete “${it.name}”?`)) return;
       await store.del(it.id);
       if (it.id === state.id) { state.id = null; state.demo = true; }
       renderSites();
@@ -1388,7 +1388,7 @@ function wire() {
       const ref = await generateImage(prompt, state.imgRatio);
       await setImage(ref, { prompt });
     } catch (e) {
-      toast(`The image engine is unavailable: ${e.message}`, 'error');
+      toast('AI images aren’t available right now. Upload your own instead.', 'error');
     } finally {
       b.disabled = false;
       b.textContent = 'Generate with Image';
@@ -1421,7 +1421,7 @@ async function boot() {
       newProject(site);
       $('#prompt').value = site.prompt || '';
       scheduleSave();
-      toast('Opened a shared site. It is your own copy now: edits stay in this browser.');
+      toast('Opened a shared site. It is your own copy now.');
       opened = true;
     } catch (e) {
       toast(`That share link could not be opened (${e.message}).`, 'error');

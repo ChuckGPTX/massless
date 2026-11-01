@@ -63,25 +63,25 @@ export default {
   id: 'film-poem',
   fields: [
     { key: 'title', label: 'Title', max: 40 },
-    { key: 'poem', label: 'Poem', type: 'textarea', rows: 7, max: 700, hint: 'One line per shot, up to 7 lines. Each line gets its own FLUX frame (6 at most).' },
+    { key: 'poem', label: 'Poem', type: 'textarea', rows: 7, max: 700, hint: 'One line per shot, up to 7 lines. Each line gets its own painted frame (6 at most).' },
     { key: 'world', label: 'Visual world', type: 'textarea', rows: 2, max: 200, hint: 'Where the images live. Keeps every frame in one film.' },
     { key: 'credit', label: 'Credit', max: 50 },
     { key: 'style', label: 'Style', type: 'select', options: [['paper', 'Paper: mono type, framed archive'], ['cinema', 'Cinema: full-bleed, serif lines']] },
     { key: 'format', label: 'Format', type: 'select', options: [['vertical', 'Vertical 9:16'], ['landscape', 'Landscape 16:9']] },
-    { key: 'sound', label: 'Sound', type: 'select', options: [['none', 'Silent'], ['ocean', 'Ocean waves'], ['wind', 'Wind'], ['rain', 'Rain'], ['forest-birds', 'Forest birds'], ['room-tone', 'Room tone'], ['city-night', 'City night'], ['campfire', 'Campfire']], hint: 'Ambience synthesized in your browser by the Audio tools.' },
+    { key: 'sound', label: 'Sound', type: 'select', options: [['none', 'Silent'], ['ocean', 'Ocean waves'], ['wind', 'Wind'], ['rain', 'Rain'], ['forest-birds', 'Forest birds'], ['room-tone', 'Room tone'], ['city-night', 'City night'], ['campfire', 'Campfire']], hint: 'A soft ambient bed under the words.' },
     { key: 'quality', label: 'Export size', type: 'select', options: [['720', '720p (fast)'], ['1080', '1080p']] },
   ],
   presets: [{
-    state: { title: 'Morning Tide', poem: 'The sea keeps its own slow hours.\nWe fold the map along the old creases.\nThe road remembers every wind.\nA lamp keeps turning for the late ones home.', world: 'a quiet coastal village at the edge of the sea, early morning, mist', credit: 'Words and frames made with Chucksi', style: 'paper', format: 'vertical', sound: 'ocean', quality: '720' },
+    state: { title: 'Morning Tide', poem: 'The sea keeps its own slow hours.\nWe fold the map along the old creases.\nThe road remembers every wind.\nA lamp keeps turning for the late ones home.', world: 'A quiet coastal village at dawn, in the mist', credit: 'Words and frames made with Chucksi', style: 'paper', format: 'vertical', sound: 'ocean', quality: '720' },
     samples: { f0: '/media/make/samples/film-1.webp', f1: '/media/make/samples/film-2.webp', f2: '/media/make/samples/film-3.webp', f3: '/media/make/samples/film-4.webp' },
   }],
   frames: (s) => Math.min(MAX_FRAMES, poemLines(s.poem).length || 1),
   surprise(r) {
     const ideas = [
-      ['Night Train', 'The carriage hums a song it never finishes.\nWindows hold a town for half a breath.\nSomeone sleeps with a ticket in their hand.\nMorning arrives one station early.', 'a long night train crossing an empty plain, warm carriage light, blue night'],
-      ['Glasshouse', 'Under glass the weather is a rumour.\nFerns unroll like slow green questions.\nRain taps the roof in a language of nails.\nWe leave with soil on our cuffs.', 'an old Victorian glasshouse full of ferns and palms, soft diffused light'],
-      ['Small Hours', 'The city keeps one window lit for you.\nA taxi folds the rain into the road.\nThe bakery opens before the birds.\nYou walk home inside the first light.', 'a sleeping city at four in the morning, wet streets, sodium lamps, first blue light'],
-      ['Field Notes', 'The wheat leans where the wind has been.\nA kestrel holds still against the sky.\nThe fence posts count the afternoon.\nWe stop, and the field keeps going.', 'wide open farmland in late summer, wheat fields, a single tree, big sky'],
+      ['Night Train', 'The carriage hums a song it never finishes.\nWindows hold a town for half a breath.\nSomeone sleeps with a ticket in their hand.\nMorning arrives one station early.', 'A night train crossing an empty plain'],
+      ['Glasshouse', 'Under glass the weather is a rumour.\nFerns unroll like slow green questions.\nRain taps the roof in a language of nails.\nWe leave with soil on our cuffs.', 'An old glasshouse full of ferns and palms'],
+      ['Small Hours', 'The city keeps one window lit for you.\nA taxi folds the rain into the road.\nThe bakery opens before the birds.\nYou walk home inside the first light.', 'A sleeping city at four in the morning'],
+      ['Field Notes', 'The wheat leans where the wind has been.\nA kestrel holds still against the sky.\nThe fence posts count the afternoon.\nWe stop, and the field keeps going.', 'Open farmland in late summer under a big sky'],
     ];
     const [title, poem, world] = ideas[Math.floor(r() * ideas.length)];
     return { title, poem, world, style: r() < 0.6 ? 'paper' : 'cinema', sound: ['wind', 'rain', 'room-tone', 'forest-birds'][Math.floor(r() * 4)] };
@@ -311,7 +311,7 @@ export default {
         return new Blob([muxer.target.buffer], { type: 'video/mp4' });
       }
       // Real-time fallback: MediaRecorder on the canvas, with the bed mixed in through Web Audio.
-      if (typeof MediaRecorder === 'undefined' || !c.captureStream) throw new Error('This browser cannot record video. Try desktop Chrome, Edge or Safari.');
+      if (typeof MediaRecorder === 'undefined' || !c.captureStream) throw new Error('Video recording isn’t available here. Try desktop Chrome, Edge or Safari.');
       const stream = c.captureStream(fps);
       let actx = null;
       if (a) {

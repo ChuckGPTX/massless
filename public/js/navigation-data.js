@@ -8,7 +8,7 @@ const item = (label, detail, href, icon, badge = "") => ({
   badge,
 });
 
-// Only shipped tools belong here. Reference-gallery providers are not app engines.
+// Only shipped tools belong here.
 export const STUDIOS = [
   {
     id: "image",
@@ -16,11 +16,11 @@ export const STUDIOS = [
     title: "Make the first frame.",
     subtitle: "A scene, a camera, your point of view.",
     href: "/image",
-    engineTitle: "Image models",
-    note: "Choose a model or connect your own workflow.",
+    engineTitle: "Styles",
+    note: "Pick a style, then create.",
     features: [
       item("Image workroom", "Reframe, grade and compose a new take", "/edit/", "pen", "NEW"),
-      item("Remove background", "Cut out any subject, free and on your device", "/edit/?tool=remove-bg", "cutout", "NEW"),
+      item("Remove background", "Cut out any subject", "/edit/?tool=remove-bg", "cutout", "NEW"),
       item("Upscale 2× / 4×", "Sharper, bigger images without the blur", "/edit/?tool=upscale", "expand", "NEW"),
       item("Erase objects", "Brush out what does not belong", "/edit/?tool=erase", "eraser", "NEW"),
       item(
@@ -58,24 +58,17 @@ export const STUDIOS = [
       ...Object.entries(MODELS).map(([id, m]) =>
         item(
           m.name,
-          id === "comfy" ? "Connect a custom image workflow" : m.note,
+          m.note,
           `/image?model=${id}`,
           id === "comfy" ? "chip" : "spark",
-          id === "comfy"
-            ? "CONNECT"
-            : id === "sana"
-              ? "COMMUNITY"
-              : id === "moss-image-sft"
-                ? "SIGN IN"
-                : "CLOUD",
+          id === "moss-image-sft" ? "SIGN IN" : "",
         ),
       ),
       item(
-        "FLUX 3 Image Klein",
-        "Official ComfyUI workflow and model setup",
+        "Pro image workflow",
+        "A ready-made workflow for detailed images",
         "/workflows/#flux3",
         "layers",
-        "CONNECT",
       ),
     ],
     feature: item(
@@ -91,8 +84,8 @@ export const STUDIOS = [
     title: "Give every frame a move.",
     subtitle: "Camera motion, effects and complete sequences.",
     href: "/video",
-    engineTitle: "Effects & engines",
-    note: "Create camera motion and visual effects directly in your browser.",
+    engineTitle: "Effects",
+    note: "Camera moves and effects for any still.",
     features: [
       item("Caption & trim", "Edit by text, style captions and export a finished clip", "/cut/", "text", "NEW"),
       item(
@@ -137,39 +130,34 @@ export const STUDIOS = [
     ],
     engines: [
       item(
-        "Depth camera",
-        "Parallax with Depth Anything V2",
+        "3D camera",
+        "Fly a camera through any still",
         "/video?move=arc-right",
         "cube",
-        "LOCAL",
       ),
       item(
         "Particle effects",
         "LiDAR, Vanish, freeze and echoes",
         "/video?effect=lidar",
         "scan",
-        "LOCAL",
       ),
       item(
         "Bullet time",
         "Push in, freeze and swing around",
         "/video?effect=freeze",
         "camera",
-        "LOCAL",
       ),
       item(
         "Clones",
         "Layer motion into repeating echoes",
         "/video?effect=clones",
         "layers",
-        "LOCAL",
       ),
       item(
         "Film composer",
-        "Typography, cuts and a synthesized score",
+        "Typography, cuts and an original score",
         "/film",
         "film",
-        "LOCAL + CLOUD",
       ),
     ],
     feature: item(
@@ -185,8 +173,8 @@ export const STUDIOS = [
     title: "Give your story a voice.",
     subtitle: "Speech, captions and the sound underneath.",
     href: "/audio",
-    engineTitle: "Models & engines",
-    note: "Voice and sound can run locally. MeloTTS and Whisper send input to Cloudflare.",
+    engineTitle: "More tools",
+    note: "Voice, captions and sound in one place.",
     features: [
       item("Edit by text", "Cut speech by deleting words; remove ums and pauses", "/cut/", "text", "NEW"),
       item("Master a track", "Loudness, tone and true peak for streaming or podcasts", "/audio?tab=master", "sliders", "NEW"),
@@ -225,46 +213,40 @@ export const STUDIOS = [
     ],
     engines: [
       item(
-        "Kokoro-82M",
-        "English speech · eight voices on your device",
+        "English voices",
+        "Eight natural English voices",
         "/audio?engine=kokoro",
         "mic",
-        "LOCAL",
       ),
       item(
-        "MeloTTS",
-        "Speech in six languages",
+        "Six languages",
+        "Voiceover in six languages",
         "/audio?engine=melo",
         "globe",
-        "CLOUD",
       ),
       item(
-        "Whisper large-v3-turbo",
-        "Transcription and English translation",
+        "Transcribe & translate",
+        "Transcripts and English translation",
         "/audio?tab=captions",
         "text",
-        "CLOUD",
       ),
       item(
-        "Chucksi synth",
-        "Procedural ambience with Web Audio",
+        "Soundscapes",
+        "Ambient beds made to any length",
         "/audio?tab=beds",
         "wave",
-        "LOCAL",
       ),
       item(
-        "LAME MP3",
-        "Convert media without uploading it",
+        "MP3 converter",
+        "Turn any video into an MP3",
         "/audio?tab=extract",
         "download",
-        "LOCAL",
       ),
       item(
-        "Chucksi master",
-        "BS.1770 loudness and a true-peak limiter",
+        "Mastering",
+        "Ready-to-release loudness",
         "/audio?tab=master",
         "sliders",
-        "LOCAL",
       ),
     ],
     feature: item(
@@ -280,7 +262,7 @@ export const STUDIOS = [
     title: "Find another dimension.",
     subtitle: "Turn a still into a scene you can explore.",
     href: "/3d",
-    engineTitle: "Models & engines",
+    engineTitle: "More tools",
     note: "Explore depth scenes, complete objects and imported 3D files.",
     features: [
       item("Scene studio", "Stage objects, lights and cameras; export GLB", "/scene/", "cube", "NEW"),
@@ -294,14 +276,13 @@ export const STUDIOS = [
       ),
       item(
         "Full object generation",
-        "Reconstruct an object with a connected service",
+        "Turn one photo into a whole object",
         "/3d?engine=idol",
         "chip",
-        "CONNECT",
       ),
       item(
-        "Open a splat",
-        "View a PLY, SPZ or splat file",
+        "Open a 3D file",
+        "View PLY, SPZ or SPLAT files",
         "/3d?panel=import",
         "layers",
       ),
@@ -321,25 +302,22 @@ export const STUDIOS = [
     ],
     engines: [
       item(
-        "Depth Anything V2 Small",
-        "Estimate depth on your device",
+        "Depth scene",
+        "Step inside any still",
         "/3d",
         "scan",
-        "LOCAL",
       ),
       item(
-        "Spark splat viewer",
-        "Explore and orbit Gaussian splats",
+        "3D viewer",
+        "Orbit and explore 3D scans",
         "/3d?panel=import",
         "cube",
-        "LOCAL",
       ),
       item(
-        "Object reconstruction",
+        "Object from a photo",
         "Whole objects from a single image",
         "/3d?engine=idol",
         "chip",
-        "CONNECT",
       ),
     ],
     feature: item(
@@ -353,10 +331,10 @@ export const STUDIOS = [
     id: "office",
     label: "Office",
     title: "Make documents work for you.",
-    subtitle: "Useful tools, with files kept in your browser.",
+    subtitle: "Useful tools for everyday documents.",
     href: "/office",
     engineTitle: "Document tools",
-    note: "Editing and conversion stay local. Ask PDF sends selected document text to Cloudflare. Sign uploads only encrypted envelopes.",
+    note: "Edit, convert, sign and present.",
     features: [
       item(
         "Slide decks",
@@ -379,10 +357,9 @@ export const STUDIOS = [
       ),
       item(
         "Ask a PDF",
-        "Ask questions about document text",
+        "Ask questions about a document",
         "/office?tab=ask",
         "text",
-        "CLOUD",
       ),
       item(
         "Send for signature",
@@ -410,35 +387,30 @@ export const STUDIOS = [
         "Combine files in the order you choose",
         "/office?tab=convert&op=merge",
         "layers",
-        "LOCAL",
       ),
       item(
         "Split pages",
         "Keep selected pages or separate a file",
         "/office?tab=convert&op=split",
         "grid",
-        "LOCAL",
       ),
       item(
         "Images to PDF",
         "One image per page, ready to share",
         "/office?tab=convert&op=images",
         "image",
-        "LOCAL",
       ),
       item(
         "PDF to images",
         "Export pages as PNG or JPG",
         "/office?tab=convert&op=toimg",
         "frame",
-        "LOCAL",
       ),
       item(
         "Compress PDF",
         "Reduce the size of image-heavy files",
         "/office?tab=convert&op=compress",
         "download",
-        "LOCAL",
       ),
     ],
     feature: item(

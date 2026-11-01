@@ -154,7 +154,7 @@ test("/games and /website are Worker pages with pinned scripts, and /build forwa
       assert.ok(html.includes('"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/'), "three.js stays on its pinned CDN version");
       assert.ok(html.includes('id="prompt-form"') && html.includes('id="player"') && html.includes('id="grid"'));
       assert.ok(html.includes('href="/games/" aria-current="page"') && html.includes('href="/website/"'), "Build tabs");
-      assert.ok(html.includes('href="/privacy.html"') && html.includes('href="/terms.html"') && html.includes('data-dialog="ledger"'), "site footer");
+      assert.ok(html.includes('href="/privacy.html"') && html.includes('href="/terms.html"') && html.includes('href="/credits.html"'), "site footer");
       assert.ok(!/Massless|\/api\/game/.test(html.replace(/github\.com\/ChuckGPTX\/massless|massless-portal-v1/g, "")), "brand and no missing route");
     }
     for (const route of ["/website", "/website/", "/website/index.html"]) {

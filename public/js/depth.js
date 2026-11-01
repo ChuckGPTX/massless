@@ -38,7 +38,7 @@ export function loadDepth(onProgress = () => {}) {
           l += f.loaded;
           t += f.total;
         }
-        onProgress(t ? l / t : 0, 'Downloading the depth model');
+        onProgress(t ? l / t : 0, 'Getting ready… (first time only)');
       }
     };
     const gpu = await hasWebGPU();
@@ -83,7 +83,7 @@ export function toCanvas(source, maxSide) {
 export async function estimateDepth(source, onProgress) {
   try {
     const { est, RawImage } = await loadDepth(onProgress);
-    onProgress?.(1, 'Reading depth');
+    onProgress?.(1, 'Preparing your still…');
     const small = toCanvas(source, 518);
     const img = RawImage.fromCanvas(small);
     const out = await est(img);

@@ -130,8 +130,8 @@ async function shot(request, env) {
   const visitorKey = `v:${day}:${await hashIp(ip)}`;
   const totalKey = `t:${day}`;
   const [total, mine] = await Promise.all([counter(env.MASSLESS_KV, totalKey), counter(env.MASSLESS_KV, visitorKey)]);
-  if (total >= dailyCap) return json({ error: "Today's free Cloudflare frames are used up. Pollinations or your own ComfyUI still work, and the allowance resets at midnight UTC." }, 429);
-  if (mine >= perVisitor) return json({ error: `You've used your ${perVisitor} free Cloudflare frames for today. Pollinations or your own ComfyUI still work.` }, 429);
+  if (total >= dailyCap) return json({ error: "Today's free images are used up. Try the Backup style, or come back tomorrow." }, 429);
+  if (mine >= perVisitor) return json({ error: `You've used your ${perVisitor} free images for today. Try the Backup style, or come back tomorrow.` }, 429);
 
   const pick = IMAGE_MODELS[body.model] || IMAGE_MODELS['flux-1-schnell'];
   const opts = { width: dim(body.width, 1024), height: dim(body.height, 1024), negative: body.negative ? String(body.negative).slice(0, 400) : undefined, seed: Number.isFinite(Number(body.seed)) ? Math.abs(Math.floor(Number(body.seed))) % 4294967295 : undefined };
@@ -139,12 +139,13 @@ async function shot(request, env) {
   try {
     result = await ai(env, pick.id, clean(pick.input(prompt, opts)));
   } catch (e) {
-    return json({ error: `Workers AI could not render this frame: ${e.message || e}` }, 502);
+    console.error('shot failed:', e?.message || e);
+    return json({ error: "Couldn't create this image. Try again." }, 502);
   }
   let bytes;
   if (result && typeof result.image === 'string') bytes = Uint8Array.from(atob(result.image), (c) => c.charCodeAt(0));
   else if (result instanceof ReadableStream || result instanceof ArrayBuffer || ArrayBuffer.isView(result)) bytes = new Uint8Array(await new Response(result).arrayBuffer());
-  if (!bytes || bytes.length < 100) return json({ error: 'Workers AI returned no image.' }, 502);
+  if (!bytes || bytes.length < 100) return json({ error: "Couldn't create this image. Try again." }, 502);
 
   await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
 
@@ -203,16 +204,17 @@ async function beats(request, env) {
       temperature: 0.8,
     });
   } catch (e) {
-    return json({ error: `Workers AI could not write the beat sheet: ${e.message || e}` }, 502);
+    console.error('beats failed:', e?.message || e);
+    return json({ error: "The script writer couldn't finish. Try again, or use the built-in template." }, 502);
   }
   await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
   let spec = result && result.response;
   if (typeof spec === 'string') {
     const a = spec.indexOf('{');
     const b = spec.lastIndexOf('}');
-    try { spec = JSON.parse(spec.slice(a, b + 1)); } catch { return json({ error: 'The model returned something that is not a beat sheet.' }, 502); }
+    try { spec = JSON.parse(spec.slice(a, b + 1)); } catch { return json({ error: "The script writer couldn't finish. Try again, or use the built-in template." }, 502); }
   }
-  if (!spec || !Array.isArray(spec.blocks)) return json({ error: 'The model returned something that is not a beat sheet.' }, 502);
+  if (!spec || !Array.isArray(spec.blocks)) return json({ error: "The script writer couldn't finish. Try again, or use the built-in template." }, 502);
   return json({ spec, model: LLM });
 }
 
@@ -233,7 +235,7 @@ async function ask(request, env) {
   const visitorKey = `av:${day}:${await hashIp(ip)}`;
   const totalKey = `a:${day}`;
   const [total, mine] = await Promise.all([counter(env.MASSLESS_KV, totalKey), counter(env.MASSLESS_KV, visitorKey)]);
-  if (total >= Number(env.ASK_CAP || 30) || mine >= Number(env.PER_VISITOR_ASK || 8)) return json({ error: 'The free document assistant is resting for today. It resets at midnight UTC.' }, 429);
+  if (total >= Number(env.ASK_CAP || 30) || mine >= Number(env.PER_VISITOR_ASK || 8)) return json({ error: 'The free document assistant is resting for today. Try again tomorrow.' }, 429);
   let result;
   try {
     result = await ai(env, LLM, {
@@ -245,12 +247,13 @@ async function ask(request, env) {
       temperature: 0.2,
     });
   } catch (e) {
-    return json({ error: `Workers AI could not answer: ${e.message || e}` }, 502);
+    console.error('ask failed:', e?.message || e);
+    return json({ error: 'No answer this time. Try again in a minute.' }, 502);
   }
   await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
   const r = result && result.response;
   const answer = typeof r === 'string' ? r : r ? JSON.stringify(r) : '';
-  if (!answer) return json({ error: 'The model returned no answer.' }, 502);
+  if (!answer) return json({ error: 'No answer this time. Try again in a minute.' }, 502);
   return json({ answer, model: LLM });
 }
 
@@ -268,9 +271,9 @@ async function tts(request, env) {
   const gate = await allow(request, env, 'tts', Number(env.TTS_CAP || 300), Number(env.PER_VISITOR_TTS || 40));
   if (gate) return gate;
   let result;
-  try { result = await ai(env, '@cf/myshell-ai/melotts', { prompt: text, lang }); } catch (e) { return json({ error: `Workers AI could not speak this: ${e.message || e}` }, 502); }
+  try { result = await ai(env, '@cf/myshell-ai/melotts', { prompt: text, lang }); } catch (e) { console.error('tts failed:', e?.message || e); return json({ error: "Couldn't create the voice. Try again." }, 502); }
   const audio = result && (result.audio || result);
-  if (typeof audio !== 'string') return json({ error: 'Workers AI returned no audio.' }, 502);
+  if (typeof audio !== 'string') return json({ error: "Couldn't create the voice. Try again." }, 502);
   const bytes = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0));
   const type = bytes[0] === 0x52 && bytes[1] === 0x49 ? 'audio/wav' : 'audio/mpeg';
   return new Response(bytes, { headers: { 'content-type': type, 'cache-control': 'no-store', 'x-massless-model': '@cf/myshell-ai/melotts' } });
@@ -300,7 +303,7 @@ async function transcribe(request, env) {
   const prompt = String(q.get('prompt') || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 240);
   if (prompt) input.initial_prompt = prompt;
   let result;
-  try { result = await ai(env, '@cf/openai/whisper-large-v3-turbo', input); } catch (e) { return json({ error: `Workers AI could not transcribe this: ${e.message || e}` }, 502); }
+  try { result = await ai(env, '@cf/openai/whisper-large-v3-turbo', input); } catch (e) { console.error('transcribe failed:', e?.message || e); return json({ error: "Couldn't transcribe this file. Try again." }, 502); }
   return json({ text: result.text || '', vtt: result.vtt || '', segments: (result.segments || []).map(segmentOut), language: result.transcription_info?.language || input.language || '', duration: result.transcription_info?.duration || null, model: '@cf/openai/whisper-large-v3-turbo' });
 }
 
@@ -324,7 +327,7 @@ async function allow(request, env, name, cap, perVisitor) {
   const visitorKey = `${name}v:${day}:${await hashIp(ip)}`;
   const totalKey = `${name}:${day}`;
   const [total, mine] = await Promise.all([counter(env.MASSLESS_KV, totalKey), counter(env.MASSLESS_KV, visitorKey)]);
-  if (total >= cap || mine >= perVisitor) return json({ error: 'This free tool is resting for today. It resets at midnight UTC.' }, 429);
+  if (total >= cap || mine >= perVisitor) return json({ error: 'This free tool is resting for today. Try again tomorrow.' }, 429);
   await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
   return null;
 }

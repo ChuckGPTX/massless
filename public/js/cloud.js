@@ -22,7 +22,7 @@ async function auth(path, body) {
   const c = await cloudConfig();
   if (!c.cloud)
     throw new Error(
-      "Cloud projects are being connected. Your local tools are ready.",
+      "Sign-in is not available right now. Try again later.",
     );
   const r = await fetch(c.supabaseUrl + "/auth/v1/" + path, {
     method: "POST",
@@ -72,7 +72,7 @@ export async function enabledProviders() {
 export async function signInWithProvider(provider, returnPath = "/projects/") {
   if (!PROVIDERS.includes(provider)) throw new Error("Unknown sign-in provider.");
   const c = await cloudConfig();
-  if (!c.cloud) throw new Error("Cloud projects are being connected. Your local tools are ready.");
+  if (!c.cloud) throw new Error("Sign-in is not available right now. Try again later.");
   location.href =
     c.supabaseUrl + "/auth/v1/authorize?provider=" + provider +
     "&redirect_to=" + encodeURIComponent(location.origin + returnPath);
@@ -109,7 +109,7 @@ export async function completeRedirect() {
 export async function accessToken() {
   let s = session();
   if (!s)
-    throw new Error("Sign in to save a project or use the connected model.");
+    throw new Error("Sign in first. It’s free.");
   if (s.expires_at < Date.now() / 1000 + 60) {
     refreshPromise ||= auth("token?grant_type=refresh_token", {
       refresh_token: s.refresh_token,
@@ -159,7 +159,7 @@ export async function cloudRequest(path, options = {}) {
   });
   if (!r.ok) {
     let j = await r.json().catch(() => ({}));
-    throw new Error(j.message || j.error || "The cloud request failed.");
+    throw new Error(j.message || j.error || "Something went wrong. Try again.");
   }
   return r.status === 204 ? null : r.json();
 }
@@ -280,7 +280,7 @@ export async function hostedImage({
     }),
   });
   let j = await r.json();
-  if (!r.ok) throw new Error(j.error || "Generation could not start.");
+  if (!r.ok) throw new Error(j.error || "Couldn't create the image. Try again.");
   const id = j.id,
     deadline = Date.now() + 22 * 60 * 1000;
   const cancel = () =>
@@ -302,7 +302,7 @@ export async function hostedImage({
       if (signal?.aborted) throw new Error("Cancelled");
       if (Date.now() > deadline) {
         await cancel();
-        throw new Error("This image took too long. Please try another model.");
+        throw new Error("This image took too long. Try another style.");
       }
       onWait?.(0, j.status);
       await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -311,16 +311,16 @@ export async function hostedImage({
         headers: { Authorization: "Bearer " + (await accessToken()) },
       });
       j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Could not check the generation.");
+      if (!r.ok) throw new Error(j.error || "Lost track of this image. Try again.");
     }
     if (j.status !== "COMPLETED")
-      throw new Error(j.error || "Generation " + j.status.toLowerCase() + ".");
+      throw new Error(j.status === "CANCELLED" ? "Cancelled." : "Couldn't create the image. Try again.");
     const imageResponse = await fetch("/api/generations/" + id + "/image", {
       signal,
       headers: { Authorization: "Bearer " + (await accessToken()) },
     });
     if (!imageResponse.ok)
-      throw new Error("The completed image could not be downloaded.");
+      throw new Error("Couldn't download the image. Try again.");
     const blob = await imageResponse.blob();
     const image = await createImageBitmap(blob);
     return { image, engine: "hosted", model, jobId: id };
@@ -363,7 +363,7 @@ export async function gpuJob({ job, input, lab = false, signal, onProgress }) {
     body: JSON.stringify({ job, input, ...(lab ? { lab: true } : {}), idempotencyKey: crypto.randomUUID() }),
   });
   let j = await r.json().catch(() => ({}));
-  if (!r.ok) throw Object.assign(new Error(j.error || "The GPU job could not start."), { status: r.status, budget: !!j.budget });
+  if (!r.ok) throw Object.assign(new Error(j.error || "Couldn't start. Try again."), { status: r.status, budget: !!j.budget });
   const id = j.id,
     deadline = Date.now() + (j.timeoutSec || 1500) * 1000,
     auth = async () => ({ Authorization: "Bearer " + (await accessToken()) });
@@ -372,20 +372,20 @@ export async function gpuJob({ job, input, lab = false, signal, onProgress }) {
   let delay = 2000;
   try {
     while (!["COMPLETED", "FAILED", "CANCELLED", "TIMED_OUT", "SUBMISSION_UNKNOWN"].includes(j.status)) {
-      onProgress?.({ status: j.status, message: j.message || (j.status === "IN_QUEUE" ? "Waiting for the GPU…" : "Starting…"), percent: j.percent ?? null });
+      onProgress?.({ status: j.status, message: j.status === "IN_PROGRESS" && j.percent >= 80 ? "Almost done…" : "Creating…", percent: j.percent ?? null });
       if (Date.now() > deadline) {
         await cancel();
-        throw new Error("The GPU job took too long and was stopped.");
+        throw new Error("This took too long and was stopped. Try again.");
       }
       await new Promise((resolve) => setTimeout(resolve, delay));
       if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
       delay = j.status === "IN_PROGRESS" ? 2500 : Math.min(8000, delay * 1.4);
       r = await fetch("/api/generations/" + id, { signal, headers: await auth() });
       j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || "Could not check the GPU job.");
+      if (!r.ok) throw new Error(j.error || "Lost track of this one. Try again.");
     }
-    if (j.status !== "COMPLETED") throw new Error(j.error || "The GPU job " + j.status.toLowerCase().replace("_", " ") + ".");
-    onProgress?.({ status: "COMPLETED", message: "Done", percent: 100 });
+    if (j.status !== "COMPLETED") throw new Error(j.status === "CANCELLED" ? "Cancelled." : "Couldn't finish this one. Try again.");
+    onProgress?.({ status: "COMPLETED", message: "Ready", percent: 100 });
     const get = async (part) => {
       const f = await fetch("/api/generations/" + id + "/" + part, { signal, headers: await auth() });
       if (!f.ok) throw new Error("The result could not be downloaded.");
@@ -416,23 +416,23 @@ export async function promoVideoJob({ prompt, duration, resolution, image, signa
     body: JSON.stringify({ prompt, duration, resolution, ...(image ? { image } : {}), idempotencyKey: crypto.randomUUID() }),
   });
   let j = await r.json().catch(() => ({}));
-  if (!r.ok) throw Object.assign(new Error(j.error || "The clip could not start."), { status: r.status, budget: !!j.budget });
+  if (!r.ok) throw Object.assign(new Error(j.error || "Couldn't create the video. Try again."), { status: r.status, budget: !!j.budget });
   const id = j.id, started = Date.now();
   let delay = 3000;
   while (!["completed", "failed", "cancelled", "expired", "unknown"].includes(j.status)) {
     const s = Math.round((Date.now() - started) / 1000);
-    onProgress?.(j.status === "pending" ? `Queued… ${s} s` : `Rendering… ${s} s`);
+    onProgress?.(s > 60 ? "Almost done…" : "Creating…");
     if (Date.now() - started > 10 * 60 * 1000) throw new Error("The clip took too long. Try again later.");
     await new Promise((resolve) => setTimeout(resolve, delay));
     if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
     delay = Math.min(8000, delay * 1.25);
     r = await fetch("/api/promo-video/" + id, { signal, headers: await auth() });
     j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(j.error || "Could not check the clip.");
+    if (!r.ok) throw new Error(j.error || "Lost track of this video. Try again.");
   }
-  if (j.status !== "completed") throw new Error(j.error || "The clip " + j.status + ".");
-  onProgress?.("Downloading…");
+  if (j.status !== "completed") throw new Error(j.status === "cancelled" ? "Cancelled." : "Couldn't create the video. Try again.");
+  onProgress?.("Almost done…");
   const f = await fetch("/api/promo-video/" + id + "/file", { signal, headers: await auth() });
-  if (!f.ok) throw new Error("The clip could not be downloaded.");
+  if (!f.ok) throw new Error("Couldn't download the video. Try again.");
   return { blob: await f.blob(), costCents: j.costCents, id };
 }

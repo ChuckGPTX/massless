@@ -195,7 +195,7 @@ $("#upload-local").onclick = async (e) => {
 try {
   const c = await cloud.cloudConfig();
   if (!c.cloud)
-    message("Cloud projects are being connected. Your local tools are ready.");
+    message("Projects are not available right now. Everything else still works.");
   else {
     // back from Google/GitHub or an email confirmation link
     let back = false;

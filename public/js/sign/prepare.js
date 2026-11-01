@@ -23,9 +23,9 @@ let n = 0;
 const uid = (p) => `${p}${Date.now().toString(36)}${(n++).toString(36)}`;
 
 const COPY = {
-  prepare: ['Send for<br>signature', 'Start from a contract template or your own PDF, place fields for each signer, then send. Everything is encrypted in this browser before it is uploaded.'],
-  envelopes: ['Your<br>envelopes', 'Envelopes created on this device. Status comes from Chucksi; the links and keys stay here.'],
-  deals: ['Deals', 'One place per deal: envelopes, documents, people and a checklist. Stored in this browser. Export it as an encrypted file to move it.'],
+  prepare: ['Send for<br>signature', 'Start from a contract template or your own PDF, place fields for each signer, then send. Documents are encrypted before they are sent.'],
+  envelopes: ['Your<br>envelopes', 'Envelopes you created on this device.'],
+  deals: ['Deals', 'One place per deal: envelopes, documents, people and a checklist. Saved on this device; export it to move it.'],
   verify: ['Verify a<br>signed PDF', 'Drop a final PDF. Its fingerprint is computed here and checked against the sealed record.'],
 };
 
@@ -76,7 +76,7 @@ function setSv(sv) {
     verifyBox();
     $('#sv-verify').replaceChildren(
       el('div', { class: 'row-sel' }, el('span', {}, el('small', {}, 'What gets checked'), el('strong', {}, 'Fingerprint, seal and audit trail'))),
-      el('p', { class: 'side-note' }, 'Verify computes the PDF\'s SHA-256 in this browser and sends only that number. Chucksi returns the sealed record, and this page checks the ES256 signature with the public key at /api/sign/key.'),
+      el('p', { class: 'side-note' }, 'Drop a signed PDF to check that it hasn\'t changed since it was signed.'),
       el('p', { class: 'side-note' }, 'Re-saving, printing to PDF or editing a signed file changes its fingerprint, so it no longer verifies. Keep the file you downloaded.'),
       noticeEl());
   }
@@ -143,7 +143,7 @@ async function openTemplate(id) {
   P.sel = null;
   renderSide();
   await renderPreview();
-  host.setSrc(`${tpl.title} · template ${tpl.id} v${tpl.version} · on this device`);
+  host.setSrc(`${tpl.title}`);
   return true;
 }
 
@@ -174,7 +174,7 @@ async function openUploadBytes(name, bytes) {
   P.sel = null;
   renderSide();
   await loadPdf(bytes);
-  host.setSrc(`${name} · ${P.pages.length} page${P.pages.length === 1 ? '' : 's'} · on this device`);
+  host.setSrc(`${name} · ${P.pages.length} page${P.pages.length === 1 ? '' : 's'} `);
   toast('Pick a signer, then drag fields onto the pages.');
   return true;
 }
@@ -185,7 +185,7 @@ function reset() {
   P.signers = []; P.message = ''; P.from = P.from || ''; P.dealId = '';
   if (P.pdf) { T.closePdf(P.pdf); P.pdf = null; }
   P.pages = [];
-  host.setSrc('pdf.js and pdf-lib · load on first use');
+  host.setSrc('Sign');
   renderSide();
   renderStage();
 }
@@ -909,7 +909,7 @@ function sentView() {
     el('p', { class: 'sg-hintline' }, hint),
     el('div', { class: 'sg-sent-grid' }, ...cards),
     owner,
-    el('p', { class: 'side-note muted' }, 'Chucksi sends no email in this version. Copy, share, show the QR code, or hand your device to the signer.'));
+    el('p', { class: 'side-note muted' }, 'Chucksi doesn’t send email yet. Copy, share, show the QR code, or hand your device to the signer.'));
 }
 
 // ======================================================================
@@ -934,7 +934,7 @@ async function renderEnvelopes() {
   side.replaceChildren(
     tally,
     el('button', { type: 'button', class: 'btn-ghost wide', id: 'sg-env-refresh', onclick: () => renderEnvelopes() }, 'Refresh status'),
-    el('p', { class: 'side-note' }, 'This list lives in this browser. It holds each envelope\'s key and links, so status and downloads work from here. Export a Deal to carry envelopes to another device.'),
+    el('p', { class: 'side-note' }, 'This list is saved on this device and holds each envelope\'s links. Export a Deal to move envelopes to another device.'),
     noticeEl());
   if (!list.length) {
     stage.replaceChildren(el('div', { class: 'dropzone small' }, el('strong', { class: 'display' }, 'No envelopes yet'), el('span', { class: 'muted' }, 'Envelopes you create on this device show up here with their status.'), el('div', { class: 'dz-actions' }, el('button', { type: 'button', class: 'btn-accent', onclick: () => setSv('prepare') }, 'Prepare an envelope'))));

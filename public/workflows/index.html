@@ -3,8 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Workflows — Chucksi studio</title>
-    <meta name="description" content="Pick a workflow, add your photo or words, and get a finished clip, design, website or game in your browser." />
+    <title>Workflows | Chucksi</title>
+    <meta name="description" content="Pick a workflow, add your photo or words, and get a finished clip, design, website or game.">
+    <link rel="canonical" href="https://chucksi.com/workflows">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Chucksi">
+    <meta property="og:url" content="https://chucksi.com/workflows">
+    <meta property="og:title" content="Workflows | Chucksi">
+    <meta property="og:description" content="Pick a workflow, add your photo or words, and get a finished clip, design, website or game.">
+    <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Workflows | Chucksi">
+    <meta name="twitter:description" content="Pick a workflow, add your photo or words, and get a finished clip, design, website or game.">
+    <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="/css/site.css" />
     <link rel="stylesheet" href="/css/navigation.css" />
@@ -27,9 +42,7 @@
         ><a href="/studios/video/">Video</a><a href="/studios/audio/">Audio</a
         ><a href="/studios/3d/">3D</a><a href="/studios/office/">Office</a>
       </nav>
-      <div class="nav-right">
-        <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless">GitHub</a
-        ><a class="btn-accent" href="/image">Create an image ↗</a>
+      <div class="nav-right"><a class="btn-accent" href="/image">Create an image ↗</a>
       </div>
     </header>
     <main class="hub-main wf-main">
@@ -67,46 +80,43 @@
             >Import a plan<input id="import-run" type="file" accept="application/json" hidden
           /></label>
         </div>
-        <p id="run-status" role="status">Progress saves in this browser.</p>
+        <p id="run-status" role="status">Progress saves automatically.</p>
       </section>
 
       <details class="wf-connected" id="connected">
-        <summary>Connected ComfyUI workflows</summary>
+        <summary>Pro workflows for ComfyUI</summary>
         <section class="hub-panel" id="flux3">
-          <p class="eyebrow">MODEL WORKFLOW / BLACK FOREST LABS</p>
-          <h2>FLUX 3 Image Klein</h2>
+          <p class="eyebrow">PRO WORKFLOW</p>
+          <h2>Detailed images</h2>
           <p>
-            Download ComfyUI’s official distilled workflow with prompt expansion. Install the listed weights in your
-            own ComfyUI before running it. This model uses the FLUX Kommunity License and may require Hugging Face
-            access approval.
+            A ready-made workflow for your own ComfyUI. Install the listed files first; they come with their own
+            licence.
           </p>
           <div class="hub-actions">
-            <a class="btn-accent" href="/comfy/flux3-klein-official.json" download>Download official workflow</a
+            <a class="btn-accent" href="/comfy/flux3-klein-official.json" download>Download workflow</a
             ><a class="btn-ghost" href="https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy" target="_blank" rel="noopener"
-              >Model files and terms ↗</a
+              >Files and licence ↗</a
             >
           </div>
-          <p class="quiet-note">This download prepares a connected workflow. Hosted FLUX 3 generation is not enabled.</p>
         </section>
         <section class="hub-section">
           <p class="eyebrow">COMMUNITY WORKFLOWS</p>
           <p>
-            Curated VFX4All presets by Noma Studio. Download the open workflow or open its Comfy Cloud app. These
-            require their own model installation or Comfy Cloud account and credits.
+            Effects presets by Noma Studio (VFX4All). Download a workflow, or open it in Comfy Cloud. Each needs
+            its own setup or a Comfy Cloud account.
           </p>
           <div id="preset-cards" class="hub-grid"></div>
           <p class="quiet-note">
-            Workflow code: MIT. LTX model weights use separate community terms. Check the included notices before
-            installing.
+            Each workflow comes with its own licence notes.
             <a href="https://github.com/ChuckGPTX/massless/blob/main/public/comfy/vfx4all/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener"
-              >Read model notices ↗</a
+              >Read the notices ↗</a
             >
           </p>
         </section>
       </details>
     </main>
     <footer class="hub-footer">
-      <a href="/">CHUCKSI / OPEN CREATIVE TOOLS</a><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
+      <a href="/">CHUCKSI</a><nav class="foot-links" aria-label="Footer"><a href="/credits.html">Credits</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub ↗</a></nav>
     </footer>
   </body>
 </html>

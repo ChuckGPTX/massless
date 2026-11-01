@@ -1,8 +1,7 @@
 // Hosted GPU panels: <section data-gpu-panel="animate|music"></section> on a page, plus this module.
-// The Video panel has four modes on the Chucksi GPU worker (80 GB GPU): Animate (Wan 2.2 A14B, from a still or
-// from text, Quick or Best), Motion (Wan-Animate-2: a still performs the motion of a driving clip), Lip sync
-// (Wan 2.2 S2V: a face speaks an audio clip) and Upscale video (SeedVR2 7B). Music writes a track (ACE-Step 1.5).
-// All run for signed-in users inside one daily budget, shown honestly with each job's expected cost.
+// The Video panel has four modes on the GPU worker: Animate (Wan 2.2 A14B, from a still or from text, Quick or
+// Best), Motion (Wan-Animate-2), Lip sync (Wan 2.2 S2V) and Upscale video (SeedVR2 7B). Music writes a track
+// (ACE-Step 1.5). All run for signed-in users inside one daily budget; the page shows plain words, not costs.
 import { accessToken, gpuBudget, gpuJob } from "./cloud.js";
 
 const h = (tag, attrs = {}, ...kids) => {
@@ -32,7 +31,7 @@ async function jpegBase64(file, maxSide = 1536) {
     const b64 = toBase64(new Uint8Array(await blob.arrayBuffer()));
     if (b64.length < 2_500_000) return b64;
   }
-  throw new Error("That image is too large to send.");
+  throw new Error("That image is too large. Try a smaller one.");
 }
 function mediaSeconds(file, tag) {
   return new Promise((resolve) => {
@@ -92,13 +91,13 @@ const videoOut = (blob) => h("video", { src: URL.createObjectURL(blob), controls
 const VIDEO_MODES = {
   animate: {
     label: "Animate",
-    note: "Wan 2.2 A14B (Apache-2.0): a still becomes a 5-second clip, or describe one from scratch. Quick uses the Wan2.2-Lightning 4-step LoRA; Best runs the full model.",
+    note: "Turn a still into a 5-second clip, or describe one.",
     fields() {
       this.still = stillPicker("image", "Still", false);
       return [
         this.still,
-        h("label", {}, "What happens ", h("input", { name: "prompt", maxlength: "1200", placeholder: "the sea breathes, hair moves in the wind (required without a still)" })),
-        select("mode", "Quality", [["quick", "Quick (4 steps)"], ["best", "Best (full steps, slower)"]]),
+        h("label", {}, "What happens ", h("input", { name: "prompt", maxlength: "1200", placeholder: "Hair moving in the wind" })),
+        select("mode", "Quality", [["quick", "Fast"], ["best", "Best quality"]]),
         select("resolution", "Size", [["480p", "480p"], ["720p", "720p"]]),
         select("aspect", "Shape", ["16:9", "9:16", "1:1"].map((a) => [a, a])),
       ];
@@ -107,7 +106,7 @@ const VIDEO_MODES = {
     async input(f) {
       const image = await this.still.read();
       const prompt = f.prompt.value.trim() || undefined;
-      if (!image && !prompt) throw new Error("Choose a still, or describe the clip.");
+      if (!image && !prompt) throw new Error("Add a still, or describe the clip.");
       return { image, prompt, mode: f.mode.value, resolution: f.resolution.value, aspect: f.aspect.value };
     },
     show: videoOut,
@@ -115,19 +114,19 @@ const VIDEO_MODES = {
   },
   motion: {
     label: "Motion",
-    note: "Wan-Animate-2 (Apache-2.0): the person in your still performs the motion of a driving clip (up to 10 s), at 480p. The clip's sound is kept.",
+    note: "The person in your still copies the moves in a short clip (up to 10 s). The clip's sound is kept.",
     fields() {
       this.still = stillPicker("image", "Character still", true);
       return [
         this.still,
-        h("label", {}, "Driving clip ", h("input", { type: "file", accept: "video/mp4,video/quicktime,video/webm", name: "video", required: true })),
-        h("label", {}, "Character and background ", h("input", { name: "prompt", maxlength: "1200", placeholder: "a knight in silver armor; a castle courtyard at dusk" })),
+        h("label", {}, "Moves to copy ", h("input", { type: "file", accept: "video/mp4,video/quicktime,video/webm", name: "video", required: true })),
+        h("label", {}, "Character and background ", h("input", { name: "prompt", maxlength: "1200", placeholder: "A knight in silver armor; a castle courtyard" })),
       ];
     },
     preset: () => "motion",
     async input(f) {
       const image = await this.still.read();
-      const video = await clipBase64(f.video.files[0], "driving clip");
+      const video = await clipBase64(f.video.files[0], "clip");
       const p = f.prompt.value.trim();
       const prompt = p ? `Character description: ${p.split(";")[0].trim()}\nBackground description: ${(p.split(";")[1] || "the same place as the reference image").trim()}` : undefined;
       return { image, video, prompt };
@@ -137,14 +136,14 @@ const VIDEO_MODES = {
   },
   lipsync: {
     label: "Lip sync",
-    note: "Wan 2.2 S2V (Apache-2.0): a face in your still speaks or sings an audio clip (up to 10 s), at 480p.",
+    note: "A face in your still speaks or sings your audio (up to 10 s).",
     fields() {
       this.still = stillPicker("image", "Face still", true);
       return [
         this.still,
         h("label", {}, "Speech or song ", h("input", { type: "file", accept: "audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/ogg,audio/flac", name: "audio", required: true })),
-        h("label", {}, "Scene (optional) ", h("input", { name: "prompt", maxlength: "1200", placeholder: "a woman talking to the camera in a sunny kitchen" })),
-        select("mode", "Quality", [["quick", "Quick (4 steps)"], ["best", "Best (20 steps, much slower)"]]),
+        h("label", {}, "Scene (optional) ", h("input", { name: "prompt", maxlength: "1200", placeholder: "Talking to the camera in a sunny kitchen" })),
+        select("mode", "Quality", [["quick", "Fast"], ["best", "Best quality"]]),
       ];
     },
     preset: (f) => `lipsync:${f.mode.value}`,
@@ -156,10 +155,10 @@ const VIDEO_MODES = {
   },
   upscale_video: {
     label: "Upscale video",
-    note: "SeedVR2 7B (Apache-2.0): restores detail and upscales a clip (up to 10 s) to as much as 1920×1080, keeping its sound.",
+    note: "Sharper detail for a clip up to 10 s, up to 1080p. The sound is kept.",
     fields: () => [
       h("label", {}, "Clip ", h("input", { type: "file", accept: "video/mp4,video/quicktime,video/webm", name: "video", required: true })),
-      select("scale", "Scale", [["2", "2×"], ["4", "4× (capped at 1920×1080)"]]),
+      select("scale", "Size", [["2", "2×"], ["4", "4× (up to 1080p)"]]),
     ],
     preset: () => "upscale_video",
     async input(f) {
@@ -171,15 +170,15 @@ const VIDEO_MODES = {
 };
 
 const KIND = {
-  animate: { title: "Video on the GPU", modes: VIDEO_MODES },
+  animate: { title: "More video tools", modes: VIDEO_MODES },
   music: {
-    title: "Compose on the GPU",
+    title: "Write a song",
     modes: {
       music: {
         label: "Music",
-        note: "ACE-Step 1.5 (MIT; generated music may be used commercially): style tags, optional lyrics, up to 3 minutes.",
+        note: "Describe a style, add lyrics if you like. Up to 3 minutes.",
         fields: () => [
-          h("label", {}, "Style ", h("input", { name: "tags", maxlength: "600", required: true, placeholder: "warm lo-fi hip hop, mellow piano, vinyl crackle" })),
+          h("label", {}, "Style ", h("input", { name: "tags", maxlength: "600", required: true, placeholder: "Warm lo-fi with mellow piano" })),
           h("label", {}, "Lyrics (optional) ", h("textarea", { name: "lyrics", maxlength: "4000", rows: "3", placeholder: "[verse]\n…" })),
           h("label", {}, "Seconds ", h("input", { name: "duration", type: "number", min: "10", max: "180", value: "30" })),
           h("label", {}, "BPM ", h("input", { name: "bpm", type: "number", min: "40", max: "220", value: "100" })),
@@ -194,9 +193,6 @@ const KIND = {
     },
   },
 };
-function money(c) {
-  return "$" + (c / 100).toFixed(2);
-}
 async function mount(el) {
   const kind = KIND[el.dataset.gpuPanel];
   if (!kind) return;
@@ -207,7 +203,7 @@ async function mount(el) {
   const note = h("p", { class: "gpu-note" });
   const cost = h("p", { class: "gpu-cost" });
   const form = h("form", { class: "gpu-form" });
-  const go = h("button", { type: "submit", class: "btn-accent", text: "Render on the GPU" });
+  const go = h("button", { type: "submit", class: "btn-accent", text: "Create" });
   const stop = h("button", { type: "button", class: "btn-ghost", text: "Cancel", hidden: true });
   const out = h("div", { class: "gpu-result" });
   const tabs = h("div", { class: "gpu-modes", role: "tablist", hidden: names.length < 2 });
@@ -215,9 +211,7 @@ async function mount(el) {
   const showCost = () => {
     const m = kind.modes[mode];
     const q = budget && budget.estimates && budget.estimates[m.preset(form.elements)];
-    cost.textContent = q
-      ? `About ${Math.round(q.seconds / 60) >= 2 ? Math.round(q.seconds / 60) + " min" : q.seconds + " s"} on the GPU, ≈ ${money(q.cents)} of today's budget (${money(q.coldCents)} if the GPU has to wake up). Up to ${money(q.reserveCents)} is held until it finishes.`
-      : "";
+    cost.textContent = q ? `Takes about ${Math.round(q.coldSeconds / 60) >= 2 ? Math.round(q.coldSeconds / 60) + " minutes" : "a minute"}.` : "";
   };
   const render = () => {
     const m = kind.modes[mode];
@@ -243,11 +237,11 @@ async function mount(el) {
     if (!b.on) return b;
     showCost();
     if (!b.signedIn) {
-      meter.replaceChildren("Hosted GPU jobs are free for signed-in users, within a shared daily budget. ", h("a", { href: "/projects/", text: "Sign in" }), " to use them; the browser tools here need no account.");
+      meter.replaceChildren(h("a", { href: "/projects/#account", text: "Sign in" }), " to create. It’s free.");
       go.disabled = true;
       return b;
     }
-    meter.textContent = b.error || `GPU budget left today: ${money(b.leftCents)} of ${money(b.dailyBudgetCents)} · ${b.jobsLeftForYou} of your ${b.perUserDaily} daily jobs left` + (b.queue ? ` · ${b.queue} job${b.queue === 1 ? "" : "s"} ahead of you` : "") + " · resets at midnight UTC";
+    meter.textContent = b.error || (b.jobsLeftForYou ? `${b.jobsLeftForYou} left today` : "That’s all for today. Come back tomorrow.");
     go.disabled = !b.jobsLeftForYou;
     return b;
   };
@@ -261,15 +255,15 @@ async function mount(el) {
     out.replaceChildren();
     try {
       await accessToken();
-      status.textContent = "Preparing…";
+      status.textContent = "Creating…";
       const input = await m.input(form.elements);
-      status.textContent = "Sending…";
-      const r = await gpuJob({ job: mode, input, signal: ctl.signal, onProgress: (p) => (status.textContent = p.message + (Number.isFinite(p.percent) ? ` (${p.percent}%)` : "")) });
+      status.textContent = "Creating…";
+      const r = await gpuJob({ job: mode, input, signal: ctl.signal, onProgress: (p) => (status.textContent = p.message) });
       const a = h("a", { href: URL.createObjectURL(r.blob), download: m.file, class: "btn-ghost", text: "Download" });
       out.replaceChildren(m.show(r.blob), a);
-      status.textContent = `Done in ${r.output?.seconds ?? "?"} s on the GPU` + (Number.isFinite(r.costCents) ? `, ${money(r.costCents)} of today's budget.` : ".");
+      status.textContent = "Ready";
     } catch (err) {
-      status.textContent = err.name === "AbortError" ? "Cancelled." : err.message;
+      status.textContent = err.name === "AbortError" ? "Cancelled." : err.message || "Couldn't create this one. Try again.";
     } finally {
       stop.hidden = true;
       await refresh();

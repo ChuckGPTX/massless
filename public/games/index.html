@@ -3,17 +3,24 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Games — Chucksi</title>
-    <meta name="description" content="Describe a game and play it in seconds: runners, stackers, shooters, match 3, mazes and eat and grow, each playtested by a bot. Remix it, share a link or download one HTML file. Free and open source." />
+    <title>Games | Chucksi</title>
+    <meta name="description" content="Describe a game and play it in seconds. Remix it, share a link or download it. Free.">
+    <link rel="canonical" href="https://chucksi.com/games">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Chucksi">
+    <meta property="og:url" content="https://chucksi.com/games">
+    <meta property="og:title" content="Games | Chucksi">
+    <meta property="og:description" content="Describe a game and play it in seconds. Remix it, share a link or download it. Free.">
+    <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Games | Chucksi">
+    <meta name="twitter:description" content="Describe a game and play it in seconds. Remix it, share a link or download it. Free.">
+    <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
     <meta name="theme-color" content="#0b0b0c" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Chucksi" />
-    <meta property="og:url" content="https://chucksi.com/games" />
-    <meta property="og:title" content="Chucksi Games — describe a game, play it now" />
-    <meta property="og:description" content="Six genres, playtested by a bot, shareable as a link or one HTML file. Free and open source." />
-    <meta property="og:image" content="https://chucksi.com/media/art/massless-portal-v1.jpg" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="canonical" href="https://chucksi.com/games" />
     <link rel="icon" href="/favicon.svg" />
     <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/instrument-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin />
@@ -41,7 +48,7 @@
       <section class="g-hero" id="make" aria-labelledby="g-h1">
         <div class="g-hero-glow" aria-hidden="true"></div>
         <div class="g-hero-card">
-          <p class="g-eyebrow"><span class="badge-new">NEW</span> Chucksi Games · free and open source</p>
+          <p class="g-eyebrow"><span class="badge-new">NEW</span> Chucksi Games · free</p>
           <h1 class="display" id="g-h1">Describe a game.<br><em>Play it now.</em></h1>
           <p class="g-sub">Say what it's about, add your own art if you like, and get a game you can play, share and download.</p>
 
@@ -60,7 +67,7 @@
                   <button type="button" role="radio" aria-checked="true" data-dims="2d">2D</button>
                   <button type="button" role="radio" aria-checked="false" data-dims="3d" title="3D works with Stack">3D</button>
                 </div>
-                <label class="g-toggle" title="Paint the player, enemy, item and background with FLUX.1 schnell"><input type="checkbox" id="ai-art"><span class="g-switch" aria-hidden="true"></span>AI art</label>
+                <label class="g-toggle" title="Paint the player, enemy, item and background with AI"><input type="checkbox" id="ai-art"><span class="g-switch" aria-hidden="true"></span>AI art</label>
                 <button type="button" class="g-chip ghost" id="surprise">Surprise me</button>
               </div>
             </div>
@@ -68,7 +75,7 @@
 
             <div class="g-pop" id="genre-pop" role="listbox" aria-label="Genre" hidden></div>
             <div class="g-pop g-art-pop" id="art-pop" role="dialog" aria-label="Your art" hidden>
-              <div class="g-pop-head"><strong>Your art</strong><span class="muted small">PNG or JPG. Flat backgrounds are removed in your browser.</span></div>
+              <div class="g-pop-head"><strong>Your art</strong><span class="muted small">PNG or JPG. Flat backgrounds are removed for you.</span></div>
               <div class="g-slots" id="art-slots"></div>
             </div>
           </form>
@@ -80,7 +87,7 @@
             <li data-step="play"><i></i>Play</li>
             <li class="g-step-note" id="step-note"></li>
           </ol>
-          <p class="g-free"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6"/></svg>No account, and it runs in your browser. Every game is playtested by a bot before you get it. <button type="button" class="link" data-dialog="how">How it works</button></p>
+          <p class="g-free"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6"/></svg>No account needed. Every game is tested before you play it. <button type="button" class="link" data-dialog="how">Tips</button></p>
         </div>
       </section>
 
@@ -90,9 +97,9 @@
       </section>
     </main>
     <footer class="foot">
-      <span>Chucksi · Open creative tools · MIT licensed code</span>
+      <span>© 2026 Chucksi</span>
       <nav aria-label="Footer">
-        <button class="text-button" data-dialog="ledger">Models &amp; artwork</button><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
+        <a href="/credits.html">Credits</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub ↗</a>
       </nav>
     </footer>
 
@@ -119,30 +126,12 @@
   </div>
 
     <dialog class="sheet" id="how">
-      <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
-      <p><strong>A recipe, not a pile of code.</strong> Your sentence becomes a small JSON recipe: genre, look, names, tuning, a level seed and a tempo. A built-in writer reads your words and fills it in, in your browser. Nothing you type is sent anywhere.</p>
-      <p><strong>Six hand-built templates.</strong> Runner, Stack (3D with three.js, or 2D), Shooter, Match 3, Maze and Eat &amp; Grow, each tuned to stay fun for minutes, not seconds. The recipe only turns their dials, so every game works.</p>
-      <p><strong>Playtested before you play.</strong> A bot plays every new game first: the maze must be solvable, every runner gap clearable with the jump arc, the match board must have moves, the shooter's first waves survivable, the stacker reachable to floor 30. If a seed fails, it rolls another.</p>
-      <p><strong>Art and sound.</strong> Characters and worlds are drawn in code. Add your own pictures, or turn on AI art and FLUX.1 [schnell] paints a background and sprites on the shared daily allowance; their backgrounds are removed in your browser. Sound effects are synthesized, and the music is the Film page's score engine at the game's tempo.</p>
-      <p><strong>Yours to keep.</strong> Remix changes the title, look, world and difficulty and plays it again. Share puts the recipe in the link. Download gives you one HTML file that plays offline, MIT licensed.</p>
-    </dialog>
-
-    <dialog class="sheet" id="ledger">
-      <form method="dialog" class="sheet-head"><h2>Tools, models &amp; artwork</h2><button class="x" aria-label="Close">×</button></form>
-      <p>Everything in Chucksi Games runs in your browser except the optional AI art, which uses the shared daily image allowance.</p>
-      <div class="scroll"><table>
-        <thead><tr><th>Job</th><th>Model or code</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
-        <tbody>
-          <tr><td>Game recipe</td><td>Chucksi built-in writer</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-          <tr><td>Game engine and six templates</td><td>Chucksi Games</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-          <tr><td>3D stacker</td><td>three.js 0.180.0</td><td>MIT</td><td>Your browser (from jsDelivr)</td><td>$0</td></tr>
-          <tr><td>Art drawn in code</td><td>Chucksi vector kit</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-          <tr><td>AI art (optional)</td><td>FLUX.1 [schnell]</td><td>Apache-2.0</td><td>Cloudflare Workers AI free tier, Pollinations as backup</td><td>$0</td></tr>
-          <tr><td>Music and sound</td><td>Chucksi score engine and synth</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-          <tr><td>Playtests</td><td>A bot per genre</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-        </tbody>
-      </table></div>
-      <p>The gallery previews were recorded from the games themselves. The T1 Vendetta: Street Run and Tiny Prompters: Robot Match gallery games use artwork from two projects by the Chucksi maker, used with permission: the T1 Vendetta fighting game (<code>t1-*</code>) and <a href="https://tinyprompters.com" rel="noopener">Tiny Prompters</a> (<code>tp-*</code>). That artwork is not covered by the MIT code license.</p>
+      <form method="dialog" class="sheet-head"><h2>Tips</h2><button class="x" aria-label="Close">×</button></form>
+      <p><strong>Say what you want.</strong> Name the genre, the hero, the world and how hard it should be: “A space cat dodging asteroids, easy.”</p>
+      <p><strong>Six kinds of game.</strong> Runner, Stack (3D or 2D), Shooter, Match 3, Maze and Eat &amp; Grow, each made to stay fun for minutes, not seconds.</p>
+      <p><strong>Tested before you play.</strong> Every new game is played once first, so mazes can be solved and every jump can be made.</p>
+      <p><strong>Art and sound.</strong> Add your own pictures, or turn on AI art to paint a background and characters.</p>
+      <p><strong>Yours to keep.</strong> Remix changes the title, look, world and difficulty. Share puts the game in a link. Download gives you one file that plays offline.</p>
     </dialog>
   </body>
 </html>

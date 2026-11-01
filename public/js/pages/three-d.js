@@ -130,7 +130,7 @@ async function showSplat(bytes, { name, kind, target, D, count }) {
   $('#p-flip').hidden = kind !== 'object';
   $('#download').disabled = false;
   const n = count ?? mesh.numSplats;
-  $('#hud-count').textContent = n ? `${n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : Math.round(n / 1000) + 'k'} splats` : '';
+  $('#hud-count').textContent = n ? `${n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : Math.round(n / 1000) + 'k'} points` : '';
 }
 
 // ---------- sources ----------
@@ -176,7 +176,7 @@ async function loadShot(id) {
 async function loadFile(file) {
   if (!file) return;
   if (/\.(ply|spz|splat|ksplat)$/i.test(file.name)) return openSplatFile(file);
-  if (!file.type.startsWith('image/')) { toast('Use a JPEG, PNG or WebP still, or a .ply splat.', 'error'); return; }
+  if (!file.type.startsWith('image/')) { toast('Use a JPEG, PNG or WebP still, or a .ply file.', 'error'); return; }
   const bmp = await createImageBitmap(file);
   const sc = Math.min(1, 2048 / Math.max(bmp.width, bmp.height));
   const c = document.createElement('canvas');
@@ -194,16 +194,16 @@ async function openSplatFile(file) {
   const bytes = new Uint8Array(await file.arrayBuffer());
   const head = new TextDecoder().decode(bytes.slice(0, 200));
   const ours = head.includes('Chucksi depth splat') || head.includes('Massless depth splat'); // older exports
-  status('Opening the splat', null);
+  status('Opening…', null);
   try {
     if (ours) {
       // our own export: viewer coordinates, camera at the rest position
       await showSplat(bytes, { name: file.name, kind: 'scene', target: [0, 0, 0.6], D: 1.4 });
     } else await showSplat(bytes, { name: file.name, kind: 'object' });
     $('#hud-name').textContent = file.name;
-    $('#src-label').textContent = 'Opened from your device';
+    $('#src-label').textContent = 'Your file';
     setAuto(true);
-  } catch (e) { toast(`Could not open that splat: ${e.message}`, 'error'); } finally { status(null); }
+  } catch (e) { toast('Could not open that file. Try a .ply, .spz or .splat file.', 'error'); } finally { status(null); }
 }
 
 // ---------- building ----------
@@ -215,9 +215,9 @@ const depthRange = () => {
 async function ensureDepth(cur) {
   let d = cur.depth || depthCache.get(cur.ref);
   if (!d) {
-    status('Reading depth on your device', null);
+    status('Preparing your still…', null);
     d = await estimateDepth(cur.image, (f, msg) => status(msg, f));
-    if (d.source === 'estimate') toast('The depth model could not load here, so the depth is a rough guess.', 'error');
+    if (d.source === 'estimate') toast('The 3D may look a little rough on this device.', 'error');
   }
   if (!d.bg) {
     const layer = backgroundLayer(cur.image, d.data, d.w, d.h);
@@ -234,14 +234,14 @@ async function buildDepth() {
   const cur = state.current;
   const d = await ensureDepth(cur);
   if (state.current !== cur) return;
-  status('Placing the splats', null);
+  status('Building your scene…', null);
   await new Promise((r) => setTimeout(r, 16));
   const [sNear, sFar] = depthRange();
   const D = 1 / (2 * Math.tan((FOV * Math.PI) / 360)) / 1.0;
   const res = depthToSplat({ image: cur.image, depth: d, cols: state.cols, sNear, sFar, D, background: state.fill, subject: d.stats.subject });
   await showSplat(res.bytes, { name: `${cur.name}.ply`, kind: 'scene', target: res.target, D: res.D, count: res.count });
-  $('#hud-name').textContent = `${cur.name} · depth splat`;
-  $('#src-label').textContent = d.source === 'precomputed' ? 'Sample · depth precomputed' : d.source === 'model' ? `Depth Anything V2 on ${depthBackend() || 'your device'}` : 'Estimated depth';
+  $('#hud-name').textContent = `${cur.name} · 3D scene`;
+  $('#src-label').textContent = d.source === 'precomputed' ? 'Sample' : 'Ready';
 }
 
 async function imageBlob(cur) {
@@ -271,18 +271,18 @@ async function checkIdol() {
 async function buildIdol() {
   const cur = state.current;
   if (!(await checkIdol())) {
-    toast('Connect a reconstruction service in Connection settings, or open an existing 3D file.', 'error');
+    toast('Connect an object service in Connection settings, or open an existing 3D file.', 'error');
     return;
   }
   status('Creating your complete object…', null);
   const q = new URLSearchParams({ mode: $('#idol-mode').value, seed: $('#idol-seed').value, num_gaussians: $('#idol-count').value });
   const t0 = performance.now();
   const r = await fetch(`${idolBase()}/generate?${q}`, { method: 'POST', body: await imageBlob(cur), headers: { 'content-type': 'image/jpeg' } });
-  if (!r.ok) throw new Error((await r.text()).slice(0, 200) || `HTTP ${r.status}`);
+  if (!r.ok) throw new Error('the object service could not build this one. Try again.');
   const bytes = new Uint8Array(await r.arrayBuffer());
   await showSplat(bytes, { name: `${cur.name}-idol.ply`, kind: 'object' });
   $('#hud-name').textContent = `${cur.name} · Full object`;
-  $('#src-label').textContent = `Object created · ${((performance.now() - t0) / 1000).toFixed(1)} s`;
+  $('#src-label').textContent = 'Object ready';
   setAuto(true);
 }
 
@@ -377,7 +377,7 @@ async function init() {
   bind();
   bindDialogs();
   buildSamples();
-  viewerReady = initViewer().catch((e) => { status(`The 3D viewer could not start here: ${e.message}`); throw e; });
+  viewerReady = initViewer().catch((e) => { status('The 3D viewer could not start on this device. Reload the page to try again.'); throw e; });
   const p = new URLSearchParams(location.search);
   if (p.get('engine') === 'idol') showTab('idol');
   if (p.get('panel') === 'import') {
@@ -385,7 +385,7 @@ async function init() {
     $('#open-splat').scrollIntoView({ block: 'nearest' });
   }
   try { await viewerReady; } catch { return; }
-  $('#src-label').textContent = 'Viewer ready';
+  $('#src-label').textContent = 'Ready';
   if (p.get('shot')) await loadShot(p.get('shot'));
   else await loadSample(p.get('sample') || 'samurai');
   window.massless = { state, build, loadSample, openSplatFile, get mesh() { return mesh; }, get camera() { return camera; } };

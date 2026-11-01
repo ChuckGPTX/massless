@@ -96,12 +96,8 @@ export function initNavigation() {
     if(path==="/projects")account.setAttribute("aria-current","page");
     header.querySelector(".nav-right")?.prepend(account);
   }
-  // Every page links to the source, since being open is the point.
-  const right=header.querySelector(".nav-right");
-  if(right&&!right.querySelector('a[href^="https://github.com/ChuckGPTX/massless"]')){
-    const gh=node("a","btn-ghost","GitHub");gh.href="https://github.com/ChuckGPTX/massless";gh.rel="noopener";
-    const cta=right.querySelector(".btn-accent");cta?cta.before(gh):right.append(gh);
-  }
+  // The source link lives in the footer, not the header.
+  header.querySelector('.nav-right a[href^="https://github.com/ChuckGPTX/massless"]')?.remove();
   nav.id = "studio-navigation";
 
   const toggle = node("button", "studio-mobile-toggle");
@@ -151,7 +147,7 @@ export function initNavigation() {
     const wrap = node("div", "studio-menu");
     const top = node("div", "studio-menu-top");
     const destination = node("a", "studio-destination", studio.label);
-    // the label opens the studio itself; its chevron opens the menu of tools and models
+    // the label opens the studio itself; its chevron opens the menu of tools
     destination.href = studio.href;
     if (active === studio) destination.setAttribute("aria-current", "page");
     const button = node("button", "studio-trigger");
@@ -159,7 +155,7 @@ export function initNavigation() {
     button.id = `studio-trigger-${studio.id}`;
     button.setAttribute("aria-expanded", "false");
     button.setAttribute("aria-controls", `studio-panel-${studio.id}`);
-    button.setAttribute("aria-label", `${studio.label} tools and models`);
+    button.setAttribute("aria-label", `${studio.label} tools`);
     button.append(icon("chevron"));
     if (active === studio) {
       button.classList.add("is-current");

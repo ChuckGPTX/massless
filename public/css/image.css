@@ -65,15 +65,14 @@
 .opts.chips .opt { padding: 6px 11px; font-size: 13px; }
 .opt[aria-checked="true"] { border-color: var(--accent); background: rgba(255, 191, 47, 0.08); }
 .pop .note { color: var(--muted); font-size: 12.5px; margin: 10px 0 0; }
-/* model picker: wider cards so the note and licence read on one line each */
+/* style picker: wider cards so each note reads on one line */
 .opts.models { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
 .opts.models .opt { padding: 8px 12px; }
-.opt small.lic { margin-top: 3px; color: var(--dim); font-size: 11px; letter-spacing: 0.01em; }
 .pop .mgroup h4 { margin: 12px 0 7px; }
 .pop h3 + .mgroup h4 { margin-top: 0; }
-.mgroup-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 6px; }
+.mgroup-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 6px; }
+@media (max-width: 560px) { .mgroup-row { grid-template-columns: 1fr; } }
 .mgroup-row .opts.models { grid-template-columns: 1fr; }
-.opt[aria-checked="true"] small.lic { color: rgba(255, 191, 47, 0.75); }
 .pop label.f { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
 .pop label.f input { background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; color: var(--text); }
 

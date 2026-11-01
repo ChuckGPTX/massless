@@ -257,7 +257,7 @@ export function inkPrint(img, ink, ground, mode = 'silhouette', w = img.width, h
   g.putImageData(d, 0, 0);
   return c;
 }
-export const toBlob = (c, type = 'image/png', q = 0.92) => new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('This browser could not encode the image.'))), type, q));
+export const toBlob = (c, type = 'image/png', q = 0.92) => new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('Couldn’t save the image. Try again.'))), type, q));
 export function loadImage(url) {
   return new Promise((res, rej) => {
     const im = new Image();

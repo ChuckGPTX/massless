@@ -17,7 +17,7 @@ export const BLOCKS = {
   words: { name: 'Words', hint: 'One idea per beat: slams and stacks' },
   strike: { name: 'Strike', hint: 'The old way, struck out, then the new one' },
   hero: { name: 'Hero', hint: 'The name in 3D, orbited and lit' },
-  prompt: { name: 'Prompt', hint: 'The brief types, Enter is the drop' },
+  prompt: { name: 'Typing', hint: 'The brief types itself, Enter is the drop' },
   counter: { name: 'Counter', hint: 'A number on slot reels' },
   stretch: { name: 'Stretch', hint: 'Type that breathes on the beat' },
   fly: { name: 'Fly', hint: 'A camera through 3D words' },

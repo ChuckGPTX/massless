@@ -260,7 +260,7 @@ for (const preset of presets) {
     actions.append(launch);
   }
   body.append(
-    make("small", "eyebrow", "COMFYUI / " + preset.category),
+    make("small", "eyebrow", String(preset.category).toUpperCase()),
     make("h3", "", preset.name),
     make("p", "", preset.description),
     make("small", "", "Connected workflow · separate setup required"),

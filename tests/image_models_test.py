@@ -33,14 +33,14 @@ BASE = f'http://127.0.0.1:{port}'
 
 # model -> (chip/tag label, Workers AI id, response format, frame to test with, expected request size)
 MODELS = {
-    'flux-1-schnell': ('FLUX.1 schnell', '@cf/black-forest-labs/flux-1-schnell', 'JPEG', '169', (1024, 576)),
-    'sdxl-lightning': ('SDXL-Lightning', '@cf/bytedance/stable-diffusion-xl-lightning', 'JPEG', '239', (1216, 512)),
-    'dreamshaper-8-lcm': ('DreamShaper 8', '@cf/lykon/dreamshaper-8-lcm', 'PNG', '916', (448, 768)),  # SD 1.5 model: 768 long side
-    'sdxl-base': ('SDXL 1.0', '@cf/stabilityai/stable-diffusion-xl-base-1.0', 'PNG', '11', (1024, 1024)),
+    'flux-1-schnell': ('Fast', '@cf/black-forest-labs/flux-1-schnell', 'JPEG', '169', (1024, 576)),
+    'sdxl-lightning': ('Quick sketch', '@cf/bytedance/stable-diffusion-xl-lightning', 'JPEG', '239', (1216, 512)),
+    'dreamshaper-8-lcm': ('Illustration', '@cf/lykon/dreamshaper-8-lcm', 'PNG', '916', (448, 768)),  # SD 1.5 model: 768 long side
+    'sdxl-base': ('Detailed', '@cf/stabilityai/stable-diffusion-xl-base-1.0', 'PNG', '11', (1024, 1024)),
 }
 FRAME = {'169': 1280 / 720, '239': 1344 / 560, '916': 720 / 1280, '11': 1.0}
-CAP_MSG = "You've used your 12 free Cloudflare frames for today. Pollinations or your own ComfyUI still work."
-FAIL_MSG = 'Workers AI could not render this frame: 3010: model is warming up'
+CAP_MSG = "You've used your 12 free images for today. Try the Backup style, or come back tomorrow."
+FAIL_MSG = "Couldn't create this image. Try again."
 POLL_MSG = 'Free limit reached: 1 image every 45 seconds per IP. Retry after 25s, or get unlimited images with a pollen key at https://enter.pollinations.ai/?ref=classic'
 
 mock = {'mode': 'ok', 'shots': [], 'poll': []}
@@ -120,19 +120,17 @@ with sync_playwright() as p:
     pg.click('.chip[data-pop="model"]')
     pg.wait_for_selector('#pop:not([hidden])')
     heads = pg.eval_on_selector_all('#pop h4', 'n => n.map(x => x.textContent)')
-    check(heads == ['Free on Cloudflare', 'Community', 'Your GPU'], f'groups {heads}')
-    opts = pg.eval_on_selector_all('#pop .opt', 'n => n.map(x => [x.dataset.key, x.querySelector("strong").textContent, x.querySelector("small.lic").textContent])')
-    check([o[0] for o in opts] == ['flux-1-schnell', 'sdxl-lightning', 'dreamshaper-8-lcm', 'sdxl-base', 'sana', 'comfy'], f'options {[o[0] for o in opts]}')
-    lic = {o[0]: o[2] for o in opts}
-    check(lic['flux-1-schnell'] == 'Apache-2.0' and lic['sdxl-lightning'] == 'OpenRAIL++' and lic['dreamshaper-8-lcm'] == 'CreativeML OpenRAIL-M'
-          and lic['sdxl-base'] == 'OpenRAIL++' and 'NVIDIA' in lic['sana'] and lic['comfy'] == 'Your choice', f'licences {lic}')
-    sana = [o for o in opts if o[0] == 'sana'][0]
-    check('Sana' in sana[1] and 'FLUX' not in pg.inner_text('#pop .opt[data-key="sana"]'), f'Pollinations labelled honestly: {sana[1]!r}')
-    check(pg.get_attribute('#pop .opt[aria-checked="true"]', 'data-key') == 'flux-1-schnell', 'FLUX.1 schnell on Cloudflare is the default')
+    check(heads == ['Free', 'Members', 'More', 'Custom'], f'groups {heads}')
+    opts = pg.eval_on_selector_all('#pop .opt', 'n => n.map(x => [x.dataset.key, x.querySelector("strong").textContent])')
+    check([o[0] for o in opts] == ['flux-1-schnell', 'sdxl-lightning', 'dreamshaper-8-lcm', 'sdxl-base', 'moss-image-sft', 'sana', 'comfy'], f'options {[o[0] for o in opts]}')
+    pop = pg.inner_text('#pop')
+    check(not any(w in pop for w in ('FLUX', 'SDXL', 'Sana', 'Apache', 'OpenRAIL', 'Cloudflare', 'Pollinations')), f'plain style names only: {pop[:160]!r}')
+    check([o[1] for o in opts][:4] == ['Fast', 'Quick sketch', 'Illustration', 'Detailed'], f'names {[o[1] for o in opts]}')
+    check(pg.get_attribute('#pop .opt[aria-checked="true"]', 'data-key') == 'flux-1-schnell', 'Fast is the default')
     pg.keyboard.press('Escape')
     pg.wait_for_selector('#pop', state='hidden')
 
-    pg.click('#prompt-peek summary')  # open "Prompt sent to the model" so the negative prompt line can be read
+    pg.click('#prompt-peek summary')  # open "Full description" so the Avoids line can be read
     set_takes(pg, 2)
     unit = pg.evaluate("getComputedStyle(document.querySelector('#takes-n'), '::after').content")
     check(unit == '" takes"', f'stepper unit {unit}')
@@ -187,19 +185,19 @@ with sync_playwright() as p:
     print('Pollinations 402')
     set_takes(pg, 1)
     pick(pg, 'model', 'sana')
-    check(pg.inner_text('#chip-model') == 'Sana', f'chip shows {pg.inner_text("#chip-model")!r}')
+    check(pg.inner_text('#chip-model') == 'Backup', f'chip shows {pg.inner_text("#chip-model")!r}')
     check(not pg.is_visible('#neg-line'), 'no negative prompt line for Sana')
     shoot_and_wait(pg)
     pg.wait_for_selector('#toast.error:not([hidden])')
     toast = pg.inner_text('#toast')
-    check(toast.startswith('Pollinations: Free limit reached') and 'Retry after 25s' in toast, f'toast {toast[:90]!r}')
+    check(toast == 'Backup is busy. Try again in a moment.', f'toast {toast[:90]!r}')
     check(len(mock['poll']) == 1 and 'model=sana' in mock['poll'][0], f'Pollinations asked for {mock["poll"][0].split("?")[-1][:80] if mock["poll"] else None}')
 
     print('remembered choice')
     pick(pg, 'model', 'sdxl-lightning')
     pg.reload(wait_until='domcontentloaded')
     pg.wait_for_function("window.massless && window.massless.state.rig")
-    check(pg.inner_text('#chip-model') == 'SDXL-Lightning', f'after reload chip shows {pg.inner_text("#chip-model")!r}')
+    check(pg.inner_text('#chip-model') == 'Quick sketch', f'after reload chip shows {pg.inner_text("#chip-model")!r}')
     tags = pg.eval_on_selector_all('.shot .tag', 'n => [...new Set(n.map(x => x.textContent))]')
     check(sorted(tags) == sorted(m[0] for m in MODELS.values()), f'restored cards keep their model tags {tags}')
 

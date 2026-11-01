@@ -137,7 +137,7 @@ export default {
   id: 'map',
   fields: [
     { key: 'place', label: 'Place or theme', max: 60 },
-    { key: 'scene', label: 'What is in it', type: 'textarea', rows: 3, max: 300, hint: 'Painted by FLUX, seen from straight above. It never draws words.' },
+    { key: 'scene', label: 'What is in it', type: 'textarea', rows: 3, max: 300, hint: 'Painted from straight above. Your labels are added on top.' },
     { key: 'subtitle', label: 'Subtitle', max: 90 },
     { key: 'coords', label: 'Coordinates or a note', max: 60 },
     { key: 'labels', label: 'Labels', type: 'textarea', rows: 6, max: 600, hint: 'One per line. Add “· Category” to put it in the legend. Drag labels on the map to move them.' },
@@ -150,7 +150,7 @@ export default {
   presets: [
     {
       state: {
-        place: 'Saltmere Island', scene: 'a small coastal island town with turquoise coves, sandy beaches, a harbour with tiny boats, terracotta rooftops, olive groves and a lighthouse on the point',
+        place: 'Saltmere Island', scene: 'A small island town with turquoise coves, a harbour of tiny boats and a lighthouse on the point',
         subtitle: 'Summer · coves, harbour and the old light', coords: '37°04′ N · 25°28′ E',
         labels: 'The Old Light · Viewpoint\nHarbour Steps · Harbour\nFig Tree Cove · Swim\nUpper Town · Village\nOlive Terraces · Walk\nSouth Beach · Swim',
         style: 'gouache', paper: 'cream', title: 'serif', format: 'portrait', furniture: true, seed: 7, pos: [[0.52, 0.47], [0.24, 0.24], [0.66, 0.84], [0.54, 0.62], [0.2, 0.62], [0.15, 0.86]],
@@ -161,11 +161,11 @@ export default {
   frames: () => 1,
   surprise(r) {
     const ideas = [
-      ['Larkspur Valley', 'an alpine lake valley with a turquoise lake, pine forests, a small wooden village, a winding trail and snowy patches', 'Late spring · lake, forest and the high trail', '46°31′ N · 8°02′ E', 'Boathouse · Swim\nPine Hollow · Walk\nThe Village · Village\nHigh Pass · Viewpoint\nWaterfall · Viewpoint'],
-      ['The Riverside Quarter', 'a river city district with bridges, tree-lined boulevards, a market square, parks and rooftops in a grid of streets', 'A walking map · bridges, markets and parks', '51°03′ N · 3°43′ E', 'Market Square · Food\nIron Bridge · Viewpoint\nBotanic Park · Park\nOld Mill · Museum\nFlower Quay · Food'],
-      ['Tamarind Bay', 'a tropical bay with coral reefs, palm groves, a fishing village with wooden piers and a mangrove river mouth', 'Dry season · reef, palms and the fishing pier', '12°17′ S · 49°18′ E', 'Coral Garden · Swim\nPalm Walk · Walk\nFishing Pier · Harbour\nMangrove Mouth · Boat\nVillage Well · Village'],
-      ['Harvest Plains', 'patchwork farmland in bloom with yellow mustard fields, a meandering stream, tree lines, small farms and a dirt road', 'Early bloom · fields, stream and farms', '29°53′ N · 77°18′ E', 'North Farm · Farm\nStream Ford · Walk\nWindbreak Trees · Viewpoint\nMarket Road · Food'],
-      ['Kumo Terraces', 'flooded rice paddies in spring with cherry trees in blossom, a straight river, narrow raised paths and a small shrine', 'Spring · blossom over flooded paddies', '37°55′ N · 139°02′ E', 'Shrine Gate · Visit\nBlossom Row · Viewpoint\nRiver Path · Walk\nTea House · Food'],
+      ['Larkspur Valley', 'An alpine valley with a turquoise lake, pine forests and a small wooden village', 'Late spring · lake, forest and the high trail', '46°31′ N · 8°02′ E', 'Boathouse · Swim\nPine Hollow · Walk\nThe Village · Village\nHigh Pass · Viewpoint\nWaterfall · Viewpoint'],
+      ['The Riverside Quarter', 'A river city with bridges, tree-lined boulevards, a market square and parks', 'A walking map · bridges, markets and parks', '51°03′ N · 3°43′ E', 'Market Square · Food\nIron Bridge · Viewpoint\nBotanic Park · Park\nOld Mill · Museum\nFlower Quay · Food'],
+      ['Tamarind Bay', 'A tropical bay with coral reefs, palm groves and a fishing village on wooden piers', 'Dry season · reef, palms and the fishing pier', '12°17′ S · 49°18′ E', 'Coral Garden · Swim\nPalm Walk · Walk\nFishing Pier · Harbour\nMangrove Mouth · Boat\nVillage Well · Village'],
+      ['Harvest Plains', 'Farmland in bloom with yellow mustard fields, a winding stream and small farms', 'Early bloom · fields, stream and farms', '29°53′ N · 77°18′ E', 'North Farm · Farm\nStream Ford · Walk\nWindbreak Trees · Viewpoint\nMarket Road · Food'],
+      ['Kumo Terraces', 'Flooded rice paddies in spring with cherry blossom and a small shrine', 'Spring · blossom over flooded paddies', '37°55′ N · 139°02′ E', 'Shrine Gate · Visit\nBlossom Row · Viewpoint\nRiver Path · Walk\nTea House · Food'],
     ];
     const [place, scene, subtitle, coords, labels] = ideas[Math.floor(r() * ideas.length)];
     return { place, scene, subtitle, coords, labels, pos: [], style: ['gouache', 'watercolour', 'papercut', 'gouache'][Math.floor(r() * 4)], paper: r() < 0.8 ? 'cream' : 'ink', title: ['serif', 'italic', 'grotesk'][Math.floor(r() * 3)], seed: Math.floor(r() * 1e6) };

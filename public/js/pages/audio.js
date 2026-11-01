@@ -21,11 +21,11 @@ const master = createMaster({ $, state, setBusy: (...a) => setBusy(...a), progre
 
 // ---------- tabs ----------
 const COPY = {
-  voice: ['Turn text<br>into voiceover', 'Eight English voices on your own device, or six languages with MeloTTS on Cloudflare. Pair a voice with a sound bed and drop both under a clip from Video.'],
-  cap: ['Captions from<br>any clip', 'Drop audio or video and get an editable transcript, plus .srt and .vtt captions with timestamps. Whisper large-v3-turbo, free.'],
-  bed: ['Score the<br>scene', 'Rain, wind, ocean and city ambience synthesized from scratch in seconds. Fades at both ends, so it loops under any clip.'],
-  ext: ['Extract audio<br>from video', 'Drop a video or audio file, pick MP3, M4A or WAV and press Convert. It all runs in this tab, so nothing is uploaded.'],
-  master: ['Master<br>your mix', 'Drop a finished mix, read the report in plain words, pick a character and where it is going. Fair A/B, 24-bit WAV or MP3. It all runs in this tab.'],
+  voice: ['Turn text<br>into voiceover', 'Eight natural English voices, or six languages. Pair a voice with a sound bed and drop both under a clip from Video.'],
+  cap: ['Captions from<br>any clip', 'Drop audio or video and get an editable transcript, plus .srt and .vtt captions.'],
+  bed: ['Score the<br>scene', 'Rain, wind, ocean and city ambience in seconds. Fades at both ends, so it loops under any clip.'],
+  ext: ['Extract audio<br>from video', 'Drop a video or audio file, pick MP3, M4A or WAV and press Convert.'],
+  master: ['Master<br>your mix', 'Drop a finished mix, read the report in plain words, pick a character and where it is going. Compare before and after, then save WAV or MP3.'],
 };
 const TABS = ['voice', 'cap', 'bed', 'ext', 'master'];
 function showTab(which) {
@@ -56,10 +56,11 @@ function showTab(which) {
 }
 function syncSource() {
   let s;
-  if (state.tab === 'cap') s = 'Whisper large-v3-turbo on Cloudflare Workers AI';
-  else if (state.tab === 'ext' || state.tab === 'master') s = 'Runs in your browser · nothing is uploaded';
-  else if (state.tab === 'voice' && state.engine === 'melo') s = 'MeloTTS on Cloudflare Workers AI';
-  else s = voiceBackend() ? `Kokoro-82M on ${voiceBackend()}` : 'Kokoro-82M · loads on first use';
+  if (state.tab === 'cap') s = 'Transcripts and captions';
+  else if (state.tab === 'ext') s = 'MP3, M4A or WAV';
+  else if (state.tab === 'master') s = 'Ready to release';
+  else if (state.tab === 'bed') s = 'Sound beds';
+  else s = state.engine === 'melo' ? 'Six languages' : 'English voices';
   $('#src-label').textContent = s;
 }
 
@@ -67,16 +68,15 @@ function syncSource() {
 function selectEngine(id) {
   state.engine = id === 'melo' ? 'melo' : 'kokoro';
   const melo = state.engine === 'melo';
-  if (melo) warmHuman(); // MeloTTS runs on Cloudflare
+  if (melo) warmHuman(); // MeloTTS runs on the server
   document.querySelectorAll('#engines .engine').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.id === state.engine)));
   $('#voices').hidden = melo;
   $('#langs').hidden = !melo;
   $('#voices-title').textContent = melo ? 'Languages' : 'Voices';
-  $('#voices-hint').textContent = melo ? 'One MeloTTS voice per language · ▶ hear a line (sent to Cloudflare)' : 'Tap to choose · ▶ to hear a line';
-  $('#model-name').textContent = melo ? 'MeloTTS · open weights (MIT)' : 'Kokoro-82M · open weights';
+  $('#voices-hint').textContent = melo ? 'One voice per language · ▶ hear a line' : 'Tap to choose · ▶ to hear a line';
   $('#voice-note').textContent = melo
-    ? 'Your script is sent to Cloudflare Workers AI to be spoken, in chunks under 1,000 characters, and the audio comes back here. Nothing is stored. There is a daily free limit.'
-    : 'The first voice downloads the model once (about 90 MB), then it runs offline in this tab. Nothing you type leaves your device.';
+    ? 'Free, with a daily limit.'
+    : 'The first voice takes a moment to get ready.';
   $('#speed').disabled = melo;
   $('#speed-field').classList.toggle('off', melo);
   $('#speed-note').hidden = !melo;
@@ -124,7 +124,7 @@ function buildVoices() {
     $('#voices').append(radioCard(v.id, v.name[0], v.name, el('span', {}, `${v.accent} · ${v.gender}`), v.note, selectVoice, (b) => previewVoice(v, b), `Hear ${v.name}`));
   }
   for (const l of MELO_LANGS) {
-    const sub = el('span', {}, l.native === l.name ? 'MeloTTS voice' : el('span', { class: 'native' }, l.native), l.native === l.name ? null : ' · MeloTTS voice');
+    const sub = el('span', {}, l.native === l.name ? 'Voice' : el('span', { class: 'native' }, l.native), l.native === l.name ? null : ' · Voice');
     $('#langs').append(radioCard(l.id, l.tag, l.name, sub, `“${l.sample}”`, selectLang, (b) => previewLang(l, b), `Hear ${l.name}`, true));
   }
 }
@@ -135,7 +135,7 @@ async function previewVoice(v, btn) {
   btn.classList.add('busy');
   setBusy(true, 'Loading voice');
   try {
-    const res = await speak(`Hi, I'm ${v.name}. This line was spoken on your own device, for free.`, { voice: v.id, onProgress: progress });
+    const res = await speak(`Hi, I'm ${v.name}. Let's tell your story.`, { voice: v.id, onProgress: progress });
     previews.set(v.id, res.url);
     playUrl(res.url, btn);
   } catch (e) { toast(`Voice failed: ${e.message}`, 'error'); } finally { btn.classList.remove('busy'); setBusy(false); }
@@ -200,10 +200,10 @@ async function genVoice() {
 
 async function genMelo(text) {
   const l = MELO_LANGS.find((x) => x.id === state.lang) || MELO_LANGS[0];
-  setBusy(true, 'Sending to Cloudflare');
+  setBusy(true, 'Creating…');
   try {
     const res = await speakMelo(text, { lang: l.id, onProgress: progress });
-    await addItem({ type: 'voice', title: text, sub: `MeloTTS · ${l.name} · ${res.duration.toFixed(1)} s`, blob: res.blob, duration: res.duration, file: `chucksi-voice-melotts-${l.id}` }, true);
+    await addItem({ type: 'voice', title: text, sub: `${l.name} · ${res.duration.toFixed(1)} s`, blob: res.blob, duration: res.duration, file: `chucksi-voice-melotts-${l.id}` }, true);
   } catch (e) { toast(`Voice failed: ${e.message}`, 'error'); } finally { setBusy(false); }
 }
 
@@ -234,7 +234,7 @@ async function pickFile(file) {
   cap.results = [];
   $('#cap-file-name').textContent = file.name;
   $('#cap-drop-title').textContent = file.name;
-  $('#cap-drop-sub').textContent = 'Reading the audio in this tab…';
+  $('#cap-drop-sub').textContent = 'Reading the file…';
   $('#cap-drop').classList.add('compact');
   $('#cap-parts').hidden = true;
   setBusy(true, 'Reading file');
@@ -242,7 +242,7 @@ async function pickFile(file) {
     cap.prep = await T.prepareAudio(file);
     const { duration, parts } = cap.prep;
     const bytes = parts.reduce((a, p) => a + 44 + Math.round((p.end - p.start) * T.ASR_RATE) * 2, 0);
-    $('#cap-drop-sub').textContent = `${fmtMin(duration)} · ${mb(bytes)} of 16 kHz mono to send${parts.length > 1 ? ` in ${parts.length} parts` : ''}. Nothing is sent until you press Transcribe.`;
+    $('#cap-drop-sub').textContent = `${fmtMin(duration)}${parts.length > 1 ? ` · ${parts.length} parts` : ''}. Press Transcribe when you're ready.`;
     renderParts();
   } catch (e) {
     cap.file = null;
@@ -372,7 +372,6 @@ const KBPS_NOTE = {
   mp3: { 128: 'Fine for speech and podcasts. About 1 MB a minute.', 192: 'Good for music, and the usual pick. About 1.4 MB a minute.', 320: 'The most MP3 can hold. About 2.4 MB a minute.' },
   m4a: { 128: 'AAC sounds better than MP3 at the same size. About 1 MB a minute.', 192: 'Very good for music. About 1.4 MB a minute.', 256: 'The rate Apple Music uses. About 1.9 MB a minute.' },
 };
-const ENCODER = { mp3: 'LAME 3.100 · open source', m4a: 'AAC · this browser’s encoder', wav: '16-bit PCM · no encoder needed' };
 const kHz = (r) => `${r / 1000} kHz`; // 48, 44.1, 22.05
 const fsize = (b) => (b < 1e6 ? `${Math.max(1, Math.round(b / 1e3))} KB` : mb(b));
 const chName = (n) => (n === 1 ? 'Mono' : n === 2 ? 'Stereo' : `${n} channels`);
@@ -397,8 +396,8 @@ function syncExt() {
   $('#ext-drop').classList.toggle('compact', n > 0);
   $('#ext-drop-title').textContent = n ? 'Add more files' : 'Drop video or audio here';
   $('#ext-drop-sub').textContent = n
-    ? `${n} file${n === 1 ? '' : 's'} below. Drop more here, or choose them. Nothing is uploaded.`
-    : 'mp4, mov, webm, mp3, wav, m4a, ogg or flac. Add several at once. Nothing is uploaded.';
+    ? `${n} file${n === 1 ? '' : 's'} below. Drop more here, or choose them.`
+    : 'mp4, mov, webm, mp3, wav, m4a, ogg or flac. Add several at once.';
   $('#ext-choose').textContent = n ? 'Add files' : 'Choose files';
   const results = ext.items.filter((it) => it.result).length;
   $('#ext-all').hidden = results < 2;
@@ -463,7 +462,6 @@ function buildKbps() {
   const wav = ext.fmt === 'wav';
   $('#o-ext-q').textContent = wav ? '16-bit PCM' : `${ext.kbps[ext.fmt]} kbps`;
   $('#ext-q-note').textContent = wav ? 'Uncompressed, for editing. About 10 MB a minute in stereo.' : KBPS_NOTE[ext.fmt][ext.kbps[ext.fmt]] || '';
-  $('#ext-enc').textContent = ENCODER[ext.fmt];
 }
 function selectKbps(k) {
   ext.kbps[ext.fmt] = k;

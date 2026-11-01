@@ -1,6 +1,6 @@
 // Text to video, front and centre on /video: one prompt bar above the studio. It is always visible.
-// Signed in, it renders on the free members model (mischief-1 on OpenRouter) when that's on, or on the Chucksi GPU
-// (Wan 2.2, from text). Signed out, the prompt is kept and the visitor is sent to sign in, then brought back here.
+// Signed in, "Fast" renders on the members model (promoVideo) and "Best quality" on the GPU worker (animate job).
+// Signed out, the prompt is kept and the visitor is sent to sign in, then brought back here.
 import { accessToken, cloudConfig, gpuBudget, gpuJob, promoBudget, promoVideoJob, session } from "./cloud.js";
 
 const KEEP = "chucksi.video-prompt";
@@ -11,11 +11,11 @@ const h = (tag, attrs = {}, ...kids) => {
   return e;
 };
 const IDEAS = [
-  "A paper boat drifting down a rain-soaked city street at dusk, neon reflections, slow tracking shot",
-  "Macro shot of coffee poured into a glass cup, cream swirling, soft morning window light",
-  "A red balloon rising past brick rooftops into a pastel sky, gentle camera tilt up",
-  "Slow dolly through a sunlit greenhouse full of ferns, floating dust, cinematic",
-  "A fox trotting through fresh snow in a birch forest, low angle, golden hour",
+  "A fox trotting through fresh snow at sunrise",
+  "A paper boat drifting down a rainy street at dusk",
+  "Cream swirling into a glass of iced coffee",
+  "A red balloon rising over city rooftops",
+  "A slow walk through a sunlit greenhouse",
 ];
 const store = {
   get: () => { try { return localStorage.getItem(KEEP) || ""; } catch { return ""; } },
@@ -25,12 +25,12 @@ const store = {
 async function mount(el) {
   const c = await cloudConfig();
   const engines = [];
-  if (c.promoVideo?.on) engines.push({ id: "free", label: "Free clip · mischief-1 · 5 s", hint: "Fast. Free for members while the promo lasts." });
-  if (c.gpu?.on) engines.push({ id: "gpu", label: "Best quality · Wan 2.2 · 5 s", hint: "Our 80 GB GPU. About 2–4 minutes (longer if it has to wake up)." });
+  if (c.promoVideo?.on) engines.push({ id: "free", label: "Fast · 5 s", hint: "Ready in about a minute." });
+  if (c.gpu?.on) engines.push({ id: "gpu", label: "Best quality · 5 s", hint: "Takes a few minutes." });
 
   const prompt = h("textarea", { id: "vp-prompt", rows: "2", maxlength: "1200", placeholder: IDEAS[0], "aria-label": "Describe your video" });
   prompt.value = store.get();
-  const engine = h("select", { id: "vp-engine", "aria-label": "Video model" }, ...engines.map((e) => h("option", { value: e.id, text: e.label })));
+  const engine = h("select", { id: "vp-engine", "aria-label": "Quality" }, ...engines.map((e) => h("option", { value: e.id, text: e.label })));
   const shape = h("select", { id: "vp-shape", "aria-label": "Shape" }, h("option", { value: "16:9", text: "16:9" }), h("option", { value: "9:16", text: "9:16" }), h("option", { value: "1:1", text: "1:1" }));
   const go = h("button", { type: "submit", class: "btn-accent vp-go" }, "Generate video");
   const idea = h("button", { type: "button", class: "btn-ghost", text: "Surprise me" });
@@ -47,21 +47,27 @@ async function mount(el) {
   const hint = form.querySelector("#vp-hint");
   const sync = () => {
     const e = engines.find((x) => x.id === engine.value);
-    hint.textContent = e ? e.hint : "Video models are being connected.";
+    hint.textContent = e ? e.hint : "";
     shape.hidden = engine.value === "free"; // the free model makes widescreen clips only
   };
-  engine.addEventListener("change", sync);
+  engine.addEventListener("change", () => { sync(); showLeft(); });
   prompt.addEventListener("input", () => store.set(prompt.value));
   idea.addEventListener("click", () => { prompt.value = IDEAS[Math.floor(Math.random() * IDEAS.length)]; store.set(prompt.value); prompt.focus(); });
 
+  const left = {};
+  const showLeft = () => {
+    if (!session() || !engines.length) return;
+    const n = left[engine.value];
+    status.textContent = Number.isFinite(n) ? `${n} left today` : "";
+  };
   const refresh = async () => {
     sync();
-    if (!engines.length) { go.disabled = true; status.textContent = "Text to video is being connected. The camera moves below work right now."; return; }
-    if (!session()) { go.disabled = false; go.textContent = "Generate video"; status.replaceChildren("Free with an account. ", h("a", { href: "/projects/#account", text: "Sign in" }), " and you'll come straight back here with your prompt."); return; }
+    if (!engines.length) { go.disabled = true; status.textContent = "Coming soon. Try a camera move below."; return; }
+    if (!session()) { go.disabled = false; go.textContent = "Generate video"; status.replaceChildren(h("a", { href: "/projects/#account", text: "Sign in" }), " to create. It’s free."); return; }
     const [p, g] = await Promise.all([engines.some((e) => e.id === "free") ? promoBudget() : null, engines.some((e) => e.id === "gpu") ? gpuBudget() : null].map((x) => Promise.resolve(x).catch(() => null)));
-    const free = p && p.on && p.signedIn ? `${p.clipsLeftForYou} free clips left today` : "";
-    const gpu = g && g.on && g.signedIn && !g.error ? `${g.jobsLeftForYou} GPU videos left today` : "";
-    status.textContent = [free, gpu].filter(Boolean).join(" · ");
+    left.free = p && p.on && p.signedIn && !p.error ? p.clipsLeftForYou : undefined;
+    left.gpu = g && g.on && g.signedIn && !g.error ? g.jobsLeftForYou : undefined;
+    showLeft();
   };
 
   let ctl;
@@ -81,12 +87,12 @@ async function mount(el) {
     out.hidden = true;
     try {
       await accessToken();
-      status.textContent = "Sending…";
+      status.textContent = "Creating…";
       let blob;
       if (engine.value === "free") {
         blob = (await promoVideoJob({ prompt: text, duration: 5, resolution: "480p", signal: ctl.signal, onProgress: (m) => (status.textContent = m) })).blob;
       } else {
-        blob = (await gpuJob({ job: "animate", input: { prompt: text, mode: "quick", resolution: "480p", aspect: shape.value }, signal: ctl.signal, onProgress: (p) => (status.textContent = p.message + (Number.isFinite(p.percent) ? ` (${p.percent}%)` : "")) })).blob;
+        blob = (await gpuJob({ job: "animate", input: { prompt: text, mode: "quick", resolution: "480p", aspect: shape.value }, signal: ctl.signal, onProgress: (p) => (status.textContent = p.message) })).blob;
       }
       const url = URL.createObjectURL(blob);
       out.replaceChildren(
@@ -94,15 +100,15 @@ async function mount(el) {
         h("div", { class: "vp-result-actions" }, h("a", { href: url, download: "chucksi-video.mp4", class: "btn-ghost", text: "Download" }), h("a", { href: "/cut/", class: "btn-ghost", text: "Caption & trim ↗" })),
       );
       out.hidden = false;
-      status.textContent = "Done. Saved to My library.";
-      import("./assets.js").then(({ saveAsset }) => saveAsset(blob, { name: "chucksi-video.mp4", engine: engine.value === "free" ? "mischief-1" : "wan-2.2", settings: { prompt: text } })).catch(() => (status.textContent = "Done. Download it before leaving; it couldn't be saved to your library."));
+      status.textContent = "Ready. Saved to My library.";
+      import("./assets.js").then(({ saveAsset }) => saveAsset(blob, { name: "chucksi-video.mp4", engine: engine.value === "free" ? "mischief-1" : "wan-2.2", settings: { prompt: text } })).catch(() => (status.textContent = "Ready. Download it before leaving; it couldn't be saved to your library."));
       store.set("");
     } catch (err) {
-      status.textContent = err.name === "AbortError" ? "Stopped waiting. If it had started, it still counts toward today's videos." : err.message;
+      status.textContent = err.name === "AbortError" ? "Stopped. If it had already started, it still counts toward today's videos." : err.message || "Couldn't create the video. Try again.";
     } finally {
       stop.hidden = true;
       go.disabled = false;
-      if (status.textContent.startsWith("Done")) return;
+      if (status.textContent.startsWith("Ready")) return;
       refresh();
     }
   });

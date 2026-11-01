@@ -23,9 +23,9 @@ export const MAX_BED_SECONDS = 120;
 
 /** Curated Kokoro voices (all English; kokoro-js 1.2.1 ships 28 English voices). */
 export const VOICES = [
-  { id: 'af_heart', name: 'Heart', accent: 'American', gender: 'Female', note: 'Warm and natural; the highest-rated Kokoro voice' },
+  { id: 'af_heart', name: 'Heart', accent: 'American', gender: 'Female', note: 'Warm and natural; a favourite' },
   { id: 'af_bella', name: 'Bella', accent: 'American', gender: 'Female', note: 'Bright and expressive' },
-  { id: 'af_nicole', name: 'Nicole', accent: 'American', gender: 'Female', note: 'Soft and close, almost a whisper' },
+  { id: 'af_nicole', name: 'Nicole', accent: 'American', gender: 'Female', note: 'Soft and close' },
   { id: 'am_michael', name: 'Michael', accent: 'American', gender: 'Male', note: 'Even, steady narrator' },
   { id: 'am_fenrir', name: 'Fenrir', accent: 'American', gender: 'Male', note: 'Deeper, with more grit' },
   { id: 'am_puck', name: 'Puck', accent: 'American', gender: 'Male', note: 'Lively and playful' },
@@ -84,7 +84,7 @@ function reportLoad(fraction, label) {
 }
 
 async function createTTS() {
-  reportLoad(0, 'Loading the voice engine');
+  reportLoad(0, 'Getting the voice ready…');
   kokoro ||= await import(/* @vite-ignore */ KOKORO_URL);
   const gpu = !wasmOnly && (await hasWebGPU());
   // kokoro-js recommends fp32 on WebGPU; q8 is the small, fast choice on CPU
@@ -106,19 +106,19 @@ async function createTTS() {
           l += f.loaded;
           t += f.total;
         }
-        reportLoad(t ? l / t : 0, 'Downloading the voice model');
+        reportLoad(t ? l / t : 0, 'Getting the voice ready… (first time only)');
       }
     };
     try {
       const tts = await kokoro.KokoroTTS.from_pretrained(VOICE_MODEL, { device: a.device, dtype: a.dtype, progress_callback });
       voiceLabel = a.label;
-      reportLoad(1, 'Voice model ready');
+      reportLoad(1, 'Voice ready');
       return tts;
     } catch (e) {
       lastErr = e;
     }
   }
-  throw lastErr || new Error('Voice model failed to load');
+  throw lastErr || new Error('The voice could not load. Reload the page and try again.');
 }
 
 function getTTS(onProgress) {
@@ -273,9 +273,9 @@ const MELO_SENTENCE_PAUSE = 0.25;
 const MELO_PARAGRAPH_PAUSE = 0.5;
 
 export const MELO_LANGS = [
-  { id: 'en', name: 'English', native: 'English', tag: 'EN', sample: 'Hi, this is MeloTTS speaking English, generated on Cloudflare for free.' },
-  { id: 'es', name: 'Spanish', native: 'Español', tag: 'ES', sample: 'Hola, esta es la voz en español de MeloTTS, gratis.' },
-  { id: 'fr', name: 'French', native: 'Français', tag: 'FR', sample: 'Bonjour, voici la voix française de MeloTTS, gratuite.' },
+  { id: 'en', name: 'English', native: 'English', tag: 'EN', sample: 'Hi, this is the English voice. Let’s tell your story.' },
+  { id: 'es', name: 'Spanish', native: 'Español', tag: 'ES', sample: 'Hola, esta es la voz en español.' },
+  { id: 'fr', name: 'French', native: 'Français', tag: 'FR', sample: 'Bonjour, voici la voix française.' },
   { id: 'zh', name: 'Chinese', native: '中文', tag: 'ZH', sample: '你好，这是中文的声音，完全免费。' },
   { id: 'jp', name: 'Japanese', native: '日本語', tag: 'JA', sample: 'こんにちは。これは日本語の声です。無料で作りました。' },
   { id: 'kr', name: 'Korean', native: '한국어', tag: 'KO', sample: '안녕하세요. 이것은 한국어 목소리입니다.' },
@@ -326,10 +326,10 @@ export async function speakMelo(text, { lang = 'en', onProgress } = {}) {
     try {
       res = await apiFetch('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: chunks[i].text, lang }) });
     } catch {
-      throw new Error('could not reach Cloudflare. Check your connection and try again.');
+      throw new Error('could not connect. Check your connection and try again.');
     }
     if (!res.ok) {
-      let msg = `the server answered ${res.status}`;
+      let msg = 'something went wrong. Try again';
       try { msg = (await res.json()).error || msg; } catch {}
       throw new Error(msg);
     }

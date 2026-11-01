@@ -70,7 +70,7 @@ test('validation: prompt, 3 or 5 s, 480p or 720p, optional start frame, request 
   assert.deepEqual([ok.prompt, ok.duration, ok.resolution, ok.image], ['a fox', 5, '480p', undefined]);
   assert.throws(() => validatePromo({ prompt: 'a fox', duration: 10, idempotencyKey: 'x'.repeat(20) }), /3 or 5/);
   assert.throws(() => validatePromo({ prompt: 'a fox', resolution: '1080p', idempotencyKey: 'x'.repeat(20) }), /480p or 720p/);
-  assert.throws(() => validatePromo({ prompt: 'ab', idempotencyKey: 'x'.repeat(20) }), /3 to 2,000/);
+  assert.throws(() => validatePromo({ prompt: 'ab', idempotencyKey: 'x'.repeat(20) }), /sentence or two/);
   assert.throws(() => validatePromo({ prompt: 'a fox', image: 'https://evil.example/x.png', idempotencyKey: 'x'.repeat(20) }), /JPEG, PNG or WebP/);
   assert.throws(() => validatePromo({ prompt: 'a fox' }), /identifier/);
   const v = validatePromo({ prompt: 'a fox', image: 'data:image/jpeg;base64,/9j/2Q==', duration: 3, idempotencyKey: 'x'.repeat(20) });

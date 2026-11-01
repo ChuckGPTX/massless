@@ -188,3 +188,5 @@ button { cursor: pointer; }
 .kit-link strong { font-size: 15px; }
 .kit-link small { color: var(--muted); font-size: 12px; line-height: 1.45; }
 @media (max-width: 760px) { .kit-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.foot-links { display: inline-flex; flex-wrap: wrap; gap: 8px 18px; }
+.bench-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 20px; }

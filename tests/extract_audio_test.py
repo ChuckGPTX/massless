@@ -215,15 +215,15 @@ def main(p):
     assert page.get_attribute('#t-ext', 'aria-selected') == 'true'
     assert page.is_visible('#ext-drop') and page.is_hidden('#history-view') and page.is_hidden('#voice-view-cards')
     assert 'you have the rights to' in page.inner_text('#ext-view') and 'YouTube Studio' in page.inner_text('#ext-view')
-    assert 'nothing is uploaded' in page.inner_text('#ext-view').lower()
     assert page.is_disabled('#gen-ext')
     # all four side tabs fit the panel
     fit = page.evaluate("(() => { const s = document.querySelector('.side').getBoundingClientRect(); return [...document.querySelectorAll('.side-tabs button')].map((b) => s.right - b.getBoundingClientRect().right); })()")
     assert min(fit) >= 0, f'side tabs overflow the panel: {fit}'
-    # the How it works dialog and the ledger name the encoder and its license
-    assert 'LAME 3.100' in page.inner_text('#how') and 'LGPL' in page.inner_text('#how') and 'YouTube Studio' in page.inner_text('#how')
-    assert 'wasm-media-encoders' in page.text_content('#ledger') and 'LGPL' in page.text_content('#ledger')
-    assert 'MP3' in page.title()
+    # the Tips dialog keeps the rights note; the Credits page names the encoder and its license
+    assert 'YouTube Studio' in page.text_content('#how') and 'LAME' not in page.text_content('#how')
+    credits = open(os.path.join(ROOT, 'credits.html')).read()
+    assert 'LAME 3.100' in credits and 'wasm-media-encoders' in credits and 'LGPL' in credits
+    assert 'Audio' in page.title()
     page.wait_for_function('massless.ext.aac !== null', timeout=10000)
     aac = page.evaluate('massless.ext.aac')
     print('aac bitrates in this browser:', aac)

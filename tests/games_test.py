@@ -310,7 +310,7 @@ with sync_playwright() as p:
     for prompt in ['a robot running on the moon', 'a ghost escaping a haunted maze', 'stack donuts as high as you can', 'a bee shooting pollen at grumpy wasps', 'match three with fruit in a jungle', 'a hungry shark eating its way through the reef']:
         expect = pg.evaluate("async (p) => { const r = await import('/js/games/recipe.js'); return r.templateRecipe(p, r.guessGenre(p)).genre; }", prompt)
         made = generate(prompt)
-        check(f'generate: "{prompt}" -> a playtested {expect} from the built-in writer, no server call', made['genre'] == expect and made['made'] == 'Built-in recipe' and made['tested'] and not made['calls'], made)
+        check(f'generate: "{prompt}" -> a playtested {expect} from the built-in writer, no server call', made['genre'] == expect and made['made'] == 'Your words' and made['tested'] and not made['calls'], made)
         if expect == 'runner': good_recipe = pg.evaluate('massless.current().recipe')
         pg.screenshot(path=f'{OUT}/games-generated-{expect}.png', timeout=60000)
         pg.evaluate('massless.closeGame()')
