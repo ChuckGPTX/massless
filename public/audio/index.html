@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Free AI voiceover, captions and video to MP3 | Chucksi</title>
-  <meta name="description" content="Turn a script into voiceover in six languages with open Kokoro and MeloTTS voices, make captions with Whisper, extract MP3, M4A or WAV from your own videos right in the browser, and render rain, wind or city ambience. $0.">
-  <meta name="theme-color" content="#0b0b0c">
+  <title>Audio | Chucksi</title>
+  <meta name="description" content="Voiceover in six languages, captions and transcripts, MP3 from your videos, mastering and sound beds.">
+  <link rel="canonical" href="https://chucksi.com/audio">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chucksi">
   <meta property="og:url" content="https://chucksi.com/audio">
-  <meta property="og:title" content="Free AI voiceover, captions and video to MP3 | Chucksi">
-  <meta property="og:description" content="Turn a script into voiceover in six languages with open Kokoro and MeloTTS voices, make captions with Whisper, extract MP3, M4A or WAV from your own videos right in the browser, and render rain, wind or city ambience. $0.">
+  <meta property="og:title" content="Audio | Chucksi">
+  <meta property="og:description" content="Voiceover in six languages, captions and transcripts, MP3 from your videos, mastering and sound beds.">
   <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Audio | Chucksi">
+  <meta name="twitter:description" content="Voiceover in six languages, captions and transcripts, MP3 from your videos, mastering and sound beds.">
   <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta name="theme-color" content="#0b0b0c">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -39,8 +43,6 @@
       <a href="/studios/office/">Office</a>
     </nav>
     <div class="nav-right">
-      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">OPEN WEIGHTS</span></button>
-      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
       <a class="btn-accent" href="/video">Open Video</a>
     </div>
   </header>
@@ -60,9 +62,9 @@
           <div class="f-head"><span>Script</span><output id="o-chars">0 / 2000</output></div>
           <textarea id="script" maxlength="2000" rows="7" aria-label="Script">The road ran straight for ninety miles. No towns, no signs, just heat on the asphalt and one rider chasing the last of the light.</textarea>
         </div>
-        <div class="engines" id="engines" role="radiogroup" aria-label="Voice engine">
-          <button type="button" class="engine" role="radio" aria-checked="true" data-id="kokoro"><small>In your browser</small><strong>Kokoro</strong><span>English · 8 voices · private</span></button>
-          <button type="button" class="engine" role="radio" aria-checked="false" data-id="melo"><small>Cloudflare</small><strong>MeloTTS</strong><span>6 languages · sent to Cloudflare</span></button>
+        <div class="engines" id="engines" role="radiogroup" aria-label="Voice">
+          <button type="button" class="engine" role="radio" aria-checked="true" data-id="kokoro"><small>Natural</small><strong>English</strong><span>8 voices</span></button>
+          <button type="button" class="engine" role="radio" aria-checked="false" data-id="melo"><small>Multilingual</small><strong>6 languages</strong><span>Spanish, French, Chinese and more</span></button>
         </div>
         <button type="button" class="row-sel" id="voice-sel">
           <span class="voice-row"><span class="avatar" id="voice-avatar">H</span><span><small id="voice-kind">Voice</small><strong id="voice-name">Heart</strong></span></span>
@@ -71,13 +73,9 @@
         <div class="field" id="speed-field">
           <div class="f-head"><span>Speed</span><output id="o-speed">1.00×</output></div>
           <input type="range" id="speed" min="0.7" max="1.3" step="0.05" value="1" aria-label="Speed">
-          <small class="field-note" id="speed-note" hidden>Speed works with Kokoro voices only.</small>
+          <small class="field-note" id="speed-note" hidden>Speed works with English voices only.</small>
         </div>
-        <div class="row-sel" aria-label="Model">
-          <span><small>Model</small><strong id="model-name">Kokoro-82M · open weights</strong></span>
-          <span class="badge-new">$0</span>
-        </div>
-        <p class="side-note" id="voice-note">The first voice downloads the model once (about 90 MB), then it runs offline in this tab. Nothing you type leaves your device.</p>
+        <p class="side-note" id="voice-note">The first voice takes a moment to get ready.</p>
       </div>
 
       <div class="side-scroll" id="tab-cap" role="tabpanel" aria-labelledby="t-cap" hidden>
@@ -87,11 +85,7 @@
         </button>
         <label class="row-sel sel"><small>Spoken language</small><select id="cap-lang"></select></label>
         <label class="check"><input type="checkbox" id="cap-translate"> <span><strong>Translate to English</strong><small>Captions come out in English, whatever the language spoken</small></span></label>
-        <div class="row-sel" aria-label="Model">
-          <span><small>Model</small><strong>Whisper large-v3-turbo · open weights</strong></span>
-          <span class="badge-new">$0</span>
-        </div>
-        <p class="side-note">Your file is decoded in this tab and nothing leaves it until you press Transcribe. Then only the audio, as 16 kHz mono, goes to Cloudflare's Whisper for transcription. It is not stored.</p>
+        <p class="side-note">Long files are split into parts and joined back together.</p>
       </div>
 
       <div class="side-scroll" id="tab-bed" role="tabpanel" aria-labelledby="t-bed" hidden>
@@ -104,7 +98,7 @@
           <div class="f-head"><span>Intensity</span><output id="o-bed-intensity">70%</output></div>
           <input type="range" id="bed-intensity" min="0" max="1" step="0.05" value="0.7" aria-label="Intensity">
         </div>
-        <p class="side-note">Beds are synthesized from scratch with the Web Audio API: no samples, no model, no download. They fade at both ends so they loop cleanly under a clip.</p>
+        <p class="side-note">Beds fade at both ends so they loop cleanly under a clip.</p>
       </div>
 
       <div class="side-scroll" id="tab-ext" role="tabpanel" aria-labelledby="t-ext" hidden>
@@ -123,12 +117,7 @@
           <div class="field"><div class="f-head"><span>Fade in</span><output id="o-ext-fi">Off</output></div><input type="range" id="ext-fi" min="0" max="10" step="0.5" value="0" aria-label="Fade in"></div>
           <div class="field"><div class="f-head"><span>Fade out</span><output id="o-ext-fo">Off</output></div><input type="range" id="ext-fo" min="0" max="10" step="0.5" value="0" aria-label="Fade out"></div>
         </div>
-        <label class="check"><input type="checkbox" id="ext-loud"> <span><strong>Even out loudness</strong><small>About −14 LUFS, the level YouTube and Spotify play at, with peaks held under −1 dB</small></span></label>
-        <div class="row-sel" aria-label="Encoder">
-          <span><small>Encoder</small><strong id="ext-enc">LAME 3.100 · open source</strong></span>
-          <span class="badge-new">$0</span>
-        </div>
-        <p class="side-note">Files are read and converted in this tab. Nothing is uploaded. The only download is the MP3 encoder, once.</p>
+        <label class="check"><input type="checkbox" id="ext-loud"> <span><strong>Even out loudness</strong><small>Match the level YouTube and Spotify play at</small></span></label>
       </div>
 
       <div class="side-scroll" id="tab-master" role="tabpanel" aria-labelledby="t-master" hidden>
@@ -138,7 +127,6 @@
         <div class="engines mst-dests" id="mst-dests" role="radiogroup" aria-label="Destination"></div>
         <label class="check"><input type="checkbox" id="mst-widen"> <span><strong>Widen stereo</strong><small>A little more space at the sides; bass stays centred</small></span></label>
         <p class="side-note mst-hint"><strong>LUFS</strong> is how loud a track feels over its whole length. Streaming services turn every song to about −14 LUFS, so louder is not better there.</p>
-        <p class="side-note">Mastering runs in this tab. Nothing is uploaded. The only download is the MP3 encoder, once.</p>
       </div>
 
       <div class="side-foot">
@@ -158,15 +146,15 @@
           <button type="button" class="pill" id="p-bed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8h2l1.5-4 2 8 2-10 2 9 1.5-3h2"/></svg>Sound beds</button>
           <button type="button" class="pill" id="p-ext"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="7" height="9" rx="1.5"/><path d="M8.5 6.5l-2-1.3v5.6l2-1.3M11 6.5v3M13 4.5v7M15 7v2"/></svg>Extract audio</button>
           <button type="button" class="pill" id="p-master"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5v11M8 2.5v11M13 2.5v11"/><rect x="1.5" y="8.5" width="3" height="2.5" rx="1"/><rect x="6.5" y="4.5" width="3" height="2.5" rx="1"/><rect x="11.5" y="9.5" width="3" height="2.5" rx="1"/></svg>Master</button>
-          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
+          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>Tips</button>
         </div>
-        <span class="src" id="src-label">Kokoro-82M · loads on first use</span>
+        <span class="src" id="src-label">English voices</span>
       </div>
 
       <div class="stage-head">
         <div>
           <h1 class="display" id="stage-title">Turn text<br>into voiceover</h1>
-          <p id="stage-sub">Eight open voices with natural pacing, generated on your own device. Pair a voice with a sound bed and drop both under a clip from Video.</p>
+          <p id="stage-sub">Eight natural English voices, or six languages. Pair a voice with a sound bed and drop both under a clip from Video.</p>
         </div>
       </div>
 
@@ -212,7 +200,7 @@
             <div class="f-head"><span id="cap-meta">Edit the words; keep the [start → end] times</span><output id="cap-count"></output></div>
             <textarea id="cap-text" rows="14" spellcheck="true" aria-label="Transcript"></textarea>
           </div>
-          <p class="side-note muted">Captions are rebuilt from your edits as sentence-level cues, at most two lines of 42 characters. The transcript is kept in this browser until you transcribe another file.</p>
+          <p class="side-note muted">Captions are rebuilt from your edits, at most two lines each.</p>
         </div>
       </div>
 
@@ -220,7 +208,7 @@
         <div class="dropzone" id="ext-drop">
           <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="10" width="24" height="28" rx="4"/><path d="M10 10v28M22 10v28M4 17h6M4 24h6M4 31h6M22 17h6M22 24h6M22 31h6"/><path d="M34 19v10M39 14v20M44 21v6"/></svg>
           <strong class="display" id="ext-drop-title">Drop video or audio here</strong>
-          <span class="muted" id="ext-drop-sub">mp4, mov, webm, mp3, wav, m4a, ogg or flac. Add several at once. Nothing is uploaded.</span>
+          <span class="muted" id="ext-drop-sub">mp4, mov, webm, mp3, wav, m4a, ogg or flac. Add several at once.</span>
           <div class="dz-actions"><label class="btn-accent" for="ext-in" id="ext-choose">Choose files</label><button type="button" class="btn-ghost" id="ext-go-inline" hidden>Convert</button></div>
         </div>
         <input type="file" id="ext-in" multiple accept="audio/*,video/*,.mp4,.m4v,.mov,.webm,.mkv,.mp3,.wav,.m4a,.aac,.ogg,.oga,.opus,.flac,.aif,.aiff" hidden>
@@ -240,7 +228,7 @@
         <div class="dropzone" id="mst-drop">
           <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 34V14M16 38V10M24 32V16M32 36V12M40 30V18"/><path d="M4 24h40" stroke-dasharray="2 3"/></svg>
           <strong class="display" id="mst-drop-title">Drop a finished mix here</strong>
-          <span class="muted" id="mst-drop-sub">wav, mp3, m4a, flac, ogg, or a video’s sound, up to 20 minutes. Nothing is uploaded.</span>
+          <span class="muted" id="mst-drop-sub">wav, mp3, m4a, flac, ogg, or a video’s sound, up to 20 minutes.</span>
           <div class="dz-actions"><label class="btn-accent" for="mst-in" id="mst-choose">Choose file</label></div>
         </div>
         <input type="file" id="mst-in" accept="audio/*,video/*,.wav,.mp3,.m4a,.flac,.ogg,.opus,.aac,.aif,.aiff,.mp4,.mov,.webm" hidden>
@@ -275,26 +263,18 @@
       <div id="history-view">
         <div class="lib-head"><h2 class="display">History</h2><button type="button" class="btn-ghost small" id="clear-history" hidden>Clear</button></div>
         <div class="history" id="history"></div>
-        <p class="side-note muted" id="history-empty">Nothing yet. Generate a voice or render a bed and it lands here, saved in this browser.</p>
+        <p class="side-note muted" id="history-empty">Nothing yet. Generate a voice or render a bed and it lands here.</p>
       </div>
     </section>
   </main>
 
   <dialog class="sheet" id="how">
-    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Voiceover in your browser uses Kokoro-82M, an 82-million-parameter open-weight text-to-speech model (Apache-2.0), running locally through kokoro-js. Text is split into sentences, spoken chunk by chunk and joined into one 24 kHz WAV. Nothing leaves your device.</p>
-    <p>For Spanish, French, Chinese, Japanese and Korean, pick MeloTTS (MIT). Your script is sent to Cloudflare Workers AI in chunks under 1,000 characters, and the audio comes back and is joined here into one 44.1 kHz WAV. Nothing is stored there.</p>
-    <p>Captions use Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Your file is decoded in this tab and only the audio is sent, as 16 kHz mono WAV, when you press Transcribe. Files over about nine minutes go in parts of up to eight minutes, and the timestamps are joined back together. It is not stored.</p>
-    <p>Sound beds are built from noise, filters and envelopes in an OfflineAudioContext and exported as 48 kHz stereo WAV. They are made in this tab; nothing is uploaded.</p>
-    <p>Extract audio decodes your file in this tab with the browser's own decoder, at the file's own sample rate. A background worker trims, fades and encodes it. Even out loudness measures the whole file (ITU-R BS.1770), sets it to about −14 LUFS and holds peaks under −1 dB with a look-ahead limiter. Nothing is uploaded.</p>
-    <p>MP3 uses LAME 3.100 (LGPL), built for browsers by wasm-media-encoders (MIT). It is loaded unmodified from jsDelivr and checked against a fixed hash before it runs. M4A uses your browser's AAC encoder and mp4-muxer (MIT). WAV is 16-bit PCM. Use it with files you have the rights to; for your own YouTube uploads, download them from YouTube Studio first.</p>
-    <p>Master measures your mix in this tab (ITU-R BS.1770 loudness, loudness range, 4x-oversampled true peak, tone against a typical mastered mix, stereo width, clipping), then runs a fixed chain: a 25 Hz high-pass and 19.5 kHz low-pass, a gentle tilt EQ for the character you pick, slow glue compression, optional width with the bass kept in the middle, and a look-ahead limiter that watches the peaks between samples. The gain is corrected until the result measures on your destination's loudness, and the exported file itself is measured again. Nothing is uploaded.</p>
-    <p>Free tools on Cloudflare have a daily cap so they stay at $0. If you hit it, try again after midnight UTC, or use Kokoro, which has no limit.</p>
-  </dialog>
-
-  <dialog class="sheet" id="ledger">
-    <form method="dialog" class="sheet-head"><h2>Models &amp; limits</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Voice: Kokoro-82M (Apache-2.0), in your browser, or MeloTTS (MIT) on Cloudflare Workers AI. Captions: Whisper large-v3-turbo (MIT) on Cloudflare Workers AI. Sound beds: Chucksi synth (MIT), in your browser. Extract audio: LAME 3.100 MP3 encoder (LGPL) via wasm-media-encoders 0.7.0 (MIT), or your browser's AAC encoder with mp4-muxer (MIT), in your browser. Master: Chucksi mastering chain (MIT), in your browser. Cost: $0.</p>
+    <form method="dialog" class="sheet-head"><h2>Tips</h2><button class="x" aria-label="Close">×</button></form>
+    <p>Voiceover: paste up to 2,000 characters. Long scripts are split on sentences and joined with natural pauses.</p>
+    <p>Captions: edit the words and keep the times in brackets, then download .srt or .vtt.</p>
+    <p>Extract audio: use it with files you have the rights to. For your own YouTube uploads, download them from YouTube Studio first.</p>
+    <p>Master: pick where the track is going, compare before and after at the same loudness, then save.</p>
+    <p>Some tools have a daily limit. If you reach it, try again tomorrow.</p>
   </dialog>
 
   <script type="module" src="/js/pages/audio.js"></script>

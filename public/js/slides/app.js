@@ -131,7 +131,7 @@ function save(now = false) {
     for (const old of list.slice(12)) lsDel(LS.deck(old.id));
     lsSet(LS.recent, JSON.stringify(list.slice(0, 12)));
     state.savedAt = Date.now();
-    if (ui.saved) ui.saved.textContent = 'Saved on this device';
+    if (ui.saved) ui.saved.textContent = 'Saved';
     if (state.panel === 'write') renderRecent();
   };
   if (now) go(); else saveT = setTimeout(go, 500);
@@ -366,7 +366,7 @@ async function generate(path, prompt) {
     c.getContext('2d').drawImage(image, 0, 0);
     await setImage(path, await toBlob(c, 'image/jpeg', 0.9), { prompt, alt: prompt.slice(0, 120) });
     ui.gen.close();
-    toast('Image generated with FLUX.1 schnell and saved on this device.');
+    toast('Image added.');
   } catch (e) {
     toast(e.message || 'Could not generate an image right now.', 'error');
   } finally {
@@ -391,7 +391,7 @@ export async function handleFiles(files, at) {
   if (!path) path = (imageSlots(cur()).find(([, v]) => !v?.src) || imageSlots(cur())[0] || [])[0];
   if (!path) { toast('This layout has no image. Try Image + text, Title or Gallery.', 'error'); return; }
   await setImage(path, img);
-  toast('Image placed. It stays in this browser.');
+  toast('Image placed.');
 }
 
 // ======================================================================
@@ -495,7 +495,7 @@ function renderWrite() {
     el('div', { class: 'sd-row' },
       el('button', { type: 'button', class: 'btn-accent', id: 'sd-write', onclick: write, html: `${ic(I.spark)}Write my deck` }),
       el('button', { type: 'button', class: 'btn-ghost', id: 'sd-surprise', onclick: surprise }, 'Surprise me')),
-    el('p', { class: 'side-note' }, 'Written in your browser from your description. Nothing is sent anywhere.'),
+    el('p', { class: 'side-note' }, 'Written from your description.'),
     el('h3', { class: 'sd-h' }, 'Templates'),
     el('div', { class: 'sd-tpls' }, ...TEMPLATES.map((t) => {
       const d = templateDeck(t.id);
@@ -858,7 +858,7 @@ async function copyShare() {
   const url = await shareUrl(state.deck);
   ui.shareOut.value = url;
   const n = localImageCount(state.deck);
-  ui.shareNote.textContent = n ? `${n} image${n === 1 ? '' : 's'} you uploaded or generated stay on this device; the link carries the text, layout, theme and site photos. Export HTML to share everything.` : 'The whole deck rides inside the link. Nothing is uploaded.';
+  ui.shareNote.textContent = n ? `${n} image${n === 1 ? '' : 's'} you added won’t travel with the link. Export HTML to share everything.` : 'Anyone with the link can open the whole deck.';
   try { await navigator.clipboard.writeText(url); toast('Share link copied.'); } catch { ui.shareOut.select(); toast('Select the link and copy it.'); }
   return url;
 }
@@ -900,7 +900,7 @@ function buildView(view) {
     el('button', { type: 'button', role: 'menuitem', 'data-im': 'focus', html: `${ic('<circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="1.5"/>')}<span><strong>Change focus</strong></span>`, onclick: () => { closeImageMenu(); cycleFocus(imgPath); } }),
     el('button', { type: 'button', role: 'menuitem', 'data-im': 'remove', html: `${ic(I.del)}<span><strong>Remove</strong></span>`, onclick: () => { closeImageMenu(); setSlide((x) => setIn(x, imgPath, { ...getIn(x, imgPath), src: '' }), true); } }));
   ui.file = el('input', { type: 'file', id: 'sd-file', accept: 'image/png,image/jpeg,image/webp', hidden: true });
-  ui.file.addEventListener('change', async () => { const f = ui.file.files[0]; ui.file.value = ''; if (f && imgPath) { await setImage(imgPath, f); renderPanel(); toast('Image placed. It stays in this browser.'); } });
+  ui.file.addEventListener('change', async () => { const f = ui.file.files[0]; ui.file.value = ''; if (f && imgPath) { await setImage(imgPath, f); renderPanel(); toast('Image placed.'); } });
   ui.view = view;
   view.append(top, el('div', { class: 'sd-stagewrap' }, ui.wrap, el('div', { class: 'sd-under' }, ui.count, ui.hint, ui.saved)), ui.strip, ui.addmenu, ui.imgmenu, ui.file);
 
@@ -911,9 +911,9 @@ function buildView(view) {
     el('form', { method: 'dialog', class: 'sheet-head' }, el('h2', {}, 'Generate an image'), el('button', { class: 'x', 'aria-label': 'Close' }, '×')),
     el('div', { class: 'field' }, el('div', { class: 'f-head' }, el('span', {}, 'Describe the picture')), ui.genPrompt),
     el('div', { class: 'sd-row end' }, ui.genGo),
-    el('p', { class: 'small muted' }, 'FLUX.1 schnell (Apache-2.0) through Chucksi’s Image route, the same request the Image studio sends. Free within a daily cap. The picture is saved only in this browser.'));
+    el('p', { class: 'small muted' }, 'Free, with a daily limit.'));
   ui.shareOut = el('input', { type: 'text', class: 'text-in', readonly: true, 'aria-label': 'Share link', placeholder: 'Press Copy link' });
-  ui.shareNote = el('p', { class: 'small muted' }, 'The whole deck rides inside the link. Nothing is uploaded.');
+  ui.shareNote = el('p', { class: 'small muted' }, 'Anyone with the link can open the whole deck.');
   const exBtn = (id, title, sub, fn) => { const b = el('button', { type: 'button', class: 'sd-ex', id, onclick: () => fn(b) }, el('strong', {}, title), el('small', {}, sub)); return b; };
   ui.exPdf = exBtn('sd-ex-pdf', 'PDF', 'One page per slide, real text in the theme fonts', exportPdf);
   ui.exPptx = exBtn('sd-ex-pptx', 'PowerPoint', '.pptx with editable text, shapes and charts', exportPptx);
@@ -924,7 +924,7 @@ function buildView(view) {
     el('div', { class: 'sd-row' }, ui.shareOut, el('button', { type: 'button', class: 'btn-accent', id: 'sd-copy', onclick: copyShare }, 'Copy link')),
     ui.shareNote,
     el('div', { class: 'sd-exs' }, ui.exPdf, ui.exPptx, ui.exHtml, ui.exPng),
-    el('p', { class: 'small muted' }, 'PDF uses pdf-lib 1.17.1 and fontkit (MIT); PowerPoint uses PptxGenJS 4.0.1 (MIT); both load from jsDelivr on first use. Fonts are the theme’s OFL faces.'));
+    el('p', { class: 'small muted' }, 'PDF keeps the text real and selectable. PowerPoint opens in PowerPoint, Keynote and Google Slides.'));
   document.body.append(ui.gen, ui.share);
   for (const d of [ui.gen, ui.share]) d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
 
@@ -1012,7 +1012,7 @@ export async function init(o) {
   buildView(o.view);
   bindPanelTabs(o.side);
   bindKeys();
-  o.setSrc?.('PptxGenJS and pdf-lib · load on export');
+  o.setSrc?.('Slides');
   const p = new URLSearchParams(location.search);
   const hash = location.hash.match(/[#&]d=([\w-]+)/);
   let opened = false;
@@ -1023,8 +1023,8 @@ export async function init(o) {
       history.replaceState(null, '', location.pathname + location.search.replace(/([?&])play=1&?/, '$1').replace(/[?&]$/, ''));
       await openDeck(d, { quiet: true });
       opened = true;
-      if (p.get('play') === '1') present(0, { fullscreen: false, onEdit: () => toast('This is your copy now. Edits save on this device.'), editLabel: 'Edit a copy' });
-      else toast('Shared deck opened. Edits save on this device.');
+      if (p.get('play') === '1') present(0, { fullscreen: false, onEdit: () => toast('This is your copy now. Edits save automatically.'), editLabel: 'Edit a copy' });
+      else toast('Shared deck opened. Edits save automatically.');
     } catch (e) { toast(e.message || 'That link could not be opened.', 'error'); }
   }
   if (!opened && p.get('template') && TEMPLATES.some((t) => t.id === p.get('template'))) { await openDeck(templateDeck(p.get('template'))); opened = true; }

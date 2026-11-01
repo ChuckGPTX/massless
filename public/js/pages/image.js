@@ -127,17 +127,17 @@ function openPop(kind, chip) {
     }
   }
   if (kind === 'model') {
-    pop.append(el('h3', {}, 'Model'));
+    pop.append(el('h3', {}, 'Style'));
     const groups = MODEL_GROUPS.map((g) => {
       const items = Object.entries(MODELS).filter(([, m]) => m.group === g.id).map(([id, m]) => ({ id, ...m }));
-      const opts = optGroup(items, (x) => x.id, (x) => [el('strong', {}, x.name), el('small', {}, x.id==='moss-image-sft'&&!connectedConfig.models?.['moss-image-sft']?'Connection being prepared · other models are ready':x.note), el('small', { class: 'lic' }, x.licence)], state.model, (k) => pickModel(k, chip));
+      const opts = optGroup(items, (x) => x.id, (x) => [el('strong', {}, x.name), el('small', {}, x.id==='moss-image-sft'&&!connectedConfig.models?.['moss-image-sft']?'Coming soon':x.note)], state.model, (k) => pickModel(k, chip));
       opts.classList.add('models');
       opts.setAttribute('aria-label', g.name);
       return el('div', { class: 'mgroup' }, el('h4', {}, g.name), opts);
     });
-    // Cloudflare's four get the full width; the two single options share a row.
-    pop.append(groups[0], ...groups.slice(1));
-    if (state.model === 'moss-image-sft') pop.append(el('a',{href:'/projects/',class:'btn-ghost'},'Sign in to try MOSS Image ↗'));
+    // The four free styles get the full width; the single-option groups share a row.
+    pop.append(groups[0], el('div', { class: 'mgroup-row' }, ...groups.slice(1)));
+    if (state.model === 'moss-image-sft') pop.append(el('a',{href:'/projects/',class:'btn-ghost'},'Sign in to use Best quality ↗'));
     if (state.model === 'comfy') {
       const url = el('input', { value: ls.get('massless.comfy-url', COMFY_URL), inputmode: 'url' });
       const ck = el('input', { value: ls.get('massless.comfy-ckpt', COMFY_CKPT) });
@@ -146,7 +146,6 @@ function openPop(kind, chip) {
       pop.append(el('label', { class: 'f' }, 'ComfyUI address', url), el('label', { class: 'f' }, 'Checkpoint', ck));
       pop.append(el('p', { class: 'note', html: 'Start ComfyUI with <code>--enable-cors-header</code>. <a href="/comfy/massless_shot_flux_schnell.api.json" download style="color:var(--accent)">Download the workflow</a>.' }));
     }
-    pop.append(el('p', { class: 'note' }, 'Browser tools and the Cloudflare allowance remain free. Connected models have their own limited preview allowance.'));
   }
   pop.setAttribute('aria-label', pop.querySelector('h3')?.textContent || 'Options');
   pop.hidden = false;
@@ -252,7 +251,7 @@ function countdown(node, ms, after) {
   const tick = () => {
     const s = Math.ceil((end - Date.now()) / 1000);
     if (s <= 0 || !node.isConnected) { clearInterval(timer); if (node.isConnected) node.textContent = after; return; }
-    node.textContent = `Pollinations allows 1 image per 45 s. Next one in ${s} s`;
+    node.textContent = `Next image in ${s} s`;
   };
   const timer = setInterval(tick, 1000);
   tick();
@@ -273,7 +272,7 @@ async function doShoot(e) {
   const model = state.model;
   const name = model === 'comfy' ? comfyLabel(ls.get('massless.comfy-ckpt', COMFY_CKPT)) : MODELS[model].short;
   for (let i = 0; i < state.takes; i++) {
-    const p = el('div', { class: 'shot pending' }, i === 0 ? `${state.takes > 1 ? 'Take 1 rendering' : 'Rendering'} · ${name}` : `Take ${i + 1} queued`);
+    const p = el('div', { class: 'shot pending' }, i === 0 ? `${state.takes > 1 ? 'Creating take 1…' : 'Creating…'} · ${name}` : `Take ${i + 1} up next`);
     p.style.aspectRatio = `${aspect.w} / ${aspect.h}`;
     grid.prepend(p);
     pendings.unshift(p);
@@ -289,7 +288,7 @@ async function doShoot(e) {
   try {
     for (let i = 0; i < state.takes; i++) {
       $('#shoot-label').textContent = state.takes > 1 ? `Take ${i + 1}/${state.takes}` : 'Shooting';
-      if (i > 0) pendings[i].textContent = `Take ${i + 1} rendering · ${name}`;
+      if (i > 0) pendings[i].textContent = `Creating take ${i + 1}… · ${name}`;
       const seed = (base + i * 104729) % 2 ** 31;
       const res = await shoot({
         model,
@@ -300,14 +299,14 @@ async function doShoot(e) {
         seed,
         comfyUrl,
         ckpt,
-        onWait: (ms, phase) => {if(ms>0)countdown(pendings[i],ms,`Rendering · ${name}`);else if(phase)pendings[i].textContent=(phase==='IN_QUEUE'?'Preparing your image':'Rendering your image')+' · '+name;},
+        onWait: (ms, phase) => {if(ms>0)countdown(pendings[i],ms,`Creating… · ${name}`);else if(phase)pendings[i].textContent=(phase==='IN_QUEUE'?'Creating…':'Almost done…')+' · '+name;},
       });
       const item = await addShot(res.image, { prompt, negative: negative || undefined, engine: res.engine, model: res.model, seed, ckpt: res.engine === 'comfy' ? ckpt : undefined, rig: { ...state.sel } });
       if (item.unsaved) unsaved++;
       pendings[i].replaceWith(shotCard(item, true));
       done++;
     }
-    if (unsaved) toast('Browser storage could not save every shot. Download the shots marked Not saved before leaving.', 'error');
+    if (unsaved) toast('Some shots couldn\'t be saved. Download the ones marked Not saved before leaving.', 'error');
     else toast(state.takes > 1 ? `${done} takes ready. Hover one and press Animate to move the camera.` : 'Shot ready. Hover it and press Animate to move the camera.');
   } catch (err) {
     pendings.slice(done).forEach((p) => p.remove());

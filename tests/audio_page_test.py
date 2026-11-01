@@ -3,7 +3,7 @@
 Serves public/ on a random port (with /audio -> /audio/index.html), mocks /api/tts and /api/transcribe with
 page.route and checks:
   - MeloTTS: the language grid replaces the Kokoro voices, a long Spanish script is sent in sentence chunks
-    under 1,000 characters with lang=es, and the joined 44.1 kHz WAV lands in the history as "MeloTTS · Spanish";
+    under 1,000 characters with lang=es, and the joined 44.1 kHz WAV lands in the history as "Spanish · …";
   - Captions: nothing is uploaded before the button is pressed; a 20 s webm video goes up as one 16 kHz mono WAV;
     the transcript, .txt, .srt and .vtt are right (two lines of at most 42 characters, ordered timestamps) and
     follow edits; a 10-minute WAV goes up in two parts with lang and translate set, and the second part's
@@ -224,7 +224,7 @@ def main(p):
     page.fill('#script', LONG_TEXT)
     assert not tts_calls, 'nothing should be sent before Generate'
     page.click('#gen-voice')
-    page.wait_for_selector('#history .hrow:has-text("MeloTTS · Spanish")', timeout=20000)
+    page.wait_for_selector('#history .hrow:has-text("Spanish ·")', timeout=20000)
     assert len(tts_calls) == 3, [len(c['text']) for c in tts_calls]  # 1,9xx characters of ~107-character sentences
     assert all(c['lang'] == 'es' for c in tts_calls)
     assert all(c['text'].endswith('.') for c in tts_calls), 'chunks should end on a sentence'
@@ -252,7 +252,7 @@ def main(p):
     page.click('#t-cap')
     assert page.is_visible('#cap-drop') and page.is_hidden('#voices-head') and page.is_hidden('#history')
     assert page.is_disabled('#gen-cap')
-    assert 'not stored' in page.inner_text('#tab-cap')
+    assert 'Whisper' not in page.inner_text('#tab-cap') and 'Cloudflare' not in page.inner_text('#tab-cap')
     shot(page, 'captions-empty-1440')
     page.set_input_files('#cap-in', CLIP)
     page.wait_for_function("!document.querySelector('#gen-cap').disabled", timeout=20000)

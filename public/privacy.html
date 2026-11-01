@@ -3,8 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Privacy policy · Chucksi</title>
-  <meta name="description" content="How Chucksi handles your data: browser-first tools, minimal accounts, no ads or tracking.">
+  <title>Privacy policy | Chucksi</title>
+  <meta name="description" content="How Chucksi handles your data: minimal accounts, no ads and no tracking.">
+  <link rel="canonical" href="https://chucksi.com/privacy.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chucksi">
+  <meta property="og:url" content="https://chucksi.com/privacy.html">
+  <meta property="og:title" content="Privacy policy | Chucksi">
+  <meta property="og:description" content="How Chucksi handles your data: minimal accounts, no ads and no tracking.">
+  <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Privacy policy | Chucksi">
+  <meta name="twitter:description" content="How Chucksi handles your data: minimal accounts, no ads and no tracking.">
+  <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
   <meta name="theme-color" content="#0b0b0c">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -38,7 +53,19 @@
     <p>When you save a project to the cloud, its files and settings are stored in our database and private storage so you can open them again. Only your account can read them. You can ask us at any time to delete a project or your whole account and everything in it.</p>
 
     <h2>Server-run AI tools</h2>
-    <p>Some features (for example speech, transcription, writing help and GPU video) send the text, audio or images you provide to a server to process. That input is used only to produce your result. It is not used to train models, and we do not keep it after the job is done unless you save the result. Our GPU provider holds a finished result only briefly, until it is delivered to you.</p>
+    <p>Some features send the text, audio or images you provide to a server to process. That input is used only to produce your result. It is not used to train models, and we do not keep it after the job is done unless you save the result. Our GPU provider holds a finished result only briefly, until it is delivered to you. In detail:</p>
+    <ul>
+      <li>Creating images (Image, design workflows, website, slide and game art): your description is sent to Cloudflare. If you pick the Backup style, or when the free images are busy or used up, some tools send it to Pollinations instead. If you connect your own image workflow, it goes only to the address you enter.</li>
+      <li>Best quality images, text to video, Animate, Motion, Lip sync, Upscale video and Write a song: your description and any image, clip or audio you add are sent to RunPod GPU servers.</li>
+      <li>Fast text to video (members video): your description and any start frame are sent to OpenRouter and the video provider it uses.</li>
+      <li>Voiceover in six languages: your script is sent to Cloudflare, in short parts. English voices are made on your device.</li>
+      <li>Captions, transcripts and edit by text: only the sound of your file, downsampled to 16 kHz mono, is sent to Cloudflare, and only when you press Transcribe.</li>
+      <li>Ask a PDF: the text of the PDF open in Edit (up to 12,000 characters) and your question are sent to Cloudflare. The file itself is not uploaded.</li>
+      <li>Launch film scripts: your brief is sent to Cloudflare when “Write it with AI” is on.</li>
+      <li>Full 3D objects: your image is sent only to the object service address you enter.</li>
+      <li>Verify a signed PDF: only a fingerprint (SHA-256) of the file is sent.</li>
+    </ul>
+    <p>Everything else, including editing, converting and signing PDFs, background removal, upscaling and erasing in the Image workroom, camera moves and effects, sound beds, extracting and mastering audio, slides, websites and games, runs on your own device.</p>
 
     <h2>Chucksi Sign</h2>
     <p>Documents sent with Chucksi Sign are encrypted in your browser before upload, and the key stays in the link, so we cannot read them. Encrypted envelopes are deleted automatically 30 days after sending if unsigned, and 90 days after completion.</p>
@@ -54,6 +81,7 @@
     <p>Chucksi runs on these providers, each of which processes data only to deliver the service:</p>
     <ul>
       <li>Cloudflare: hosting, security, Turnstile and some AI models</li>
+      <li>Pollinations: the Backup image style (your description is sent to make the image)</li>
       <li>Supabase: accounts, saved projects and file storage</li>
       <li>RunPod: GPU servers for heavier video and audio jobs</li>
       <li>OpenRouter: the free members video model (your prompt and any start frame are sent to make the clip)</li>
@@ -74,8 +102,8 @@
     <p>If this policy changes, we will update the date above. Questions or deletion requests: <a href="mailto:chuckgptx@gmail.com">chuckgptx@gmail.com</a>.</p>
   </main>
   <footer class="foot">
-    <span>Chucksi · Open creative tools · MIT licensed code</span>
-    <nav aria-label="Footer"><a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="https://github.com/ChuckGPTX/massless">Source ↗</a></nav>
+    <span>© 2026 Chucksi</span>
+    <nav aria-label="Footer"><a href="/credits.html">Credits</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub ↗</a></nav>
   </footer>
 </body>
 </html>

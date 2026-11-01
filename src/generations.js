@@ -80,18 +80,18 @@ export async function generationAPI(request, env) {
     return reply(
       {
         error:
-          "Hosted generation is being connected. The browser tools are ready.",
+          "This isn't available right now. Try again later.",
       },
       503,
     );
   if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY)
-    return reply({ error: "Cloud sign-in is being connected." }, 503);
+    return reply({ error: "Sign-in isn't available right now. Try again later." }, 503);
   const origin = request.headers.get("origin");
   if (origin && origin !== url.origin)
     return reply({ error: "Cross-site requests are not allowed." }, 403);
   const bearer = request.headers.get("authorization") || "";
   if (!/^Bearer [A-Za-z0-9._-]+$/.test(bearer))
-    return reply({ error: promo ? "Sign in to make free clips." : "Sign in to use hosted GPU models." }, 401);
+    return reply({ error: promo ? "Sign in to make free clips. It's free." : "Sign in to create. It's free." }, 401);
   let auth;
   try {
     auth = await fetch(env.SUPABASE_URL + "/auth/v1/user", {
@@ -137,7 +137,7 @@ export class GenerationLedger {
         signal: AbortSignal.timeout(25000),
       },
     );
-    if (!r.ok) throw new Error("The GPU service is unavailable.");
+    if (!r.ok) throw new Error("This isn't available right now. Try again in a minute.");
     return r.json();
   }
   async fetch(request) {
@@ -272,7 +272,7 @@ export class GenerationLedger {
       return reply(this.publicJob(job));
     } catch (e) {
       return reply(
-        { error: e.message || "Generation request failed." },
+        { error: e.message || "Couldn't create this. Try again." },
         e.status || 502,
       );
     }
@@ -358,12 +358,12 @@ export class GenerationLedger {
   }
   async submitGpu(body, owner, country) {
     const g = this.settings();
-    if (!g.valid) return reply({ error: "GPU jobs are misconfigured, so they are off." }, 503);
-    if (!g.on) return reply({ on: false, error: "GPU jobs are switched off." }, 503);
+    if (!g.valid) return reply({ error: "This isn't available right now. Try again later." }, 503);
+    if (!g.on) return reply({ on: false, error: "This isn't available right now. Try again later." }, 503);
     if (!/^[a-zA-Z0-9-]{16,80}$/.test(body.idempotencyKey || ""))
       return reply({ error: "A request identifier is required." }, 400);
     const lab = LAB_JOBS.includes(body.job);
-    if (lab && !g.lab) return reply({ error: "Lab models are not enabled on this site." }, 403);
+    if (lab && !g.lab) return reply({ error: "This isn't available on this site." }, 403);
     if (lab && body.lab !== true)
       return reply({ error: "This is a Lab model: a research preview for non-commercial use. Turn on Lab mode to run it.", lab: true }, 403);
     let v;
@@ -395,17 +395,17 @@ export class GenerationLedger {
         if (active) {
           const a = await tx.get("job:" + active);
           if (a && !this.terminal(a.status) && Date.now() - a.createdAt < (a.timeoutSec || 1200) * 1000)
-            throw Object.assign(new Error("Your previous job is still running."), { status: 409 });
+            throw Object.assign(new Error("Your last one is still being made. Wait for it to finish."), { status: 409 });
         }
         const mine = (await tx.get("user:" + day + ":" + owner)) || 0;
         if (mine >= g.perUser)
-          throw Object.assign(new Error(`You've used your ${g.perUser} GPU jobs for today. They reset at midnight UTC.`), { status: 429 });
+          throw Object.assign(new Error(`That's all ${g.perUser} for today. Come back tomorrow.`), { status: 429 });
         const used = (await tx.get("day:" + day)) || 0;
         if (used + cents > g.daily) {
           const left = Math.max(0, g.daily - used);
           throw Object.assign(new Error(left < 2
-            ? "Today's GPU budget is used up. It resets at midnight UTC."
-            : `Only ${left}¢ of GPU time is left today and this job could take up to ${cents}¢. Try a smaller job, or come back after midnight UTC.`), { status: 429, budget: true });
+            ? "Today's free creations are used up. Come back tomorrow."
+            : "There isn't enough left today for this one. Try a shorter or smaller one, or come back tomorrow."), { status: 429, budget: true });
         }
         job = {
           id: crypto.randomUUID(), kind: "gpu", owner, job: v.job, lab, fingerprint,
@@ -442,7 +442,7 @@ export class GenerationLedger {
       job.status = result.status || "IN_QUEUE";
     } catch {
       job.status = "SUBMISSION_UNKNOWN";
-      job.error = "Submission could not be confirmed. It will not be automatically repeated.";
+      job.error = "Couldn't start this one. Try again.";
     }
     await this.ctx.storage.put("job:" + job.id, job);
     return reply(this.publicJob(job), 202);
@@ -530,7 +530,7 @@ export class GenerationLedger {
     }
     if (mossReady === false)
       return reply(
-        { error: "MOSS Image is being connected. The other image models are ready." },
+        { error: "Best quality isn't available right now. Try another style." },
         503,
       );
     const g = this.settings();
@@ -562,7 +562,7 @@ export class GenerationLedger {
       if (used + reserve > limit)
         throw Object.assign(
           new Error(
-            "The MOSS preview allowance has been used. Other image models are available.",
+            "Best quality is used up for now. Try another style.",
           ),
           { status: 429 },
         );
@@ -571,10 +571,10 @@ export class GenerationLedger {
         dayKey = "day:" + day;
       const dayUsed = (await tx.get(dayKey)) || 0;
       if (!g.valid)
-        throw Object.assign(new Error("Hosted generation is misconfigured."), { status: 503 });
+        throw Object.assign(new Error("This isn't available right now. Try again later."), { status: 503 });
       if (g.daily > 0 && dayUsed + reserve > g.daily)
         throw Object.assign(
-          new Error("Today's GPU budget is used up. It resets at midnight UTC."),
+          new Error("Today's free images are used up. Come back tomorrow."),
           { status: 429 },
         );
       job = {
@@ -625,7 +625,7 @@ export class GenerationLedger {
     } catch {
       job.status = "SUBMISSION_UNKNOWN";
       job.error =
-        "Submission could not be confirmed. It will not be automatically repeated.";
+        "Couldn't start this one. Try again.";
     }
     await this.ctx.storage.put("job:" + job.id, job);
     return reply(this.publicJob(job), 202);

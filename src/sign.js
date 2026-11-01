@@ -106,7 +106,7 @@ async function signText(k, text) {
 
 async function publicKey(request, env) {
   const k = await signingKey(env);
-  if (!k) return json({ error: 'Signing keys are not set up on this server yet.' }, 503);
+  if (!k) return json({ error: "Signing isn't available right now. Try again later." }, 503);
   const want = new URL(request.url).searchParams.get('kid');
   let old = [];
   try { old = JSON.parse(env.SIGN_OLD_KEYS || '[]'); } catch { /* none */ }
@@ -159,7 +159,7 @@ function signerOut(s) {
 // ---------- auth ----------
 async function authorize(request, env, id) {
   const m = (request.headers.get('authorization') || '').match(/^Bearer\s+([A-Za-z0-9_-]{43})$/);
-  if (!m) return { stop: json({ error: 'This link is missing its access token.' }, 401) };
+  if (!m) return { stop: json({ error: "This link is incomplete. Open the full link you were sent." }, 401) };
   const row = await env.SIGN_DB.prepare('SELECT * FROM sign_envelopes WHERE id = ?').bind(id).first();
   if (!row) return { stop: json({ error: 'This envelope does not exist or was deleted.' }, 404) };
   if (row.expires_at <= clock()) {
@@ -413,7 +413,7 @@ async function postEvent(request, env, id) {
     if (!HASH_RE.test(signedHash)) return json({ error: 'The signed document fingerprint is missing.' }, 400);
     if (row.attest_json) return json({ ok: true, already: true, matches: row.signed_hash === signedHash, attest: await attestOut(row) });
     const k = await signingKey(env);
-    if (!k) return json({ error: 'Signing keys are not set up on this server yet.' }, 503);
+    if (!k) return json({ error: "Signing isn't available right now. Try again later." }, 503);
     const text = canonical(await auditRecord(env, row, k, signedHash, now));
     const sig = await signText(k, text);
     const ch = await env.SIGN_DB.prepare('UPDATE sign_envelopes SET signed_hash = ?, attest_json = ?, attest_sig = ? WHERE id = ? AND attest_json IS NULL').bind(signedHash, text, sig, id).run();
@@ -431,7 +431,7 @@ async function postEvent(request, env, id) {
     if (!HASH_RE.test(finalHash)) return json({ error: 'The final document fingerprint is missing.' }, 400);
     if (row.final_hash) return json({ ok: true, already: true, matches: row.final_hash === finalHash, seal: await sealOut(env, row) });
     const k = await signingKey(env);
-    if (!k) return json({ error: 'Signing keys are not set up on this server yet.' }, 503);
+    if (!k) return json({ error: "Signing isn't available right now. Try again later." }, 503);
     const audit = JSON.parse(row.attest_json);
     const seal = {
       v: 1, kind: 'massless-sign/seal', envelopeId: id, kid: k.kid,
@@ -519,7 +519,8 @@ export async function signApi(request, env, ctx) {
     if (m[2] === '/events') return method === 'POST' ? await postEvent(request, env, id) : json({ error: 'Use POST.' }, 405);
     return method === 'GET' ? await getAudit(request, env, id) : json({ error: 'Use GET.' }, 405);
   } catch (e) {
-    return json({ error: `Massless Sign hit a server error: ${e.message || e}` }, 500);
+    console.error('sign failed:', e?.message || e);
+    return json({ error: 'Something went wrong with Chucksi Sign. Try again in a minute.' }, 500);
   }
 }
 

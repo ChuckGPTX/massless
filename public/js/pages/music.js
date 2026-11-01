@@ -126,7 +126,7 @@ async function makeDemo() {
     demo = true;
     $("#track-file").value = "";
     $("#track-info").textContent =
-      "Original Chucksi demo instrumental · no artist vocals. Your own track stays on this device.";
+      "Original Chucksi demo instrumental · no artist vocals.";
     message("Ready. Play with sound or export your preview.");
   } catch (e) {
     message(`Could not create the demo: ${e.message}`);
@@ -186,7 +186,7 @@ async function loadTrack(file) {
     });
     demo = false;
     $("#track-info").textContent =
-      `${file.name} · ${format(audio.duration)} · stays on this device`;
+      `${file.name} · ${format(audio.duration)}`;
     message("Track loaded. Set its tempo to align the cut grid.");
   } catch (e) {
     message(`Could not use that track: ${e.message}`);
@@ -237,7 +237,7 @@ $("#export-music").addEventListener("click", async () => {
   lock(true);
   cancel = new AbortController();
   $("#cancel-export").hidden = false;
-  message("Rendering MP4 on your device…");
+  message("Creating your MP4…");
   const target = document.createElement("canvas");
   target.width = canvas.width;
   target.height = canvas.height;
@@ -248,7 +248,7 @@ $("#export-music").addEventListener("click", async () => {
       duration: config().duration,
       signal: cancel.signal,
       draw: (c, t) => draw(t, c),
-      onProgress: (p) => message(`Rendering MP4 · ${Math.round(p * 100)}%`),
+      onProgress: (p) => message(`Creating your MP4 · ${Math.round(p * 100)}%`),
     });
     try { const {saveAsset}=await import('../assets.js');await saveAsset(blob,{name:config().title+' teaser.mp4',engine:'music-visualizer',settings:config()}); } catch { message('Video ready; local saving failed. Download before leaving.'); }
     resultURL = URL.createObjectURL(blob);

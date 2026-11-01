@@ -111,7 +111,7 @@ try {
   const results = await Promise.all(Array.from({ length: 8 }, (_, i) => submit("user" + i, i).then(async (r) => ({ status: r.status, j: await r.json() }))));
   const accepted = results.filter((r) => r.status === 202);
   assert.equal(accepted.length, 2, JSON.stringify(results.map((r) => r.status)));
-  assert.ok(results.filter((r) => r.status === 429).every((r) => /GPU/.test(r.j.error)));
+  assert.ok(results.filter((r) => r.status === 429).every((r) => /today|tomorrow/i.test(r.j.error)));
   const id = accepted[0].j.id, owner = "user" + results.indexOf(accepted[0]);
   const done = await (await gpu.dispatchFetch("http://massless.test/api/generations/" + id, { headers: { "x-owner-id": owner } })).json();
   assert.equal(done.status, "COMPLETED");

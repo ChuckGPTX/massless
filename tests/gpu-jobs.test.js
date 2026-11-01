@@ -169,7 +169,7 @@ test('one daily budget, per-user daily limits, one running job per user', async 
   assert.equal(b.status, 202);
   const c = await submit('animate', { image: JPEG }, 'c');
   assert.equal(c.status, 429);
-  assert.match(c.j.error, /Only 2¢ of GPU time is left today/);
+  assert.match(c.j.error, /isn't enough left today/);
   jobs.set('rp-1', { status: 'FAILED', executionTime: 2000, error: JSON.stringify({ error_message: 'boom' }) });
   const failed = await call('/api/generations/' + a.j.id, 'a');
   assert.equal(failed.j.error, 'boom');
@@ -180,7 +180,7 @@ test('one daily budget, per-user daily limits, one running job per user', async 
   assert.equal((await call('/api/generations/' + second.j.id, 'a')).j.status, 'CANCELLED');
   const third = await submit('music', { tags: 'x' }, 'a');
   assert.equal(third.status, 429);
-  assert.match(third.j.error, /your 2 GPU jobs for today/);
+  assert.match(third.j.error, /all 2 for today/);
   const realNow = Date.now;
   Date.now = () => realNow() + 86400000;
   try {

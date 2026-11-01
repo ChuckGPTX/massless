@@ -587,7 +587,8 @@ export async function sitesApi(request, env, ctx) {
     if (a.stop) return a.stop;
     return method === 'PUT' ? await publish(request, env, ctx, a.user, slug) : await unpublish(env, a.user, slug);
   } catch (e) {
-    return json({ error: `Hosting hit a server error: ${e.message || e}` }, 500);
+    console.error('sites failed:', e?.message || e);
+    return json({ error: "Couldn't publish right now. Try again in a minute." }, 500);
   }
 }
 

@@ -2,16 +2,16 @@
 
 /** Every model the Image page offers, keyed by id. `server` is the /api/shot model name. */
 export const MODELS = {
-  "moss-image-sft": { engine: "hosted", family: "moss", group: "hosted", name: "MOSS Image SFT", short: "MOSS Image", note: "Detailed images, typography and layouts · sign in", licence: "Apache-2.0" },
+  "moss-image-sft": { engine: "hosted", family: "moss", group: "hosted", name: "Best quality", short: "Best quality", note: "Detailed images, lettering and layouts · sign in", licence: "Apache-2.0" },
   "flux-1-schnell": {
     engine: "workers",
     server: "flux-1-schnell",
     cf: "@cf/black-forest-labs/flux-1-schnell",
     family: "flux",
     group: "cloudflare",
-    name: "FLUX.1 schnell",
-    short: "FLUX.1 schnell",
-    note: "Black Forest Labs. Sharp, follows prompts",
+    name: "Fast",
+    short: "Fast",
+    note: "Sharp and true to your words",
     licence: "Apache-2.0",
   },
   "sdxl-lightning": {
@@ -20,9 +20,9 @@ export const MODELS = {
     cf: "@cf/bytedance/stable-diffusion-xl-lightning",
     family: "sdxl",
     group: "cloudflare",
-    name: "SDXL-Lightning",
-    short: "SDXL-Lightning",
-    note: "ByteDance. 8 steps, the quickest SDXL",
+    name: "Quick sketch",
+    short: "Quick sketch",
+    note: "The quickest results",
     licence: "OpenRAIL++",
   },
   "dreamshaper-8-lcm": {
@@ -31,9 +31,9 @@ export const MODELS = {
     cf: "@cf/lykon/dreamshaper-8-lcm",
     family: "sd15",
     group: "cloudflare",
-    name: "DreamShaper 8",
-    short: "DreamShaper 8",
-    note: "Lykon. Stylized looks and illustration",
+    name: "Illustration",
+    short: "Illustration",
+    note: "Stylized looks and illustration",
     licence: "CreativeML OpenRAIL-M",
   },
   "sdxl-base": {
@@ -42,36 +42,36 @@ export const MODELS = {
     cf: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
     family: "sdxl",
     group: "cloudflare",
-    name: "SDXL 1.0",
-    short: "SDXL 1.0",
-    note: "Stability AI base. 20 steps, slower",
+    name: "Detailed",
+    short: "Detailed",
+    note: "Slower, with more detail",
     licence: "OpenRAIL++",
   },
   sana: {
     engine: "pollinations",
     family: "sana",
     group: "community",
-    name: "Pollinations · Sana",
-    short: "Sana",
-    note: "Community API, NVIDIA Sana, 1 image per 45 s",
+    name: "Backup",
+    short: "Backup",
+    note: "One image every 45 seconds",
     licence: "NVIDIA's licence, open weights",
   },
   comfy: {
     engine: "comfy",
     family: "flux",
     group: "gpu",
-    name: "ComfyUI · FLUX.1 schnell",
-    short: "FLUX.1 schnell · ComfyUI",
+    name: "Your own workflow",
+    short: "Your workflow",
     note: "Connect your own image workflow",
     licence: "Your choice",
   },
 };
 
 export const MODEL_GROUPS = [
-  { id: "cloudflare", name: "Free on Cloudflare" },
-  {id:"hosted",name:"Connected models"},
-  { id: "community", name: "Community" },
-  { id: "gpu", name: "Connected workflows" },
+  { id: "cloudflare", name: "Free" },
+  { id: "hosted", name: "Members" },
+  { id: "community", name: "More" },
+  { id: "gpu", name: "Custom" },
 ];
 
 export const DEFAULT_MODEL = "flux-1-schnell";

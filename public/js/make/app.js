@@ -123,8 +123,8 @@ export async function start(id, root) {
   function updateBudget() {
     const n = mod.frames(state);
     budget.textContent = n
-      ? `Make it paints ${n} new FLUX.1 schnell frame${n === 1 ? '' : 's'} (free, ${n === 1 ? 'it counts' : 'they count'} toward 12 a day). Editing words never spends frames.`
-      : 'Everything here is drawn in your browser. No AI frames are used.';
+      ? `Make it paints ${n} new frame${n === 1 ? '' : 's'} (free, up to 12 a day). Editing words is always free.`
+      : 'Everything here is drawn for you. Editing is always free.';
   }
 
   // ---------- images ----------
@@ -147,13 +147,13 @@ export async function start(id, root) {
         const key = `${prompt}|${w}x${hgt}|${seed}`;
         let img = cache.get(key);
         if (!img && mode === 'generate') {
-          status.textContent = `Painting frame ${i + 1} with FLUX.1 schnell…`;
+          status.textContent = `Painting frame ${i + 1}…`;
           try {
             img = await flux({ prompt, w, h: hgt, seed });
             cache.set(key, img);
             io.used = true;
           } catch (e) {
-            if (!warned) toast(e.cap ? "Today's free FLUX frames are used up, so this uses a sample frame. Your words and layout still apply." : `FLUX could not paint this frame (${e.message}). Using a sample frame instead.`, 'error');
+            if (!warned) toast(e.cap ? "Today's free frames are used up, so this uses a sample frame. Your words and layout still apply." : 'Couldn’t paint this frame, so this uses a sample frame instead.', 'error');
             warned = true;
           }
         }
@@ -344,7 +344,7 @@ export async function start(id, root) {
       }
       toast(`Saved ${list.length} artboard${list.length === 1 ? '' : 's'} to My library.`);
     } catch (e) {
-      toast(`Could not save in this browser: ${e.message}. Download the ZIP instead.`, 'error');
+      toast('Couldn’t save it here. Download the ZIP instead.', 'error');
     } finally {
       saveBtn.disabled = false;
     }

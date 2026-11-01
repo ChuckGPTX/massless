@@ -15,7 +15,7 @@ async function read(res) {
     let msg = data.error;
     if (!msg) {
       if (res.status === 404 && !data.error) msg = 'Chucksi Sign is not switched on here yet.';
-      else if (res.status >= 500) msg = 'The signing server had a problem. Try again in a minute.';
+      else if (res.status >= 500) msg = 'Something went wrong. Try again in a minute.';
       else msg = `Something went wrong (${res.status}). Try again.`;
     }
     if (res.status === 501) msg = data.error || 'Chucksi Sign is not switched on here yet.';
@@ -25,7 +25,7 @@ async function read(res) {
 }
 async function req(url, init) {
   let res;
-  try { res = await apiFetch(url, init); } catch { throw new SignError("Couldn't reach the server. Check your connection and try again.", 0); }
+  try { res = await apiFetch(url, init); } catch { throw new SignError("Couldn't connect. Check your connection and try again.", 0); }
   return read(res);
 }
 
@@ -52,12 +52,12 @@ export class Envelope {
   headers(extra = {}) { return { authorization: `Bearer ${this.token}`, ...extra }; }
   async get({ status = false } = {}) {
     let res;
-    try { res = await fetch(`${this.base}${status ? '?parts=status' : ''}`, { headers: this.headers(), cache: 'no-store' }); } catch { throw new SignError("Couldn't reach the server. Check your connection and try again.", 0); }
+    try { res = await fetch(`${this.base}${status ? '?parts=status' : ''}`, { headers: this.headers(), cache: 'no-store' }); } catch { throw new SignError("Couldn't connect. Check your connection and try again.", 0); }
     return read(res);
   }
   async audit() {
     let res;
-    try { res = await fetch(`${this.base}/audit`, { headers: this.headers(), cache: 'no-store' }); } catch { throw new SignError("Couldn't reach the server.", 0); }
+    try { res = await fetch(`${this.base}/audit`, { headers: this.headers(), cache: 'no-store' }); } catch { throw new SignError("Couldn't connect.", 0); }
     return read(res);
   }
   event(type, body = {}) {
@@ -65,7 +65,7 @@ export class Envelope {
   }
   async remove() {
     let res;
-    try { res = await fetch(this.base, { method: 'DELETE', headers: this.headers() }); } catch { throw new SignError("Couldn't reach the server.", 0); }
+    try { res = await fetch(this.base, { method: 'DELETE', headers: this.headers() }); } catch { throw new SignError("Couldn't connect.", 0); }
     return read(res);
   }
 }

@@ -3,17 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Website builder — Chucksi</title>
-  <meta name="description" content="Describe your business, event, band or launch and get an editable website. Edit in place, switch styles, then export a fast static site and host it free anywhere. Open source, no account.">
-  <meta name="theme-color" content="#0b0b0c">
+  <title>Website builder | Chucksi</title>
+  <meta name="description" content="Describe your business, event, band or launch and get a website you can edit, publish free or export.">
+  <link rel="canonical" href="https://chucksi.com/website">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chucksi">
   <meta property="og:url" content="https://chucksi.com/website">
-  <meta property="og:title" content="Chucksi Website — describe a site, get a fast one">
-  <meta property="og:description" content="Describe it, edit it in place, export a fast static site and host it free anywhere. Open source, no account.">
-  <meta property="og:image" content="https://chucksi.com/media/art/massless-portal-v1.jpg">
+  <meta property="og:title" content="Website builder | Chucksi">
+  <meta property="og:description" content="Describe your business, event, band or launch and get a website you can edit, publish free or export.">
+  <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="canonical" href="https://chucksi.com/website">
+  <meta name="twitter:title" content="Website builder | Chucksi">
+  <meta name="twitter:description" content="Describe your business, event, band or launch and get a website you can edit, publish free or export.">
+  <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta name="theme-color" content="#0b0b0c">
   <link rel="icon" href="/favicon.svg">
   <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/instrument-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -47,7 +54,7 @@
 
       <div class="ws-panel" id="p-create" role="tabpanel" aria-labelledby="t-create">
         <div class="ws-hero">
-          <p class="ws-eyebrow"><span class="badge-new">NEW</span> Chucksi Website · open source</p>
+          <p class="ws-eyebrow"><span class="badge-new">NEW</span> Chucksi Website</p>
           <h1 class="display">Describe a site.<br><em>Get a fast one.</em></h1>
           <p class="ws-sub">Edit any word in place, swap the style, then export plain HTML you can host free anywhere.</p>
         </div>
@@ -67,15 +74,15 @@
           <legend>Style</legend>
           <div class="ws-styles" id="styles" role="radiogroup" aria-label="Style"></div>
         </fieldset>
-        <p class="ws-note">The built-in writer turns your words into pages and sections in your browser. Nothing you type is sent anywhere.</p>
+        <p class="ws-note">Your words become pages and sections you can edit.</p>
         <button type="button" class="ws-go" id="generate"><span id="generate-label">Generate site</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button>
         <div class="ws-fill" id="fill-box" hidden>
-          <p><strong id="fill-count">0 images</strong> are waiting for pictures. Fill them with the Image engine (FLUX.1 schnell on Cloudflare's free daily allowance), or click any image to upload your own.</p>
+          <p><strong id="fill-count">0 images</strong> are waiting for pictures. Fill them with AI images (free, with a daily limit), or click any image to upload your own.</p>
           <button type="button" class="btn-ghost wide" id="fill-images">Fill images with AI</button>
         </div>
         <div class="ws-sites" id="sites-wrap" hidden>
           <h2 class="ws-h2">Your sites</h2>
-          <p class="ws-note">Saved in this browser only.</p>
+          <p class="ws-note">Saved on this device.</p>
           <ul class="ws-site-list" id="sites"></ul>
         </div>
       </div>
@@ -244,32 +251,15 @@
 
   <dialog class="sheet ws-dialog" id="share-dialog">
     <form method="dialog" class="sheet-head"><h2>Share a preview</h2><button class="x" aria-label="Close">×</button></form>
-    <p>This link holds the whole site, compressed, in the address itself. Anyone who opens it gets their own copy in the editor. Images you uploaded or generated stay in your browser and are not in the link.</p>
+    <p>This link holds the whole site, compressed, in the address itself. Anyone who opens it gets their own copy in the editor. Images you uploaded or generated are not in the link.</p>
     <div class="ws-share"><input type="text" id="share-url" readonly aria-label="Share link"><button type="button" class="btn-accent" id="copy-share">Copy</button></div>
     <p class="ws-note" id="share-size"></p>
   </dialog>
 
-  <dialog class="sheet" id="ledger">
-    <form method="dialog" class="sheet-head"><h2>Tools, models &amp; artwork</h2><button class="x" aria-label="Close">×</button></form>
-    <div class="scroll"><table>
-      <thead><tr><th>Job</th><th>Model or code</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
-      <tbody>
-        <tr><td>Site writing</td><td>Chucksi built-in writer and section library</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-        <tr><td>Editing, preview and export</td><td>Chucksi Website</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-        <tr><td>Images (optional)</td><td>FLUX.1 [schnell]</td><td>Apache-2.0</td><td>Cloudflare Workers AI free tier, Pollinations as backup</td><td>$0</td></tr>
-        <tr><td>Fonts</td><td>Google Fonts families (including Archivo, Inter, Hanken Grotesk and Geist for the templates)</td><td>SIL Open Font License</td><td>Google Fonts, from your visitors' browsers</td><td>$0</td></tr>
-        <tr><td>Template photography</td><td>Generated with Higgsfield Soul (fictional people; prompts in media/website/provenance.json)</td><td>Chucksi-commissioned, MIT with the templates</td><td>Bundled with the site</td><td>$0</td></tr>
-        <tr><td>Templates and placeholder art</td><td>Chucksi templates and generated SVG compositions</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-        <tr><td>Icons</td><td>Chucksi stroke icon set</td><td>MIT</td><td>Your browser</td><td>$0</td></tr>
-      </tbody>
-    </table></div>
-    <p>Images you upload stay in your browser. Exported sites are plain HTML and CSS that you own.</p>
-  </dialog>
-
   <footer class="foot">
-    <span>Chucksi · Open creative tools · MIT licensed code</span>
+    <span>© 2026 Chucksi</span>
     <nav aria-label="Footer">
-      <button class="text-button" data-dialog="ledger">Models &amp; artwork</button><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless">View the source ↗</a>
+      <a href="/credits.html">Credits</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub ↗</a>
     </nav>
   </footer>
 

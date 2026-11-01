@@ -20,7 +20,7 @@ const CSS = Object.fromEntries([...HL, ...INK].map(([k, , c]) => [k, c]));
 const hexA = (hex, a) => `rgba(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)}, ${a})`;
 
 const OPS = [
-  { id: 'images', name: 'Images to PDF', note: 'JPG, PNG, WebP', kind: 'image', go: 'Make PDF', drop: ['Drop images here', 'JPG, PNG or WebP. One page per image, in this order.'], side: 'Drop images in the order you want the pages. Files stay in this browser.' },
+  { id: 'images', name: 'Images to PDF', note: 'JPG, PNG, WebP', kind: 'image', go: 'Make PDF', drop: ['Drop images here', 'JPG, PNG or WebP. One page per image, in this order.'], side: 'Drop images in the order you want the pages.' },
   { id: 'toimg', name: 'PDF to images', note: 'PNG or JPG', kind: 'pdf', go: 'Export images', drop: ['Drop a PDF here', 'Every page becomes an image. Several pages come as one .zip.'], side: 'Each page is drawn at the scale you pick. 2x is sharper and bigger.' },
   { id: 'merge', name: 'Merge PDFs', note: 'Join in order', kind: 'pdf', go: 'Merge PDFs', drop: ['Drop PDFs here', 'Add two or more, then use the arrows to set the order.'], side: 'Pages are copied as they are, so text stays sharp and searchable.' },
   { id: 'split', name: 'Split pages', note: 'Keep or separate', kind: 'pdf', go: 'Split PDF', drop: ['Drop a PDF here', 'Pick pages like 1-3, 5 on the left.'], side: 'Leave pages blank to use every page. Ranges can run backwards, like 5-1.' },
@@ -30,10 +30,10 @@ const OPS = [
 ];
 
 const COPY = {
-  edit: ['Edit any<br>PDF', 'Highlight, write, draw, sign and leave notes, then save a real PDF. Your file stays in this browser; nothing is uploaded.'],
-  convert: ['Convert and<br>combine', 'Images to PDF, PDF to images, merge, split, rotate, compress and pull out text. All of it runs on your device.'],
-  ask: ['Ask your<br>PDF', 'Ask a question about the PDF open in Edit. Only its text, up to 12,000 characters, is sent to an open model to answer.'],
-  sign: ['Send for<br>signature', 'Start from a contract template or your own PDF, place fields for each signer, then send. Everything is encrypted in this browser before it is uploaded.'],
+  edit: ['Edit any<br>PDF', 'Highlight, write, draw, sign and leave notes, then save a real PDF.'],
+  convert: ['Convert and<br>combine', 'Images to PDF, PDF to images, merge, split, rotate, compress and pull out text.'],
+  ask: ['Ask your<br>PDF', 'Ask a question about the PDF open in Edit.'],
+  sign: ['Send for<br>signature', 'Start from a contract template or your own PDF, place fields for each signer, then send. Documents are encrypted before they are sent.'],
   slides: ['Make a<br>deck', 'Describe it, get a designed deck, then edit, present and export.'],
 };
 const TABS = ['edit', 'convert', 'ask', 'sign', 'slides'];
@@ -72,8 +72,8 @@ function showTab(which) {
   $('#stage-title').innerHTML = COPY[which][0];
   $('#stage-sub').textContent = COPY[which][1];
   $('.stage').classList.toggle('slides-on', which === 'slides');
-  if (which === 'slides') { if (slides) { setSrc('PptxGenJS and pdf-lib · load on export'); slides.onShow(); } else loadSlides().catch(() => {}); }
-  else if (which !== 'sign') setSrc(state.doc ? docLabel() : 'pdf.js and pdf-lib · load on first use');
+  if (which === 'slides') { if (slides) { setSrc('Slides'); slides.onShow(); } else loadSlides().catch(() => {}); }
+  else if (which !== 'sign') setSrc(state.doc ? docLabel() : 'No PDF open');
   if (which === 'ask') { syncAskDoc(); warmHuman(); }
   if (which === 'sign') { sign.onShow(); warmHuman(); }
   if (which === 'edit' && state.doc) requestAnimationFrame(() => (state.fit ? fitZoom() : renderVisible()));
@@ -97,14 +97,14 @@ async function openFile(file) {
 }
 
 async function openBytes(name, bytes) {
-  setSrc('Loading pdf.js');
+  setSrc('Opening…');
   $('#doc-name').textContent = 'Opening…';
   let pdf;
   try {
     pdf = await T.openPdfjs(bytes);
   } catch (e) {
     $('#doc-name').textContent = state.doc ? state.doc.name : 'No PDF open';
-    setSrc(state.doc ? docLabel() : 'pdf.js and pdf-lib · load on first use');
+    setSrc(state.doc ? docLabel() : 'No PDF open');
     toast(e.message || 'Could not open that PDF.', 'error');
     return false;
   }
@@ -126,7 +126,7 @@ async function openBytes(name, bytes) {
   T.loadPdfLib().catch(() => {}); // warm up the writer for Save
   return true;
 }
-const docLabel = () => `${state.doc.name} · ${state.doc.pages.length} page${state.doc.pages.length === 1 ? '' : 's'} · on this device`;
+const docLabel = () => `${state.doc.name} · ${state.doc.pages.length} page${state.doc.pages.length === 1 ? '' : 's'} `;
 
 let renderIO, countIO;
 const ratios = new Map();
@@ -527,7 +527,7 @@ async function save() {
     const name = `${T.baseName(state.doc.name)}-edited.pdf`;
     download(T.pdfBlob(out), name);
     state.lastSave = { name, size: out.length };
-    toast(`Saved ${name} (${T.fmtBytes(out.length)}). It stays on your device.`);
+    toast(`Saved ${name} (${T.fmtBytes(out.length)}).`);
   } catch (e) {
     toast(`Save failed: ${e.message}`, 'error');
   } finally {
@@ -544,7 +544,7 @@ async function makeSample() {
   const fb = await doc.embedFont(StandardFonts.HelveticaBold);
   const ink = rgb(0.1, 0.1, 0.12), soft = rgb(0.42, 0.42, 0.46), amber = rgb(1, 0.75, 0.18);
   const pages = [
-    ['A free PDF toolkit', ['Chucksi Office opens, edits and converts PDFs in your browser.', 'Nothing is uploaded. Pick a tool above the page and try it here:', '', 'Highlight this line with the marker.', 'Click anywhere with Text and type a sentence.', 'Circle something with Draw.', 'Leave a sticky Note in the margin.']],
+    ['A free PDF toolkit', ['Chucksi Office opens, edits and converts PDFs.', 'Pick a tool above the page and try it here:', '', 'Highlight this line with the marker.', 'Click anywhere with Text and type a sentence.', 'Circle something with Draw.', 'Leave a sticky Note in the margin.']],
     ['Convert anything', ['Turn photos into a PDF, or every page into a PNG.', 'Merge several files, split out the pages you need,', 'rotate sideways scans and shrink big files.', '', 'Extract text pulls the words out as a .txt file.']],
     ['Sign here', ['Make a signature once with Sign, then click the line below.', 'Drag to move it, pull the corner to resize, then press Save PDF.']],
   ];
@@ -837,24 +837,23 @@ async function ask() {
     try {
       res = await apiFetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q, text: state.askText }) });
     } catch {
-      answerCard(q, "Couldn't reach the server. Check your connection and try again.", '', 'warn');
+      answerCard(q, "Couldn't connect. Check your connection and try again.", '', 'warn');
       return;
     }
     let data = {};
     try { data = await res.json(); } catch { /* not JSON */ }
     if (res.status === 404 || res.status === 405 || res.status === 501) {
-      answerCard(q, "Ask isn't switched on yet. Edit and Convert work fully in your browser in the meantime.", '', 'warn');
+      answerCard(q, "Ask isn't switched on yet. Edit and Convert still work.", '', 'warn');
       return;
     }
     if (!res.ok || !data.answer) {
       const msg = res.status === 429 ? data.error || "Today's free questions are used up. Try again tomorrow."
-        : res.status === 502 ? data.error || "The model didn't answer this time. Try again in a minute."
+        : res.status === 502 ? data.error || "No answer this time. Try again in a minute."
           : data.error || `Something went wrong (${res.status}). Try again.`;
       answerCard(q, msg, '', 'warn');
       return;
     }
-    const model = String(data.model || 'Llama 3.3 70B').replace(/^@cf\/meta\//, '');
-    answerCard(q, data.answer, `${model} · read ${state.askText.length.toLocaleString()} characters`);
+    answerCard(q, data.answer, `Read ${state.askText.length.toLocaleString()} characters`);
     state.answers++;
   } catch (e) {
     toast(`Ask failed: ${e.message}`, 'error');

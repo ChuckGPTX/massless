@@ -30,7 +30,7 @@ async function fetchVerified(file, label) {
     try {
       const hit = await cache.match(url);
       if (hit) {
-        progress(0, `Loading ${label} from this device`);
+        progress(0, 'Getting ready…');
         const buf = await hit.arrayBuffer();
         if ((await sha256(buf)) === file.sha256) return buf;
         await cache.delete(url);
@@ -43,9 +43,9 @@ async function fetchVerified(file, label) {
   try {
     res = await fetch(url, { credentials: 'omit' });
   } catch {
-    throw new Error(`Could not download ${label}. Check your connection and try again.`);
+    throw new Error('Could not get this tool ready. Check your connection and try again.');
   }
-  if (!res.ok || !res.body) throw new Error(`The ${label} download failed (${res.status}). Try again in a moment.`);
+  if (!res.ok || !res.body) throw new Error('Could not get this tool ready. Try again in a moment.');
   const buf = new Uint8Array(file.size);
   const reader = res.body.getReader();
   let got = 0;
@@ -53,16 +53,16 @@ async function fetchVerified(file, label) {
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    if (got + value.length > file.size) throw new Error(`The ${label} download was not the expected file, so it was not used.`);
+    if (got + value.length > file.size) throw new Error('Could not get this tool ready. Try again in a moment.');
     buf.set(value, got);
     got += value.length;
     if (got - last > 1 << 20 || got === file.size) {
       last = got;
-      progress(got / file.size, `Downloading ${label}: ${mb(got)} of ${mb(file.size)}`);
+      progress(got / file.size, 'Getting ready… (first time only)');
     }
   }
   if (got !== file.size || (await sha256(buf.buffer)) !== file.sha256) {
-    throw new Error(`The ${label} download did not match its checksum, so it was not used.`);
+    throw new Error('Could not get this tool ready. Try again in a moment.');
   }
   if (cache) {
     try {
@@ -128,7 +128,7 @@ async function session(id) {
     try {
       const file = modelFile(id, backend);
       const bytes = await fetchVerified(file, `${m.name} (${mb(file.size)})`);
-      progress(1, `Starting ${m.name}`);
+      progress(1, 'Getting ready…');
       const s = await ort.InferenceSession.create(new Uint8Array(bytes), { executionProviders: [backend], graphOptimizationLevel: 'all' });
       const entry = { session: s, backend, ort };
       sessions.set(id, entry);
@@ -138,7 +138,7 @@ async function session(id) {
       if (backend === 'webgpu') gpuFailed.add(id);
     }
   }
-  throw lastErr || new Error(`${m.name} could not start.`);
+  throw lastErr || new Error('This tool could not start on this device.');
 }
 
 /** Run fn(session entry); if WebGPU fails mid-run, retry once on WebAssembly. */
@@ -217,7 +217,7 @@ async function erase({ rgba, w, h, hole, method }) {
     });
   }
   // Texture copy (PatchMatch, as in the Video page's clean plate): no download, works anywhere
-  progress(0.5, 'Copying texture into the gap');
+  progress(0.5, 'Filling in');
   const rect = contextRect(box, w, h, 0.75, 32);
   const crop = cropRGBA(rgba, w, rect);
   const holeCrop = cropChannel(hole, w, rect);

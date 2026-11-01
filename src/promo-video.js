@@ -39,7 +39,7 @@ export const reserveMills = (seconds, millsPerSec) => seconds * millsPerSec * 2;
 export function validatePromo(body) {
   if (!body || typeof body !== 'object') throw new Error('Send JSON.');
   const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
-  if (prompt.length < 3 || prompt.length > 2000) throw new Error('Describe the clip in 3 to 2,000 characters.');
+  if (prompt.length < 3 || prompt.length > 2000) throw new Error('Describe your video in a sentence or two.');
   const duration = Number(body.duration ?? 5);
   if (!PROMO_DURATIONS.includes(duration)) throw new Error('Choose 3 or 5 seconds.');
   const resolution = body.resolution ?? '480p';
@@ -97,7 +97,7 @@ export async function promoAPI(ctx, env, request, owner) {
     return reply({ on: true, model: p.model, perUserDaily: p.perUser, clipsLeftForYou: left < cheapest ? 0 : Math.max(0, p.perUser - mine), budgetLeft: left < cheapest ? 'none' : left < p.budgetMills / 5 ? 'low' : 'ok', centsPerSecond: p.millsPerSec / 10 });
   }
   if (url.pathname === '/api/promo-video' && request.method === 'POST') {
-    if (!p.on) return reply({ error: 'The members video model is switched off.' }, 503);
+    if (!p.on) return reply({ error: "This isn't available right now. Try again later." }, 503);
     let v;
     try {
       v = validatePromo(await request.json().catch(() => null));
@@ -115,12 +115,12 @@ export async function promoAPI(ctx, env, request, owner) {
         const active = await tx.get('promo:active:' + owner);
         if (active) {
           const a = await tx.get('promo:job:' + active);
-          if (a && !promoTerminal(a.status) && Date.now() - a.createdAt < 900000) throw Object.assign(new Error('Your previous clip is still rendering.'), { status: 409 });
+          if (a && !promoTerminal(a.status) && Date.now() - a.createdAt < 900000) throw Object.assign(new Error('Your last video is still being made. Wait for it to finish.'), { status: 409 });
         }
         const mine = (await tx.get('promo:user:' + day + ':' + owner)) || 0;
-        if (mine >= p.perUser) throw Object.assign(new Error(`You've made your ${p.perUser} free clips for today. They reset at midnight UTC.`), { status: 429 });
+        if (mine >= p.perUser) throw Object.assign(new Error(`That's all ${p.perUser} free clips for today. Come back tomorrow.`), { status: 429 });
         const spent = (await tx.get('promo:spent')) || 0;
-        if (spent + hold > p.budgetMills) throw Object.assign(new Error('The free members video allowance has been used up. Thanks for testing it!'), { status: 429, budget: true });
+        if (spent + hold > p.budgetMills) throw Object.assign(new Error('Free videos are used up for now. Try Best quality, or come back later.'), { status: 429, budget: true });
         job = { id: crypto.randomUUID(), owner, fingerprint, status: 'submitting', createdAt: Date.now(), duration: v.duration, resolution: v.resolution, model: p.model, holdMills: hold };
         await tx.put({ 'promo:spent': spent + hold, ['promo:user:' + day + ':' + owner]: mine + 1, ['promo:job:' + job.id]: job, ['promo:request:' + owner + ':' + v.idempotencyKey]: job.id, ['promo:active:' + owner]: job.id });
         isNew = true;

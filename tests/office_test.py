@@ -447,7 +447,7 @@ with sync_playwright() as p:
     pg.click('#ask')
     pg.wait_for_function("document.querySelectorAll('.acard').length === 2 && !massless.live.busy")
     body = ASK['bodies'][-1]
-    check('ask_answer_shown', pg.inner_text('.acard:first-child p') == 'Mock answer to: What is on page 2?' and 'llama-3.3-70b' in pg.inner_text('.acard:first-child .meta'),
+    check('ask_answer_shown', pg.inner_text('.acard:first-child p') == 'Mock answer to: What is on page 2?' and 'characters' in pg.inner_text('.acard:first-child .meta') and 'llama' not in pg.inner_text('.acard:first-child .meta').lower(),
           pg.inner_text('.acard:first-child'))
     check('ask_request_shape', set(body) == {'question', 'text'} and body['question'] == 'What is on page 2?' and 0 < len(body['text']) <= 12000 and 'Chucksi doc3 page 2' in body['text'], {'keys': list(body), 'chars': len(body['text'])})
     ASK['mode'] = '429'

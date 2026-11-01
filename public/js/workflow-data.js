@@ -92,9 +92,9 @@ export const WORKFLOWS = [
 // and repaints with FLUX.1 schnell on demand. Thumbnails were rendered with the workflows themselves.
 export const makeURL = (id) => "/workflows?make=" + encodeURIComponent(id);
 export const DESIGN_WORKFLOWS = [
-  { id: "map", name: "Illustrated map", tag: "IMAGE + MAP", image: "/media/make/thumb-map.webp", description: "Name a place. FLUX paints it from straight above; you get a map poster with editable labels, legend and compass.", output: "Poster PNG + print PDF", frames: 1 },
-  { id: "identity", name: "Brand identity kit", tag: "BRAND + SYSTEM", image: "/media/make/thumb-identity.webp", description: "A name and a vibe become a studio-style identity: wordmark, monogram, OKLCH palette, type, pattern and six applications.", output: "Board + 7 PNGs + SVG + tokens JSON", frames: 0 },
-  { id: "film-poem", name: "Film poem", tag: "TEXT + IMAGE + FILM", image: "/media/make/thumb-film-poem.webp", description: "Write a few lines. Each one gets a FLUX frame, typed-on words and a slow camera move, cut into a 20 to 40 second film.", output: "MP4 / WebM + title card", frames: 4 },
+  { id: "map", name: "Illustrated map", tag: "IMAGE + MAP", image: "/media/make/thumb-map.webp", description: "Name a place. It is painted from straight above, then becomes a map poster with editable labels, legend and compass.", output: "Poster PNG + print PDF", frames: 1 },
+  { id: "identity", name: "Brand identity kit", tag: "BRAND + SYSTEM", image: "/media/make/thumb-identity.webp", description: "A name and a vibe become a studio-style identity: wordmark, monogram, palette, type, pattern and six applications.", output: "Board + 7 PNGs + SVG + brand colours file", frames: 0 },
+  { id: "film-poem", name: "Film poem", tag: "TEXT + IMAGE + FILM", image: "/media/make/thumb-film-poem.webp", description: "Write a few lines. Each one gets a painted frame, typed-on words and a slow camera move, cut into a 20 to 40 second film.", output: "MP4 / WebM + title card", frames: 4 },
   { id: "poetry", name: "Poetry posters", tag: "TYPE + PRINT", image: "/media/make/thumb-poetry.webp", description: "Set a poem as an editorial poster series: big verse, tiny captions, a strict grid and real scale contrast.", output: "3 to 5 posters + print PDF", frames: 1 },
   { id: "festival", name: "Festival poster series", tag: "EVENT + SOCIAL", image: "/media/make/thumb-festival.webp", description: "Event name, dates and lineup become a two-colour poster series with printed silhouettes, plus feed and story sizes.", output: "Posters + 1080×1350 + 1080×1920", frames: 3 },
 ].map((w) => ({ ...w, href: makeURL(w.id) }));
@@ -250,7 +250,7 @@ export const GALLERY = [
   ...EFFECT_CARDS,
   ...MOVE_CARDS,
   card("image-compose", "image", "Reframe & grade", "Recompose a photo on a new backdrop", "/edit/", "16/9"),
-  card("image-remove-bg", "image", "Remove background", "Cut out any subject on your device", "/edit/?tool=remove-bg", "16/9"),
+  card("image-remove-bg", "image", "Remove background", "Cut out any subject", "/edit/?tool=remove-bg", "16/9"),
   card("image-upscale", "image", "Upscale", "Sharper, bigger images without the blur", "/edit/?tool=upscale", "16/9"),
   card("image-erase", "image", "Erase objects", "Brush out what does not belong", "/edit/?tool=erase", "16/9"),
   card("image-depth", "image", "Photo to 3D", "Turn a still into a scene you can orbit", "/3d?sample=samurai", "16/9"),

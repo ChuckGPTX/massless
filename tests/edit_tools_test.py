@@ -175,11 +175,11 @@ with sync_playwright() as p:
     pg = page('/edit/?tool=remove-bg')
     check('deep_link_selects_tab', pg.get_attribute('#tab-remove-bg', 'aria-selected') == 'true' and pg.is_visible('#bg-run'))
     open_image(pg, person)
-    pg.wait_for_function("document.querySelector('[data-note=\"remove-bg\"]').textContent.includes('MB')")
+    pg.wait_for_function("document.querySelector('[data-note=\"remove-bg\"]').dataset.model === 'birefnet'")
     note = pg.inner_text('[data-note="remove-bg"]')
-    check('note_states_size_and_local', 'nothing is uploaded' in note and 'MB' in note, note)
+    check('note_is_plain', 'moment' in note and not any(w in note for w in ('MB', 'WebGPU', 'BiRefNet', 'MIT')), note)
     pg.select_option('#bg-model', 'modnet')
-    pg.wait_for_function("document.querySelector('[data-note=\"remove-bg\"]').textContent.includes('MODNet')")
+    pg.wait_for_function("document.querySelector('[data-note=\"remove-bg\"]').dataset.model === 'modnet'")
     res['modnet_note'] = pg.inner_text('[data-note="remove-bg"]')
     s, status = run(pg, '#bg-run', 'Background removed')
     res['modnet_first'] = {'s': s, 'status': status}
@@ -220,7 +220,7 @@ with sync_playwright() as p:
     before = dict(net)
     pg.reload(wait_until='domcontentloaded'); pg.wait_for_function("window.massless && window.massless.edit.base")
     pg.select_option('#bg-model', 'modnet')
-    pg.wait_for_function("document.querySelector('[data-note=\"remove-bg\"]').textContent.includes('saved on this device')")
+    pg.wait_for_function("(n => n.dataset.model === 'modnet' && n.dataset.cached === 'true')(document.querySelector('[data-note=\"remove-bg\"]'))")
     s, status = run(pg, '#bg-run', 'Background removed')
     res['modnet_cached'] = {'s': s}
     check('second_visit_uses_cache', net.get(model_url) == 1 and net == before, {k: v for k, v in net.items()})
@@ -293,7 +293,7 @@ with sync_playwright() as p:
     check('undo_restores', pg.evaluate("window.massless.edit.result") is None)
     paint()
     pg.select_option('#er-method', 'migan')
-    pg.wait_for_function("document.querySelector('[data-note=\"erase\"]').textContent.includes('MI-GAN')")
+    pg.wait_for_function("document.querySelector('[data-note=\"erase\"]').dataset.model === 'migan'")
     s, status = run(pg, '#er-run', 'Erased')
     res['erase_migan'] = {'s': s, 'status': status}
     changed = pg.evaluate(diff)

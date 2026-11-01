@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Image to 3D, free | Chucksi</title>
-  <meta name="description" content="Turn a still into a scene you can orbit. Explore depth, reconstruct objects and export your work.">
-  <meta name="theme-color" content="#0b0b0c">
+  <title>3D | Chucksi</title>
+  <meta name="description" content="Turn a still into a 3D scene you can orbit, or open your own 3D files.">
+  <link rel="canonical" href="https://chucksi.com/3d">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chucksi">
   <meta property="og:url" content="https://chucksi.com/3d">
-  <meta property="og:title" content="Image to 3D, free | Chucksi">
-  <meta property="og:description" content="Turn a still into a scene you can orbit. Explore depth, reconstruct objects and export your work.">
+  <meta property="og:title" content="3D | Chucksi">
+  <meta property="og:description" content="Turn a still into a 3D scene you can orbit, or open your own 3D files.">
   <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="3D | Chucksi">
+  <meta name="twitter:description" content="Turn a still into a 3D scene you can orbit, or open your own 3D files.">
   <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta name="theme-color" content="#0b0b0c">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -47,8 +51,6 @@
       <a href="/studios/office/">Office</a>
     </nav>
     <div class="nav-right">
-      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">OPEN WEIGHTS</span></button>
-      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
       <a class="btn-accent" href="/image">New image</a>
     </div>
   </header>
@@ -56,7 +58,7 @@
   <main class="studio">
     <aside class="side" aria-label="3D controls">
       <div class="side-tabs" role="tablist">
-        <button role="tab" aria-selected="true" aria-controls="tab-depth" id="t-depth">In your browser</button>
+        <button role="tab" aria-selected="true" aria-controls="tab-depth" id="t-depth">Scene</button>
         <button role="tab" aria-selected="false" aria-controls="tab-idol" id="t-idol">Full object</button>
       </div>
 
@@ -75,25 +77,25 @@
           </div>
           <label class="row-sel sel"><small>Detail</small><select id="detail"><option value="300">Fast</option><option value="420" selected>Standard</option><option value="600">High</option></select></label>
           <label class="check"><input type="checkbox" id="fill" checked> <span><strong>Fill behind objects</strong><small>Adds a refilled background layer so orbiting doesn't show holes</small></span></label>
-          <p class="side-note">Depth Anything V2 reads the still on your device, then every pixel becomes a small Gaussian. You get the front of the scene in true 3D, instantly, for $0.</p>
+          <p class="side-note">The front of your still becomes a scene you can orbit.</p>
         </div>
 
         <div id="tab-idol" role="tabpanel" aria-labelledby="t-idol" class="stack" hidden>
           <div class="field">
-            <div class="f-head"><span>Reconstruction service</span><output id="o-idol">not checked</output></div>
-            <input type="url" id="idol-url" class="text-in" value="http://127.0.0.1:7861" spellcheck="false" aria-label="Reconstruction service address">
+            <div class="f-head"><span>Object service</span><output id="o-idol">not checked</output></div>
+            <input type="url" id="idol-url" class="text-in" value="http://127.0.0.1:7861" spellcheck="false" aria-label="Object service address">
           </div>
           <div class="grid2">
             <label class="row-sel sel"><small>Source</small><select id="idol-mode"><option value="synthetic">AI image</option><option value="real">Photo</option></select></label>
-            <label class="row-sel sel"><small>Splats</small><select id="idol-count"><option value="131072">131k</option><option value="262144" selected>262k</option><option value="524288">524k</option><option value="1048576">1M</option></select></label>
+            <label class="row-sel sel"><small>Detail</small><select id="idol-count"><option value="131072">131k</option><option value="262144" selected>262k</option><option value="524288">524k</option><option value="1048576">1M</option></select></label>
           </div>
           <div class="field">
-            <div class="f-head"><span>Seed</span><output id="o-seed">42</output></div>
-            <input type="range" id="idol-seed" min="0" max="999" step="1" value="42" aria-label="Seed">
+            <div class="f-head"><span>Variation</span><output id="o-seed">42</output></div>
+            <input type="range" id="idol-seed" min="0" max="999" step="1" value="42" aria-label="Variation">
           </div>
           <details class="adv">
             <summary>Connection settings</summary>
-            <p class="side-note">Enter the address of your reconstruction service above, then choose Build 3D. <a href="https://github.com/ChuckGPTX/massless#idol-on-your-gpu-full-3d-objects">Connection guide ↗</a></p>
+            <p class="side-note">Enter the address of your object service above, then choose Build 3D. <a href="https://github.com/ChuckGPTX/massless#idol-on-your-gpu-full-3d-objects">Connection guide ↗</a></p>
             <p class="side-note">You can also <a href="https://huggingface.co/spaces/speridlabs/idol" rel="noopener">create an object in the online demo</a> and open the exported file here.</p>
           </details>
         </div>
@@ -117,22 +119,22 @@
           <button type="button" class="pill on" id="p-orbit"><svg viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="8" rx="6.5" ry="3.2"/><circle cx="8" cy="8" r="1.6"/></svg>Auto-orbit</button>
           <button type="button" class="pill" id="p-reset"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 105-5H5M5 1v4h4"/></svg>Reset view</button>
           <button type="button" class="pill" id="p-flip" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M4 5l-2 3 2 3M12 5l2 3-2 3"/></svg>Flip</button>
-          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
+          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>Tips</button>
         </div>
-        <span class="src" id="src-label">Loading the viewer</span>
+        <span class="src" id="src-label">Getting ready…</span>
       </div>
 
       <div class="stage-head">
         <div>
           <h1 class="display">Turn a still<br>into 3D</h1>
-          <p>Drag to orbit, scroll to zoom. Download the splat as a standard .ply that opens in any Gaussian splat viewer.</p>
+          <p>Drag to orbit, scroll to zoom. Download a .ply to open it in other 3D apps.</p>
         </div>
         <div class="stage-actions"><span class="badge-new">NEW</span></div>
       </div>
 
       <div class="viewfinder three-view" id="viewfinder">
         <canvas id="view3d" aria-label="3D viewer"></canvas>
-        <div class="vf-hud" aria-live="polite"><span class="hud-move" id="hud-name">Depth splat</span><span id="hud-count"></span></div>
+        <div class="vf-hud" aria-live="polite"><span class="hud-move" id="hud-name">3D scene</span><span id="hud-count"></span></div>
         <div class="vf-status" id="vf-status" hidden><div class="meter"><div class="meter-fill" id="meter-fill"></div></div><p id="vf-status-text"></p></div>
         <div class="drop-hint" id="drop-hint" hidden>Drop a still or a .ply</div>
       </div>
@@ -154,15 +156,9 @@
   </dialog>
 
   <dialog class="sheet" id="how">
-    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
-    <p><strong>In your browser:</strong> Depth Anything V2 estimates depth on your device. Each sample of the still becomes a flat Gaussian placed along its camera ray, and a second layer built from the refilled background sits behind foreground objects. The result is the visible front of the scene in true 3D.</p>
-    <p><strong>Full object:</strong> Connect a reconstruction service to create a complete object from one image, including its unseen sides. Your image is sent to the service you connect.</p>
-    <p>Splats render with Spark (MIT) on three.js.</p>
-  </dialog>
-
-  <dialog class="sheet" id="ledger">
-    <form method="dialog" class="sheet-head"><h2>Models &amp; limits</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Depth: Depth Anything V2 Small (Apache-2.0), in your browser. Splat viewer: Spark (MIT). Object reconstruction uses a connected service with its own terms. Local editing has no service charge.</p>
+    <form method="dialog" class="sheet-head"><h2>Tips</h2><button class="x" aria-label="Close">×</button></form>
+    <p><strong>Scene:</strong> the visible front of your still becomes 3D. Small orbits look best.</p>
+    <p><strong>Full object:</strong> builds a complete object from one image, including its unseen sides, with an object service you connect.</p>
   </dialog>
 
   <script type="module" src="/js/pages/three-d.js"></script>

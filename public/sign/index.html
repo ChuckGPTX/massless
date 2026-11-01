@@ -3,17 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Chucksi Sign: free, open-source e-signatures</title>
-  <meta name="description" content="Sign documents on any phone. End-to-end encrypted: the key stays in the link, never on the server. Certificate of Completion and Verify included. Free and open source.">
-  <meta name="theme-color" content="#0b0b0c">
-  <meta name="referrer" content="no-referrer">
+  <title>Chucksi Sign: free e-signatures</title>
+  <meta name="description" content="Send documents for signature and sign on any phone. End-to-end encrypted, with a Certificate of Completion. Free.">
+  <link rel="canonical" href="https://chucksi.com/sign">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chucksi">
   <meta property="og:url" content="https://chucksi.com/sign">
-  <meta property="og:title" content="Chucksi Sign: free, open-source e-signatures">
-  <meta property="og:description" content="End-to-end encrypted e-signatures with a Certificate of Completion. Free and open source.">
+  <meta property="og:title" content="Chucksi Sign: free e-signatures">
+  <meta property="og:description" content="Send documents for signature and sign on any phone. End-to-end encrypted, with a Certificate of Completion. Free.">
   <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Chucksi Sign: free e-signatures">
+  <meta name="twitter:description" content="Send documents for signature and sign on any phone. End-to-end encrypted, with a Certificate of Completion. Free.">
+  <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta name="theme-color" content="#0b0b0c">
+  <meta name="referrer" content="no-referrer">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -41,17 +49,17 @@
 
   <dialog class="sheet sg-sheet" id="how">
     <form method="dialog" class="sheet-head"><h2>How it stays private</h2><button class="x" aria-label="Close">×</button></form>
-    <p><strong>The key is in the link.</strong> When the sender creates an envelope, their browser makes a random 256-bit key, encrypts the PDF, the field layout and the filled-in details with AES-GCM, and uploads only the ciphertext. The key travels after the # in the link, a part browsers never send to a server.</p>
-    <p><strong>What Chucksi sees:</strong> encrypted blobs, their sizes, SHA-256 fingerprints, how many signers there are and in what order, and when each step happened, from which IP address and browser. <strong>What it never sees:</strong> the document's text, names and emails, anything typed into fields, signatures, the message or decline reasons.</p>
-    <p><strong>Proof.</strong> Each step is logged with the server's time, IP and user agent. When everyone has signed, a browser with the key builds the final PDF and a Certificate of Completion. Chucksi signs the audit trail with an ECDSA P-256 key and records the final file's fingerprint, so Verify can prove a file is unchanged.</p>
+    <p><strong>The key is in the link.</strong> When you create an envelope, the document, its fields and the filled-in details are encrypted before they are sent. Only people with the link can open them.</p>
+    <p><strong>What Chucksi sees:</strong> encrypted files, their sizes and fingerprints, how many signers there are and in what order, and when each step happened, from which IP address and browser. <strong>What it never sees:</strong> the document's text, names and emails, anything typed into fields, signatures, the message or decline reasons.</p>
+    <p><strong>Proof.</strong> Each step is logged with the time, IP address and browser. When everyone has signed, the final PDF gets a Certificate of Completion, and Chucksi seals the audit trail so Verify can prove a file is unchanged.</p>
     <p><strong>Retention.</strong> Unsigned envelopes are deleted after 30 days, completed ones after 90. The sender can delete any time.</p>
     <p><strong>Not for every document.</strong> U.S. e-signature law (the ESIGN Act and UETA) does not cover wills, codicils and testamentary trusts; adoption, divorce and other family-law matters; court orders, notices and official court papers; notices of utility shutoff, default, foreclosure, eviction or repossession of a primary residence; cancellation of health or life insurance; product recall notices; and papers that must travel with hazardous materials. Deeds for recording, notarized or witnessed documents and some other instruments may need wet ink, a notary or a set process. Check before you send.</p>
-    <p class="small">Chucksi Sign provides templates and signing tools, not legal advice. Open source under the MIT license.</p>
+    <p class="small">Chucksi Sign provides templates and signing tools, not legal advice.</p>
   </dialog>
 
   <footer class="sg-foot">
     <span>Chucksi Sign provides templates and signing tools, not legal advice.</span>
-    <nav><a href="/sign#verify">Verify</a><a href="/office?tab=sign">Send a document</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">Open source (MIT)</a></nav>
+    <nav><a href="/sign#verify">Verify</a><a href="/office?tab=sign">Send a document</a><a href="/credits.html">Credits</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav>
   </footer>
 
   <script type="module" src="/js/sign/signer.js"></script>

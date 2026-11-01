@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Kinetic launch films from a brief, free | Chucksi</title>
-  <meta name="description" content="Describe your product in a few lines. Chucksi writes the beat sheet, scores it at an exact tempo and cuts a kinetic type film to the beat, with real motion blur. MP4 out, $0.">
-  <meta name="theme-color" content="#0b0b0c">
+  <title>Launch Film | Chucksi</title>
+  <meta name="description" content="Describe your product in a few lines and get a kinetic launch film cut to the beat. MP4 out.">
+  <link rel="canonical" href="https://chucksi.com/film">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chucksi">
   <meta property="og:url" content="https://chucksi.com/film">
-  <meta property="og:title" content="Kinetic launch films from a brief, free | Chucksi">
-  <meta property="og:description" content="Describe your product in a few lines. Chucksi writes the beat sheet, scores it at an exact tempo and cuts a kinetic type film to the beat, with real motion blur. MP4 out, $0.">
+  <meta property="og:title" content="Launch Film | Chucksi">
+  <meta property="og:description" content="Describe your product in a few lines and get a kinetic launch film cut to the beat. MP4 out.">
   <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Launch Film | Chucksi">
+  <meta name="twitter:description" content="Describe your product in a few lines and get a kinetic launch film cut to the beat. MP4 out.">
   <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta name="theme-color" content="#0b0b0c">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -38,8 +42,6 @@
       <a href="/studios/office/">Office</a>
     </nav>
     <div class="nav-right">
-      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">OPEN WEIGHTS</span></button>
-      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
       <a class="btn-accent" href="/video">Open Video</a>
     </div>
   </header>
@@ -58,7 +60,7 @@
         </div>
         <div class="field">
           <div class="f-head"><span>Brief</span><output id="o-brief">0 / 600</output></div>
-          <textarea id="brief" maxlength="600" rows="5" aria-label="Brief">A free AI film studio in your browser. 28 camera moves, voiceover, 3D and launch films, all on open models. No account, no credits, $0.</textarea>
+          <textarea id="brief" maxlength="600" rows="5" aria-label="Brief">A creative studio for marketers. Images, camera moves, voiceover, 3D and launch films in one place.</textarea>
         </div>
         <div class="grid2">
           <label class="row-sel sel"><small>Music</small><select id="style"></select></label>
@@ -74,7 +76,7 @@
           <div class="f-head"><span>Colour</span></div>
           <div class="swatches" id="palettes" role="radiogroup" aria-label="Colour"></div>
         </div>
-        <label class="check"><input type="checkbox" id="use-llm" checked> <span><strong>Write it with Llama 3.3</strong><small>Open-weight model on Cloudflare's free allowance. Off: the built-in template.</small></span></label>
+        <label class="check"><input type="checkbox" id="use-llm" checked> <span><strong>Write it with AI</strong><small>Off: use the built-in template.</small></span></label>
         <label class="check"><input type="checkbox" id="use-stills" checked> <span><strong>Cut in your stills</strong><small>Your latest shots from Image, or the samples</small></span></label>
       </div>
 
@@ -96,7 +98,7 @@
         <div class="pills" role="tablist" aria-label="Stage">
           <a class="pill on" href="#preview"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z"/></svg>Preview</a>
           <a class="pill" href="#check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>Film check</a>
-          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>How it works</button>
+          <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>Tips</button>
         </div>
         <span class="src" id="src-label">Built-in template</span>
       </div>
@@ -126,26 +128,21 @@
       </div>
 
       <div class="lib-head"><h2 class="display">Words into film</h2><span class="muted small">Another way to start</span></div>
-      <div class="kit-links kit-links-2"><a class="kit-link" href="/workflows?make=film-poem"><img loading="lazy" src="/media/make/thumb-film-poem.webp" alt="" width="800" height="600"><span><strong>Film poem</strong><small>A poem becomes a 20 to 40 second film: one FLUX frame per line, typed words, slow camera moves</small></span></a><a class="kit-link" href="/workflows?make=festival"><img loading="lazy" src="/media/make/thumb-festival.webp" alt="" width="800" height="600"><span><strong>Festival poster series</strong><small>Posters plus feed and story sizes for your event</small></span></a></div>
+      <div class="kit-links kit-links-2"><a class="kit-link" href="/workflows?make=film-poem"><img loading="lazy" src="/media/make/thumb-film-poem.webp" alt="" width="800" height="600"><span><strong>Film poem</strong><small>A poem becomes a 20 to 40 second film: one painted frame per line, typed words, slow camera moves</small></span></a><a class="kit-link" href="/workflows?make=festival"><img loading="lazy" src="/media/make/thumb-festival.webp" alt="" width="800" height="600"><span><strong>Festival poster series</strong><small>Posters plus feed and story sizes for your event</small></span></a></div>
 
-      <div class="lib-head" id="check"><h2 class="display">Film check</h2><span class="muted small">Measured on the beat grid, the way the reference film is checked</span></div>
+      <div class="lib-head" id="check"><h2 class="display">Film check</h2><span class="muted small">Every cut checked against the beat</span></div>
       <div class="checks" id="checks"></div>
 
-      <div class="lib-head"><h2 class="display">The blocks</h2><span class="muted small">What the engine can draw</span></div>
+      <div class="lib-head"><h2 class="display">The blocks</h2><span class="muted small">What a film can show</span></div>
       <div class="block-grid" id="block-grid"></div>
     </section>
   </main>
 
   <dialog class="sheet" id="how">
-    <form method="dialog" class="sheet-head"><h2>How it works</h2><button class="x" aria-label="Close">×</button></form>
-    <p><strong>Words on the beat.</strong> Your brief becomes a beat sheet: a few words per beat, a block for each phrase, and the drop where the film turns. Llama 3.3 70B writes it on Cloudflare's free allowance, or a built-in template does, offline.</p>
-    <p><strong>Scored at an exact tempo.</strong> The music and the cut sounds are synthesized in your browser at the tempo you pick, so every cut lands on a beat by construction. No samples, no paid music model.</p>
-    <p><strong>Code moves it.</strong> Each frame is drawn by code: slams, whip pans, colour grounds, extruded 3D type, typed prompts, slot reels and your own stills. The export averages several sub-frames per frame across a 180° shutter for real motion blur, and WebCodecs writes an MP4 with sound.</p>
-  </dialog>
-
-  <dialog class="sheet" id="ledger">
-    <form method="dialog" class="sheet-head"><h2>Models &amp; limits</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Beat sheet: Llama 3.3 70B (open weights) on Cloudflare's free daily allowance, or a built-in template. Music and sound: synthesized in your browser. Motion and encoding: your browser. Cost: $0.</p>
+    <form method="dialog" class="sheet-head"><h2>Tips</h2><button class="x" aria-label="Close">×</button></form>
+    <p><strong>Words on the beat.</strong> Your brief becomes a script: a few words per beat and a drop where the film turns.</p>
+    <p><strong>Scored to the tempo you pick,</strong> so every cut lands on a beat.</p>
+    <p><strong>Add your own stills</strong> to put your product on screen.</p>
   </dialog>
 
   <script type="module" src="/js/pages/film.js"></script>

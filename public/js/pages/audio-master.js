@@ -42,7 +42,7 @@ export function createMaster({ $, state, setBusy, progress }) {
       };
       worker.onerror = (e) => {
         e.preventDefault?.();
-        for (const p of pending.values()) p.reject(new Error('The mastering worker stopped. Reload the page and try again.'));
+        for (const p of pending.values()) p.reject(new Error('Mastering stopped. Reload the page and try again.'));
         pending.clear();
         worker = null;
       };
@@ -91,7 +91,7 @@ export function createMaster({ $, state, setBusy, progress }) {
     $('#mst-body').hidden = true;
     $('#mst-drop').classList.add('compact');
     $('#mst-drop-title').textContent = m.name;
-    $('#mst-drop-sub').textContent = 'Reading the audio in this tab…';
+    $('#mst-drop-sub').textContent = 'Reading the file…';
     $('#mst-choose').textContent = 'Choose another';
     setBusy(true, 'Reading');
     meter(true);
@@ -115,7 +115,7 @@ export function createMaster({ $, state, setBusy, progress }) {
       const { report } = await call('analyze');
       m.report = report;
       showReport();
-      $('#mst-drop-sub').textContent = `${clock(report.duration)} · ${report.channels === 1 ? 'mono' : 'stereo'} · ${m.rate / 1000} kHz. Nothing is uploaded.`;
+      $('#mst-drop-sub').textContent = `${clock(report.duration)} · ${report.channels === 1 ? 'mono' : 'stereo'} · ${m.rate / 1000} kHz.`;
     } catch (e) {
       m.file = null;
       $('#mst-drop-title').textContent = 'Drop a finished mix here';

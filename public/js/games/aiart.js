@@ -62,14 +62,14 @@ export async function paintArt(recipe, { roles = ['player', 'bg', 'enemy', 'item
       cached++;
       continue;
     }
-    if (slow && role !== 'player') { notes.push(`${role}: drawn in code (the free cloud is busy)`); continue; }
+    if (slow && role !== 'player') { notes.push(`${role}: drawn for you (AI art is busy right now)`); continue; }
     onProgress?.(i, roles.length, role);
     try {
       const res = await shootFn({ prompt, w, h, seed, engine: 'auto', signal, onFallback: () => { slow = true; } });
       let canvas = res.image;
       if (role !== 'bg') {
         const k = keyImage(canvas, { tolerance: 70, maxSize: 512 });
-        if (!k.keyed || k.empty) { notes.push(`${role}: background could not be removed, drawn in code instead`); continue; }
+        if (!k.keyed || k.empty) { notes.push(`${role}: drawn for you instead`); continue; }
         canvas = k.canvas;
       }
       images[role] = canvas;

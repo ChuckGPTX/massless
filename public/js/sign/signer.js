@@ -57,7 +57,7 @@ async function boot() {
   if (!f.e) return landing(verifyOnly);
   if (!f.k || !(f.s || f.o)) return fail('This link is incomplete', 'Part of the link is missing. Copy the whole link from the message and open it again.');
   Object.assign(S, { f, owner: !!f.o, inPerson: f.p === '1', queue: String(f.q || '').split(',').filter(Boolean) });
-  loading('Opening your envelope', 'Decrypting it in this browser. The server only ever had ciphertext.');
+  loading('Opening your envelope', 'Opening your document…');
   try {
     S.key = await C.importKey(f.k);
     S.api = new Envelope(f.e, f.s || f.o);
@@ -137,17 +137,17 @@ async function downloadOriginal() {
 }
 
 function landing(focusVerify) {
-  document.title = 'Chucksi Sign: free, open-source e-signatures';
+  document.title = 'Chucksi Sign: free e-signatures';
   const v = el('div', { class: 'sg-verify-box', id: 'verify' });
   screen('landing',
     el('section', { class: 'sg-hero' },
-      el('span', { class: 'sg-eyebrow', html: `${I.lock}<span>Free · open source (MIT) · end-to-end encrypted</span>` }),
+      el('span', { class: 'sg-eyebrow', html: `${I.lock}<span>Free · end-to-end encrypted</span>` }),
       el('h1', { class: 'display' }, 'Sign anything.', el('br'), 'Show no one.'),
-      el('p', { class: 'muted' }, 'Chucksi Sign sends documents for signature with the key in the link, never on the server. Signers sign on any phone, the final PDF carries a certificate, and anyone can check it.'),
+      el('p', { class: 'muted' }, 'Send documents for signature. Signers sign on any phone, the final PDF carries a certificate, and anyone can check it.'),
       el('div', { class: 'sg-cta' }, el('a', { class: 'btn-accent', href: '/office?tab=sign' }, 'Send a document'), el('a', { class: 'btn-ghost', href: '#verify', onclick: (e) => { e.preventDefault(); v.scrollIntoView({ behavior: 'smooth' }); } }, 'Verify a PDF'))),
     el('section', { class: 'sg-feats' },
-      feat('Encrypted before upload', 'Your browser locks the PDF, fields and signatures with a random key. The key rides in the link after the #, which browsers never send to a server.'),
-      feat('Signed in order', 'Signers go one after another or all at once. The server enforces the order and timestamps every step with IP and device.'),
+      feat('Private by design', 'Every document is locked with a key that lives only in its link, so only the people you share it with can read it.'),
+      feat('Signed in order', 'Signers go one after another or all at once. Every step is recorded with a timestamp.'),
       feat('Proof you can check', 'The final PDF ends with a Certificate of Completion. Chucksi signs the audit trail, and Verify catches a single changed byte.')),
     el('section', { class: 'sg-vsec' }, el('h2', { class: 'display' }, 'Verify'), v),
     el('section', { class: 'sg-feat sg-excl' }, el('h3', {}, 'Not for every document'), el('p', { class: 'muted' }, EXCLUDED)));
@@ -654,7 +654,7 @@ async function downloadFinal() {
 }
 
 async function completedView(justSigned = false) {
-  const state = el('div', { class: 'sg-sealing', 'aria-live': 'polite' }, el('span', { class: 'sg-spin small', 'aria-hidden': 'true' }), el('span', {}, 'Building the final PDF and its certificate in this browser…'));
+  const state = el('div', { class: 'sg-sealing', 'aria-live': 'polite' }, el('span', { class: 'sg-spin small', 'aria-hidden': 'true' }), el('span', {}, 'Building the final PDF and its certificate…'));
   const dl = el('button', { type: 'button', class: 'go', id: 'dl-final', disabled: true, html: `<span>Download signed PDF</span>${I.dl}` });
   dl.addEventListener('click', () => downloadFinal().catch((e) => toast(e.message, 'error')));
   const signers = el('ol', { class: 'sg-slist' }, ...S.env.signers.map((s) => {
@@ -675,7 +675,7 @@ async function completedView(justSigned = false) {
     const f = await buildFinal();
     state.className = `sg-sealing ${f.matches ? 'ok' : 'warn'}`;
     state.innerHTML = f.matches
-      ? `${I.check}<span>Sealed. File SHA-256 <code>${f.finalHash.slice(0, 16)}…</code></span>`
+      ? `${I.check}<span>Sealed and ready to download.</span>`
       : `${I.x}<span>Your rebuilt copy differs from the sealed copy. Ask the sender for the sealed file.</span>`;
     dl.disabled = false;
   } catch (e) {
@@ -711,7 +711,7 @@ async function manage() {
   if (rec && env.status === 'sent') {
     for (const s of rec.signers) links.append(signerLinkCard({ origin: location.origin, envelopeId: env.id, key: S.f.k, signer: s, message: S.meta.message, docName: S.meta.name, all: rec.signers }));
   } else if (env.status === 'sent') {
-    links.append(el('p', { class: 'muted small' }, 'Signer links live on the device that created the envelope (Office > Sign > Envelopes). Chucksi cannot show them here: it never stored them.'));
+    links.append(el('p', { class: 'muted small' }, 'Signer links are only on the device that created the envelope (Office > Sign > Envelopes).'));
   } else links.hidden = true;
   const auditBox = el('section', { class: 'sg-sec' }, el('h2', {}, 'Audit trail'), el('p', { class: 'muted small' }, 'Loading…'));
   const declined = el('div', { class: 'sg-reasons-box' });
@@ -740,7 +740,7 @@ async function deleteEnvelope() {
     const rec = await local.get(S.env.id).catch(() => null);
     if (rec) await local.put({ ...rec, status: 'deleted', statusText: 'Deleted' });
     try { sessionStorage.removeItem('ms-sign'); } catch { /* fine */ }
-    screen('center', el('div', { class: 'sg-card sg-done' }, el('span', { class: 'sg-badge', html: I.check }), el('h1', { class: 'display' }, 'Deleted'), el('p', { class: 'muted' }, 'The envelope and its ciphertext are gone from Chucksi.'), el('a', { class: 'btn-ghost', href: '/office?tab=sign' }, 'Back to Office')));
+    screen('center', el('div', { class: 'sg-card sg-done' }, el('span', { class: 'sg-badge', html: I.check }), el('h1', { class: 'display' }, 'Deleted'), el('p', { class: 'muted' }, 'The envelope has been deleted from Chucksi.'), el('a', { class: 'btn-ghost', href: '/office?tab=sign' }, 'Back to Office')));
   } catch (e) { toast(e.message, 'error'); }
 }
 

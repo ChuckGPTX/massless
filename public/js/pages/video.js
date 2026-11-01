@@ -158,16 +158,16 @@ async function loadFrame({ ref, name, image, sub, look, gradeMix = 0.45, depth =
     renderer.setDepth(new Uint8Array([128]), 1, 1);
     state.stats = { subject: 0.5, near: 0.5, far: 0.5 };
     updateZoom();
-    status('Reading depth on your device', null);
+    status('Preparing your still…', null);
     d = await estimateDepth(image, (f, msg) => status(msg, f));
     status(null);
-    if (d.source === 'estimate') toast('The depth model could not load here, so Chucksi guessed the depth. Moves still work, with less accuracy.', 'error');
+    if (d.source === 'estimate') toast('Moves still work, but may look a little less precise on this device.', 'error');
   }
   depthCache.set(ref, d);
   state.current.depth = d;
   if (state.current.ref !== ref) return; // a newer frame was chosen meanwhile
   useDepth(d, image);
-  $('#src-label').textContent = d.source === 'precomputed' ? 'Sample · depth precomputed' : d.source === 'model' ? `Depth Anything V2 on ${depthBackend() || 'your device'}` : 'Estimated depth';
+  $('#src-label').textContent = d.source === 'precomputed' ? 'Sample' : 'Ready';
 }
 
 async function loadSample(key) {
@@ -388,7 +388,7 @@ function timecode(sec, fps) {
   return `00:${p(s)}:${p(f)}`;
 }
 function addClip(blob, ext, label) {
-  import('../assets.js').then(({saveAsset}) => saveAsset(blob, {name:label+'.'+ext, engine:'camera-effects', sourceId:state.current?.ref, settings:{move:state.move, effect:state.effect, effectLook:state.effectLook, intensity:state.intensity, look:{...state.look}, fps:state.fps, duration:state.duration}})).catch(() => toast('Clip ready, but local saving failed. Download it before leaving.', 'error'));
+  import('../assets.js').then(({saveAsset}) => saveAsset(blob, {name:label+'.'+ext, engine:'camera-effects', sourceId:state.current?.ref, settings:{move:state.move, effect:state.effect, effectLook:state.effectLook, intensity:state.intensity, look:{...state.look}, fps:state.fps, duration:state.duration}})).catch(() => toast('Clip ready, but it couldn\'t be saved. Download it before leaving.', 'error'));
   $('#clips-wrap').hidden = false;
   const url = URL.createObjectURL(blob);
   const v = el('video', { src: url, muted: true, loop: true, playsinline: true, autoplay: true });
@@ -478,7 +478,7 @@ async function thumbCanvas(src, max = 320) {
 
 async function addToBoard() {
   const cur = state.current;
-  if (!cur?.depth) { toast('Wait for depth to finish, then add the shot.', 'error'); return; }
+  if (!cur?.depth) { toast('One moment, the still is still loading.', 'error'); return; }
   const was = state.recording;
   state.recording = true;
   drawFrame(0.7, 0);
@@ -509,7 +509,7 @@ async function ensureCard(card, i, n) {
   if (!card.depth) {
     card.depth = depthCache.get(card.ref) || (card.ref.startsWith('sample:') ? await precomputedDepth(card.ref.slice(7)) : null);
     if (!card.depth) {
-      status(`Reading depth for shot ${i + 1} of ${n}`, null);
+      status(`Preparing shot ${i + 1} of ${n}…`, null);
       card.depth = await estimateDepth(card.image, (f, msg) => status(`${msg} (shot ${i + 1} of ${n})`, f));
     }
     depthCache.set(card.ref, card.depth);

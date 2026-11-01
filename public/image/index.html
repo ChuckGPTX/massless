@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Free AI image generator with a real camera rig | Chucksi</title>
-  <meta name="description" content="Pick a camera body, lens and film stock, describe the shot, and an open-weight model like FLUX.1 or SDXL renders it. Free models need no account. MOSS Image offers a limited preview with sign-in.">
-  <meta name="theme-color" content="#0b0b0c">
+  <title>Image | Chucksi</title>
+  <meta name="description" content="Pick a camera, lens and film stock, describe the shot and create it. Free to start.">
+  <link rel="canonical" href="https://chucksi.com/image">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chucksi">
   <meta property="og:url" content="https://chucksi.com/image">
-  <meta property="og:title" content="Free AI image generator with a real camera rig | Chucksi">
-  <meta property="og:description" content="Pick a camera body, lens and film stock, describe the shot, and an open-weight model like FLUX.1 or SDXL renders it. Free models need no account. MOSS Image offers a limited preview with sign-in.">
+  <meta property="og:title" content="Image | Chucksi">
+  <meta property="og:description" content="Pick a camera, lens and film stock, describe the shot and create it. Free to start.">
   <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Image | Chucksi">
+  <meta name="twitter:description" content="Pick a camera, lens and film stock, describe the shot and create it. Free to start.">
   <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta name="theme-color" content="#0b0b0c">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -38,8 +42,6 @@
       <a href="/studios/office/">Office</a>
     </nav>
     <div class="nav-right">
-      <button type="button" class="pill-link" data-dialog="ledger"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l6 3v4c0 3.2-2.6 5.6-6 6.5-3.4-.9-6-3.3-6-6.5v-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8.2l1.8 1.8 3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Open models<span class="tag">OPEN WEIGHTS</span></button>
-      <a class="btn-ghost" href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a>
       <a class="btn-accent" href="/video">Animate a still</a>
     </div>
   </header>
@@ -50,7 +52,7 @@
         <video muted loop playsinline preload="none" poster="/media/art/canyon.jpg" data-src="/media/clips/promo-canyon.mp4"></video>
         <div class="hero-copy">
           <h1 class="display">AI images shot<br>with a real camera</h1>
-          <p>Pick the body, lens and film stock. Choose open-weight FLUX.1, SDXL, Sana or MOSS Image. Free models need no account. MOSS Image offers a limited preview with sign-in.</p>
+          <p>Pick the body, lens and film stock, then describe the shot. Free to start, no account needed.</p>
           <button type="button" class="btn-white" id="hero-cta">Create image now</button>
         </div>
 
@@ -59,10 +61,10 @@
             <label class="pbar-add" for="upload" title="Use your own still"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg><span class="sr-only">Use your own still</span></label>
             <input type="file" id="upload" accept="image/*" hidden>
             <label class="sr-only" for="subject">Describe the shot</label>
-            <textarea id="subject" rows="1" placeholder="Describe the shot. The rig handles the cinematography."></textarea>
+            <textarea id="subject" rows="1" placeholder="A lighthouse on a cliff at dusk"></textarea>
           </div>
           <div class="pbar-chips">
-            <button type="button" class="chip model" data-pop="model" aria-haspopup="dialog" aria-expanded="false" title="Model"><span class="dot"></span><span class="sr-only">Model: </span><span id="chip-model">FLUX.1 schnell</span></button>
+            <button type="button" class="chip model" data-pop="model" aria-haspopup="dialog" aria-expanded="false" title="Style"><span class="dot"></span><span class="sr-only">Style: </span><span id="chip-model">Fast</span></button>
             <button type="button" class="chip" data-pop="camera"><span class="k">Camera</span><span id="chip-camera"></span></button>
             <button type="button" class="chip" data-pop="lens"><span class="k">Lens</span><span id="chip-lens"></span></button>
             <button type="button" class="chip" data-pop="focal"><span id="chip-focal"></span></button>
@@ -76,15 +78,15 @@
         </form>
       </div>
       <details class="prompt-peek" id="prompt-peek">
-        <summary>Prompt sent to the model</summary>
+        <summary>Full description</summary>
         <textarea id="compiled" rows="3" spellcheck="false"></textarea>
-        <p class="neg" id="neg-line" hidden>Negative prompt for <span id="neg-model">SDXL</span>: <span id="neg"></span></p>
-        <p class="muted">Edit freely; Generate uses this text. Change any rig setting to rebuild it.</p>
+        <p class="neg" id="neg-line" hidden>Avoids (<span id="neg-model">Detailed</span>): <span id="neg"></span></p>
+        <p class="muted">Edit freely. Changing a camera setting rebuilds it.</p>
       </details>
     </section>
 
     <section class="wrap results" id="results-wrap" hidden>
-      <div class="row-head"><h2 class="display">Your shots</h2><span class="muted" id="results-note">Saved in this browser only.</span></div>
+      <div class="row-head"><h2 class="display">Your shots</h2><span class="muted" id="results-note">Saved on this device.</span></div>
       <div class="results-grid" id="results"></div>
       <button class="btn-ghost" id="more-shots" type="button" hidden>Load older shots</button>
     </section>
@@ -92,58 +94,41 @@
     <section class="wrap feats">
       <article class="feat">
         <div class="media"><img loading="lazy" src="/media/art/cinema.jpg" alt="Cinematographer adjusting a cinema camera on a rainy night street"></div>
-        <h3>A real camera, not a prompt hack</h3>
-        <p>Body, lens, focal length and aperture compile into a precise prompt you can read and edit, then shape the look again in post.</p>
+        <h3>A real camera, built in</h3>
+        <p>Body, lens, focal length and aperture shape the shot, and you can still edit every word.</p>
       </article>
       <article class="feat" id="takes">
         <div class="media takes-demo"><img loading="lazy" src="/media/art/neon.jpg" alt="Woman in a red raincoat under neon"><img loading="lazy" src="/media/art/samurai.jpg" alt=""><img loading="lazy" src="/media/art/diner.jpg" alt=""><img loading="lazy" src="/media/art/train.jpg" alt=""></div>
         <h3>Four takes, one hero</h3>
-        <p>Ask for up to four variations of the same shot. The first appears right away while the rest keep rendering.</p>
+        <p>Ask for up to four variations of the same shot. The first appears right away while the rest keep coming.</p>
       </article>
       <article class="feat">
         <div class="media"><video muted loop playsinline preload="none" poster="/media/art/rider.jpg" data-src="/media/clips/hero-rider.mp4"></video></div>
         <h3>From still to shot in one click</h3>
-        <p>Send any frame to Video and fly a dolly zoom, orbit or crane through it, on your own device.</p>
+        <p>Send any frame to Video and fly a dolly zoom, orbit or crane through it.</p>
       </article>
       <article class="feat">
         <div class="media"><img loading="lazy" src="/media/art/astronaut.jpg" alt="Astronaut in a golden wheat field"></div>
-        <h3>Open weights. Your choice.</h3>
-        <p>FLUX.1 schnell, SDXL-Lightning, DreamShaper 8 and SDXL 1.0 run on Cloudflare's free tier, Sana on Pollinations, or bring your own ComfyUI. Nothing asks for a card.</p>
+        <h3>A style for every shot.</h3>
+        <p>Fast, Quick sketch, Illustration, Detailed or Best quality. Nothing asks for a card.</p>
       </article>
     </section>
 
     <section class="wrap kits" aria-labelledby="kits-title">
-      <div class="row-head"><h2 class="display" id="kits-title">Make a whole design</h2><span class="muted">One click opens a finished example. FLUX paints, your words stay editable.</span></div>
+      <div class="row-head"><h2 class="display" id="kits-title">Make a whole design</h2><span class="muted">One click opens a finished example. Your words stay editable.</span></div>
       <div class="kit-links"><a class="kit-link" href="/workflows?make=map"><img loading="lazy" src="/media/make/thumb-map.webp" alt="" width="800" height="600"><span><strong>Illustrated map</strong><small>A place painted from above, with your labels</small></span></a><a class="kit-link" href="/workflows?make=identity"><img loading="lazy" src="/media/make/thumb-identity.webp" alt="" width="800" height="600"><span><strong>Brand identity kit</strong><small>Wordmark, mark, palette and applications</small></span></a><a class="kit-link" href="/workflows?make=poetry"><img loading="lazy" src="/media/make/thumb-poetry.webp" alt="" width="800" height="600"><span><strong>Poetry posters</strong><small>Editorial type series from a poem</small></span></a><a class="kit-link" href="/workflows?make=festival"><img loading="lazy" src="/media/make/thumb-festival.webp" alt="" width="800" height="600"><span><strong>Festival poster series</strong><small>Two-colour posters plus social sizes</small></span></a></div>
     </section>
 
     <section class="wrap inspo">
-      <div class="row-head"><h2 class="display">Start from a look</h2><span class="muted">Click one to load its prompt and rig.</span></div>
+      <div class="row-head"><h2 class="display">Start from a look</h2><span class="muted">Click one to load its look and camera.</span></div>
       <div class="inspo-grid" id="inspo"></div>
     </section>
   </main>
 
   <footer class="foot">
-    <span>© 2026 Chucksi · MIT licensed · Built on open weights</span>
-    <nav aria-label="Footer"><a href="#" data-dialog="ledger">Models &amp; limits</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub</a></nav>
+    <span>© 2026 Chucksi</span>
+    <nav aria-label="Footer"><a href="/credits.html">Credits</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub ↗</a></nav>
   </footer>
-
-  <dialog class="sheet" id="ledger">
-    <form method="dialog" class="sheet-head"><h2>Models &amp; limits</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Browser tools and the Cloudflare allowance are free. MOSS Image requires sign-in and has a limited preview allowance. Connected ComfyUI workflows use your own setup and model terms.</p>
-    <div class="scroll"><table>
-      <thead><tr><th>Job</th><th>Model</th><th>License</th><th>Runs on</th><th>Cost</th></tr></thead>
-      <tbody><tr><td>Image</td><td>MOSS Image SFT</td><td>Apache-2.0</td><td>Connected service · sign-in required</td><td>Limited preview</td></tr>
-        <tr><td>Image</td><td>FLUX.1 [schnell]</td><td>Apache-2.0</td><td>Cloudflare Workers AI free tier, or your ComfyUI</td><td>$0</td></tr>
-        <tr><td>Image</td><td>SDXL-Lightning</td><td>OpenRAIL++</td><td>Cloudflare Workers AI free tier</td><td>$0</td></tr>
-        <tr><td>Image</td><td>DreamShaper 8 LCM</td><td>CreativeML OpenRAIL-M</td><td>Cloudflare Workers AI free tier</td><td>$0</td></tr>
-        <tr><td>Image</td><td>SDXL 1.0 base</td><td>OpenRAIL++</td><td>Cloudflare Workers AI free tier</td><td>$0</td></tr>
-        <tr><td>Image</td><td>NVIDIA Sana</td><td>NVIDIA's licence, open weights</td><td>Pollinations community API, 1 image per 45 s</td><td>$0</td></tr>
-        <tr><td>Depth for moves</td><td>Depth Anything V2 Small</td><td>Apache-2.0</td><td>Your browser</td><td>$0</td></tr>
-        <tr><td>Voiceover</td><td>Kokoro-82M</td><td>Apache-2.0</td><td>Your browser</td><td>$0</td></tr>
-      </tbody>
-    </table></div>
-  </dialog>
 
   <script type="module" src="/js/pages/image.js"></script>
 </body>

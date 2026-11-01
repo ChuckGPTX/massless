@@ -182,7 +182,7 @@ async function load(blob, id) {
   message(
     scaled
       ? `Ready. The tools work on a ${T.base.width} × ${T.base.height} copy of this large image.`
-      : "Ready. Your source remains unchanged.",
+      : "Ready. Your original stays unchanged.",
   );
 }
 
@@ -239,16 +239,20 @@ async function updateNote() {
   if (!el) return;
   let id = { "remove-bg": $("#bg-model").value, upscale: "esrgan", erase: "migan" }[tool];
   if (tool === "erase" && $("#er-method").value === "patch") {
-    el.textContent =
-      "Texture copy fills the gap from the rest of the picture. Runs on this device with no download; nothing is uploaded.";
+    el.dataset.model = "patch";
+    el.textContent = "Fills the gap from the rest of the picture.";
     return;
   }
   const [note, gpu] = await Promise.all([downloadNote(id), hasWebGPU()]);
   const heavy =
     id === "birefnet" && !gpu
-      ? " This browser has no WebGPU, so it runs on the processor: allow up to a minute and about 3 GB of memory. For portraits, MODNet is much lighter."
+      ? " On this device it can take up to a minute. For portraits, People is much faster."
       : "";
-  if (T.tool === tool) el.textContent = `${MODELS[id].name} · ${MODELS[id].license}. ${note.text}${heavy}`;
+  if (T.tool === tool) {
+    el.dataset.model = id;
+    el.dataset.cached = String(!note.bytes);
+    el.textContent = `${note.bytes ? "The first time takes a moment to get ready." : ""}${heavy}`.trim();
+  }
 }
 
 function updateUpscaleHint() {
@@ -277,8 +281,6 @@ const onProgress = (fraction, label) => {
   message(label);
 };
 
-const where = (backend) =>
-  backend === "webgpu" ? "on your graphics chip (WebGPU)" : "on your processor";
 
 async function tool(label, fn) {
   if (!T.base) return message("Open an image first.");
@@ -290,7 +292,7 @@ async function tool(label, fn) {
   try {
     const backend = await fn();
     const s = ((performance.now() - t0) / 1000).toFixed(1);
-    message(`${label} in ${s} s ${where(backend)}. Nothing left this device.`);
+    message(`${label} in ${s} s.`);
   } catch (e) {
     message(e.message);
   } finally {
@@ -565,7 +567,7 @@ $("#compare").oninput = draw;
 for (const r of document.querySelectorAll('[name="up-factor"]')) r.onchange = refresh;
 $("#clear-models").onclick = async () => {
   const ok = await clearModels();
-  message(ok ? "Downloaded models removed from this browser." : "No downloaded models to remove.");
+  message(ok ? "Space freed." : "Nothing to remove.");
   updateNote();
 };
 $("#download").onclick = async () => {

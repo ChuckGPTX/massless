@@ -154,12 +154,12 @@ async function generate() {
   $('#go-label').textContent = 'Making…';
   popToggle('#genre-pop', false);
   try {
-    steps('recipe', 'Writing the recipe');
+    steps('recipe', 'Writing your game…');
     const genre = state.genre === 'auto' ? guessGenre(prompt) : state.genre;
     let dims = GENRES[genre].dims.includes(state.dims) ? state.dims : GENRES[genre].dims[0];
     if (state.dims === '3d' && dims !== '3d') toast(`3D works with Stack for now, so this ${GENRES[genre].name.toLowerCase()} is 2D.`);
     const { recipe: written, base, source } = await writeRecipe(prompt, genre, dims);
-    steps('test', 'A bot is playing it');
+    steps('test', 'Testing it…');
     let t = await playtested(written, { tries: 12 });
     if (!t.ok) {
       // the written tuning would not pass: keep the look, use the template's tuning
@@ -168,7 +168,7 @@ async function generate() {
     }
     const images = { ...state.uploads };
     if ($('#ai-art').checked) {
-      steps('art', 'Painting with FLUX.1 schnell');
+      steps('art', 'Painting the art…');
       const { paintArt } = await import('../games/aiart.js');
       const roles = ['player', 'bg', 'enemy', 'item'].filter((r) => !images[r]);
       const res = await paintArt(t.recipe, { roles, onProgress: (i, n, role) => steps('art', `Painting the ${role === 'bg' ? 'background' : role} (${i + 1} of ${n})`) });
@@ -260,7 +260,7 @@ function renderSide() {
   const side = $('#pl-side');
   const who = (role, label) => el('div', {}, spriteThumb(cur.art, role), el('span', {}, el('strong', {}, r[role]?.name || label), el('small', {}, `${label} · ${r[role]?.desc || ''}`.slice(0, 80))));
   const cast = r.genre === 'stack' ? [] : [who('player', 'Player'), who('enemy', r.genre === 'match' ? 'Tile' : 'Enemy'), who('item', r.genre === 'maze' ? 'Key' : r.genre === 'match' ? 'Tile' : 'Pick-up')];
-  const source = cur.galleryId ? 'Gallery game' : cur.source === 'link' ? 'Shared link' : cur.source === 'remix' ? 'Your remix' : 'Built-in recipe';
+  const source = cur.galleryId ? 'Gallery game' : cur.source === 'link' ? 'Shared link' : cur.source === 'remix' ? 'Your remix' : 'Your words';
   const goal = r.goal ? `${r.goal} ${GENRES[r.genre].goalUnit}` : 'Endless';
   side.replaceChildren(...[
     el('h3', {}, 'The game'),
@@ -268,15 +268,13 @@ function renderSide() {
     el('p', {}, cur.tpl.meta?.help || r.text.start),
     cast.length ? el('h3', {}, 'Cast') : null,
     cast.length ? el('div', { class: 'g-cast' }, ...cast) : null,
-    el('h3', {}, 'Recipe'),
+    el('h3', {}, 'Details'),
     el('dl', { class: 'g-kv' },
       el('dt', {}, 'Made by'), el('dd', {}, source),
       el('dt', {}, 'Goal'), el('dd', {}, goal),
       el('dt', {}, 'Music'), el('dd', {}, `${r.music.style}, ${r.music.bpm} BPM`),
-      el('dt', {}, 'Look'), el('dd', {}, `${cur.art.pal.name} palette, ${r.world.scene}${Object.keys(cur.images).length || r.art?.mode === 'images' ? ', with images' : ', drawn in code'}`),
-      el('dt', {}, 'Seed'), el('dd', {}, String(r.seed))),
-    cur.tested ? el('h3', {}, cur.tested.ok ? 'Playtest passed' : 'Playtest') : null,
-    cur.tested ? el('ul', { class: 'g-notes' }, ...cur.tested.notes.slice(0, 5).map((n) => el('li', { class: cur.tested.ok ? '' : 'bad' }, n))) : null,
+      el('dt', {}, 'Look'), el('dd', {}, `${cur.art.pal.name} palette, ${r.world.scene}${Object.keys(cur.images).length || r.art?.mode === 'images' ? ', with images' : ''}`)),
+    cur.tested?.ok ? el('h3', {}, 'Tested and ready') : null,
     remixForm(r),
     el('button', { type: 'button', class: 'btn-ghost g-remix', onclick: () => remix(r) }, 'Describe a new version'),
   ].filter(Boolean));
@@ -302,7 +300,7 @@ function remixForm(r) {
       const next = remixRecipe(cur.recipe, { title: title.value.trim(), palette: pal.value, scene: scene.value, difficulty: diff, newLevels: fresh.checked });
       const t = await playtested(next, { tries: 12 });
       await openGame({ recipe: t.recipe, images: cur.images, tested: t, source: 'remix', save: true });
-      toast(`Remixed: ${t.recipe.title}. ${t.ok ? 'Playtested again.' : ''}`);
+      toast(`Remixed: ${t.recipe.title}. ${t.ok ? 'Tested and ready.' : ''}`);
     } catch (e) {
       toast(`Could not remix: ${e.message}`, 'error');
     } finally { go.disabled = false; }
@@ -312,7 +310,7 @@ function remixForm(r) {
     el('label', {}, el('span', {}, 'Title'), title),
     el('div', { class: 'g-rx-row' }, el('label', {}, el('span', {}, 'Look'), pal), el('label', {}, el('span', {}, 'World'), scene)),
     el('label', {}, el('span', {}, 'Difficulty'), seg),
-    el('label', { class: 'g-rx-check' }, fresh, el('span', {}, 'New levels (a fresh seed)')),
+    el('label', { class: 'g-rx-check' }, fresh, el('span', {}, 'New levels')),
     go);
 }
 function remix(r) {
@@ -351,7 +349,7 @@ async function downloadGame() {
     const blob = new Blob([html], { type: 'text/html' });
     download(blob, name);
     const kept = await retainExport(blob, { name: cur.recipe.title, title: cur.recipe.title, prompt: cur.recipe.theme, engine: 'games', model: `Chucksi Games · ${GENRES[cur.recipe.genre].name}`, seed: cur.recipe.seed, settings: { recipe: cur.recipe } });
-    toast(`Saved ${name} (${(html.length / 1e6).toFixed(1)} MB)${kept.saved ? ' and added it to My library' : ''}. It plays offline in any browser${cur.recipe.dims === '3d' && !threeInlined ? ' once it can reach jsDelivr for three.js' : ''}.`);
+    toast(`Saved ${name} (${(html.length / 1e6).toFixed(1)} MB)${kept.saved ? ' and added it to My library' : ''}. It plays in any browser${cur.recipe.dims === '3d' && !threeInlined ? ' with an internet connection' : ', even offline'}.`);
   } catch (e) {
     toast(`Download failed: ${e.message}`, 'error');
   } finally { b.disabled = false; }
