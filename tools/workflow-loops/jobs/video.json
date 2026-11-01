@@ -1,0 +1,316 @@
+[
+ {
+  "id": "fx-lidar-cyan",
+  "effect": "lidar",
+  "look": "cyan",
+  "sample": "canyon",
+  "dur": 4.5,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "fx-lidar-thermal",
+  "effect": "lidar",
+  "look": "thermal",
+  "sample": "summit",
+  "dur": 4.5,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "fx-lidar-white",
+  "effect": "lidar",
+  "look": "white",
+  "sample": "lighthouse",
+  "dur": 4.5,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "fx-vanish-embers",
+  "effect": "vanish",
+  "look": "embers",
+  "sample": "dancer",
+  "dur": 4.4,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "fx-vanish-ash",
+  "effect": "vanish",
+  "look": "ash",
+  "sample": "samurai",
+  "dur": 4.4,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "fx-vanish-pixels",
+  "effect": "vanish",
+  "look": "pixels",
+  "sample": "diner",
+  "dur": 4.4,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "fx-freeze",
+  "effect": "freeze",
+  "look": "",
+  "sample": "astronaut",
+  "dur": 4.4,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "fx-clones-rainbow",
+  "effect": "clones",
+  "look": "rainbow",
+  "sample": "neon",
+  "dur": 4.4,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "fx-clones-natural",
+  "effect": "clones",
+  "look": "natural",
+  "sample": "bmx",
+  "dur": 4.4,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "fx-clones-ghost",
+  "effect": "clones",
+  "look": "ghost",
+  "sample": "jellyfish",
+  "dur": 4.4,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "move-dolly-in",
+  "move": "dolly-in",
+  "sample": "rider",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-arc-right",
+  "move": "arc-right",
+  "sample": "fisherman",
+  "dur": 3,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "move-crane-up",
+  "move": "crane-up",
+  "sample": "bmx",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-handheld",
+  "move": "handheld",
+  "sample": "samurai",
+  "dur": 3,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "move-crash-zoom",
+  "move": "crash-zoom",
+  "sample": "train",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-truck-left",
+  "move": "truck-left",
+  "sample": "astronaut",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-dolly-zoom",
+  "move": "dolly-zoom",
+  "sample": "lighthouse",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-tilt-up",
+  "move": "tilt-up",
+  "sample": "diner",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-fpv",
+  "move": "fpv",
+  "sample": "cinema",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-breathe",
+  "move": "breathe",
+  "sample": "dancer",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-wide-orbit",
+  "move": "wide-orbit",
+  "sample": "jellyfish",
+  "dur": 3,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "move-pan-right",
+  "move": "pan-right",
+  "sample": "canyon",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-bullet-time",
+  "move": "bullet-time",
+  "sample": "neon",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-rack-focus",
+  "move": "rack-focus",
+  "sample": "summit",
+  "dur": 3,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "move-dolly-out",
+  "move": "dolly-out",
+  "sample": "rider",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-arc-left",
+  "move": "arc-left",
+  "sample": "fisherman",
+  "dur": 3,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "move-crane-down",
+  "move": "crane-down",
+  "sample": "bmx",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-snorricam",
+  "move": "snorricam",
+  "sample": "samurai",
+  "dur": 3,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "move-zoom-in",
+  "move": "zoom-in",
+  "sample": "train",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-truck-right",
+  "move": "truck-right",
+  "sample": "astronaut",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-float",
+  "move": "float",
+  "sample": "lighthouse",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-dutch-roll",
+  "move": "dutch-roll",
+  "sample": "diner",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-crash-zoom-out",
+  "move": "crash-zoom-out",
+  "sample": "cinema",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-tilt-down",
+  "move": "tilt-down",
+  "sample": "dancer",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-earthquake",
+  "move": "earthquake",
+  "sample": "jellyfish",
+  "dur": 3,
+  "w": 360,
+  "h": 480
+ },
+ {
+  "id": "move-pan-left",
+  "move": "pan-left",
+  "sample": "canyon",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-zoom-out",
+  "move": "zoom-out",
+  "sample": "neon",
+  "dur": 3,
+  "w": 640,
+  "h": 360
+ },
+ {
+  "id": "move-dolly-zoom-in",
+  "move": "dolly-zoom-in",
+  "sample": "summit",
+  "dur": 3,
+  "w": 360,
+  "h": 480
+ }
+]

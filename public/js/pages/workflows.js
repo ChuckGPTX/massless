@@ -1,11 +1,13 @@
-import { createPreviewMotion } from "../preview-motion.js";
 import {
   WORKFLOWS,
   DESIGN_WORKFLOWS,
-  WEBSITE_WORKFLOWS,
+  GALLERY,
+  CATEGORIES,
+  FEATURED,
   validatePlan,
   stepURL,
 } from "../workflow-data.js";
+import { mountGallery } from "../workflow-gallery.js";
 import { all } from "../store.js";
 import * as cloud from "../cloud.js";
 const $ = (s) => document.querySelector(s),
@@ -30,28 +32,27 @@ if (makeId && DESIGN_WORKFLOWS.some((w) => w.id === makeId)) {
       console.warn(e);
     });
 }
-function linkCard(flow, action, container) {
-  const card = make("a", "hub-card make-card");
-  card.href = flow.href;
-  const image = make("img");
-  image.src = flow.image;
-  image.alt = "";
-  image.loading = "lazy";
-  image.width = 800;
-  image.height = 600;
-  const body = make("div", "hub-card-body");
-  body.append(
-    make("small", "eyebrow", flow.tag),
-    make("h3", "", flow.name),
-    make("p", "", flow.description),
-    make("small", "", "YOU LEAVE WITH / " + flow.output),
-    make("span", "btn-accent", action),
-  );
-  card.append(image, body);
-  container.append(card);
-}
-for (const flow of DESIGN_WORKFLOWS) linkCard(flow, "Make it ↗", $("#make-cards"));
-for (const flow of WEBSITE_WORKFLOWS) linkCard(flow, "Use template ↗", $("#site-cards"));
+// The gallery: every Chucksi workflow as a looping card. #<category> opens that category.
+const making = document.body.classList.contains("making");
+// "All" deals the categories out in turn so the grid opens mixed; each chip keeps its own order.
+const dealt = [];
+const queues = CATEGORIES.map((c) => GALLERY.filter((g) => g.cat === c.id));
+while (queues.some((q) => q.length)) for (const q of queues) if (q.length) dealt.push(q.shift());
+const gallery = making ? null : mountGallery({
+  items: dealt,
+  categories: CATEGORIES,
+  featured: FEATURED,
+  grid: $("#wf-grid"),
+  chips: $("#wf-chips"),
+  track: $("#wf-track"),
+  initial: location.hash.slice(1),
+});
+addEventListener("hashchange", () => {
+  const h = location.hash.slice(1);
+  if (gallery && CATEGORIES.some((c) => c.id === h)) gallery.filter(h);
+});
+// Old links to the connected ComfyUI section open it.
+if (/^#(flux3|preset-)/.test(location.hash)) $("#connected").open = true;
 function persist() {
   try {
     localStorage.setItem(KEY, JSON.stringify(plan));
@@ -101,18 +102,16 @@ function openPlan(next, scroll = true) {
     });
 }
 for (const flow of WORKFLOWS) {
-  const card = make("article", "hub-card");
-  const image = make("img");
-  image.src = flow.image;
-  image.alt = "";
-  image.loading = "lazy";
-  image.onerror = () => {
-    image.remove();
-    const visual = make("div", "preset-stages", flow.tag.split(" + ")[0]);
-    card.prepend(visual);
-  };
-  const body = make("div", "hub-card-body"),
-    button = make("button", "btn-accent", "Start workflow ↗");
+  const button = make("button", "wf-plan");
+  button.type = "button";
+  const img = make("img");
+  img.src = flow.image;
+  img.alt = "";
+  img.loading = "lazy";
+  img.width = 96;
+  img.height = 72;
+  button.append(img, make("span", "", flow.name));
+  button.title = flow.description;
   button.onclick = () =>
     openPlan({
       version: 1,
@@ -121,16 +120,7 @@ for (const flow of WORKFLOWS) {
       shotId: "",
       done: flow.steps.map(() => false),
     });
-  body.append(
-    make("small", "eyebrow", flow.tag),
-    make("h2", "", flow.name),
-    make("p", "", flow.description),
-    make("small", "", "YOU LEAVE WITH / " + flow.output),
-    make("div", "hub-actions"),
-  );
-  body.lastChild.append(button);
-  card.append(image, body);
-  $("#workflow-cards").append(card);
+  $("#workflow-cards").append(button);
 }
 shots = (await all().catch(() => [])).filter((x) =>
   x.blob?.type.startsWith("image/"),
@@ -277,6 +267,7 @@ for (const preset of presets) {
     actions,
   );
   card.id = "preset-" + preset.id;
+  if (location.hash === "#" + card.id) $("#connected").open = true;
   if (["liquid-chrome", "walk-of-fire", "zero-gravity"].includes(preset.id)) {
     const image = make("img");
     image.src =
@@ -300,5 +291,5 @@ for (const preset of presets) {
   card.append(art, body);
   $("#preset-cards").append(card);
 }
-
-createPreviewMotion({ videos: document.querySelectorAll("video[data-src]") });
+// Links to a connected workflow (/workflows/#flux3, #preset-<id>) land on it once it exists.
+if ($("#connected").open) document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: "start" });

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile, stat } from "node:fs/promises";
-import { DESIGN_WORKFLOWS, WEBSITE_WORKFLOWS, WORKFLOWS } from "../public/js/workflow-data.js";
+import { DESIGN_WORKFLOWS, WEBSITE_WORKFLOWS, WORKFLOWS, GALLERY } from "../public/js/workflow-data.js";
 import { workersBody } from "../public/js/engines.js";
 import * as kit from "../public/js/make/kit.js";
 import { timeline, poemLines, framePrompt, MAX_LINES } from "../public/js/make/filmpoem.js";
@@ -179,7 +179,10 @@ test("every typeface the workflows draw with is self-hosted with its OFL licence
 
 test("workflow pages surface the design kits without touching the top navigation", async () => {
   const wf = await readFile(pub("/workflows/index.html"), "utf8");
-  for (const id of ["maker", "make-cards", "site-cards", "workflow-cards"]) assert.ok(wf.includes(`id="${id}"`), id);
+  for (const id of ["maker", "wf-grid", "workflow-cards"]) assert.ok(wf.includes(`id="${id}"`), id);
+  // the gallery opens every design kit and every website template
+  for (const w of DESIGN_WORKFLOWS) assert.ok(GALLERY.some((c) => c.href.startsWith(w.href + "&example=")), w.id);
+  for (const w of WEBSITE_WORKFLOWS) assert.ok(GALLERY.some((c) => c.href === w.href), w.id);
   const image = await readFile(pub("/studios/image/index.html"), "utf8");
   for (const id of ["map", "identity", "poetry", "festival"]) assert.ok(image.includes(`/workflows?make=${id}`), id);
   assert.ok((await readFile(pub("/studios/video/index.html"), "utf8")).includes("/workflows?make=film-poem"));

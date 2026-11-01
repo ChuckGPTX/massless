@@ -1,0 +1,1477 @@
+{
+ "date": "2026-11-01",
+ "notice": "Every loop and poster here was made by Chucksi's own tools in headless Chromium from media already in this repository (sample stills, sample frames, bundled audio). No people were filmed and no outside footage was used. Encoded with ffmpeg: H.264, no audio, 24 fps, posters are WebP. Recording scripts: tools/workflow-loops.",
+ "sources": {
+  "video-renderer": "Drawn frame by frame by the Video page's own depth renderer, camera moves and effect engine (massless.drawFrame) on the bundled sample stills in /media/art with their precomputed depth maps (record-video.cjs). Camera moves play forward then back (ping-pong); effects close with a short crossfade into their first frame.",
+  "game-previews": "Re-cut from the Games gallery clips in /media/games, which tools/game_previews.py recorded headlessly with each game's own bot playing. Closed with a short crossfade into the first frame.",
+  "design-artboards": "Artboards rendered by the design workflow itself (/workflows?make=<id>&example=<id>) from its bundled sample frames, no AI calls, captured from the page's canvases (record-design.cjs) and assembled into a sliding carousel (slides.py).",
+  "film-poem-player": "Frames drawn by the Film poem workflow's own player, stepped with its scrubber (record-design.cjs).",
+  "website-builder": "The Website builder's own template preview at tablet width (768 px), scrolled frame by frame and captured (record-steps.cjs).",
+  "edit-workroom": "The Image workroom on its bundled sample photo (/media/website/ceramics.jpg). Compose: the page's own frame, backdrop, scale and headline controls stepped per frame. Remove background, upscale and erase: the tool's real on-device model output, shown with the page's own before/after slider (record-steps.cjs).",
+  "depth-viewer": "The 3D page's depth splat of the bundled samurai sample, orbited by dragging the viewer frame by frame (record-steps.cjs, jobs/animated.js).",
+  "scene-studio": "The Scene studio's default scene, orbited by dragging the viewer frame by frame (record-steps.cjs, jobs/animated.js).",
+  "launch-film": "The Launch film page's built-in example film, drawn by its own renderer (massless.seek) frame by frame.",
+  "music-visualizer": "The Music page's visualizer driving the bundled sample still /media/art/lighthouse.jpg with the bundled synthesized instrumental, stepped with its scrubber.",
+  "audio-page": "The Audio page's own animated voice and sound-bed preview cards over the bundled sample stills, with performance.now() stepped 1/24 s per frame (jobs/animated.js).",
+  "clip-workroom": "The Clip workroom burning three typed captions into its bundled LiDAR sample clip, seeking the clip frame by frame (jobs/tools.js).",
+  "office": "Chucksi Office on its bundled sample document and contract templates, driven with scripted clicks and typing, captured frame by frame."
+ },
+ "files": [
+  {
+   "path": "media/templates/fx-lidar-cyan.mp4",
+   "bytes": 211422,
+   "sha256": "9deb44ef864e62fcec89f7fdb5acc5fed45eecdb2edda2a7d0858725fb390ee9",
+   "card": "fx-lidar-cyan",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=lidar&look=cyan&sample=canyon"
+  },
+  {
+   "path": "media/templates/fx-lidar-cyan.webp",
+   "bytes": 15040,
+   "sha256": "aa0672dae3ab0b80a6343b3ed13ca2592ae31ecf32427d108a60214159756f37",
+   "card": "fx-lidar-cyan",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=lidar&look=cyan&sample=canyon"
+  },
+  {
+   "path": "media/templates/fx-lidar-thermal.mp4",
+   "bytes": 155609,
+   "sha256": "a76e80afccb029f8aec71dce4dd8ada2f8bf6b7d50577c32fb98ac9d81a68ce1",
+   "card": "fx-lidar-thermal",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=lidar&look=thermal&sample=summit"
+  },
+  {
+   "path": "media/templates/fx-lidar-thermal.webp",
+   "bytes": 11902,
+   "sha256": "5f4548a78dbdc3d0f29eddfcae7e4635fc9021c07c5848d681f231a2221ba5a5",
+   "card": "fx-lidar-thermal",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=lidar&look=thermal&sample=summit"
+  },
+  {
+   "path": "media/templates/fx-lidar-white.mp4",
+   "bytes": 193891,
+   "sha256": "e3aa5a258da1fb38a4d8831579443f5a884eb0f076f858c5b391af7408d68bd8",
+   "card": "fx-lidar-white",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=lidar&look=white&sample=lighthouse"
+  },
+  {
+   "path": "media/templates/fx-lidar-white.webp",
+   "bytes": 15752,
+   "sha256": "3cd715f4f6eaf28d2fa8d819bb77de77b0fcafda3bb803ceff8f5f22aab79805",
+   "card": "fx-lidar-white",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=lidar&look=white&sample=lighthouse"
+  },
+  {
+   "path": "media/templates/fx-vanish-embers.mp4",
+   "bytes": 113607,
+   "sha256": "340f33717d4acfd264a025995117f7643f0a25764a35b03fda5be0a581df7421",
+   "card": "fx-vanish-embers",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=vanish&look=embers&sample=dancer"
+  },
+  {
+   "path": "media/templates/fx-vanish-embers.webp",
+   "bytes": 5526,
+   "sha256": "e29a7627e1ebbe115373bcb0b3410093f99dbd3feb648081c3c72c3621e4487b",
+   "card": "fx-vanish-embers",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=vanish&look=embers&sample=dancer"
+  },
+  {
+   "path": "media/templates/fx-vanish-ash.mp4",
+   "bytes": 102376,
+   "sha256": "b468bbadad9a8cdd00f95edf0e022150664f4585dddf1370466afda81ac14e61",
+   "card": "fx-vanish-ash",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=vanish&look=ash&sample=samurai"
+  },
+  {
+   "path": "media/templates/fx-vanish-ash.webp",
+   "bytes": 14170,
+   "sha256": "135d55bb0b68bc310a0712112931747ec0d0260ecae17580a6548cad8d5c886d",
+   "card": "fx-vanish-ash",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=vanish&look=ash&sample=samurai"
+  },
+  {
+   "path": "media/templates/fx-vanish-pixels.mp4",
+   "bytes": 116747,
+   "sha256": "047765302e437148759255cac52c171efb9721a96638c0ade279ede757446c3d",
+   "card": "fx-vanish-pixels",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=vanish&look=pixels&sample=diner"
+  },
+  {
+   "path": "media/templates/fx-vanish-pixels.webp",
+   "bytes": 10900,
+   "sha256": "af6a0bc1485a72e8536a16299eda50cf8879972a297dbac59fe96e4d00fca1c5",
+   "card": "fx-vanish-pixels",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=vanish&look=pixels&sample=diner"
+  },
+  {
+   "path": "media/templates/fx-freeze.mp4",
+   "bytes": 83186,
+   "sha256": "fa3d90fa29fc5ccce6afa64da85c2718f5ff309ff0ad6df9a341af6eff3632ca",
+   "card": "fx-freeze",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=freeze&sample=astronaut"
+  },
+  {
+   "path": "media/templates/fx-freeze.webp",
+   "bytes": 5610,
+   "sha256": "06c21a166df5ebe5e3261578822bc45411c6a5864e286bdf5463363637cfd43c",
+   "card": "fx-freeze",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=freeze&sample=astronaut"
+  },
+  {
+   "path": "media/templates/fx-clones-rainbow.mp4",
+   "bytes": 62574,
+   "sha256": "8b77af58855fd902ad097a12c7a019627a010a8618a0cf126c137974ee9810e5",
+   "card": "fx-clones-rainbow",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=clones&look=rainbow&sample=neon"
+  },
+  {
+   "path": "media/templates/fx-clones-rainbow.webp",
+   "bytes": 5812,
+   "sha256": "10cdf9c94f449ab17f02a3d2a744f4c0fd60c67fe7b478880ac82ad65453287d",
+   "card": "fx-clones-rainbow",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=clones&look=rainbow&sample=neon"
+  },
+  {
+   "path": "media/templates/fx-clones-natural.mp4",
+   "bytes": 114069,
+   "sha256": "f287745da6d4d6bebe125aaad773acb717522e50f7f3449c379dae7664ca010e",
+   "card": "fx-clones-natural",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=clones&look=natural&sample=bmx"
+  },
+  {
+   "path": "media/templates/fx-clones-natural.webp",
+   "bytes": 13174,
+   "sha256": "8a6036fc9bdda8c045534a0811e9aae8646ac2d8dd2f3ffb770ec20ebda68e20",
+   "card": "fx-clones-natural",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=clones&look=natural&sample=bmx"
+  },
+  {
+   "path": "media/templates/fx-clones-ghost.mp4",
+   "bytes": 51798,
+   "sha256": "1a686174290eded3a688872f8607df991616e7a647b0cd8a859ef4b3d92fb634",
+   "card": "fx-clones-ghost",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=clones&look=ghost&sample=jellyfish"
+  },
+  {
+   "path": "media/templates/fx-clones-ghost.webp",
+   "bytes": 6540,
+   "sha256": "57e369c654b0a5f1f3829aa6821f894df87d78e8cd344f8f7007a0cf338f4497",
+   "card": "fx-clones-ghost",
+   "source": "video-renderer",
+   "recorded_from": "/video?effect=clones&look=ghost&sample=jellyfish"
+  },
+  {
+   "path": "media/templates/move-dolly-in.mp4",
+   "bytes": 64698,
+   "sha256": "4031816f2d43f051259d15bfeb5388b16dcf5e6bcb2cefd245e25d5f7d21f9b8",
+   "card": "move-dolly-in",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dolly-in&sample=rider"
+  },
+  {
+   "path": "media/templates/move-dolly-in.webp",
+   "bytes": 7124,
+   "sha256": "3d96eb17f05f4ec31fe8734f2481231d4dcdf1aa2cbc14e3c108fd5376230ea9",
+   "card": "move-dolly-in",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dolly-in&sample=rider"
+  },
+  {
+   "path": "media/templates/move-arc-right.mp4",
+   "bytes": 116492,
+   "sha256": "84117e8e62a580d1a62f84f84641f497cff9b68104785ae1c973ed80c21ac803",
+   "card": "move-arc-right",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=arc-right&sample=fisherman"
+  },
+  {
+   "path": "media/templates/move-arc-right.webp",
+   "bytes": 11216,
+   "sha256": "a2f8b28f3881943a9003c353a3dfefd89175eebe9c2ad3e8f1dbe94c61d56457",
+   "card": "move-arc-right",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=arc-right&sample=fisherman"
+  },
+  {
+   "path": "media/templates/move-crane-up.mp4",
+   "bytes": 120318,
+   "sha256": "c0f2f44c848a2b9f4bfb81c036ab66fcf888fbcda8201f379a8d2f76fc538ff4",
+   "card": "move-crane-up",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=crane-up&sample=bmx"
+  },
+  {
+   "path": "media/templates/move-crane-up.webp",
+   "bytes": 13448,
+   "sha256": "dc68eb5902d67c3add97fecc635e6155d5c18c3a9260a8569b79014cf0ff954f",
+   "card": "move-crane-up",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=crane-up&sample=bmx"
+  },
+  {
+   "path": "media/templates/move-handheld.mp4",
+   "bytes": 129545,
+   "sha256": "a26bff3b810cde7f3ce45fdfac04bdf3597de1edabd02824846452c393bda9ff",
+   "card": "move-handheld",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=handheld&sample=samurai"
+  },
+  {
+   "path": "media/templates/move-handheld.webp",
+   "bytes": 14178,
+   "sha256": "46c3988df5102f12787df1067804338cc5cfad5f1a25800ffcd83173eebaa06a",
+   "card": "move-handheld",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=handheld&sample=samurai"
+  },
+  {
+   "path": "media/templates/move-crash-zoom.mp4",
+   "bytes": 78421,
+   "sha256": "6f8a85f5228ff0fdad3440df058ed1ba33f62dd679eb72952f6df16e2673a145",
+   "card": "move-crash-zoom",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=crash-zoom&sample=train"
+  },
+  {
+   "path": "media/templates/move-crash-zoom.webp",
+   "bytes": 5462,
+   "sha256": "84d27f666e29f3468d01d14fc04555f521795c8629f9b31a2ea0da05e766dfc5",
+   "card": "move-crash-zoom",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=crash-zoom&sample=train"
+  },
+  {
+   "path": "media/templates/move-truck-left.mp4",
+   "bytes": 68111,
+   "sha256": "ee939e6ea3b4916782d9687591ae9f754692f691dbf7e555cb62b78f4d327a53",
+   "card": "move-truck-left",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=truck-left&sample=astronaut"
+  },
+  {
+   "path": "media/templates/move-truck-left.webp",
+   "bytes": 6158,
+   "sha256": "319246354de757991ff679e2e1bb1d7631b623b7355c5302298a9f64f774d50b",
+   "card": "move-truck-left",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=truck-left&sample=astronaut"
+  },
+  {
+   "path": "media/templates/move-dolly-zoom.mp4",
+   "bytes": 31062,
+   "sha256": "9e38b50f343609d2d342533bf3aef3f72b4c0965f526c1735b783605d5ee0b33",
+   "card": "move-dolly-zoom",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dolly-zoom&sample=lighthouse"
+  },
+  {
+   "path": "media/templates/move-dolly-zoom.webp",
+   "bytes": 3540,
+   "sha256": "9da2290c0c2430d841c7f68f170a2e2f4e0bbc661c9f978f1e5582ec0b2154d9",
+   "card": "move-dolly-zoom",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dolly-zoom&sample=lighthouse"
+  },
+  {
+   "path": "media/templates/move-tilt-up.mp4",
+   "bytes": 77478,
+   "sha256": "a88c0e0a8f96e06be01bdd59091a491888ae95bbf34c0c4447fa173c3772ccbb",
+   "card": "move-tilt-up",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=tilt-up&sample=diner"
+  },
+  {
+   "path": "media/templates/move-tilt-up.webp",
+   "bytes": 9628,
+   "sha256": "4f1fdf7e40cfc1eb0f5585843aa8adfc22791cf105557c7e3041e170b9ddb356",
+   "card": "move-tilt-up",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=tilt-up&sample=diner"
+  },
+  {
+   "path": "media/templates/move-fpv.mp4",
+   "bytes": 125508,
+   "sha256": "c534c68cc7f0beda1f5b04ad51f2bcfce14f5dae69308759dac858af8c24148e",
+   "card": "move-fpv",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=fpv&sample=cinema"
+  },
+  {
+   "path": "media/templates/move-fpv.webp",
+   "bytes": 8976,
+   "sha256": "b7b401822f65cacaed296c814dc9577158190e95af9fa7dccb6904fd50b22b0c",
+   "card": "move-fpv",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=fpv&sample=cinema"
+  },
+  {
+   "path": "media/templates/move-breathe.mp4",
+   "bytes": 37364,
+   "sha256": "311e994305b862ae5dbadbee4f825b0d9852e977dd552a104cbd7c65ae520504",
+   "card": "move-breathe",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=breathe&sample=dancer"
+  },
+  {
+   "path": "media/templates/move-breathe.webp",
+   "bytes": 4554,
+   "sha256": "1c88db6c840bf0c263298a19ef4982baa59fa780c97a64e720c38e3a9e6fab07",
+   "card": "move-breathe",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=breathe&sample=dancer"
+  },
+  {
+   "path": "media/templates/move-wide-orbit.mp4",
+   "bytes": 66770,
+   "sha256": "6007745cc5e638276d2c9524eb481c948874fe639b6c4a95155968c1e196a3a7",
+   "card": "move-wide-orbit",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=wide-orbit&sample=jellyfish"
+  },
+  {
+   "path": "media/templates/move-wide-orbit.webp",
+   "bytes": 4326,
+   "sha256": "d9794e2ec254eef443470439e58e2c252e0b3cb85a0f61e43468fe44523b7c2b",
+   "card": "move-wide-orbit",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=wide-orbit&sample=jellyfish"
+  },
+  {
+   "path": "media/templates/move-pan-right.mp4",
+   "bytes": 67363,
+   "sha256": "f095f46daab941b41c558d7954f6c76521950a9b5df31c471fb515fc3b3f17f2",
+   "card": "move-pan-right",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=pan-right&sample=canyon"
+  },
+  {
+   "path": "media/templates/move-pan-right.webp",
+   "bytes": 7474,
+   "sha256": "f96b2aa37f95e7feb2a0510115912803fa06ea4e612ddfa61d18bab450b8d004",
+   "card": "move-pan-right",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=pan-right&sample=canyon"
+  },
+  {
+   "path": "media/templates/move-bullet-time.mp4",
+   "bytes": 66867,
+   "sha256": "f3a30022ea4c1df95b3aed2b326537581e29412392de64ff7807c21a6e0d4bd1",
+   "card": "move-bullet-time",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=bullet-time&sample=neon"
+  },
+  {
+   "path": "media/templates/move-bullet-time.webp",
+   "bytes": 4720,
+   "sha256": "30bd433729f5e5d0b65f20fcf4178c311664f1268b23adae6cdaa14a7ffa2a90",
+   "card": "move-bullet-time",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=bullet-time&sample=neon"
+  },
+  {
+   "path": "media/templates/move-rack-focus.mp4",
+   "bytes": 22333,
+   "sha256": "35014a8d0635ec83f090c6bfe86aa85537f9a1688da39500778e4a9ed1487007",
+   "card": "move-rack-focus",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=rack-focus&sample=summit"
+  },
+  {
+   "path": "media/templates/move-rack-focus.webp",
+   "bytes": 3004,
+   "sha256": "63e865a69b731d2f73589a504b719314bfc882987f0e16bee9a37f43b156b32a",
+   "card": "move-rack-focus",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=rack-focus&sample=summit"
+  },
+  {
+   "path": "media/templates/move-dolly-out.mp4",
+   "bytes": 65154,
+   "sha256": "c7e3ece53e363e16e5af03a0c3def63ed029f730d0db71b29a8079cbec708653",
+   "card": "move-dolly-out",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dolly-out&sample=rider"
+  },
+  {
+   "path": "media/templates/move-dolly-out.webp",
+   "bytes": 7114,
+   "sha256": "a2a220ff182774210dc27e7adcc8503ed68e900847ae82977daf1836525e274b",
+   "card": "move-dolly-out",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dolly-out&sample=rider"
+  },
+  {
+   "path": "media/templates/move-arc-left.mp4",
+   "bytes": 119160,
+   "sha256": "169ee4d38f67500d2304dff6f55519875c0a667f7a75bdd054540b6d88ebcc0f",
+   "card": "move-arc-left",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=arc-left&sample=fisherman"
+  },
+  {
+   "path": "media/templates/move-arc-left.webp",
+   "bytes": 12256,
+   "sha256": "67d635aaab1afeb9a6729252132338248355be1c949676f324c33eeba8cc2285",
+   "card": "move-arc-left",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=arc-left&sample=fisherman"
+  },
+  {
+   "path": "media/templates/move-crane-down.mp4",
+   "bytes": 120010,
+   "sha256": "0bcaa364e1eaec3f941bb8450f2bfc4798ac28986525f0e04515c6a2873b7cc1",
+   "card": "move-crane-down",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=crane-down&sample=bmx"
+  },
+  {
+   "path": "media/templates/move-crane-down.webp",
+   "bytes": 13468,
+   "sha256": "3ab12d739bdb68f7470ad1764dd2cca72a1ad26f94288de99fb91d07748d9b48",
+   "card": "move-crane-down",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=crane-down&sample=bmx"
+  },
+  {
+   "path": "media/templates/move-snorricam.mp4",
+   "bytes": 147612,
+   "sha256": "5799eaf321a501bac7e0bca2289937b730ed8bf4cf366976da207ba2c749a566",
+   "card": "move-snorricam",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=snorricam&sample=samurai"
+  },
+  {
+   "path": "media/templates/move-snorricam.webp",
+   "bytes": 13522,
+   "sha256": "b0c8b9a58fa04e01d96b83f62c9994ca605df46327bfeee45d2e4cca9569a261",
+   "card": "move-snorricam",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=snorricam&sample=samurai"
+  },
+  {
+   "path": "media/templates/move-zoom-in.mp4",
+   "bytes": 104316,
+   "sha256": "76f693761add6c2d3b9204c66116516d0ce6677b08d60ca763956336ccb7581b",
+   "card": "move-zoom-in",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=zoom-in&sample=train"
+  },
+  {
+   "path": "media/templates/move-zoom-in.webp",
+   "bytes": 8310,
+   "sha256": "def4e476a65085f440c1de788d4ced59184638a3b6cab9af1afc2279e2352f76",
+   "card": "move-zoom-in",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=zoom-in&sample=train"
+  },
+  {
+   "path": "media/templates/move-truck-right.mp4",
+   "bytes": 67041,
+   "sha256": "d702aedae36baa6ff7ab1fd6182177efe3c3b101cf0ed6155fc6f9843f2af121",
+   "card": "move-truck-right",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=truck-right&sample=astronaut"
+  },
+  {
+   "path": "media/templates/move-truck-right.webp",
+   "bytes": 6148,
+   "sha256": "926bbddc67e6af0f9aeda472c9d8b55bbaee607902b5f6bfdf6a49c19a118fb1",
+   "card": "move-truck-right",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=truck-right&sample=astronaut"
+  },
+  {
+   "path": "media/templates/move-float.mp4",
+   "bytes": 43807,
+   "sha256": "d8e91a160b432e4b5fe4ae5e15d58b40a68439608bed532ee28f7cd340b7f6e9",
+   "card": "move-float",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=float&sample=lighthouse"
+  },
+  {
+   "path": "media/templates/move-float.webp",
+   "bytes": 3514,
+   "sha256": "2c23f62b78e050151315d08ea09fca44419d62d3be4c433787a15d73bec0cb72",
+   "card": "move-float",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=float&sample=lighthouse"
+  },
+  {
+   "path": "media/templates/move-dutch-roll.mp4",
+   "bytes": 74672,
+   "sha256": "4a503c643c836dfbe0eedf9b2bf93829fa01a26a0ea9fb528e5605336db4da77",
+   "card": "move-dutch-roll",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dutch-roll&sample=diner"
+  },
+  {
+   "path": "media/templates/move-dutch-roll.webp",
+   "bytes": 8398,
+   "sha256": "380c37b79731e3cac065c3fde0cc882869153d22a0550d63b2968e7416dd723f",
+   "card": "move-dutch-roll",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dutch-roll&sample=diner"
+  },
+  {
+   "path": "media/templates/move-crash-zoom-out.mp4",
+   "bytes": 114200,
+   "sha256": "feaf54bb74789bb3fb1a7d04ee461f997753c4855af7c80d2b11057083b3fc2a",
+   "card": "move-crash-zoom-out",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=crash-zoom-out&sample=cinema"
+  },
+  {
+   "path": "media/templates/move-crash-zoom-out.webp",
+   "bytes": 13588,
+   "sha256": "8c6f41613befadd594f08d0d12f5a62905ee3f0ab1ebdb1a3c63e200dfc2ea6b",
+   "card": "move-crash-zoom-out",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=crash-zoom-out&sample=cinema"
+  },
+  {
+   "path": "media/templates/move-tilt-down.mp4",
+   "bytes": 51175,
+   "sha256": "c1dbd72364b0e9eff4fed53e4cd6e71eddf30abc8d8ef3f639f0ea25e20b156b",
+   "card": "move-tilt-down",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=tilt-down&sample=dancer"
+  },
+  {
+   "path": "media/templates/move-tilt-down.webp",
+   "bytes": 4062,
+   "sha256": "68f54bd1017449c2667dce212ca0fa8cc1da7ed10ccc71a6d67f19285843e16d",
+   "card": "move-tilt-down",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=tilt-down&sample=dancer"
+  },
+  {
+   "path": "media/templates/move-earthquake.mp4",
+   "bytes": 64042,
+   "sha256": "61b0647d8ba54fd158133b7805bf70a60ca8987d0f34b3e193e6ebaeabfacc5e",
+   "card": "move-earthquake",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=earthquake&sample=jellyfish"
+  },
+  {
+   "path": "media/templates/move-earthquake.webp",
+   "bytes": 6194,
+   "sha256": "c35ca98db068619d504f52950f43f94d6f26fe3b48b79b613f602446c5df8ade",
+   "card": "move-earthquake",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=earthquake&sample=jellyfish"
+  },
+  {
+   "path": "media/templates/move-pan-left.mp4",
+   "bytes": 66176,
+   "sha256": "b49dec5741b309f641866a9fbed2d1ab178ab8dff6ab1f9d58d05d613475850c",
+   "card": "move-pan-left",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=pan-left&sample=canyon"
+  },
+  {
+   "path": "media/templates/move-pan-left.webp",
+   "bytes": 7026,
+   "sha256": "26e69088a6a38cc6d59b1f50928ec204d013a2d2a7f9d7090bccf0ac0961e8e8",
+   "card": "move-pan-left",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=pan-left&sample=canyon"
+  },
+  {
+   "path": "media/templates/move-zoom-out.mp4",
+   "bytes": 65329,
+   "sha256": "5077beb4efc2f2811973458023d488463379ee30e6f77d6f0b839f37a75d2ab0",
+   "card": "move-zoom-out",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=zoom-out&sample=neon"
+  },
+  {
+   "path": "media/templates/move-zoom-out.webp",
+   "bytes": 5306,
+   "sha256": "2d4f82ee4ee01437eb870fec423131dccf3db36b8cbe91ba7ac6a2ce5206a748",
+   "card": "move-zoom-out",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=zoom-out&sample=neon"
+  },
+  {
+   "path": "media/templates/move-dolly-zoom-in.mp4",
+   "bytes": 34042,
+   "sha256": "2befded7171f91d5fa1662cbfcdd59069ba5b457bf128453fae9720dca4931a1",
+   "card": "move-dolly-zoom-in",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dolly-zoom-in&sample=summit"
+  },
+  {
+   "path": "media/templates/move-dolly-zoom-in.webp",
+   "bytes": 3386,
+   "sha256": "317340f0eee04f9ba6d2ebb4ea15523f393e1d2bd21cc35577a5740818a135cc",
+   "card": "move-dolly-zoom-in",
+   "source": "video-renderer",
+   "recorded_from": "/video?move=dolly-zoom-in&sample=summit"
+  },
+  {
+   "path": "media/templates/image-compose.mp4",
+   "bytes": 94926,
+   "sha256": "dab642daad9b05df44e4096fa3d4eca63f11c1b74c2adb90e2b0a198199fdfca",
+   "card": "image-compose",
+   "source": "edit-workroom",
+   "recorded_from": "/edit/"
+  },
+  {
+   "path": "media/templates/image-compose.webp",
+   "bytes": 8402,
+   "sha256": "38b69ce9f891223f1e1691936142b15bdde790894e4e3977678a12061cf36316",
+   "card": "image-compose",
+   "source": "edit-workroom",
+   "recorded_from": "/edit/"
+  },
+  {
+   "path": "media/templates/image-remove-bg.mp4",
+   "bytes": 69186,
+   "sha256": "1fa9ef7184340feff1e52ef6ca9503238305d07a5c53ebacf585813d3248ca8f",
+   "card": "image-remove-bg",
+   "source": "edit-workroom",
+   "recorded_from": "/edit/?tool=remove-bg"
+  },
+  {
+   "path": "media/templates/image-remove-bg.webp",
+   "bytes": 10072,
+   "sha256": "85681801848679cb2c00588639253b56d6bd232f744eb12b29eb736d74defba9",
+   "card": "image-remove-bg",
+   "source": "edit-workroom",
+   "recorded_from": "/edit/?tool=remove-bg"
+  },
+  {
+   "path": "media/templates/image-upscale.mp4",
+   "bytes": 48019,
+   "sha256": "d8adc7fdb9ec4acbfbed37b20818588b0ac3574a9a2f47c1b62e2a1a6de84209",
+   "card": "image-upscale",
+   "source": "edit-workroom",
+   "recorded_from": "/edit/?tool=upscale"
+  },
+  {
+   "path": "media/templates/image-upscale.webp",
+   "bytes": 4248,
+   "sha256": "d6d2b4bb92ab09290c593746cc021284eef7c2b0856abb0be297de7195a3c287",
+   "card": "image-upscale",
+   "source": "edit-workroom",
+   "recorded_from": "/edit/?tool=upscale"
+  },
+  {
+   "path": "media/templates/image-erase.mp4",
+   "bytes": 54358,
+   "sha256": "9c1c6d5788f542f5139d2bee2cbde2058f23c43a1b4becf44a8f45726521cbe9",
+   "card": "image-erase",
+   "source": "edit-workroom",
+   "recorded_from": "/edit/?tool=erase"
+  },
+  {
+   "path": "media/templates/image-erase.webp",
+   "bytes": 6922,
+   "sha256": "52e912c93722f854d169dde815d080dfcf35dab43769d4bfb2d4680a4cb4cea2",
+   "card": "image-erase",
+   "source": "edit-workroom",
+   "recorded_from": "/edit/?tool=erase"
+  },
+  {
+   "path": "media/templates/image-depth.mp4",
+   "bytes": 111156,
+   "sha256": "63d9350a679ae0867e9af5bf50c1cbd5a02e6353f0f181147d538d3f102f7561",
+   "card": "image-depth",
+   "source": "depth-viewer",
+   "recorded_from": "/3d?sample=samurai"
+  },
+  {
+   "path": "media/templates/image-depth.webp",
+   "bytes": 8142,
+   "sha256": "3d9ccc13f67bf14085afe175d1e7ced3bb8bcb0f1f7322543b732c29924dede9",
+   "card": "image-depth",
+   "source": "depth-viewer",
+   "recorded_from": "/3d?sample=samurai"
+  },
+  {
+   "path": "media/templates/image-scene.mp4",
+   "bytes": 76560,
+   "sha256": "fd9f471185774d33816f21d539a181ccf2820c0f461791dd512c37be89fb32fe",
+   "card": "image-scene",
+   "source": "scene-studio",
+   "recorded_from": "/scene/"
+  },
+  {
+   "path": "media/templates/image-scene.webp",
+   "bytes": 2846,
+   "sha256": "9082097a91aa56866786cd6fbc8a22eda380936df00a855c9d8197699d95cb71",
+   "card": "image-scene",
+   "source": "scene-studio",
+   "recorded_from": "/scene/"
+  },
+  {
+   "path": "media/templates/design-map-saltmere.mp4",
+   "bytes": 125257,
+   "sha256": "be8501b3b9dbfcdabca484adb95294348152fbd58edf091c31cb201ebce62d02",
+   "card": "design-map-saltmere",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=map&example=map-saltmere"
+  },
+  {
+   "path": "media/templates/design-map-saltmere.webp",
+   "bytes": 18348,
+   "sha256": "4729f38be85781cc870ed2c117d6620f268d86979408f096ab5d113d3cfe0ae4",
+   "card": "design-map-saltmere",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=map&example=map-saltmere"
+  },
+  {
+   "path": "media/templates/design-map-larkspur.mp4",
+   "bytes": 107909,
+   "sha256": "fd1e0b3753efc43890cd245032b5c80fc895a8e22d699d839f78321b8c20c9cb",
+   "card": "design-map-larkspur",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=map&example=map-larkspur"
+  },
+  {
+   "path": "media/templates/design-map-larkspur.webp",
+   "bytes": 13772,
+   "sha256": "2a7bd2de0dafa72894d8ab3ca49bac0865ce9814ed0b4fe1bcdbd8c8248ee8d6",
+   "card": "design-map-larkspur",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=map&example=map-larkspur"
+  },
+  {
+   "path": "media/templates/design-map-saltmere-night.mp4",
+   "bytes": 109282,
+   "sha256": "f58c2817d8f8606e631f15422335230b6e0362f1308a3d61f6aa3046f0f9083e",
+   "card": "design-map-saltmere-night",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=map&example=map-saltmere-night"
+  },
+  {
+   "path": "media/templates/design-map-saltmere-night.webp",
+   "bytes": 14228,
+   "sha256": "a88178cfbd506c58cdd358ec917b1c6f8a06a887a2cf110a2ce02c125c79ba54",
+   "card": "design-map-saltmere-night",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=map&example=map-saltmere-night"
+  },
+  {
+   "path": "media/templates/design-id-pebble.mp4",
+   "bytes": 77602,
+   "sha256": "6d8b993a39d98ff7a3dbb389c65692a1bdc6b2a5d45317ba93c32ee80e7eafb8",
+   "card": "design-id-pebble",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-pebble"
+  },
+  {
+   "path": "media/templates/design-id-pebble.webp",
+   "bytes": 8684,
+   "sha256": "55c9a5809bb9dc25968ac28674ff5112fbf3e99b6c6f1a6cfbb9ce92755f1bbe",
+   "card": "design-id-pebble",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-pebble"
+  },
+  {
+   "path": "media/templates/design-id-northwind.mp4",
+   "bytes": 73197,
+   "sha256": "77c2aa56c73c9bb86293b5c49a929a663352ab24891d8d8a618866ab9cd5aa76",
+   "card": "design-id-northwind",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-northwind"
+  },
+  {
+   "path": "media/templates/design-id-northwind.webp",
+   "bytes": 8492,
+   "sha256": "bd81d420229fd9bb5574f8b450c07acc2855a79c21ec0f3b01c33adee7531d86",
+   "card": "design-id-northwind",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-northwind"
+  },
+  {
+   "path": "media/templates/design-id-halcyon.mp4",
+   "bytes": 63614,
+   "sha256": "d5bb9fc672fcd8f29139ddefbf252f90f02c6857deee03393b5f182abe0ef49b",
+   "card": "design-id-halcyon",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-halcyon"
+  },
+  {
+   "path": "media/templates/design-id-halcyon.webp",
+   "bytes": 6750,
+   "sha256": "74de068dc89917f0faa815ffeb7ef02bf60afefd521412d9d84121331db0d283",
+   "card": "design-id-halcyon",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-halcyon"
+  },
+  {
+   "path": "media/templates/design-id-maison.mp4",
+   "bytes": 72475,
+   "sha256": "02eab35d8215064d40a24f03bc8d3bcd7f20d193592a4056e9be77293749a74e",
+   "card": "design-id-maison",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-maison"
+  },
+  {
+   "path": "media/templates/design-id-maison.webp",
+   "bytes": 8074,
+   "sha256": "0eb9f724eb70bfb7a17d8945ec2ab2e195b38dacd68b6a38208ba21d520f294b",
+   "card": "design-id-maison",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-maison"
+  },
+  {
+   "path": "media/templates/design-id-lumen.mp4",
+   "bytes": 77036,
+   "sha256": "850f069e30cba55a3c18bc0b056fc653ba1bebc33fff9b737e268d93500c5ded",
+   "card": "design-id-lumen",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-lumen"
+  },
+  {
+   "path": "media/templates/design-id-lumen.webp",
+   "bytes": 8604,
+   "sha256": "52e53ecad9510016424b82592e7d569a927cfdb66a44c479250b57248ef2e42e",
+   "card": "design-id-lumen",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=identity&example=id-lumen"
+  },
+  {
+   "path": "media/templates/design-film-tide.mp4",
+   "bytes": 67562,
+   "sha256": "a51776d3b07d7531688e5b6ae4c0e3b596f5d2bf5df95ba99816883eb31bb972",
+   "card": "design-film-tide",
+   "source": "film-poem-player",
+   "recorded_from": "/workflows?make=film-poem&example=film-tide"
+  },
+  {
+   "path": "media/templates/design-film-tide.webp",
+   "bytes": 7002,
+   "sha256": "7b9d8c302501f6c4807ea6551e2a215c12bea9516f6e22420fdcb13c1bf8f92d",
+   "card": "design-film-tide",
+   "source": "film-poem-player",
+   "recorded_from": "/workflows?make=film-poem&example=film-tide"
+  },
+  {
+   "path": "media/templates/design-film-tide-cinema.mp4",
+   "bytes": 68898,
+   "sha256": "bc4bcbdc01ecd9a30b05d0e89d4170c48137a4ffb8ca640fd18c9359dcfe7854",
+   "card": "design-film-tide-cinema",
+   "source": "film-poem-player",
+   "recorded_from": "/workflows?make=film-poem&example=film-tide-cinema"
+  },
+  {
+   "path": "media/templates/design-film-tide-cinema.webp",
+   "bytes": 9284,
+   "sha256": "2a28fca75bb0f23f28c39b8c6b7eae7a36af83c6b688b7828ad8d1dd8009dacb",
+   "card": "design-film-tide-cinema",
+   "source": "film-poem-player",
+   "recorded_from": "/workflows?make=film-poem&example=film-tide-cinema"
+  },
+  {
+   "path": "media/templates/design-poe-small-maps.mp4",
+   "bytes": 101454,
+   "sha256": "1a6eea570f621b6f65be423e71b5f185175e83d45baf50a4dc0a96d39df1eebf",
+   "card": "design-poe-small-maps",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=poetry&example=poe-small-maps"
+  },
+  {
+   "path": "media/templates/design-poe-small-maps.webp",
+   "bytes": 10436,
+   "sha256": "b47959982e009ea4cd842e7a4f91eb151a2a61c398d1eb5497cda509f6e897fc",
+   "card": "design-poe-small-maps",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=poetry&example=poe-small-maps"
+  },
+  {
+   "path": "media/templates/design-poe-weather.mp4",
+   "bytes": 89508,
+   "sha256": "d8dd5aef076f09e4d80245d8a5377db8267bac49947be34fb786d905649a661a",
+   "card": "design-poe-weather",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=poetry&example=poe-weather"
+  },
+  {
+   "path": "media/templates/design-poe-weather.webp",
+   "bytes": 14122,
+   "sha256": "0e9c199e9e76b248a2e151b1668db641df544ac4570ca315e7839d6be0deb78b",
+   "card": "design-poe-weather",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=poetry&example=poe-weather"
+  },
+  {
+   "path": "media/templates/design-poe-slow-day.mp4",
+   "bytes": 76752,
+   "sha256": "575f99a193cde683155460e1f424dd161094387bc3a85c80766f8f1a8815ae60",
+   "card": "design-poe-slow-day",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=poetry&example=poe-slow-day"
+  },
+  {
+   "path": "media/templates/design-poe-slow-day.webp",
+   "bytes": 7462,
+   "sha256": "cf2764299239b8823a573d9b2dec968975c06d4fccbae923fda27b5c06f4d081",
+   "card": "design-poe-slow-day",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=poetry&example=poe-slow-day"
+  },
+  {
+   "path": "media/templates/design-fest-harbourlight.mp4",
+   "bytes": 121885,
+   "sha256": "e54f7453fb8bc5a634a2f74babc2ab8332fa40c29dbae6b51d2f496c9a2505fe",
+   "card": "design-fest-harbourlight",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=festival&example=fest-harbourlight"
+  },
+  {
+   "path": "media/templates/design-fest-harbourlight.webp",
+   "bytes": 12252,
+   "sha256": "aa3e23c13060ec8548a6ba78a448c65812eca8492689e5a9387772f6a334501c",
+   "card": "design-fest-harbourlight",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=festival&example=fest-harbourlight"
+  },
+  {
+   "path": "media/templates/design-fest-copper-lantern.mp4",
+   "bytes": 123784,
+   "sha256": "b5069c87478edc7893f2aca2bfdcd286f2f8e326f89ea06f9bd79e31d7263440",
+   "card": "design-fest-copper-lantern",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=festival&example=fest-copper-lantern"
+  },
+  {
+   "path": "media/templates/design-fest-copper-lantern.webp",
+   "bytes": 12208,
+   "sha256": "4f29d08ee78f8dd8a357a5aa00bcd329b56b5f91d78a466eeaff3527c72d6249",
+   "card": "design-fest-copper-lantern",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=festival&example=fest-copper-lantern"
+  },
+  {
+   "path": "media/templates/design-fest-mustard.mp4",
+   "bytes": 162900,
+   "sha256": "68b8d545ab874fadab6fd0475beab3129bbd3bd0fad7727a6d13fc37b50562a9",
+   "card": "design-fest-mustard",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=festival&example=fest-mustard"
+  },
+  {
+   "path": "media/templates/design-fest-mustard.webp",
+   "bytes": 15190,
+   "sha256": "d881ae27edf4b24c75c045211011d2eec3e8c1241bc2a09c12e1df843e9637ea",
+   "card": "design-fest-mustard",
+   "source": "design-artboards",
+   "recorded_from": "/workflows?make=festival&example=fest-mustard"
+  },
+  {
+   "path": "media/templates/site-editorial-shop.mp4",
+   "bytes": 94143,
+   "sha256": "c5e8e1af792411d505c51b9d452803a4ef475cc83e268ebc757dec381bb661f9",
+   "card": "site-editorial-shop",
+   "source": "website-builder",
+   "recorded_from": "/website?template=editorial-shop"
+  },
+  {
+   "path": "media/templates/site-editorial-shop.webp",
+   "bytes": 8098,
+   "sha256": "c5a7163ab30c09f59a0c7b970f7bcdd31e5cea12310e9ad02c146fc35f92de52",
+   "card": "site-editorial-shop",
+   "source": "website-builder",
+   "recorded_from": "/website?template=editorial-shop"
+  },
+  {
+   "path": "media/templates/site-manifesto.mp4",
+   "bytes": 118640,
+   "sha256": "dab77a24e2f50c1bd3db2ce5df68df9d202a30d4d15bb2880ed0b2917ab317ee",
+   "card": "site-manifesto",
+   "source": "website-builder",
+   "recorded_from": "/website?template=manifesto"
+  },
+  {
+   "path": "media/templates/site-manifesto.webp",
+   "bytes": 12100,
+   "sha256": "f40a24d1edf7afe2d86c380f86073b5053a50a957843a71200fa97c0005dbfc8",
+   "card": "site-manifesto",
+   "source": "website-builder",
+   "recorded_from": "/website?template=manifesto"
+  },
+  {
+   "path": "media/templates/site-portfolio-timeline.mp4",
+   "bytes": 76294,
+   "sha256": "6298ba55444e9a6abd0d758e922854a3c6845a0f7b0e97a519bf6208b8278111",
+   "card": "site-portfolio-timeline",
+   "source": "website-builder",
+   "recorded_from": "/website?template=portfolio-timeline"
+  },
+  {
+   "path": "media/templates/site-portfolio-timeline.webp",
+   "bytes": 11578,
+   "sha256": "b54999983835a4c9d7f6e0fcfed5c660776c8df3876c4934141fb517743a0d9a",
+   "card": "site-portfolio-timeline",
+   "source": "website-builder",
+   "recorded_from": "/website?template=portfolio-timeline"
+  },
+  {
+   "path": "media/templates/site-ai-product.mp4",
+   "bytes": 115609,
+   "sha256": "f1a048de1014ce484bda2740f44ee2b7d5cf8b8e986987bd228aa4b0198b822a",
+   "card": "site-ai-product",
+   "source": "website-builder",
+   "recorded_from": "/website?template=ai-product"
+  },
+  {
+   "path": "media/templates/site-ai-product.webp",
+   "bytes": 9584,
+   "sha256": "9f91fcdec0716c609eeef47101b20162346f7f92cb7861f90bf92a4b3ce19f65",
+   "card": "site-ai-product",
+   "source": "website-builder",
+   "recorded_from": "/website?template=ai-product"
+  },
+  {
+   "path": "media/templates/site-local-business.mp4",
+   "bytes": 147263,
+   "sha256": "3efd62b1c312513f5bbe8c6699ea533402d06ee2633905b9eeb726a52e886e17",
+   "card": "site-local-business",
+   "source": "website-builder",
+   "recorded_from": "/website?template=local-business"
+  },
+  {
+   "path": "media/templates/site-local-business.webp",
+   "bytes": 13886,
+   "sha256": "7435da573d2d1e1f7dd5ffb6780f059829fe099e7cdfe6edb761cc40059332b7",
+   "card": "site-local-business",
+   "source": "website-builder",
+   "recorded_from": "/website?template=local-business"
+  },
+  {
+   "path": "media/templates/site-photographer.mp4",
+   "bytes": 92427,
+   "sha256": "58bd9afec09f82f57f0ceccff0593742900d47c7fabc1e90c9f1b7935e2d199a",
+   "card": "site-photographer",
+   "source": "website-builder",
+   "recorded_from": "/website?template=photographer"
+  },
+  {
+   "path": "media/templates/site-photographer.webp",
+   "bytes": 11032,
+   "sha256": "7e67320594f0a8e6b4671744b3accafcd0a110c2da689a75b45b6975e46719a1",
+   "card": "site-photographer",
+   "source": "website-builder",
+   "recorded_from": "/website?template=photographer"
+  },
+  {
+   "path": "media/templates/site-app-landing.mp4",
+   "bytes": 109374,
+   "sha256": "6c001e1f615b4871de160080676717aede1f2d789cd93f1d4e8b600feda9a168",
+   "card": "site-app-landing",
+   "source": "website-builder",
+   "recorded_from": "/website?template=app-landing"
+  },
+  {
+   "path": "media/templates/site-app-landing.webp",
+   "bytes": 12888,
+   "sha256": "fc91dc30893fc3f9b87da82dcc764f5740b6edbf44f0a883fb1818a21b8eb650",
+   "card": "site-app-landing",
+   "source": "website-builder",
+   "recorded_from": "/website?template=app-landing"
+  },
+  {
+   "path": "media/templates/site-conference.mp4",
+   "bytes": 136953,
+   "sha256": "cfcb2156dd9137d3d9889bbbb912539efc565c78ecc274dc5a0421038cc64302",
+   "card": "site-conference",
+   "source": "website-builder",
+   "recorded_from": "/website?template=conference"
+  },
+  {
+   "path": "media/templates/site-conference.webp",
+   "bytes": 16148,
+   "sha256": "e0f3393a6e666f6edbf3792d70aab8323b1906321aad490b64602d466132e6f6",
+   "card": "site-conference",
+   "source": "website-builder",
+   "recorded_from": "/website?template=conference"
+  },
+  {
+   "path": "media/templates/site-restaurant.mp4",
+   "bytes": 129028,
+   "sha256": "b2e224d3d8f6add37f5d512583e9794b4c53c5a06b6c0f63bd2fbe89a87defeb",
+   "card": "site-restaurant",
+   "source": "website-builder",
+   "recorded_from": "/website?template=restaurant"
+  },
+  {
+   "path": "media/templates/site-restaurant.webp",
+   "bytes": 16228,
+   "sha256": "aaf99a04fb0e7a6c84a34e5332d0786c05684b4884a172e2d70f6d34b1e48998",
+   "card": "site-restaurant",
+   "source": "website-builder",
+   "recorded_from": "/website?template=restaurant"
+  },
+  {
+   "path": "media/templates/site-book-launch.mp4",
+   "bytes": 102569,
+   "sha256": "fe20e2ec01043c4933e6ef70fa1c7684d064f6834e95cf338b2c79fe73991ff7",
+   "card": "site-book-launch",
+   "source": "website-builder",
+   "recorded_from": "/website?template=book-launch"
+  },
+  {
+   "path": "media/templates/site-book-launch.webp",
+   "bytes": 7160,
+   "sha256": "28dd7ae83c95d0ed52b72bd166bd530080864ff4cd9245802b23bab5765603af",
+   "card": "site-book-launch",
+   "source": "website-builder",
+   "recorded_from": "/website?template=book-launch"
+  },
+  {
+   "path": "media/templates/site-app-waitlist.mp4",
+   "bytes": 100877,
+   "sha256": "2aa10cbfd24a69223130b18c7591272f59bf49a26cebd193f240da3d95fa7129",
+   "card": "site-app-waitlist",
+   "source": "website-builder",
+   "recorded_from": "/website?template=app-waitlist"
+  },
+  {
+   "path": "media/templates/site-app-waitlist.webp",
+   "bytes": 12258,
+   "sha256": "7cdb369b93a17be99cc60795d755ef83bdb950be28a920d910e65ef27c0df7b3",
+   "card": "site-app-waitlist",
+   "source": "website-builder",
+   "recorded_from": "/website?template=app-waitlist"
+  },
+  {
+   "path": "media/templates/game-t1-street-run.mp4",
+   "bytes": 203355,
+   "sha256": "003fadcf2e625db612a4314dcf51753b73629eebb694477e19aaa686b33b70cd",
+   "card": "game-t1-street-run",
+   "source": "game-previews",
+   "recorded_from": "/games#play=t1-street-run"
+  },
+  {
+   "path": "media/templates/game-t1-street-run.webp",
+   "bytes": 24494,
+   "sha256": "e465a331e8a1a61799c9f71880ecb010220df0ed2bbfc037263e98cfc76064d0",
+   "card": "game-t1-street-run",
+   "source": "game-previews",
+   "recorded_from": "/games#play=t1-street-run"
+  },
+  {
+   "path": "media/templates/game-sky-tower.mp4",
+   "bytes": 80227,
+   "sha256": "524b4cee3dfa9d1be89411df415ae129359e53eb1caa770af331f1700b9079d9",
+   "card": "game-sky-tower",
+   "source": "game-previews",
+   "recorded_from": "/games#play=sky-tower"
+  },
+  {
+   "path": "media/templates/game-sky-tower.webp",
+   "bytes": 6176,
+   "sha256": "010a5ab133f853a787f25ce13262adbf898037f929b9dbee231753573d3b82d8",
+   "card": "game-sky-tower",
+   "source": "game-previews",
+   "recorded_from": "/games#play=sky-tower"
+  },
+  {
+   "path": "media/templates/game-star-hornets.mp4",
+   "bytes": 121756,
+   "sha256": "497108f2ac8ef7152ee2ff10f6d78d715c91e5d5352acc2320fabfbe0d2706df",
+   "card": "game-star-hornets",
+   "source": "game-previews",
+   "recorded_from": "/games#play=star-hornets"
+  },
+  {
+   "path": "media/templates/game-star-hornets.webp",
+   "bytes": 5178,
+   "sha256": "d670ea78f3e30fb9e445e4ecc12268c4dd41dde5b89dab5b690d2d57bedca1ac",
+   "card": "game-star-hornets",
+   "source": "game-previews",
+   "recorded_from": "/games#play=star-hornets"
+  },
+  {
+   "path": "media/templates/game-tp-robot-match.mp4",
+   "bytes": 179872,
+   "sha256": "60d9cc41873ef7cc32fbd888bb5c438151913622ee5773fbd2578e936a6012be",
+   "card": "game-tp-robot-match",
+   "source": "game-previews",
+   "recorded_from": "/games#play=tp-robot-match"
+  },
+  {
+   "path": "media/templates/game-tp-robot-match.webp",
+   "bytes": 22516,
+   "sha256": "f5a3a21dbfca4a99e4ceb8ab1168c766fe20201e3cd627b597c7d9bdb2bb2bc0",
+   "card": "game-tp-robot-match",
+   "source": "game-previews",
+   "recorded_from": "/games#play=tp-robot-match"
+  },
+  {
+   "path": "media/templates/game-deep-snack.mp4",
+   "bytes": 81666,
+   "sha256": "cde6f85f71840218858b175a692f5d81bf3d9c9a850f99d670951ddfd391106a",
+   "card": "game-deep-snack",
+   "source": "game-previews",
+   "recorded_from": "/games#play=deep-snack"
+  },
+  {
+   "path": "media/templates/game-deep-snack.webp",
+   "bytes": 4948,
+   "sha256": "fd57d29b722ccd41bc65295d3f41ac9d5fb2642e279240a3f3fa194b051c920e",
+   "card": "game-deep-snack",
+   "source": "game-previews",
+   "recorded_from": "/games#play=deep-snack"
+  },
+  {
+   "path": "media/templates/game-cheese-quest.mp4",
+   "bytes": 81200,
+   "sha256": "fb037cf2a98196a61edea7bfd38bfc087173bc594653913554432ec3156ef1d3",
+   "card": "game-cheese-quest",
+   "source": "game-previews",
+   "recorded_from": "/games#play=cheese-quest"
+  },
+  {
+   "path": "media/templates/game-cheese-quest.webp",
+   "bytes": 8402,
+   "sha256": "bdc1b9aef249181b2a370f7c465e48a6749c7ca56dab199900212f844e533a8e",
+   "card": "game-cheese-quest",
+   "source": "game-previews",
+   "recorded_from": "/games#play=cheese-quest"
+  },
+  {
+   "path": "media/templates/game-dune-rover.mp4",
+   "bytes": 64455,
+   "sha256": "361d6c12e83c93b9259155f7dc5342cb3ec35c3e73ab8768fbe9769c4b1c116e",
+   "card": "game-dune-rover",
+   "source": "game-previews",
+   "recorded_from": "/games#play=dune-rover"
+  },
+  {
+   "path": "media/templates/game-dune-rover.webp",
+   "bytes": 3226,
+   "sha256": "ec1d6492141082d977ee3296841ed96fbcc9ae07c221e1de43a265bb435a50ef",
+   "card": "game-dune-rover",
+   "source": "game-previews",
+   "recorded_from": "/games#play=dune-rover"
+  },
+  {
+   "path": "media/templates/game-pancake-panic.mp4",
+   "bytes": 64306,
+   "sha256": "5ac971918fd2bee03de890110fc0e68eb516939aa004f361c57f9340a5727b03",
+   "card": "game-pancake-panic",
+   "source": "game-previews",
+   "recorded_from": "/games#play=pancake-panic"
+  },
+  {
+   "path": "media/templates/game-pancake-panic.webp",
+   "bytes": 3398,
+   "sha256": "ca3f9d47255d65a8027cfceb1400f8fd35fdac0d3fea4b428e4ed722a21408fa",
+   "card": "game-pancake-panic",
+   "source": "game-previews",
+   "recorded_from": "/games#play=pancake-panic"
+  },
+  {
+   "path": "media/templates/game-jelly-storm.mp4",
+   "bytes": 131039,
+   "sha256": "ed0f74fe7235e520d3afe56116eb8568f8f5eb7e58d4146c0982b07c9e50e0ca",
+   "card": "game-jelly-storm",
+   "source": "game-previews",
+   "recorded_from": "/games#play=jelly-storm"
+  },
+  {
+   "path": "media/templates/game-jelly-storm.webp",
+   "bytes": 4840,
+   "sha256": "32fc736c5570b8b8cf1e361eee40d7520bbb938b710c61ae201d4818151de646",
+   "card": "game-jelly-storm",
+   "source": "game-previews",
+   "recorded_from": "/games#play=jelly-storm"
+  },
+  {
+   "path": "media/templates/game-crystal-caves.mp4",
+   "bytes": 160422,
+   "sha256": "40b61b8373d904d8c091aec5809d3645858f00704ce5cf8617becffb19064508",
+   "card": "game-crystal-caves",
+   "source": "game-previews",
+   "recorded_from": "/games#play=crystal-caves"
+  },
+  {
+   "path": "media/templates/game-crystal-caves.webp",
+   "bytes": 17094,
+   "sha256": "6d75f88f433fd4877bd1164a5bd1d5b15f18b828baa7638b03e001fc39512284",
+   "card": "game-crystal-caves",
+   "source": "game-previews",
+   "recorded_from": "/games#play=crystal-caves"
+  },
+  {
+   "path": "media/templates/game-planet-muncher.mp4",
+   "bytes": 71200,
+   "sha256": "a6c74ac50a29aefc4400c6f789fe9db0f17c3ea270822b562694f974a3df3e97",
+   "card": "game-planet-muncher",
+   "source": "game-previews",
+   "recorded_from": "/games#play=planet-muncher"
+  },
+  {
+   "path": "media/templates/game-planet-muncher.webp",
+   "bytes": 4478,
+   "sha256": "964ad98fb99089e3adb008c96f9ce34a4cf52875ccbdf10253d5e6f516583970",
+   "card": "game-planet-muncher",
+   "source": "game-previews",
+   "recorded_from": "/games#play=planet-muncher"
+  },
+  {
+   "path": "media/templates/game-night-circuit.mp4",
+   "bytes": 73763,
+   "sha256": "b246d987b44a6e1d85613dba57fba398c075762959bf23d029962e9cbde29b52",
+   "card": "game-night-circuit",
+   "source": "game-previews",
+   "recorded_from": "/games#play=night-circuit"
+  },
+  {
+   "path": "media/templates/game-night-circuit.webp",
+   "bytes": 7004,
+   "sha256": "d779e87b05155c685934a063593369b9772ae6efaad00650cf9a39aeca46d18a",
+   "card": "game-night-circuit",
+   "source": "game-previews",
+   "recorded_from": "/games#play=night-circuit"
+  },
+  {
+   "path": "media/templates/film-launch.mp4",
+   "bytes": 81368,
+   "sha256": "5b0f297a5d784f0b84792300d41de6b2d8d9bbb91825e9447774084e2aac5d54",
+   "card": "film-launch",
+   "source": "launch-film",
+   "recorded_from": "/film"
+  },
+  {
+   "path": "media/templates/film-launch.webp",
+   "bytes": 8332,
+   "sha256": "0eca7d710fed65cac4cf4e0e6031f8a4c6c66e30abfdacaa1455ca080df428a8",
+   "card": "film-launch",
+   "source": "launch-film",
+   "recorded_from": "/film"
+  },
+  {
+   "path": "media/templates/film-music.mp4",
+   "bytes": 53551,
+   "sha256": "b577c6d8686ac87d140b5259538efda01dc8f7520c8f7853fbbc0e056828fa42",
+   "card": "film-music",
+   "source": "music-visualizer",
+   "recorded_from": "/music"
+  },
+  {
+   "path": "media/templates/film-music.webp",
+   "bytes": 8216,
+   "sha256": "893028be8a4bf9a768d2661b093dd613311a08c7d89dcf8c9bee52e680701ec4",
+   "card": "film-music",
+   "source": "music-visualizer",
+   "recorded_from": "/music"
+  },
+  {
+   "path": "media/templates/film-captions.mp4",
+   "bytes": 167573,
+   "sha256": "4b9584955517fdd214e25e246dfcbc1cf04954e8474ec6ecff212ed412407ced",
+   "card": "film-captions",
+   "source": "clip-workroom",
+   "recorded_from": "/cut/"
+  },
+  {
+   "path": "media/templates/film-captions.webp",
+   "bytes": 15864,
+   "sha256": "cb21924189e7b82d5d9106c8828838346422d07e13bf7367769aecc457ccbef4",
+   "card": "film-captions",
+   "source": "clip-workroom",
+   "recorded_from": "/cut/"
+  },
+  {
+   "path": "media/templates/film-voice.mp4",
+   "bytes": 80126,
+   "sha256": "279d91f75a9b5bfe6bd9fd1a72d2c01bfcb04709774bef8db56fe7be1a4a12bd",
+   "card": "film-voice",
+   "source": "audio-page",
+   "recorded_from": "/audio?tab=voice"
+  },
+  {
+   "path": "media/templates/film-voice.webp",
+   "bytes": 10432,
+   "sha256": "54aa5454fd430efefa41f1cb99892aa15987ec0b5bc23c316b293bce021d0ee7",
+   "card": "film-voice",
+   "source": "audio-page",
+   "recorded_from": "/audio?tab=voice"
+  },
+  {
+   "path": "media/templates/film-beds.mp4",
+   "bytes": 46337,
+   "sha256": "99bebb345734aaa1f863a469ae808ab4088073360bb1afc205a5bc9779de5238",
+   "card": "film-beds",
+   "source": "audio-page",
+   "recorded_from": "/audio?tab=beds"
+  },
+  {
+   "path": "media/templates/film-beds.webp",
+   "bytes": 4312,
+   "sha256": "ec82f3446a11570dec215a7cfd8389de846579741facb055af9de9d8bfa3d1a7",
+   "card": "film-beds",
+   "source": "audio-page",
+   "recorded_from": "/audio?tab=beds"
+  },
+  {
+   "path": "media/templates/office-annotate.mp4",
+   "bytes": 43628,
+   "sha256": "a844d4da4c045e7bcc5768beb779edb811d2ac92f228201edf07f99d86ba27a7",
+   "card": "office-annotate",
+   "source": "office",
+   "recorded_from": "/office?sample=1"
+  },
+  {
+   "path": "media/templates/office-annotate.webp",
+   "bytes": 12366,
+   "sha256": "d555fd493baa12c35f807a72dff1aabe1fd5e8054850f652e7245d25931c6e8f",
+   "card": "office-annotate",
+   "source": "office",
+   "recorded_from": "/office?sample=1"
+  },
+  {
+   "path": "media/templates/office-sign.mp4",
+   "bytes": 53343,
+   "sha256": "7d1e2dc7a4a0cf7be96c59bd46b5e1aa2f5bc3a122de82c348f458b541b978a1",
+   "card": "office-sign",
+   "source": "office",
+   "recorded_from": "/office?tab=sign"
+  },
+  {
+   "path": "media/templates/office-sign.webp",
+   "bytes": 13374,
+   "sha256": "ea38c80cfe9d8c10da9df9eb18cf337364462e6b166e7a5c2644389fd9f8fd53",
+   "card": "office-sign",
+   "source": "office",
+   "recorded_from": "/office?tab=sign"
+  },
+  {
+   "path": "media/templates/office-templates.mp4",
+   "bytes": 129986,
+   "sha256": "df4c0960100f75fd602218542df413136db107fe8c72b499fdac994b5e100438",
+   "card": "office-templates",
+   "source": "office",
+   "recorded_from": "/office?tab=sign"
+  },
+  {
+   "path": "media/templates/office-templates.webp",
+   "bytes": 20330,
+   "sha256": "092a43df6ddc0cffd1117006f831b5b42ac443cd1710d5de7daf62660e5dca08",
+   "card": "office-templates",
+   "source": "office",
+   "recorded_from": "/office?tab=sign"
+  }
+ ]
+}

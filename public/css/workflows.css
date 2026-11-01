@@ -1,0 +1,111 @@
+/* The Workflows gallery: a moving strip of loops, category chips and a masonry grid of video cards.
+   Motion uses transform and opacity only. site.css switches every animation off for reduced motion. */
+
+.wf-main { padding-top: 34px; }
+.wf-hero { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin: 0 0 22px; }
+.wf-hero h1 {
+  font-family: var(--display); font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em;
+  font-size: clamp(52px, 7vw, 104px); line-height: 0.9; margin: 0;
+}
+.wf-hero p { margin: 0; color: var(--muted); font-size: 16px; }
+
+/* ---------- marquee ---------- */
+.wf-marquee {
+  --h: clamp(150px, 17vw, 240px);
+  position: relative; overflow: hidden; margin: 0 calc(-5vw) 30px; padding: 4px 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.wf-track { display: flex; gap: 12px; width: max-content; animation: wf-slide 90s linear infinite; will-change: transform; }
+.wf-marquee:hover .wf-track { animation-play-state: paused; }
+@keyframes wf-slide { to { transform: translate3d(calc(-50% - 6px), 0, 0); } }
+.wf-tile {
+  position: relative; display: block; flex: none; height: var(--h); aspect-ratio: var(--ar);
+  border-radius: 14px; overflow: hidden; background: var(--surface);
+  transition: transform 0.35s cubic-bezier(.2, .8, .2, 1);
+}
+.wf-tile:hover { transform: translateY(-4px); }
+.wf-tile video, .wf-card video { width: 100%; height: 100%; object-fit: cover; background: var(--surface); }
+
+/* ---------- chips ---------- */
+.wf-chips {
+  position: sticky; top: var(--nav-h); z-index: 20; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+  padding: 12px 0; margin: 0 0 14px; background: linear-gradient(#0b0b0d 78%, rgba(11, 11, 13, 0));
+  scroll-margin-top: var(--nav-h);
+}
+.wf-chips::-webkit-scrollbar { display: none; }
+.wf-chip {
+  flex: none; border: 1px solid var(--line-2); background: transparent; color: #d9d9dd; border-radius: 999px;
+  padding: 9px 16px; font-size: 14px; font-weight: 500; white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+}
+.wf-chip:hover { border-color: rgba(255, 255, 255, 0.32); transform: translateY(-1px); }
+.wf-chip[aria-pressed="true"] { background: var(--text); color: #0b0b0c; border-color: var(--text); }
+
+/* ---------- masonry grid ---------- */
+.wf-grid {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 2px; grid-auto-flow: row dense;
+  column-gap: 12px; row-gap: 0; align-items: start;
+}
+@media (max-width: 1360px) { .wf-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 1000px) { .wf-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .wf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 8px; } }
+
+.wf-card { display: block; position: relative; aspect-ratio: var(--ar); color: #fff; text-decoration: none; }
+.wf-grid.wf-enter .wf-card:not(.is-in) { opacity: 0; transform: translateY(26px) scale(0.98); }
+.wf-grid.wf-enter .wf-card.is-in {
+  opacity: 1; transform: none;
+  transition: opacity 0.6s var(--d, 0ms) ease, transform 0.7s var(--d, 0ms) cubic-bezier(.2, .8, .2, 1);
+}
+.wf-inner {
+  position: absolute; inset: 0; display: block; border-radius: 14px; overflow: hidden; background: var(--surface);
+  transform: translateZ(0); transition: transform 0.35s cubic-bezier(.2, .8, .2, 1), box-shadow 0.35s;
+}
+.wf-inner::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 52%, rgba(0, 0, 0, 0.72));
+}
+.wf-card video { position: absolute; inset: 0; }
+.wf-name {
+  position: absolute; z-index: 1; left: 12px; right: 12px; bottom: 11px; font-weight: 600; font-size: 15px;
+  line-height: 1.2; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5); transition: transform 0.3s cubic-bezier(.2, .8, .2, 1);
+}
+.wf-more {
+  position: absolute; z-index: 1; left: 12px; right: 12px; bottom: 11px; display: flex; flex-direction: column;
+  align-items: flex-start; gap: 8px; opacity: 0; transform: translateY(10px);
+  transition: opacity 0.25s, transform 0.3s cubic-bezier(.2, .8, .2, 1); pointer-events: none;
+}
+.wf-line { font-size: 13px; color: #e4e4e8; line-height: 1.35; }
+.wf-use {
+  background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 13px; border-radius: 999px;
+  padding: 7px 13px; white-space: nowrap;
+}
+.wf-card:is(:hover, :focus-visible, .is-open) .wf-inner { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.9); }
+.wf-card:is(:hover, :focus-visible, .is-open) .wf-inner::after { background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 30%, rgba(0, 0, 0, 0.85)); }
+.wf-card:is(:hover, :focus-visible, .is-open) .wf-name { transform: translateY(-62px); }
+.wf-card:is(:hover, :focus-visible, .is-open) .wf-more { opacity: 1; transform: none; }
+.wf-card:focus-visible { outline: none; }
+.wf-card:focus-visible .wf-inner { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .wf-name { font-size: 13px; left: 9px; bottom: 8px; }
+  .wf-more { left: 9px; right: 9px; bottom: 8px; }
+  .wf-line { font-size: 12px; }
+  .wf-use { font-size: 12px; padding: 6px 11px; }
+  .wf-card:is(:hover, :focus-visible, .is-open) .wf-name { transform: translateY(-56px); }
+  .wf-inner { border-radius: 11px; }
+}
+
+/* ---------- plans and connected workflows ---------- */
+.wf-plans-section { margin-top: 64px; }
+.wf-plans-section h2 { font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: 30px; margin: 0 0 14px; }
+.wf-plans { display: flex; flex-wrap: wrap; gap: 10px; }
+.wf-plan {
+  display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: var(--surface); font-size: 14px; transition: transform 0.2s, border-color 0.2s;
+}
+.wf-plan:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.3); }
+.wf-plan img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+.wf-connected { margin-top: 40px; border-top: 1px solid var(--line-2); padding-top: 18px; }
+.wf-connected summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+.wf-connected summary:hover { color: var(--text); }
+.wf-connected[open] summary { margin-bottom: 8px; }
