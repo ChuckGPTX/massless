@@ -11,7 +11,7 @@ export const SPEC_VERSION = 1;
 export const KINDS = {
   business: { name: 'Business', style: 'friendly', example: 'A site for my lawn care business in Cedar Rapids. Mowing, fertilizing, aeration and fall cleanup.' },
   portfolio: { name: 'Portfolio', style: 'studio', example: 'A portfolio for Ana Ruiz, a wedding and portrait photographer in Austin.' },
-  landing: { name: 'Landing page', style: 'swiss', example: 'A landing page for Ledgerly, an app that turns receipts into a tidy monthly budget.' },
+  landing: { name: 'Landing page', style: 'swiss', example: 'A landing page for Tallyfern, an app that turns receipts into a tidy monthly budget.' },
   event: { name: 'Event', style: 'bold', example: 'A site for Prairie Code Camp, a one-day developer conference on May 16, 2027 at the Paramount Theatre in Cedar Rapids.' },
   restaurant: { name: 'Restaurant', style: 'luxe', example: 'A site for Casa Verde, a family taqueria in Des Moines with handmade tortillas and a patio.' },
   band: { name: 'Band / artist', style: 'bold', example: 'A site for The Low Lanterns, a four-piece indie folk band from Iowa City. New album and a fall tour.' },
@@ -21,7 +21,7 @@ export const KINDS = {
   shop: { name: 'Shop / label', style: 'editorial-shop', example: 'A shop for Kelsa Atelier, a small outerwear label in Lyon making waxed field jackets, wool coats, travel trousers and overshirts.' },
   manifesto: { name: 'Manifesto', style: 'manifesto', example: 'A manifesto for Quiet Hours, a sound studio that believes cities should protect silence as a public good.' },
   cases: { name: 'Case studies', style: 'portfolio-timeline', example: 'A chronological portfolio for Noor Haddad, an interaction designer in Oakland who has shipped maps, cameras, reading apps and a thermostat since 2009.' },
-  product: { name: 'AI product launch', style: 'ai-product', example: 'A launch page for Facet, an AI studio that keeps one character looking the same across every photo and video you make.' },
+  product: { name: 'AI product launch', style: 'ai-product', example: 'A launch page for Twinlight, an AI studio that keeps one character looking the same across every photo and video you make.' },
 };
 
 // ---------------------------------------------------------------------------------------------
