@@ -100,12 +100,20 @@ async function action(fn) {
       b.disabled = false;
   }
 }
+// Pages that sent a visitor here to sign in (e.g. Video's prompt bar) get them back afterwards.
+function returnAfterSignIn() {
+  let next = "";
+  try { next = sessionStorage.getItem("chucksi.after-signin") || ""; sessionStorage.removeItem("chucksi.after-signin"); } catch { /* private mode */ }
+  if (/^\/[a-z0-9/_-]*$/i.test(next) && !next.startsWith("//") && next !== "/projects/") { location.href = next; return true; }
+  return false;
+}
 for (const b of document.querySelectorAll("#auth-form .oauth"))
   b.onclick = () => action(() => cloud.signInWithProvider(b.dataset.provider));
 $("#auth-form").onsubmit = (e) => {
   e.preventDefault();
   action(async () => {
     await cloud.signIn($("#email").value.trim(), $("#password").value);
+    if (returnAfterSignIn()) return;
     $("#password").value = "";
     await refresh();
   });
@@ -201,7 +209,7 @@ try {
     for (const b of document.querySelectorAll("#auth-form .oauth")) b.hidden = !on.includes(b.dataset.provider);
     document.querySelector("#auth-form .oauth-buttons").hidden = !on.length;
     document.querySelector("#auth-form .oauth-or").hidden = !on.length;
-    if (back) message("Signed in as " + (cloud.session()?.user?.email || "you") + ". Welcome to Chucksi.");
+    if (back && !returnAfterSignIn()) message("Signed in as " + (cloud.session()?.user?.email || "you") + ". Welcome to Chucksi.");
   }
 } catch (e) {
   message(e.message);
