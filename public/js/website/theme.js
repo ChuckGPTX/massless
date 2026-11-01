@@ -24,9 +24,15 @@ export const FONTS = {
   'Instrument Sans': { cat: 'sans', w: [400, 700], dw: 600, fb: "system-ui, sans-serif" },
   'Work Sans': { cat: 'sans', w: [100, 900], dw: 600, fb: "system-ui, sans-serif" },
   'IBM Plex Sans': { cat: 'sans', w: [100, 700], dw: 600, fb: "system-ui, sans-serif" },
+  // Archivo's width axis at 125: the wide, flat caps of a fashion label (same OFL family as Archivo)
+  'Archivo Expanded': { cat: 'sans', w: [100, 900], dw: 800, fam: 'Archivo', wdth: 125, fb: "'Arial Black', Arial, sans-serif" },
+  'Hanken Grotesk': { cat: 'sans', w: [100, 900], dw: 400, fb: "'Helvetica Neue', Arial, sans-serif" },
+  'Geist': { cat: 'sans', w: [100, 900], dw: 600, fb: "system-ui, -apple-system, 'Segoe UI', sans-serif" },
 };
-export const HEADING_FONTS = ['Fraunces', 'Instrument Serif', 'Cormorant Garamond', 'Playfair Display', 'DM Serif Display', 'Source Serif 4', 'Inter Tight', 'Plus Jakarta Sans', 'Archivo', 'Sora', 'Space Grotesk', 'Bricolage Grotesque', 'Syne', 'Outfit', 'Manrope'];
-export const BODY_FONTS = ['Inter', 'DM Sans', 'Manrope', 'Plus Jakarta Sans', 'Instrument Sans', 'Work Sans', 'IBM Plex Sans', 'Archivo', 'Outfit', 'Source Serif 4'];
+/** The real Google Fonts family behind a font name ('Archivo Expanded' is Archivo at width 125). */
+export const fontFamily = (name) => (FONTS[name] && FONTS[name].fam) || name;
+export const HEADING_FONTS = ['Fraunces', 'Instrument Serif', 'Cormorant Garamond', 'Playfair Display', 'DM Serif Display', 'Source Serif 4', 'Inter Tight', 'Plus Jakarta Sans', 'Archivo', 'Archivo Expanded', 'Sora', 'Space Grotesk', 'Bricolage Grotesque', 'Syne', 'Outfit', 'Manrope', 'Hanken Grotesk', 'Geist'];
+export const BODY_FONTS = ['Inter', 'DM Sans', 'Manrope', 'Plus Jakarta Sans', 'Instrument Sans', 'Work Sans', 'IBM Plex Sans', 'Archivo', 'Outfit', 'Source Serif 4', 'Hanken Grotesk', 'Geist'];
 
 /** Neutrals for light and dark, plus a default accent and a second colour for gradients. */
 export const PALETTES = {
@@ -60,6 +66,18 @@ export const PALETTES = {
   lilac: { name: 'Lilac', accent: '#6d4aff', accent2: '#ffb38a',
     light: { bg: '#f6f4fb', surface: '#ffffff', alt: '#ece8f7', text: '#17142a', muted: '#5a5670' },
     dark: { bg: '#100e1c', surface: '#191628', alt: '#141221', text: '#f1effa', muted: '#aaa5c2' } },
+  chalk: { name: 'Chalk', accent: '#111111', accent2: '#b9b2a6',
+    light: { bg: '#f3f3f1', surface: '#ffffff', alt: '#e9e8e4', text: '#0b0b0b', muted: '#62625e' },
+    dark: { bg: '#0b0b0b', surface: '#161616', alt: '#111111', text: '#f3f3f1', muted: '#a3a39e' } },
+  void: { name: 'Void', accent: '#ff5a1f', accent2: '#8b5cff',
+    light: { bg: '#f4f3f1', surface: '#ffffff', alt: '#eae8e4', text: '#0a0a0a', muted: '#5c5a56' },
+    dark: { bg: '#000000', surface: '#0d0d0f', alt: '#09090b', text: '#f4f4f2', muted: '#9a9a9f' } },
+  gallery: { name: 'Gallery', accent: '#2b59ff', accent2: '#ffb38a',
+    light: { bg: '#ffffff', surface: '#f6f6f5', alt: '#f4f4f2', text: '#111111', muted: '#6e6e6e' },
+    dark: { bg: '#0e0e0e', surface: '#181818', alt: '#131313', text: '#f2f2f2', muted: '#9b9b9b' } },
+  linen: { name: 'Linen', accent: '#0b0b0c', accent2: '#e8c6a4',
+    light: { bg: '#f7f6f3', surface: '#ffffff', alt: '#efede8', text: '#0b0b0c', muted: '#67655f' },
+    dark: { bg: '#0b0b0c', surface: '#151517', alt: '#111113', text: '#f7f6f3', muted: '#a19e98' } },
 };
 
 /** The style chips. Each is a complete look: type pairing, palette, shape, rhythm and motion. */
@@ -71,6 +89,11 @@ export const STYLES = {
   bold: { name: 'Bold', blurb: 'Loud caps, hard edges, big colour', heading: 'Archivo', body: 'Archivo', hw: 900, palette: 'pop', mode: 'light', radius: 0, spacing: 'normal', motion: 'lively', tracking: -0.025, lead: 0.92, upper: true, fixedAccent: true },
   aurora: { name: 'Aurora', blurb: 'Night sky gradients and glass', heading: 'Sora', body: 'Inter', hw: 600, palette: 'aurora', mode: 'dark', radius: 18, spacing: 'normal', motion: 'lively', tracking: -0.04, lead: 1.04, fixedAccent: true },
   studio: { name: 'Studio', blurb: 'Soft serif italics, quiet neutrals', heading: 'Instrument Serif', body: 'Instrument Sans', hw: 400, palette: 'stone', mode: 'light', radius: 14, spacing: 'airy', motion: 'subtle', tracking: -0.02, lead: 1.0 },
+  // template styles: each is reverse-engineered from a reference technique (docs/design-notes/website-templates.md)
+  'editorial-shop': { name: 'Atelier', blurb: 'Tiny chrome, wide caps, lookbook', heading: 'Archivo Expanded', body: 'Archivo', hw: 800, palette: 'chalk', mode: 'light', radius: 2, spacing: 'normal', motion: 'subtle', tracking: 0, lead: 0.98, upper: true },
+  manifesto: { name: 'Manifesto', blurb: 'Black, big statements, ambient lines', heading: 'Inter Tight', body: 'Inter', hw: 300, palette: 'void', mode: 'dark', radius: 6, spacing: 'airy', motion: 'lively', tracking: -0.035, lead: 1.06 },
+  'portfolio-timeline': { name: 'Timeline', blurb: 'White, quiet type, work in order', heading: 'Hanken Grotesk', body: 'Hanken Grotesk', hw: 400, palette: 'gallery', mode: 'light', radius: 10, spacing: 'airy', motion: 'subtle', tracking: -0.02, lead: 1.12 },
+  'ai-product': { name: 'Product', blurb: 'Warm white, tight type, portrait hero', heading: 'Geist', body: 'Geist', hw: 600, palette: 'linen', mode: 'light', radius: 16, spacing: 'normal', motion: 'lively', tracking: -0.045, lead: 1.0 },
 };
 
 export const RADII = { min: 0, max: 28 };
@@ -143,6 +166,8 @@ function buttonPair(accent) {
 
 /** Tokens for one tone: background, cards, text, muted text, lines and the accent pair. */
 function tone({ bg, surface, text, muted, accent, accent2 }) {
+  // a near-black accent on a black band (or near-white on white) becomes the ink colour, so buttons stay visible
+  if (contrast(accent, bg) < 1.6) accent = text;
   const soft = mix(bg, accent, 0.13);
   const t = ensure(text, [bg, surface, soft], 7);
   const m = ensure(muted, [bg, surface], 4.6);
@@ -195,28 +220,34 @@ export function contrastReport(theme) {
 const clampW = (font, w) => { const f = FONTS[font] || FONTS.Inter; return Math.max(f.w[0], Math.min(f.w[1], w)); };
 export const headingWeight = (theme) => clampW(theme.heading, theme.hw || FONTS[theme.heading]?.dw || 600);
 
-/** The Google Fonts stylesheet for a theme, with only the weights it uses. */
+/** The Google Fonts stylesheet for a theme, with only the weights (and widths) it uses. */
 export function fontsHref(theme) {
   const fams = new Map();
-  const add = (fam, weights, ital) => {
-    if (!FONTS[fam]) return;
-    const cur = fams.get(fam) || { w: new Set(), ital: false };
-    weights.forEach((w) => cur.w.add(clampW(fam, w)));
-    cur.ital = cur.ital || (ital && FONTS[fam].ital);
+  const add = (name, weights, ital) => {
+    const f = FONTS[name];
+    if (!f) return;
+    const fam = f.fam || name;
+    const cur = fams.get(fam) || { t: new Set(), ital: false, wdth: false };
+    const it = !!(ital && f.ital);
+    weights.forEach((w) => cur.t.add(`${clampW(name, w)}|${f.wdth || 100}|0`));
+    if (it) weights.forEach((w) => cur.t.add(`${clampW(name, w)}|${f.wdth || 100}|1`));
+    cur.ital = cur.ital || it;
+    cur.wdth = cur.wdth || !!f.wdth;
     fams.set(fam, cur);
   };
   add(theme.heading, [headingWeight(theme)], true);
   add(theme.body, [400, 500, 600, 700], false);
   const parts = [];
-  for (const [fam, { w, ital }] of fams) {
-    const ws = [...w].sort((a, b) => a - b);
-    const axes = ital ? `ital,wght@${[...ws.map((x) => `0,${x}`), ...ws.map((x) => `1,${x}`)].join(';')}` : `wght@${ws.join(';')}`;
-    parts.push(`family=${fam.replace(/ /g, '+')}:${axes}`);
+  for (const [fam, { t, ital, wdth }] of fams) {
+    const tuples = [...t].map((x) => x.split('|').map(Number)).map(([w, d, i]) => [...(ital ? [i] : []), ...(wdth ? [d] : []), w]);
+    tuples.sort((a, b) => { for (let k = 0; k < a.length; k++) if (a[k] !== b[k]) return a[k] - b[k]; return 0; });
+    const axes = [ital && 'ital', wdth && 'wdth', 'wght'].filter(Boolean).join(',');
+    parts.push(`family=${fam.replace(/ /g, '+')}:${axes}@${[...new Set(tuples.map((x) => x.join(',')))].join(';')}`);
   }
   return `https://fonts.googleapis.com/css2?${parts.join('&')}&display=swap`;
 }
 
-export const fontStack = (fam) => `'${fam}', ${(FONTS[fam] || FONTS.Inter).fb}`;
+export const fontStack = (fam) => `'${fontFamily(fam)}', ${(FONTS[fam] || FONTS.Inter).fb}`;
 
 /** CSS custom properties for the theme (the :root block plus the three tone classes). */
 export function themeCss(theme) {
@@ -230,7 +261,7 @@ export function themeCss(theme) {
     vars(tk.base),
     `--font-h:${fontStack(theme.heading)}`, `--font-b:${fontStack(theme.body)}`,
     `--hw:${headingWeight(theme)}`, `--ht:${st.tracking ?? -0.02}em`, `--hl:${st.lead ?? 1.05}`, `--hc:${st.upper ? 'uppercase' : 'none'}`,
-    `--h-ital:${serifHead ? 'italic' : 'normal'}`,
+    `--h-ital:${serifHead ? 'italic' : 'normal'}`, `--h-str:${FONTS[theme.heading]?.wdth || 100}%`,
     `--r:${r}px`, `--r-lg:${Math.min(36, Math.round(r * 1.5))}px`, `--r-sm:${Math.round(r * 0.6)}px`, `--r-btn:${r >= 18 ? '999px' : `${Math.min(r, 12)}px`}`,
     `--sp:${sp}`,
     `color-scheme:${theme.mode === 'dark' ? 'dark' : 'light'}`,

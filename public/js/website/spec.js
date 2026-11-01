@@ -4,6 +4,7 @@
 
 import { STYLES, PALETTES, themeFor, isHex, FONTS, MOTION, SPACING } from './theme.js';
 import { ICON_NAMES } from './icons.js';
+import { MOTIFS } from './art.js';
 
 export const SPEC_VERSION = 1;
 
@@ -17,6 +18,10 @@ export const KINDS = {
   realestate: { name: 'Real estate listing', style: 'luxe', example: 'A listing site for 1240 Oak Hill Drive, a 4 bed, 3 bath, 2,850 sq ft craftsman in Marion, IA, listed at $485,000.' },
   launch: { name: 'Course / book launch', style: 'editorial', example: 'A launch site for my book "Small Fires", a practical guide to starting a backyard garden, by June Park.' },
   waitlist: { name: 'App waitlist', style: 'aurora', example: 'A waitlist page for Driftwood, an app that plans calm weekend trips within two hours of home.' },
+  shop: { name: 'Shop / label', style: 'editorial-shop', example: 'A shop for Kelsa Atelier, a small outerwear label in Lyon making waxed field jackets, wool coats, travel trousers and overshirts.' },
+  manifesto: { name: 'Manifesto', style: 'manifesto', example: 'A manifesto for Quiet Hours, a sound studio that believes cities should protect silence as a public good.' },
+  cases: { name: 'Case studies', style: 'portfolio-timeline', example: 'A chronological portfolio for Noor Haddad, an interaction designer in Oakland who has shipped maps, cameras, reading apps and a thermostat since 2009.' },
+  product: { name: 'AI product launch', style: 'ai-product', example: 'A launch page for Facet, an AI studio that keeps one character looking the same across every photo and video you make.' },
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -30,7 +35,7 @@ export const TONES = { base: 'Page', alt: 'Soft', inv: 'Inverse', acc: 'Brand co
 export const SECTIONS = {
   hero: {
     name: 'Hero', group: 'Intro', hint: 'Headline, intro and the main button',
-    variants: { split: 'Split', centered: 'Centered', cover: 'Full photo', editorial: 'Editorial', banner: 'Page header' },
+    variants: { split: 'Split', centered: 'Centered', cover: 'Full photo', editorial: 'Editorial', banner: 'Page header', portrait: 'Portrait', ambient: 'Ambient', runway: 'Runway', minimal: 'Name card' },
     fields: { eyebrow: 'text', title: 'text', subtitle: 'para', cta: 'link', cta2: 'link', note: 'text', image: IMG },
     labels: { cta: 'Main button', cta2: 'Second button', note: 'Small print' },
   },
@@ -134,6 +139,39 @@ export const SECTIONS = {
     variants: { columns: 'Two columns', list: 'Centered list' }, collection: 'menu',
     fields: { eyebrow: 'text', title: 'text', subtitle: 'para' },
   },
+  statement: {
+    name: 'Statement', group: 'Content', hint: 'One big sentence, set large',
+    variants: { center: 'Centered', left: 'Left', reveal: 'Word by word', framed: 'Framed' },
+    fields: { eyebrow: 'text', text: 'para', note: 'text', mark: 'text' },
+    labels: { text: 'Statement', note: 'Signed or source', mark: 'Big numeral (framed layout)' },
+  },
+  lookbook: {
+    name: 'Lookbook', group: 'Media', hint: 'Full-bleed editorial photos, one per screen',
+    variants: { full: 'Full bleed', pair: 'Pairs', offset: 'Offset' },
+    fields: { eyebrow: 'text', title: 'text', items: { max: 8, item: { image: IMG, caption: 'text', note: 'text' } } },
+  },
+  products: {
+    name: 'Products', group: 'Commerce', hint: 'Pieces with prices, as a grid or a lineup',
+    variants: { grid: 'Grid', lineup: 'Lineup' },
+    fields: { eyebrow: 'text', title: 'text', subtitle: 'para', items: { max: 12, item: { image: IMG, name: 'text', price: 'text', note: 'text', link: 'link' } }, cta: 'link' },
+    labels: { cta: 'Button under the grid' },
+  },
+  chapters: {
+    name: 'Chapters', group: 'Content', hint: 'A long read in parts, each with line art',
+    variants: { stack: 'Centered', split: 'Numbered' },
+    fields: { eyebrow: 'text', title: 'text', items: { max: 10, item: { title: 'text', text: 'para', motif: 'motif' } } },
+  },
+  cases: {
+    name: 'Case studies', group: 'Content', hint: 'Projects in order with year, role and credits',
+    variants: { rail: 'Sideways rail', list: 'Year by year' },
+    fields: { eyebrow: 'text', title: 'text', items: { max: 12, item: { year: 'text', title: 'text', role: 'text', client: 'text', text: 'para', image: IMG, credits: 'list', link: 'link' } } },
+  },
+  annotated: {
+    name: 'Annotated image', group: 'Media', hint: 'A big image with labels that appear as you scroll',
+    variants: { portrait: 'Portrait', wide: 'Wide' },
+    fields: { eyebrow: 'text', title: 'text', subtitle: 'para', status: 'text', image: IMG, items: { max: 6, item: { label: 'text' } } },
+    labels: { status: 'Status pill' },
+  },
   footer: {
     name: 'Footer', group: 'Footer', hint: 'Links, contact and the credit',
     variants: { columns: 'Columns', simple: 'Simple' },
@@ -150,7 +188,7 @@ export const COLLECTIONS = {
   menu: { name: 'Menu', singular: 'Dish', fields: { title: 'text', category: 'text', text: 'para', price: 'text' } },
 };
 
-const ANCHORS = { features: 'services', about: 'about', gallery: 'gallery', testimonials: 'reviews', pricing: 'pricing', faq: 'faq', team: 'team', timeline: 'how-it-works', stats: 'facts', contact: 'contact', signup: 'signup', embed: 'watch', posts: 'journal', listings: 'listings', listing: 'details', tracks: 'music', schedule: 'schedule', menu: 'menu' };
+const ANCHORS = { products: 'shop', lookbook: 'lookbook', chapters: 'chapters', cases: 'work', annotated: 'demo', features: 'services', about: 'about', gallery: 'gallery', testimonials: 'reviews', pricing: 'pricing', faq: 'faq', team: 'team', timeline: 'how-it-works', stats: 'facts', contact: 'contact', signup: 'signup', embed: 'watch', posts: 'journal', listings: 'listings', listing: 'details', tracks: 'music', schedule: 'schedule', menu: 'menu' };
 
 // ---------------------------------------------------------------------------------------------
 // A system prompt for a model-backed writer (Llama 3.3 70B). Not wired to a server route yet: the page uses templateSite.
@@ -184,6 +222,13 @@ Section types (variants): fields
 - posts (cards|list), listings (cards|rows), tracks (list|cover), menu (columns|list): eyebrow, title, subtitle; they list the matching collection (tracks also takes image)
 - listing (details|showcase): status, price, address, beds, baths, sqft, lot, year, text, points [{text}], photos [{image}], cta
 - schedule (list|columns): eyebrow, title, items [{day, time, title, text}]
+- statement (center|left|reveal|framed): eyebrow, text (one to three sentences, set very large), note, mark (a short numeral for framed)
+- lookbook (full|pair|offset): eyebrow, title, items [{image, caption, note}]
+- products (grid|lineup): eyebrow, title, subtitle, items [{image, name, price, note, link}], cta; prices only from the prompt
+- chapters (stack|split): eyebrow, title, items [{title, text, motif: orbit|wave|horizon|bloom|grid|stairs|none}]
+- cases (rail|list): eyebrow, title, items [{year, title, role, client, text, image, credits (one name per line), link}]
+- annotated (portrait|wide): eyebrow, title, subtitle, status, image, items [{label}] (2 to 6 short labels)
+- hero also has portrait (centered copy over a tall portrait), ambient (a moving line field), runway (a tall editorial photo) and minimal (name card)
 - footer (columns|simple): tagline
 Icons: leaf sprout sun droplet scissors shield clock calendar pin phone mail heart check sparkle bolt home key users chat camera music mic ticket book cap code chart globe truck wrench brush coffee utensils wine gift smile layers compass rocket pen paw car hammer tooth scale dumbbell lotus bed bath area.
 Collection items: posts {title, date, excerpt, body, image}; listings {title, status, price, address, beds, baths, sqft, text, image}; tracks {title, length}; menu {title, category, text, price}. Include a collection only when a section lists it.
@@ -214,7 +259,7 @@ export const isPlaceholder = (s) => /\[[^\]]{1,60}\]/.test(String(s || ''));
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const lc = (s) => (s ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 
-const LIMITS = { eyebrow: 60, label: 40, value: 24, period: 24, price: 32, time: 32, date: 40, day: 40, length: 12, status: 32, beds: 12, baths: 12, sqft: 16, lot: 24, year: 12, button: 32, name: 80, role: 80, caption: 140, q: 180, tagline: 200, note: 160, title: 140, category: 40, excerpt: 320, alt: 160, prompt: 400 };
+const LIMITS = { mark: 12, client: 80, eyebrow: 60, label: 40, value: 24, period: 24, price: 32, time: 32, date: 40, day: 40, length: 12, status: 32, beds: 12, baths: 12, sqft: 16, lot: 24, year: 12, button: 32, name: 80, role: 80, caption: 140, q: 180, tagline: 200, note: 160, title: 140, category: 40, excerpt: 320, alt: 160, prompt: 400 };
 const TYPE_LIMIT = { text: 140, para: 1000, long: 12000, list: 1200 };
 
 function clean(v, max = 140, multiline = false) {
@@ -440,6 +485,15 @@ function emphasizeTail(t) {
   return `${w.slice(0, w.length - k).join(' ')} *${w.slice(-k).join(' ')}.*`.trim();
 }
 
+
+/** "making waxed jackets, wool coats and travel trousers" -> ['waxed jackets', 'wool coats', 'travel trousers'] */
+function nounList(raw) {
+  const m = String(raw).match(/\b(?:making|makes|make|selling|sells|sell|offering|offers|designing|designs|stocking|stocks)\s+([^.;]{4,180})/i);
+  if (!m) return [];
+  return m[1].split(/,\s*|\s+and\s+|\s*&\s*/).map((x) => x.trim().replace(/^(and|or|the|a|an)\s+/i, '')).filter((x) => x && x.split(' ').length <= 5).slice(0, 6);
+}
+const singular = (s) => String(s).replace(/ies$/i, 'y').replace(/(?<![su])s$/i, '');
+
 const fill = (tpl, N, L) => tpl
   .replace(/\{ in L\}/g, L && !N.includes(L) ? ` in ${L}` : '')
   .replace(/\{L\|([^}]*)\}/g, (_, d) => (L && !N.includes(L) ? L : d))
@@ -482,6 +536,12 @@ export function newSection(type, site = {}) {
     schedule: () => sec('schedule', 'list', { eyebrow: 'Schedule', title: 'What is *on*', subtitle: '', items: [['[Day]', '[Time]', 'First item', ''], ['[Day]', '[Time]', 'Second item', '']].map(([day, time, title, text]) => ({ day, time, title, text, link: { label: '', href: '' }, ph: true })) }),
     menu: () => sec('menu', 'columns', { eyebrow: 'Menu', title: 'From the *kitchen*', subtitle: '' }),
     footer: () => sec('footer', 'columns', { tagline: site.tagline || '', social: [] }, 'inv'),
+    statement: () => sec('statement', 'center', { eyebrow: '', text: 'Say the one thing you want every visitor to remember, in a sentence or two.', note: '', mark: '' }),
+    lookbook: () => sec('lookbook', 'full', { eyebrow: 'Lookbook', title: '', items: [0, 1, 2].map((k) => ({ image: im(['a model in a long coat walking through a concrete courtyard, editorial fashion photograph', 'a close crop of a wool jacket collar in soft daylight', 'two people in neutral outerwear on a city bridge at dusk'][k]), caption: `Look ${String(k + 1).padStart(2, '0')}`, note: '' })) }),
+    products: () => sec('products', 'grid', { eyebrow: 'Shop', title: 'New *in*', subtitle: '', cta: { label: '', href: '' }, items: [0, 1, 2, 3].map((k) => ({ image: im(`a studio product photo of piece ${k + 1}, plain backdrop`), name: `Piece ${k + 1}`, price: '[Price]', note: '', link: { label: '', href: '' }, ph: true })) }),
+    chapters: () => sec('chapters', 'stack', { eyebrow: 'Manifesto', title: '', items: [['Something is *out of balance*', 'Name the problem plainly, with one fact you can stand behind.', 'wave'], ['What we *believe*', 'Say what you hold to be true, and what you will not compromise on.', 'horizon'], ['What happens *next*', 'Tell people how to be part of it.', 'stairs']].map(([title, text, motif]) => ({ title, text, motif })) }),
+    cases: () => sec('cases', 'list', { eyebrow: 'Work', title: 'Selected *projects*', items: [0, 1, 2].map((k) => ({ year: String(new Date().getFullYear() - k * 2), title: `[Project ${k + 1}]`, role: '[Your role]', client: '[Client or team]', text: 'The problem, what you did and what changed, in two sentences.', image: im('an app interface shown on a laptop, clean studio light'), credits: '', link: { label: '', href: '' }, ph: true })) }),
+    annotated: () => sec('annotated', 'portrait', { eyebrow: 'How it works', title: 'Every *detail*, kept', subtitle: '', status: 'Working', image: im('a studio portrait in soft daylight, plain warm backdrop'), items: ['First detail', 'Second detail', 'Third detail', 'Fourth detail'].map((label) => ({ label })) }),
   };
   return (make[type] || make.features)();
 }
@@ -698,6 +758,117 @@ export function templateSite({ prompt = '', kind = 'business', style } = {}) {
         footer(tagline),
       ], ''),
     ];
+  } else if (kind === 'shop') {
+    const fashion = /wear|cloth|apparel|fashion|jacket|coat|dress|knit|denim|label|trouser|shirt|garment|parka/i.test(r.raw);
+    const goods = nounList(r.raw).map((g) => cap(singular(g)));
+    const pieces = goods.length ? goods : fashion ? ['Field jacket', 'Wool coat', 'Travel trouser', 'Overshirt'] : ['[Product one]', '[Product two]', '[Product three]', '[Product four]'];
+    const colours = fashion ? ['Black', 'Olive', 'Rust', 'Stone', 'Navy', 'Chalk'] : ['Natural', 'Charcoal', 'Sand', 'Clay', 'Ink', 'Moss'];
+    const shot = (k) => (fashion ? `a model wearing a ${lc(colours[k % colours.length])} ${lc(pieces[k % pieces.length])}, full length, plain studio backdrop` : `a studio product photo of a ${lc(colours[k % colours.length])} ${lc(pieces[k % pieces.length])}, plain backdrop`);
+    const products = (n) => Array.from({ length: n }, (_, k) => ({ image: im(shot(k)), name: pieces[k % pieces.length], price: r.price || '[Price]', note: colours[k % colours.length], link: { label: '', href: '' }, ...(r.price ? {} : { ph: true }) }));
+    const what = r.desc ? r.desc.replace(/^(a|an)\s+/i, '') : fashion ? 'a small clothing label' : 'a small shop';
+    tagline = cap(`${what.replace(/\s+(making|selling|with)\s.*$/i, '')}${L && !what.includes(L) ? ` in ${L}` : ''}.`);
+    accent = '#111111';
+    navCta = link('Shop', '/shop');
+    const looks = fashion ? ['a model in a long coat walking through a concrete courtyard, editorial fashion photograph, soft daylight', 'a close crop of a waxed cotton collar and brass snaps in hard sunlight', 'two people in neutral outerwear standing on a city bridge at dusk', 'a model sitting on stone steps in wide trousers, overcast light', 'a rail of jackets in a bright white studio'] : ['the shop interior with objects on plinths, soft daylight', 'a close crop of hands holding a finished piece', 'a still life of the collection on linen', 'a workshop bench with tools and materials', 'the storefront at dusk'];
+    const plural = (goods.length ? nounList(r.raw).map(lc) : fashion ? ['field jackets', 'wool coats', 'travel trousers'] : ['a few good things']).slice(0, 3);
+    const statement = `${N} makes ${plural.join(', ').replace(/, ([^,]*)$/, ' and $1')}${L ? ` in ${L}` : ''}, in small runs. Made to be used hard, cut to last for years, and sold without the noise.`;
+    pages = [
+      page('Home', [
+        sec('hero', 'runway', { eyebrow: `Collection 01${L ? ` · ${L}` : ''}`, title: N, subtitle: cap(`${what}.`.replace(/\.\.$/, '.')), cta: link('Shop the collection', '/shop'), cta2: link('Lookbook', '/lookbook'), note: `${pieces.length * 2} pieces`, image: im(looks[0]) }),
+        sec('products', 'grid', { eyebrow: 'New in', title: 'Collection', subtitle: '', items: products(8), cta: link('See every piece', '/shop') }),
+        sec('statement', 'center', { eyebrow: '', text: statement, note: '', mark: '' }),
+        sec('lookbook', 'full', { eyebrow: 'Lookbook', title: 'Season one', items: looks.slice(1, 4).map((p, k) => ({ image: im(p), caption: `Look ${String(k + 1).padStart(2, '0')}`, note: pieces[k % pieces.length] })) }),
+        sec('products', 'lineup', { eyebrow: 'Shop by piece', title: 'The *line-up*', subtitle: '', items: products(Math.min(8, pieces.length * 2)), cta: { label: '', href: '' } }),
+        sec('signup', 'band', { eyebrow: 'Letters', title: 'First look at *new pieces*', text: 'One short email when something new is ready. Nothing else.', button: 'Subscribe', note: 'Unsubscribe any time.' }),
+        footer(tagline),
+      ], ''),
+      page('Shop', [banner('Shop', 'All *pieces*', `${pieces.length * 3} pieces in ${colours.length} colours.`), sec('products', 'grid', { eyebrow: '', title: '', subtitle: '', items: products(12), cta: { label: '', href: '' } }), footer(tagline)]),
+      page('Lookbook', [banner('Lookbook', 'Season *one*', ''), sec('lookbook', 'pair', { eyebrow: '', title: '', items: looks.map((p, k) => ({ image: im(p), caption: `Look ${String(k + 1).padStart(2, '0')}`, note: pieces[k % pieces.length] })) }), sec('statement', 'left', { eyebrow: 'Notes', text: '[A few lines on the season: where it was shot, what it is about.]', note: '', mark: '' }), footer(tagline)]),
+      page('About', [
+        banner('About', `About *${N}*`, ''),
+        sec('about', 'split', { eyebrow: 'Studio', title: 'Made in *small runs*', text: `${N} is ${r.desc ? lc(r.desc) : what}${L && !what.includes(L) ? ` in ${L}` : ''}. [Add who makes the pieces and where.]\n\nWe make a few things well, repair what we sell, and keep every piece in production for as long as people want it.`, points: [{ text: 'Small runs, no seasons of waste' }, { text: 'Free repairs for the first year' }, { text: '[Where the fabric comes from]' }], cta: { label: '', href: '' }, image: im(looks[4]) }),
+        sec('faq', 'columns', { eyebrow: 'Service', title: 'Shipping, returns and *care*', subtitle: '', items: faqItems([['Where do you ship?', '[List the countries you ship to.]'], ['How do returns work?', '[Your return window and how to start one.]'], ['How do the pieces fit?', '[A line on fit, and where to find the size guide.]'], ['How do I care for it?', '[Washing and care, in plain words.]']]) }),
+        sec('contact', 'centered', { eyebrow: '', title: 'Write to *us*', text: 'Questions about sizing, orders or stockists. We reply within a day.', hours: '', button: 'Send' }),
+        footer(tagline),
+      ]),
+    ];
+  } else if (kind === 'manifesto') {
+    const belief = (r.raw.match(/\bbelieves?\s+(?:that\s+)?([^.;]{6,160})/i) || [])[1];
+    const thesis = belief ? cap(belief.replace(/[.\s]+$/, '')) : 'There is a better way to live with the things we make';
+    const what = r.desc ? r.desc.replace(/\s+(?:that|who)\s+believes?.*$/i, '') : 'a small group of people';
+    const year = (r.raw.match(/\b(19|20)\d\d\b/) || [])[0] || String(new Date().getFullYear());
+    tagline = `${thesis}.`;
+    accent = '#ff5a1f';
+    navCta = link('Join us', '#signup');
+    pages = [
+      page('Home', [
+        sec('hero', 'ambient', { eyebrow: `${N} · Manifesto`, title: emphasizeTail(thesis), subtitle: `Why ${N} exists, what we believe, and what we are going to do about it.`, cta: link('Read the manifesto', '#chapters'), cta2: { label: '', href: '' }, note: '', image: im('') }),
+        sec('statement', 'reveal', { eyebrow: '', text: `We built a world that moves faster than we do. ${N} is ${lc(what)}, and this is what we believe.`, note: '', mark: '' }),
+        sec('chapters', 'stack', { eyebrow: '', title: '', items: [
+          ['Something is *out of balance*', `${thesis}. Most of us feel it long before we can name it. [Add one fact or story that shows the problem.]`, 'wave'],
+          ['The old answers are *not enough*', 'Good intentions and small fixes have not changed the outcome. The tools we keep reaching for were made for a different time.', 'grid'],
+          ['What we *believe*', `${thesis}. We say it in public so that you can hold us to it.`, 'horizon'],
+          ['What we are *building*', `${N} is ${lc(what)}. [Say plainly what you make or do, and who it is for.]`, 'orbit'],
+          ['What happens *next*', 'Change starts small: one person, one street, one decision at a time. Here is how to be part of it.', 'stairs'],
+        ].map(([title, text, motif]) => ({ title, text, motif })) }),
+        sec('statement', 'framed', { eyebrow: 'Our promise', text: `${thesis}.`, note: N, mark: year }),
+        sec('signup', 'band', { eyebrow: 'Join', title: 'Be part of *what comes next*', text: 'Occasional letters about the work, and ways to help.', button: 'Sign the manifesto', note: 'No spam. Leave any time.' }),
+        sec('footer', 'simple', { tagline, social: [] }),
+      ], ''),
+    ];
+  } else if (kind === 'cases') {
+    const who = r.person || N;
+    const role = (r.raw.match(/\b(?:a|an)\s+([a-z][a-z\s&-]{2,40}?(?:designer|developer|engineer|architect|director|photographer|writer|researcher|illustrator|maker|artist|strategist|producer))\b/i) || [])[1] || 'designer';
+    const now = new Date().getFullYear();
+    const since = +((r.raw.match(/\b(?:since|from)\s+((?:19|20)\d\d)\b/i) || [])[1] || now - 12);
+    const things = ((r.raw.match(/\b(?:shipped|built|designed|made|worked on|launched|created)\s+([^.;]{4,160}?)(?:\s+since\b|[.;]|$)/i) || [])[1] || '').split(/,\s*|\s+and\s+/).map((x) => x.trim().replace(/^(a|an|the)\s+/i, '')).filter(Boolean);
+    const titles = [...things.map((t) => cap(singular(t))), '[Project]', '[Project]', '[Project]', '[Project]', '[Project]', '[Project]'].slice(0, 6);
+    const step = Math.max(1, Math.round((now - since) / 5));
+    const surf = (t, k) => (k % 3 === 1 ? `a ${lc(t)} app on a phone, clean studio light` : `the ${lc(t)} interface on a laptop, clean studio light`);
+    const items = titles.map((t, k) => ({ year: String(k === 5 ? since : now - k * step), title: t, role: k % 2 ? 'Interaction design' : 'Lead designer', client: '[Client or team]', text: `[What ${t === '[Project]' ? 'it' : lc(t)} is, what you did and what changed, in two sentences.]`, image: im(surf(t, k)), credits: '', link: { label: '', href: '' }, ph: true }));
+    tagline = `${cap(role)}${L ? ` in ${L}` : ''}.`;
+    accent = '#2b59ff';
+    navCta = { label: '', href: '' };
+    pages = [
+      page('Home', [
+        sec('hero', 'minimal', { eyebrow: '', title: who, subtitle: `${cap(role)}${L ? ` in ${L}` : ''}. Work from ${since} to now, newest first.`, cta: link('Work', '/work'), cta2: link('About', '/about'), note: '', image: im('') }),
+        sec('cases', 'rail', { eyebrow: `${since} to ${now}`, title: 'Selected work', items }),
+        sec('statement', 'left', { eyebrow: 'Approach', text: 'I design the small moments people touch every day, and stay with them until they feel inevitable.', note: '', mark: '' }),
+        sec('cta', 'card', { title: 'Working on something *new*?', text: 'I take on one or two projects at a time.', cta: link('Get in touch', '/contact'), cta2: { label: '', href: '' } }),
+        sec('footer', 'simple', { tagline, social: [] }),
+      ], ''),
+      page('Work', [banner('Work', 'Year by *year*', ''), sec('cases', 'list', { eyebrow: '', title: '', items: items.map((x) => ({ ...x, image: { ...x.image } })) }), sec('footer', 'simple', { tagline, social: [] })]),
+      page('About', [
+        banner('About', `About *${who.split(' ')[0]}*`, ''),
+        sec('about', 'split', { eyebrow: '', title: `${cap(role)}${L ? `, ${L}` : ''}`, text: `${who} is a ${role}${L ? ` based in ${L}` : ''}. [Two sentences on your background and what you care about.]\n\n[Where you have worked, and what you are doing now.]`, points: [], cta: { label: '', href: '' }, image: im(`a natural portrait of a ${role} in a bright studio, soft window light`, `Portrait of ${who}`) }),
+        sec('timeline', 'vertical', { eyebrow: 'Path', title: 'So *far*', subtitle: '', items: items.slice(0, 4).map((x) => ({ date: x.year, title: x.title, text: x.role })) }),
+        sec('footer', 'simple', { tagline, social: [] }),
+      ]),
+      page('Contact', [banner('Contact', 'Say *hello*', 'A line about the project and a rough timeline is plenty.'), sec('contact', 'centered', { eyebrow: '', title: 'Send a *note*', text: 'I reply within two days.', hours: '', button: 'Send' }), sec('footer', 'simple', { tagline, social: [] })]),
+    ];
+  } else if (kind === 'product') {
+    const what = (r.raw.match(/\b(?:AI|app|tool|product|platform|model|assistant|studio|agent)\s+(?:that|which|to|for)\s+([^.]{6,140})/i) || [])[1] || 'does the hard part for you';
+    const visual = /character|portrait|face|avatar|photo|video|image|selfie|fashion|influenc|model/i.test(r.raw);
+    tagline = cap(`${N} ${lc(what)}.`);
+    accent = '#0b0b0c';
+    navCta = link('Start free', '#pricing');
+    const claim = visual ? 'The same face, *every frame.*' : what.length <= 56 ? emphasizeTail(cap(what)) : 'The hard part, *done for you.*';
+    const tags = visual ? ['Face matched', 'Hair matched', 'Light kept', 'Style set', 'Jewelry kept'] : ['Context read', 'Tone matched', 'Sources linked', 'Draft ready'];
+    const portrait = visual ? 'a studio portrait of the character, a young woman with freckles and a short bob, soft daylight, plain warm backdrop' : 'a person working calmly at a laptop in soft morning light, plain warm backdrop';
+    const scenes = visual ? ['the same woman sitting on brick steps in the city, candid street photo', 'the same woman holding a coffee in a cafe window, morning light', 'the same woman laughing on a rooftop at golden hour', 'the same woman walking a dog in a park, autumn', 'the same woman in a studio portrait with a red backdrop'] : ['a laptop screen with a calm writing interface', 'a phone showing a summary card', 'a team table with laptops and coffee', 'a tablet with a chart on a desk', 'an inbox with sorted messages on a screen'];
+    pages = [
+      page('Home', [
+        sec('hero', 'portrait', { eyebrow: `Introducing ${N}`, title: claim, subtitle: tagline, cta: link('Start free', '#pricing'), cta2: link('See how it works', '#demo'), note: '', image: im(portrait, visual ? 'Studio portrait of a character' : '') }),
+        sec('annotated', 'portrait', { eyebrow: 'How it works', title: visual ? 'Locked in, *detail by detail*' : 'It reads *everything* first', subtitle: visual ? `${N} learns a face once, then keeps every detail consistent in new photos and video.` : `${N} reads what you already have before it writes a word.`, status: visual ? 'Building your character' : 'Reading your context', image: im(portrait), items: tags.map((label) => ({ label })) }),
+        sec('features', 'bento', { eyebrow: '', title: visual ? 'One character. *Endless content.*' : `One tool. *Every workflow.*`, subtitle: '', items: (visual ? [['camera', 'From a prompt', 'Describe a scene and get the same person in it, from any angle.'], ['layers', 'From a reference', 'Drop in a photo of a place and put your character into it.'], ['sparkle', 'Any style', 'Street, studio, film or editorial. The face stays the same.'], ['bolt', 'Made for posting', 'Square, portrait and wide, ready for every platform.']] : [['bolt', 'Fast', 'Answers in seconds, not meetings.'], ['shield', 'Private', 'Your data is never used to train anything.'], ['layers', 'Connected', 'Works with the tools you already use.'], ['sparkle', 'Careful', 'Shows its sources so you can check its work.']]).map(([icon, title, text], k) => ({ icon, title, text, image: im(scenes[k]) })) }, 'inv'),
+        sec('gallery', 'strip', { eyebrow: '', title: visual ? 'See them *in motion*' : 'See it *at work*', subtitle: visual ? 'Every still can become a short video of the same character.' : '', items: scenes.map((p, k) => ({ image: im(p), caption: ['Any vibe', 'Showcase', 'Golden hour', 'Everyday', 'Studio'][k] })) }, 'inv'),
+        sec('timeline', 'steps', { eyebrow: 'Three steps', title: 'From idea to *post*', subtitle: '', items: [['01', visual ? 'Create a character' : 'Connect your work', visual ? 'Start from a description or a few photos.' : 'Link the documents and tools you already use.'], ['02', visual ? 'Lock the identity' : 'Ask for what you need', visual ? `${N} remembers the face, hair and style.` : 'Plain words are enough.'], ['03', visual ? 'Make anything' : 'Review and ship', visual ? 'Photos and video, at any scale.' : 'Check the sources, then send it.']].map(([date, title, text]) => ({ date, title, text })) }),
+        sec('pricing', 'cards', { eyebrow: 'Pricing', title: 'Start free, *grow later*', subtitle: '', note: '', items: [['Free', '$0', 'To try it out', false], ['Creator', '[Price]', 'For regular posting', true], ['Studio', '[Price]', 'For teams and brands', false]].map(([name, price, text, featured]) => ({ name, price, period: price === '$0' ? '' : '/ month', text, features: visual ? 'Characters you can keep\nPhotos and video\nCommercial use' : 'Unlimited questions\nSources on every answer\nEmail support', cta: link(featured ? 'Start free trial' : 'Get started', '#signup'), featured, ph: price !== '$0' })) }),
+        sec('faq', 'accordion', { eyebrow: 'FAQ', title: 'Questions, *answered*', subtitle: '', items: faqItems([[`What is ${N}?`, tagline], ['Who owns what I make?', '[Say who owns the output and how it can be used.]'], ['Which platforms does it support?', '[List the platforms and export formats.]'], ['What about my data?', '[Say what you store, for how long, and how to delete it.]']]) }),
+        sec('signup', 'card', { eyebrow: 'Get early access', title: `Start with *${N}*`, text: 'Leave your email and we will send an invite.', button: 'Request access', note: 'No spam. Unsubscribe any time.' }),
+        footer(tagline),
+      ], ''),
+    ];
   } else {
     // launch: a course or a book
     const isBook = /\bbook|novel|guide|memoir|cookbook/i.test(r.raw);
@@ -769,6 +940,7 @@ function cleanField(type, key, v, opts) {
   if (type === 'href') return safeHref(v);
   if (type === 'bool') return !!v;
   if (type === 'icon') return ICON_NAMES.includes(v) ? v : 'sparkle';
+  if (type === 'motif') return MOTIFS[v] ? v : 'orbit';
   if (type === 'url') return clean(v, 400);
   if (type === 'audio') return opts.source === 'user' && /^asset:[\w-]{4,40}$/.test(v || '') && opts.assets?.has(String(v).slice(6)) ? v : '';
   if (type === 'list') return clean(Array.isArray(v) ? v.join('\n') : v, TYPE_LIMIT.list, true);

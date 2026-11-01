@@ -3,7 +3,9 @@
 // listens for clicks, so every heading, paragraph, button label and image is editable in place.
 
 import { KINDS, SECTIONS, SECTION_GROUPS, COLLECTIONS, TONES, templateSite, sanitizeSite, newSection, newItem, getIn, setIn, uid, slugify, checklist, isPlaceholder, embedFor, tidySite } from '../website/spec.js';
-import { STYLES, PALETTES, FONTS, HEADING_FONTS, BODY_FONTS, themeFor, themeCss, fontsHref, contrastReport, tokens, headingWeight } from '../website/theme.js';
+import { STYLES, PALETTES, FONTS, HEADING_FONTS, BODY_FONTS, themeFor, themeCss, fontsHref, contrastReport, tokens, headingWeight, fontFamily } from '../website/theme.js';
+import { TEMPLATES, TEMPLATES_LIST, buildTemplate } from '../website/templates.js';
+import { MOTIFS } from '../website/art.js';
 import { renderParts, renderSingle, makeContext, usedCollection } from '../website/render.js';
 import { renderSection, inline, paras } from '../website/sections.js';
 import { BASE_CSS, EDIT_CSS } from '../website/css.js';
@@ -34,7 +36,7 @@ const state = {
   past: [], future: [], lastKey: '', lastAt: 0,
   kind: 'business', style: 'friendly', styleTouched: false, source: 'template',
   editing: null, tab: 'create', cmsCol: 'posts', open: new Set(),
-  frameReady: false, insertAfter: null, imgPath: null, imgRatio: 4 / 3, busy: false, fillCtl: null, replaying: false, demo: false,
+  frameReady: false, template: null, insertAfter: null, imgPath: null, imgRatio: 4 / 3, busy: false, fillCtl: null, replaying: false, demo: false,
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -711,13 +713,14 @@ function boolField(label, path) {
   return el('label', { class: 'ws-toggle' }, cb, label);
 }
 
-const LABEL = { eyebrow: 'Label above the title', title: 'Title', subtitle: 'Intro', text: 'Text', note: 'Small print', hours: 'Opening hours', button: 'Button text', tagline: 'Tagline', caption: 'Caption', url: 'Link or map: address', status: 'Status', price: 'Price', address: 'Address', beds: 'Beds', baths: 'Baths', sqft: 'Square feet', lot: 'Lot size', year: 'Year built', name: 'Name', role: 'Role', bio: 'Short bio', quote: 'Quote', q: 'Question', a: 'Answer', value: 'Value', label: 'Label', date: 'Date or step', day: 'Day', time: 'Time', period: 'Per', features: 'Included (one per line)', excerpt: 'Summary', body: 'Article', length: 'Length', category: 'Category' };
+const LABEL = { mark: 'Big numeral', client: 'Client or team', credits: 'Credits (one per line)', year: 'Year', status: 'Status', eyebrow: 'Label above the title', title: 'Title', subtitle: 'Intro', text: 'Text', note: 'Small print', hours: 'Opening hours', button: 'Button text', tagline: 'Tagline', caption: 'Caption', url: 'Link or map: address', status: 'Status', price: 'Price', address: 'Address', beds: 'Beds', baths: 'Baths', sqft: 'Square feet', lot: 'Lot size', year: 'Year built', name: 'Name', role: 'Role', bio: 'Short bio', quote: 'Quote', q: 'Question', a: 'Answer', value: 'Value', label: 'Label', date: 'Date or step', day: 'Day', time: 'Time', period: 'Per', features: 'Included (one per line)', excerpt: 'Summary', body: 'Article', length: 'Length', category: 'Category' };
 const lbl = (k, def) => def?.labels?.[k] || LABEL[k] || k[0].toUpperCase() + k.slice(1);
 
 function fieldFor(type, key, path, def) {
   if (type === 'image') return imageField(lbl(key, def) === 'image' ? 'Image' : 'Image', path);
   if (type === 'link') return linkField(lbl(key, def), path);
   if (type === 'icon') return iconField(path);
+  if (type === 'motif') return selectField('Line art', readPath(path) || 'orbit', Object.entries(MOTIFS), (val) => mutate((site) => writePath(site, path, val), { render: renderHintFor(path), panels: false }));
   if (type === 'bool') return boolField(key === 'featured' ? 'Highlight this one' : lbl(key, def), path);
   if (type === 'href') return textField('Link', path, { max: 400, render: renderHintFor(path) });
   if (type === 'url') {
@@ -818,7 +821,7 @@ function styleCard(id, checked, onpick) {
   const pal = PALETTES[st.palette][st.mode];
   const acc = PALETTES[st.palette].accent;
   const b = el('button', { type: 'button', class: 'ws-style', role: 'radio', 'aria-checked': String(checked), onclick: onpick, 'data-style': id },
-    el('span', { class: 'ws-swatch', style: `background:${pal.bg};color:${pal.text};border-radius:${Math.min(st.radius, 12)}px` }, el('b', { style: `font-family:'${st.heading}',serif;font-weight:${Math.min(st.hw, FONTS[st.heading].w[1])}` }, 'Aa'), el('i', { style: `background:${acc}` })),
+    el('span', { class: 'ws-swatch', style: `background:${pal.bg};color:${pal.text};border-radius:${Math.min(st.radius, 12)}px` }, el('b', { style: `font-family:'${fontFamily(st.heading)}',serif;font-weight:${Math.min(st.hw, FONTS[st.heading].w[1])};font-stretch:${FONTS[st.heading].wdth || 100}%` }, 'Aa'), el('i', { style: `background:${acc}` })),
     el('strong', {}, st.name), el('small', {}, st.blurb));
   return b;
 }
@@ -1017,6 +1020,7 @@ function newProject(site, { demo = false } = {}) {
   state.view = null;
   state.sel = null;
   state.open.clear();
+  state.template = null;
   state.kind = site.kind;
   if (STYLES[site.theme.style]) state.style = site.theme.style;
   frame.contentWindow?.scrollTo(0, 0);
@@ -1159,6 +1163,34 @@ function loadRecord(rec) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Templates: one-click example sites (the picker in Create, the dialog, and /website?template=<id>)
+// ---------------------------------------------------------------------------------------------
+
+function templateCard(t, big = false) {
+  return el('button', { type: 'button', class: `ws-tpl${big ? ' big' : ''}`, 'data-template': t.id, 'aria-current': String(state.template === t.id), onclick: () => openTemplate(t.id) },
+    el('span', { class: 'ws-tpl-img' }, el('img', { src: t.thumb, alt: '', width: 640, height: 400, loading: 'lazy', decoding: 'async' }), t.isNew ? el('span', { class: 'ws-tpl-new' }, 'New') : null),
+    el('strong', {}, t.title), el('small', {}, t.description));
+}
+function renderTemplates() {
+  $('#tpl-strip').replaceChildren(...TEMPLATES_LIST.map((t) => templateCard(t)));
+  $('#tpl-grid').replaceChildren(...TEMPLATES_LIST.map((t) => templateCard(t, true)));
+}
+async function openTemplate(id) {
+  const site = buildTemplate(id);
+  if (!site) return false;
+  commitEdit();
+  if (state.id && !state.demo) await save();
+  newProject(site, { demo: true });
+  state.template = id;
+  $('#prompt').value = site.prompt || '';
+  syncCreate();
+  if ($('#tpl-dialog').open) $('#tpl-dialog').close();
+  renderTemplates();
+  toast(`${TEMPLATES[id].title}: an example site. Click any text to make it yours; it saves once you edit.`);
+  return true;
+}
+
+// ---------------------------------------------------------------------------------------------
 // Image dialog
 // ---------------------------------------------------------------------------------------------
 
@@ -1267,7 +1299,7 @@ function buildLibrary() {
   const groups = SECTION_GROUPS.map((g) => {
     const types = Object.entries(SECTIONS).filter(([, d]) => d.group === g);
     if (!types.length) return null;
-    const ic = { hero: 'layers', logos: 'globe', features: 'sparkle', about: 'book', gallery: 'camera', testimonials: 'chat', pricing: 'ticket', faq: 'compass', team: 'users', timeline: 'clock', stats: 'chart', cta: 'bolt', contact: 'mail', signup: 'heart', embed: 'play', posts: 'pen', listings: 'home', listing: 'key', tracks: 'music', schedule: 'calendar', menu: 'utensils', footer: 'layers' };
+    const ic = { hero: 'layers', logos: 'globe', features: 'sparkle', about: 'book', gallery: 'camera', testimonials: 'chat', pricing: 'ticket', faq: 'compass', team: 'users', timeline: 'clock', stats: 'chart', cta: 'bolt', contact: 'mail', signup: 'heart', embed: 'play', posts: 'pen', listings: 'home', listing: 'key', tracks: 'music', schedule: 'calendar', menu: 'utensils', footer: 'layers', statement: 'pen', lookbook: 'camera', products: 'gift', chapters: 'book', cases: 'clock', annotated: 'sparkle' };
     return el('section', {}, el('h3', {}, g), el('div', { class: 'ws-lib-grid' }, ...types.map(([t, d]) => el('button', { type: 'button', 'data-type': t, onclick: () => addSection(t) }, el('span', { class: 'ico', html: icon(ic[t] || 'sparkle', 'i') }), el('span', {}, el('strong', {}, d.name), el('small', {}, d.hint))))));
   }).filter(Boolean);
   $('#lib').replaceChildren(...groups);
@@ -1285,6 +1317,7 @@ function wire() {
     switchTab(n.id.slice(2));
   });
   $('#prompt').addEventListener('input', syncCreate);
+  $('#all-templates').addEventListener('click', () => $('#tpl-dialog').showModal());
   $('#generate').addEventListener('click', generate);
   $('#fill-images').addEventListener('click', fillImages);
   $('#status-cancel').addEventListener('click', () => state.fillCtl?.abort());
@@ -1362,6 +1395,7 @@ async function boot() {
   wire();
   buildLibrary();
   renderCreate();
+  renderTemplates();
   layoutFrame();
   await initFrame();
   let opened = false;
@@ -1381,6 +1415,16 @@ async function boot() {
     }
     history.replaceState(null, '', location.pathname + location.search);
   }
+  const tpl = new URLSearchParams(location.search).get('template');
+  if (tpl) {
+    if (!opened) {
+      opened = await openTemplate(tpl);
+      if (!opened) toast('That template was not found. Pick one under Start from a template.', 'error');
+    }
+    const q = new URLSearchParams(location.search);
+    q.delete('template');
+    history.replaceState(null, '', location.pathname + (q.toString() ? `?${q}` : '') + location.hash);
+  }
   if (!opened) {
     let recent = null;
     try { recent = (await store.all()).filter((x) => x.kind === 'site').sort((a, b) => b.updated - a.updated)[0]; } catch { /* private mode */ }
@@ -1388,21 +1432,33 @@ async function boot() {
   }
   if (!opened) {
     // a first example straight away, from the template (no model call until the visitor asks)
-    newProject(templateSite({ prompt: KINDS.business.example, kind: 'business' }), { demo: true });
+    newProject(buildTemplate('local-business'), { demo: true });
   }
   syncCreate();
   renderSites();
   switchTab('create');
   // tiny subset of each style's heading font for the style cards ("Aa" only)
-  const fams = [...new Set(Object.values(STYLES).map((s) => `family=${s.heading.replace(/ /g, '+')}:wght@${Math.min(s.hw, FONTS[s.heading].w[1])}`))];
-  document.head.append(el('link', { rel: 'stylesheet', href: `https://fonts.googleapis.com/css2?${fams.join('&')}&text=Aa&display=swap` }));
+  const fams = new Map();
+  for (const st of Object.values(STYLES)) {
+    const f = FONTS[st.heading];
+    const fam = fontFamily(st.heading);
+    const cur = fams.get(fam) || new Set();
+    cur.add(`${f.wdth || 100},${Math.min(st.hw, f.w[1])}`);
+    fams.set(fam, cur);
+  }
+  const q = [...fams].map(([fam, t]) => {
+    const tuples = [...t].map((x) => x.split(',').map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const wide = tuples.some(([d]) => d !== 100);
+    return `family=${fam.replace(/ /g, '+')}:${wide ? `wdth,wght@${tuples.map((x) => x.join(',')).join(';')}` : `wght@${tuples.map((x) => x[1]).join(';')}`}`;
+  });
+  document.head.append(el('link', { rel: 'stylesheet', href: `https://fonts.googleapis.com/css2?${q.join('&')}&text=Aa&display=swap` }));
   window.mzSite = {
     state, mutate, undo, redo, generate, select, setBreakpoint, goPage, openItem, renderPreview, readPath, here, commitEdit,
     apply: (site) => { newProject(site); scheduleSave(); },
     zip: () => exportZip(state.site, state.assets, { doc: frame.contentDocument }),
     single: () => exportSingle(state.site, state.assets),
     share: () => shareUrl(state.site),
-    emptySlots, fillImages, addSection, openImage, save, tokens, headingWeight,
+    emptySlots, fillImages, addSection, openImage, save, tokens, headingWeight, openTemplate, templates: TEMPLATES_LIST,
   };
   document.body.dataset.ready = '1';
 }
