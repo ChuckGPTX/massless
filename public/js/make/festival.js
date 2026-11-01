@@ -101,7 +101,7 @@ export default {
       ['Northern Lights Folk Gathering', '2–4 August 2027', 'Hollow Hill Farm', 'The Wren Sisters\nOld Pine Stringband\nAnnick Dalla\nCalloway Road', 'Camping · Workshops · Family tickets', 'folk'],
       ['Afterhours Electronic Festival', '18–19 September 2027', 'The Old Gasworks', 'NOVA HALE\nKiln\nSister Static\nUnderpass Choir', 'Two stages · Until 4 am · 18+', 'electronic'],
       ['Midsummer Strings', '21 June 2027', 'Glasshouse Hall', 'The Arden Quartet\nLina Petrov, cello\nYoung Sinfonia\nRuth Amsel, violin', 'Evening concerts · Garden picnic · Free under 12', 'classical'],
-      ['Blue Hour Jazz Nights', '5–7 October 2027', 'The Corn Exchange', 'Sol Ibarra Sextet\nNight Owl Trio\nGrace Mbeki\nThe Late Set Orchestra', 'Live music · Late bar · All ages', 'jazz'],
+      ['Copper Lantern Jazz Nights', '5–7 October 2027', 'The Corn Exchange', 'Sol Ibarra Sextet\nNight Owl Trio\nGrace Mbeki\nThe Late Set Orchestra', 'Live music · Late bar · All ages', 'jazz'],
     ];
     const [name, dates, venue, lineup, badges, genre] = ideas[Math.floor(r() * ideas.length)];
     const pk = Object.keys(PALETTES);

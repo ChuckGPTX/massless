@@ -278,11 +278,11 @@
  },
  {
   "workflow": "festival",
-  "id": "fest-blue-hour",
-  "title": "Blue Hour Jazz Nights",
+  "id": "fest-copper-lantern",
+  "title": "Copper Lantern Jazz Nights",
   "note": "Oxblood · two-tone photographs",
   "state": {
-   "name": "Blue Hour Jazz Nights",
+   "name": "Copper Lantern Jazz Nights",
    "dates": "5–7 October 2027",
    "venue": "The Corn Exchange, Market Street",
    "lineup": "Sol Ibarra Sextet\nNight Owl Trio\nGrace Mbeki\nThe Late Set Orchestra",
@@ -299,7 +299,7 @@
    "p3": "/media/make/samples/fest-5.webp",
    "p4": "/media/make/samples/fest-3.webp"
   },
-  "image": "/media/make/showcase/fest-blue-hour.webp",
+  "image": "/media/make/showcase/fest-copper-lantern.webp",
   "width": 600,
   "height": 750
  },
