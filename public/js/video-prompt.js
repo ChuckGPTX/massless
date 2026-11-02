@@ -30,8 +30,8 @@ async function mount(el) {
   if (c.promoVideo?.on) engines.push({id:'free',label:'Fast',hint:'Your video will appear here when it is ready.'});
   const prompt = h('textarea',{id:'vp-prompt',rows:5,maxlength:1200,placeholder:'Describe the scene, the movement, the feeling…','aria-label':'Describe your video'}); prompt.value=store.get();
   const engine = h('select',{id:'vp-engine','aria-label':'Generation mode'},...engines.map(e=>h('option',{value:e.id,text:e.label})));
-  const shape = h('select',{id:'vp-shape','aria-label':'Aspect ratio'},h('option',{value:'16:9',text:'Landscape · 16:9'}),h('option',{value:'9:16',text:'Portrait · 9:16'}),h('option',{value:'1:1',text:'Square · 1:1'}));
-  const resolution = h('select',{'aria-label':'Video resolution'},h('option',{value:'480p',text:'480p'}),h('option',{value:'720p',text:'720p'}));
+  const shape = h('select',{id:'vp-shape','aria-label':'Aspect ratio'},h('option',{value:'auto',text:'Auto · follows first frame',hidden:true}),h('option',{value:'16:9',text:'Landscape · 16:9'}),h('option',{value:'9:16',text:'Portrait · 9:16'}),h('option',{value:'1:1',text:'Square · 1:1'}));
+  const resolution = h('select',{'aria-label':'Video resolution'},h('option',{value:'auto',text:'Automatic',hidden:true}),h('option',{value:'480p',text:'480p'}),h('option',{value:'720p',text:'720p'}));
   const go = h('button',{type:'submit',class:'btn-accent vp-go',form:'video-create-form'},'Generate video ↗');
   const retry = h('button',{type:'button',class:'btn-ghost',text:'Retry download',hidden:true});
   const stop = h('button',{type:'button',class:'btn-ghost',text:'Stop waiting',hidden:true});
@@ -53,7 +53,16 @@ async function mount(el) {
   const out=document.querySelector('#vp-output');
   let ctl,busy=false,frame=null,frameVersion=0,outputUrl,recoveryId;
   const setStatus=(text,error=false)=>{status.textContent=text;status.classList.toggle('is-error',error);};
-  const sync=()=>{const managed=engine.value==='managed-wan';resolution.querySelector('[value=\"480p\"]').disabled=managed;shape.querySelector('[value=\"1:1\"]').disabled=managed;if(managed){resolution.value='720p';if(shape.value==='1:1')shape.value='16:9';}hint.textContent=engines.find(e=>e.id===engine.value)?.hint||'';shape.closest('label').hidden=engine.value==='free';};
+  const sync=()=>{
+    const managed=engine.value==='managed-wan';
+    for(const select of [resolution,shape]){
+      for(const option of select.options){const available=(option.value==='auto')===managed;option.hidden=!available;option.disabled=!available;}
+      select.disabled=managed||busy;
+    }
+    if(managed){resolution.value='auto';shape.value='auto';}
+    else{if(resolution.value==='auto')resolution.value='720p';if(shape.value==='auto')shape.value='16:9';}
+    hint.textContent=engines.find(e=>e.id===engine.value)?.hint||'';shape.closest('label').hidden=engine.value==='free';
+  };
   const refresh=async()=>{
     sync(); if(busy)return;
     if(!engines.length){go.disabled=true;allowance.textContent='Generation is temporarily unavailable. Try Effects to animate a still.';return;}
@@ -84,7 +93,8 @@ async function mount(el) {
     const progress=message=>{setStatus(message);out.querySelector('.vp-progress p').textContent=message;};
     try{
       await accessToken();progress('Starting your video…');
-      const result=selected==='free'?await promoVideoJob({prompt:text,duration:5,resolution:selectedResolution,image:startFrame||undefined,signal:ctl.signal,onProgress:progress}):await gpuJob({job:'animate',engine:selected==='managed-wan'?selected:undefined,input:{prompt:text,mode:'quick',resolution:selectedResolution,aspect:selectedShape,...(startFrame?{image:startFrame.split(',')[1]}:{})},signal:ctl.signal,onProgress:p=>progress(p.message)});
+      // The hosted profile accepts a size hint; its output follows the source frame.
+      const result=selected==='free'?await promoVideoJob({prompt:text,duration:5,resolution:selectedResolution,image:startFrame||undefined,signal:ctl.signal,onProgress:progress}):await gpuJob({job:'animate',engine:selected==='managed-wan'?selected:undefined,input:{prompt:text,mode:'quick',resolution:selected==='managed-wan'?'720p':selectedResolution,aspect:selected==='managed-wan'?'16:9':selectedShape,...(startFrame?{image:startFrame.split(',')[1]}:{})},signal:ctl.signal,onProgress:p=>progress(p.message)});
       if(!result.blob?.size)throw new Error('The video was empty. Please try again.');
       if(outputUrl)URL.revokeObjectURL(outputUrl);outputUrl=URL.createObjectURL(result.blob);
       out.replaceChildren(h('div',{class:'vp-result-heading'},h('div',{},h('p',{class:'video-eyebrow',text:'READY FOR YOUR NEXT CHAPTER'}),h('h2',{text:'Your film is ready.'})),h('a',{href:outputUrl,download:'chucksi-video.mp4',class:'btn-accent',text:'Download MP4 ↓'})),h('video',{src:outputUrl,controls:true,autoplay:true,muted:true,loop:true,playsinline:true,'aria-label':'Generated video'}),h('p',{class:'vp-result-prompt',text}),h('div',{class:'vp-result-actions'},h('a',{href:'/cut/',class:'pill',text:'Caption & trim ↗'}),h('a',{href:'/library/',class:'pill',text:'My library ↗'})));
