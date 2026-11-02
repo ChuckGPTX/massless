@@ -141,6 +141,7 @@ export function initPublish(app) {
 
   async function publish(slug, update) {
     if (busy) return;
+    if (!session()) { show('out'); return; }
     const problem = formProblem();
     if (problem) { say(problem, 'warn'); return; }
     busy = true;
@@ -205,7 +206,7 @@ export function initPublish(app) {
     try { await navigator.clipboard.writeText($('#pub-url').value); app.toast('Link copied.'); } catch { $('#pub-url').select(); }
   });
   $('#pub-signin').addEventListener('click', async () => {
-    try { await app.persist(); } catch { /* still go */ }
+    try { await app.persist(); } catch (error) { say(error.message || 'Your draft could not be saved. Export a copy before signing in.', 'error'); return; }
     try { sessionStorage.setItem('chucksi.after-signin', '/website/'); sessionStorage.setItem(REOPEN, '1'); } catch { /* private mode */ }
     location.href = '/projects/#account';
   });

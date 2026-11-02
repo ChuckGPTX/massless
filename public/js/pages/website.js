@@ -5,6 +5,7 @@
 import { KINDS, SECTIONS, SECTION_GROUPS, COLLECTIONS, TONES, templateSite, sanitizeSite, newSection, newItem, getIn, setIn, uid, slugify, checklist, isPlaceholder, embedFor, tidySite } from '../website/spec.js';
 import { STYLES, PALETTES, FONTS, HEADING_FONTS, BODY_FONTS, themeFor, themeCss, fontsHref, contrastReport, tokens, headingWeight, fontFamily } from '../website/theme.js';
 import { TEMPLATES, TEMPLATES_LIST, buildTemplate } from '../website/templates.js';
+import { TEMPLATE_CATEGORIES, filterTemplates, personalizeSite, launchReview } from '../website/studio-tools.js';
 import { MOTIFS } from '../website/art.js';
 import { renderParts, renderSingle, makeContext, usedCollection, GEN_JS } from '../website/render.js';
 import { renderSection, inline, paras } from '../website/sections.js';
@@ -178,7 +179,7 @@ function scheduleSave() {
   $('#saved').textContent = 'Saving…';
   saveTimer = setTimeout(save, 600);
 }
-async function save() {
+async function save({ strict = false } = {}) {
   clearTimeout(saveTimer);
   if (!state.id || !state.site) return;
   const refs = state.past.slice(-40).join('') + state.future.join('') + snapshot();
@@ -190,6 +191,7 @@ async function save() {
   } catch (e) {
     $('#saved').textContent = 'Not saved';
     console.warn('Autosave failed', e);
+    if (strict) throw new Error('Your draft could not be saved on this device. Export a copy before leaving the editor.');
   }
   renderSites();
 }
@@ -1183,9 +1185,37 @@ function templateCard(t, big = false) {
     el('span', { class: 'ws-tpl-img' }, el('img', { src: t.thumb, alt: '', width: 640, height: 400, loading: 'lazy', decoding: 'async' }), t.isNew ? el('span', { class: 'ws-tpl-new' }, 'New') : null),
     el('strong', {}, t.title), el('small', {}, t.description));
 }
+let templateGoal = 'all';
 function renderTemplates() {
-  $('#tpl-strip').replaceChildren(...TEMPLATES_LIST.map((t) => templateCard(t)));
-  $('#tpl-grid').replaceChildren(...TEMPLATES_LIST.map((t) => templateCard(t, true)));
+  $('#tpl-strip').replaceChildren(...TEMPLATES_LIST.slice(0, 6).map((t) => templateCard(t)));
+  renderTemplateResults();
+  $('#tpl-goals').replaceChildren(...Object.entries(TEMPLATE_CATEGORIES).map(([key, title]) => el('button', {
+    type: 'button', 'aria-pressed': String(templateGoal === key), onclick: () => {
+      templateGoal = key;
+      for (const b of $('#tpl-goals').children) b.setAttribute('aria-pressed', String(b.textContent === title));
+      renderTemplateResults();
+    },
+  }, title)));
+}
+function renderTemplateResults() {
+  const results = filterTemplates(TEMPLATES_LIST, { category: templateGoal, query: $('#tpl-search').value });
+  $('#tpl-count').textContent = `${results.length} ${results.length === 1 ? 'design' : 'designs'} to make your own`;
+  $('#tpl-grid').replaceChildren(...(results.length ? results.map(t => templateCard(t, true)) : [el('p', { class: 'ws-empty-designs' }, 'No designs found. Try another goal or a shorter search.')]));
+}
+function openPersonalize() {
+  commitEdit();
+  $('#brand-name').value = state.site.name;
+  $('#brand-intro').value = state.site.pages[0]?.sections.find(s => s.type === 'hero')?.subtitle || '';
+  $('#brand-email').value = state.site.contact.email || '';
+  $('#personalize-error').hidden = true;
+  $('#personalize-dialog').showModal();
+}
+function openLaunchReview() {
+  commitEdit();
+  const items = launchReview(state.site);
+  $('#launch-summary').textContent = items.length ? `${state.site.name} — a few details to look over before going live.` : `${state.site.name} — the automated checks look good. Give it a final read.`;
+  $('#launch-checks').replaceChildren(...(items.length ? items : [{ level: 'ok', text: 'No unfinished details found by the automated checks.' }]).map(item => el('li', { class: item.level }, item.text)));
+  $('#launch-dialog').showModal();
 }
 async function openTemplate(id) {
   const site = buildTemplate(id);
@@ -1331,6 +1361,26 @@ function wire() {
   });
   $('#prompt').addEventListener('input', syncCreate);
   $('#all-templates').addEventListener('click', () => $('#tpl-dialog').showModal());
+  $('#step-design').addEventListener('click', () => $('#tpl-dialog').showModal());
+  $('#tpl-search').addEventListener('input', renderTemplateResults);
+  $('#step-personalize').addEventListener('click', openPersonalize);
+  $('#personalize-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    try {
+      const next = personalizeSite(state.site, { name: $('#brand-name').value, description: $('#brand-intro').value, email: $('#brand-email').value });
+      mutate(site => Object.assign(site, next));
+      $('#personalize-dialog').close();
+      toast('Your details are in. Click any text or image to keep making it yours.');
+    } catch (error) {
+      $('#personalize-error').textContent = error.message;
+      $('#personalize-error').hidden = false;
+    }
+  });
+  $('#step-review').addEventListener('click', openLaunchReview);
+  $('#launch-edit').addEventListener('click', () => $('#launch-dialog').close());
+  $('#launch-details').addEventListener('click', () => { $('#launch-dialog').close(); switchTab('settings'); });
+  $('#launch-phone').addEventListener('click', () => { $('#launch-dialog').close(); setBreakpoint('phone'); $('#canvas').scrollIntoView({ block: 'center' }); });
+  $('#launch-publish').addEventListener('click', () => { $('#launch-dialog').close(); window.mzSite.publish?.open(); });
   $('#generate').addEventListener('click', generate);
   $('#fill-images').addEventListener('click', fillImages);
   $('#status-cancel').addEventListener('click', () => state.fillCtl?.abort());
@@ -1445,7 +1495,9 @@ async function boot() {
   }
   if (!opened) {
     // a first example straight away, from the template (no model call until the visitor asks)
-    newProject(buildTemplate('local-business'), { demo: true });
+    newProject(buildTemplate('wellness-studio'), { demo: true });
+    state.template = 'wellness-studio';
+    renderTemplates();
   }
   syncCreate();
   renderSites();
@@ -1479,11 +1531,11 @@ async function boot() {
     getDoc: () => frame.contentDocument,
     projectId: () => state.id,
     // a published site belongs to a saved project (the first example is not saved until it is edited)
-    persist: async () => { commitEdit(); if (state.demo) { state.demo = false; } if (!state.id) { state.id = uid('w'); state.created = Date.now(); } await save(); },
+    persist: async () => { commitEdit(); if (state.demo) { state.demo = false; } if (!state.id) { state.id = uid('w'); state.created = Date.now(); } await save({ strict: true }); },
     commitEdit: () => commitEdit(),
     toast,
   });
-  $('#publish-btn').addEventListener('click', () => window.mzSite.publish?.open());
+  $('#publish-btn').addEventListener('click', openLaunchReview);
   document.body.dataset.ready = '1';
 }
 

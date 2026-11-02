@@ -55,9 +55,15 @@
       <div class="ws-panel" id="p-create" role="tabpanel" aria-labelledby="t-create">
         <div class="ws-hero">
           <p class="ws-eyebrow"><span class="badge-new">NEW</span> Chucksi Website</p>
-          <h1 class="display">Describe a site.<br><em>Get a fast one.</em></h1>
-          <p class="ws-sub">Edit any word in place, swap the style, then export plain HTML you can host free anywhere.</p>
+          <h1 class="display">Your next chapter.<br><em>Made into a site.</em></h1>
+          <p class="ws-sub">Start with a complete design. Add your voice, make it yours, and put it online.</p>
         </div>
+        <ol class="ws-journey" aria-label="Build your website">
+          <li><button type="button" id="step-design"><span>01</span><strong>Pick a design</strong><small>Find your starting point</small></button></li>
+          <li><button type="button" id="step-personalize"><span>02</span><strong>Make it yours</strong><small>Your name, story & contact</small></button></li>
+          <li><button type="button" id="step-review"><span>03</span><strong>Review & publish</strong><small>Check the details. Go live.</small></button></li>
+        </ol>
+        <p class="ws-note">Create and export freely. Sign in to publish on your own free subdomain.</p>
         <section class="ws-tpl-wrap" aria-labelledby="tpl-h">
           <div class="ws-row-head"><h2 class="ws-h2" id="tpl-h">Start from a template</h2><button type="button" class="ws-mini" id="all-templates">See all</button></div>
           <div class="ws-tpls" id="tpl-strip"></div>
@@ -161,7 +167,32 @@
   <dialog class="sheet ws-dialog wide" id="tpl-dialog">
     <form method="dialog" class="sheet-head"><h2>Start from a template</h2><button class="x" aria-label="Close">×</button></form>
     <p>Each template is a complete example site. Open one, then click any word or image to make it yours. Your current site stays in Your sites.</p>
+    <div class="ws-template-search"><label for="tpl-search">Find your starting point</label><input id="tpl-search" type="search" placeholder="Try music, property, portfolio…" autocomplete="off"></div>
+    <div class="ws-template-goals" id="tpl-goals" role="group" aria-label="Website goal"></div>
+    <p class="ws-note" id="tpl-count" role="status"></p>
     <div class="ws-tpl-grid" id="tpl-grid"></div>
+  </dialog>
+
+  <dialog class="sheet ws-dialog" id="personalize-dialog" aria-labelledby="personalize-title">
+    <form method="dialog" class="sheet-head"><h2 id="personalize-title">Make it yours</h2><button class="x" aria-label="Close">×</button></form>
+    <p>A few details to make this design feel like you. Everything stays editable.</p>
+    <form id="personalize-form" class="ws-personalize">
+      <div class="ws-field"><div class="ws-f-head"><label for="brand-name">Business, project or artist name</label></div><input id="brand-name" type="text" maxlength="70" required autocomplete="organization"></div>
+      <div class="ws-field"><div class="ws-f-head"><label for="brand-intro">Your introduction</label></div><textarea id="brand-intro" rows="3" maxlength="350" placeholder="What do you do, and who is it for?"></textarea></div>
+      <div class="ws-field"><div class="ws-f-head"><label for="brand-email">Public contact email</label><span>Optional</span></div><input id="brand-email" type="email" maxlength="160" placeholder="hello@your-business.com" autocomplete="email"></div>
+      <p class="ws-note">Contact forms open the visitor’s email app. Use an address you want to make public.</p>
+      <p class="ws-note" id="personalize-error" role="alert" hidden></p>
+      <button type="submit" class="btn-accent wide">Apply to my site</button>
+    </form>
+  </dialog>
+
+  <dialog class="sheet ws-dialog" id="launch-dialog" aria-labelledby="launch-title">
+    <form method="dialog" class="sheet-head"><h2 id="launch-title">One last look</h2><button class="x" aria-label="Close">×</button></form>
+    <p id="launch-summary"></p>
+    <ul class="ws-checklist" id="launch-checks"></ul>
+    <div class="ws-review-actions"><button type="button" class="btn-ghost" id="launch-details">Edit site details</button><button type="button" class="btn-ghost" id="launch-phone">Check phone layout</button></div>
+    <p class="ws-note">Check your text, images and links before publishing. A verified account is required for your free subdomain.</p>
+    <div class="ws-export-acts"><button type="button" class="btn-accent" id="launch-publish">Continue to publish</button><button type="button" class="ws-mini" id="launch-edit">Keep editing</button></div>
   </dialog>
 
   <dialog class="sheet ws-dialog" id="img-dialog">

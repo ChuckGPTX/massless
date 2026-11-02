@@ -272,3 +272,26 @@
 .ws-tpl small { font-size: 11.5px; line-height: 1.35; color: var(--muted); padding: 0 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .ws-tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-top: 14px; max-height: min(70vh, 760px); overflow: auto; padding: 2px; }
 .ws-tpl.big small { -webkit-line-clamp: 3; }
+
+/* A short path from a complete design to a personal site. */
+.ws-journey { display: grid; gap: 7px; list-style: none; padding: 0; margin: 0; }
+.ws-journey button { width: 100%; display: grid; grid-template-columns: 36px 1fr; column-gap: 9px; text-align: left; background: #1a1a1c; color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; }
+.ws-journey button:hover { border-color: var(--accent); background: #24221b; }
+.ws-journey button:focus-visible, .ws-template-goals button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.ws-journey span { grid-row: span 2; color: var(--accent); align-self: center; font-size: 18px; font-weight: 600; }
+.ws-journey strong { font-size: 14px; }
+.ws-journey small { color: var(--muted); font-size: 12px; }
+.ws-template-search { display: grid; gap: 7px; margin: 18px 0 12px; }
+.ws-template-search label { font-size: 13px; color: var(--muted); }
+.ws-template-search input { width: 100%; min-height: 46px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); color: var(--text); padding: 10px 14px; font: inherit; }
+.ws-template-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ws-template-goals { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.ws-template-goals button { padding: 8px 12px; border: 1px solid var(--line-2); border-radius: 99px; background: transparent; color: var(--muted); font-size: 12px; }
+.ws-template-goals button[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+#tpl-dialog { max-height: 90dvh; overflow: auto; }
+#tpl-dialog .ws-tpl-grid { max-height: none; overflow: visible; }
+.ws-empty-designs { grid-column: 1 / -1; padding: 32px 16px; border: 1px dashed var(--line-2); border-radius: 12px; text-align: center; color: var(--muted); }
+.ws-personalize { display: grid; gap: 12px; }
+.ws-review-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+#personalize-error { color: #f5c046; }
+@media (max-width: 560px) { .ws-template-goals { flex-wrap: nowrap; overflow-x: auto; padding: 3px 3px 8px; } .ws-template-goals button { flex: none; } .ws-tpl-grid { grid-template-columns: 1fr; } }

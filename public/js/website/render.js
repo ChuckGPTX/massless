@@ -80,7 +80,7 @@ export function makeContext(site, here, opts = {}) {
     h1: { used: false },
     here,
     src: (src) => (opts.src ? opts.src(src, here) : /^\/media\//.test(src) ? src : ''),
-    imgInfo: (src) => (opts.imgInfo && opts.imgInfo(src)) || photoInfo(src),
+    imgInfo: (src) => ({ ...photoInfo(src), ...(opts.imgInfo && opts.imgInfo(src)) }),
     // bundled template photos carry a small copy; exports map both through their own plan
     srcset: opts.srcset ? (src) => opts.srcset(src, here) : (src) => { const p = photoInfo(src); return p && opts.mode !== 'single' ? `${c.src(p.sm)} ${p.smW}w, ${c.src(src)} ${p.w}w` : ''; },
     href: (h) => mapHref(h, here, site, opts),

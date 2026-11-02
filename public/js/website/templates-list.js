@@ -3,6 +3,9 @@
 // /website?template=<id>. Thumbnails are screenshots of the templates themselves (tests/website_thumbs.py).
 
 export const TEMPLATES_LIST = [
+  { id: 'wellness-studio', title: 'Stillform · Wellness', description: 'A sunlit studio, class introductions and a gentle path to a first visit.', style: 'studio', kind: 'business', isNew: true },
+  { id: 'music-artist', title: 'After Hours · Music', description: 'A cinematic live stage, artist story, show dates and booking enquiries.', style: 'bold', kind: 'band', isNew: true },
+  { id: 'property-story', title: 'Lake & Light · Property', description: 'A full-screen architectural story, property facts and viewing enquiries.', style: 'editorial', kind: 'realestate', isNew: true },
   { id: 'editorial-shop', title: 'Editorial shop', description: 'A clothing label shop: tiny chrome, wide caps, a full-bleed lookbook and a product grid.', style: 'editorial-shop', kind: 'shop', isNew: true },
   { id: 'manifesto', title: 'Manifesto', description: 'A long scroll of big statements over a moving line field, with line art that draws itself in.', style: 'manifesto', kind: 'manifesto', isNew: true },
   { id: 'portfolio-timeline', title: 'Portfolio timeline', description: 'Case studies in order on white, scrolling sideways while the year counts down.', style: 'portfolio-timeline', kind: 'cases', isNew: true },
