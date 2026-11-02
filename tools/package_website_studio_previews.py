@@ -4,9 +4,9 @@ Capture <id>.png and <id>-full.png through the browser first, then pass that dir
 from pathlib import Path
 from PIL import Image, ImageOps
 import argparse, subprocess, hashlib, json
-parser=argparse.ArgumentParser(); parser.add_argument('screenshots',type=Path); args=parser.parse_args()
+parser=argparse.ArgumentParser(); parser.add_argument('screenshots',type=Path); parser.add_argument('--ids', nargs='+'); args=parser.parse_args()
 root=Path(__file__).resolve().parents[1]
-ids=['wellness-studio','music-artist','property-story']
+ids=args.ids or ['wellness-studio','music-artist','property-story']
 provenance=root/'public/media/templates/provenance.json'; data=json.loads(provenance.read_text())
 data['sources']['website-studio-screenshots']='Actual complete template pages captured in Chrome through CUA with reduced motion, then cropped into a six-second forward/back scroll using ffmpeg. Original generated photography and original template code. No external footage.'
 for id in ids:

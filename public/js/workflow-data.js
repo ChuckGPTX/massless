@@ -1,4 +1,5 @@
 import { OPTICAL_EFFECTS } from './effect-presets.js';
+import { COLLECTION_TEMPLATES } from './website/collection-list.js';
 
 export const WORKFLOWS = [
   {id:'image-workroom',name:'Image to campaign frame',tag:'IMAGE + DESIGN',image:'/media/website/ceramics.jpg',description:'Reframe an image, adjust its finish and add a headline. Save a new take, ready for motion.',output:'PNG + saved take',steps:[['Choose or create an image','/image'],['Compose a new take','/edit/'],['Use the saved take in your next tool','/library/']]},
@@ -239,7 +240,8 @@ const SITE_CARDS = [
   ["restaurant", "Restaurant", "Menu, photos, hours and table requests"],
   ["book-launch", "Book launch", "Chapters, the author and a free sample"],
   ["app-waitlist", "App waitlist", "A night-sky page with an early-access form"],
-].map(([id, name, line]) => card(`site-${id}`, "websites", name, line, `/website?template=${id}`, ["wellness-studio", "music-artist", "property-story", "nightjar-film", "aural-object", "current-studio"].includes(id) ? "16/9" : "3/4"));
+  ...COLLECTION_TEMPLATES.map(t => [t.id, t.title, t.description]),
+].map(([id, name, line]) => card(`site-${id}`, "websites", name, line, `/website?template=${id}`, ["wellness-studio", "music-artist", "property-story", "nightjar-film", "aural-object", "current-studio", ...COLLECTION_TEMPLATES.map(t => t.id)].includes(id) ? "16/9" : "3/4"));
 const GAME_CARDS = [
   ["t1-street-run", "Street run", "Hop the cones, stomp the rivals"],
   ["sky-tower", "Sky tower", "Stack a skyscraper floor by floor"],

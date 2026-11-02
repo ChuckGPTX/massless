@@ -1,4 +1,5 @@
-// One-click website templates: a small data list with no imports, so any page can link to them
+import { COLLECTION_TEMPLATES } from './collection-list.js';
+// One-click website templates: a small data list, so any page can link to them
 // (for example the Workflows page). Each opens the builder with that template's example site loaded:
 // /website?template=<id>. Thumbnails are screenshots of the templates themselves (tests/website_thumbs.py).
 
@@ -20,4 +21,5 @@ export const TEMPLATES_LIST = [
   { id: 'restaurant', title: 'Restaurant', description: 'A dark, candle-lit site with the menu, photos, hours and table requests.', style: 'luxe', kind: 'restaurant' },
   { id: 'book-launch', title: 'Book launch', description: 'A warm launch page with chapters, the author, editions and a free sample.', style: 'editorial', kind: 'launch' },
   { id: 'app-waitlist', title: 'App waitlist', description: 'A night-sky waitlist page with glass cards and an early-access form.', style: 'aurora', kind: 'waitlist' },
+  ...COLLECTION_TEMPLATES,
 ].map((t) => ({ ...t, thumb: `/media/website/tpl-${t.id}.webp`, href: `/website?template=${t.id}` }));

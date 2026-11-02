@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Developer console | Chucksi</title>
+  <meta name="description" content="Explore Chucksi website templates, try the public catalog API and build with editable open-source designs.">
+  <link rel="canonical" href="https://chucksi.com/console/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chucksi">
+  <meta property="og:url" content="https://chucksi.com/console/">
+  <meta property="og:title" content="Developer console | Chucksi">
+  <meta property="og:description" content="Explore editable website templates and build with the public Chucksi API.">
+  <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Developer console | Chucksi">
+  <meta name="twitter:description" content="Explore editable website templates and build with the public Chucksi API.">
+  <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+  <link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/css/site.css"><link rel="stylesheet" href="/css/console.css">
+</head>
+<body class="console-body">
+  <a class="console-skip" href="#main">Skip to content</a>
+  <aside class="console-nav">
+    <a class="console-brand" href="/">CHUCKSI<span>Developer console</span></a>
+    <nav aria-label="Console"><a href="#catalog">Explore templates <span>↗</span></a><a href="#playground">API playground <span>⌘</span></a><a href="#quickstart">Quick start <span>01</span></a><a href="#connections">Agent connections <span>↗</span></a><a href="/api/v1/openapi.json">API specification <span>{ }</span></a></nav>
+    <div class="console-nav-end"><p>Made to build on.<br>Made to make your own.</p><a href="https://github.com/ChuckGPTX/massless">View source ↗</a><a href="/website/">Open website studio ↗</a></div>
+  </aside>
+  <main id="main" class="console-main">
+    <header class="console-top"><span>CHUCKSI / DEVELOPERS</span><a href="/website/">Open studio ↗</a></header>
+    <section class="console-hero" aria-labelledby="hero-title"><div><p class="console-kicker">THE OPEN CREATIVE TOOLKIT</p><h1 id="hero-title">A head start.<br><em>Not a blank page.</em></h1><p>Explore complete designs, get an editable template, and build it into your own workflow.</p><div class="console-actions"><a class="console-primary" href="#catalog">Find your design ↗</a><a href="#quickstart">Start with the API →</a></div></div><div class="console-hero-art" aria-label="A selection of editable website designs"><img src="/media/website/tpl-echo-festival.webp" alt="Echo festival website"><img src="/media/website/tpl-folio-learning.webp" alt="Folio learning website"><img src="/media/website/tpl-haven-retreat.webp" alt="Haven retreat website"></div></section>
+    <div class="console-facts"><div><strong id="template-count">32</strong><span>editable templates</span></div><div><strong>Open</strong><span>source & exports</span></div><div><strong>No key</strong><span>for the public catalog</span></div></div>
+    <section id="catalog" class="console-section"><div class="console-section-head"><div><p class="console-kicker">EXPLORE THE COLLECTION</p><h2>Pick a starting point.</h2></div><label class="console-search">Search designs<input id="template-search" type="search" placeholder="Try restaurant, motion or portfolio"></label></div><p class="console-muted" id="result-count" role="status"></p><div id="template-catalog" class="console-grid"></div><p id="empty-result" hidden>No matching designs. Try a different name or category.</p></section>
+    <section id="playground" class="console-section"><p class="console-kicker">API PLAYGROUND</p><h2>Try a real request.</h2><p class="console-muted">These endpoints return public template data. They do not create a project or use generation credits.</p><div class="console-playground"><div><label for="api-choice">Request</label><select id="api-choice"><option value="">List all templates</option></select><pre id="request-code"></pre><button id="copy-request" type="button">Copy request</button> <button id="run-request" type="button" class="console-primary">Run request ↗</button><p id="request-status" role="status"></p></div><div><span class="console-kicker">RESPONSE</span><pre id="api-response" tabindex="0" aria-label="API response">Run a request to see the response.</pre></div></div></section>
+    <section id="quickstart" class="console-section"><p class="console-kicker">QUICK START</p><h2>One design. Your next project.</h2><div class="console-steps"><article><span>01</span><h3>Choose a design</h3><p>Browse the catalog. Preview the complete page and open it in the website studio.</p></article><article><span>02</span><h3>Get the editable data</h3><p>Use the public API to retrieve the theme, pages, sections and media paths. Copy the starter prompt for your coding assistant.</p></article><article><span>03</span><h3>Make it yours</h3><p>Edit and export freely. Sign in to Chucksi to publish a reviewed site on your own subdomain.</p></article></div><button id="copy-agent" type="button">Copy agent starter prompt ↗</button><p id="copy-status" role="status"></p></section>
+    <section id="connections" class="console-section"><p class="console-kicker">AGENT CONNECTIONS</p><h2>Start with the open API.</h2><div class="console-connections"><article><span class="console-pill">AVAILABLE</span><h3>Catalog API</h3><p>List templates and retrieve their editable site specifications with ordinary HTTP requests. Works with coding assistants that can call an API.</p><a href="/api/v1/openapi.json">Read the OpenAPI specification ↗</a></article><article><span class="console-pill planned">PLANNED</span><h3>Chucksi MCP</h3><p>A direct agent connection for discovering designs, creating drafts and checking generation jobs. Remote MCP sign-in and write tools are not available yet.</p><p class="console-muted">Your private projects and publishing stay behind your account.</p></article></div></section>
+    <footer class="console-footer">Chucksi / Build something worth sharing.<a href="/">Back to Chucksi ↗</a></footer>
+  </main>
+  <script type="module" src="/js/pages/console.js"></script>
+</body>
+</html>

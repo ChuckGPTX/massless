@@ -1875,6 +1875,246 @@
    "timestamps_sha256": "07a4117884d2cf5a733989a6458fc767214b19603c5dba6f7a519c6103b851d0",
    "timing": "Original elapsed timestamps; nearest 24 fps output samples repeat captured frames without interpolation. Final captured frame held to six seconds when necessary.",
    "recording": "recordings/nightjar-film/times.json"
+  },
+  {
+   "path": "media/templates/site-fern-gardens.mp4",
+   "bytes": 110441,
+   "sha256": "dc4126d1e49bc3475b155edb4196dde6c6e32724d806c41fc819faca8f5f5185",
+   "card": "site-fern-gardens",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=fern-gardens"
+  },
+  {
+   "path": "media/templates/site-fern-gardens.webp",
+   "bytes": 17464,
+   "sha256": "80e0668e8d2d05f6a76d3780bbacbe598bc7c8f13df16a72d0eb3d34f4ee561b",
+   "card": "site-fern-gardens",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=fern-gardens"
+  },
+  {
+   "path": "media/templates/site-haven-retreat.mp4",
+   "bytes": 227732,
+   "sha256": "29d9aafe054c4ae947e99a9bfdc7abce582c6c75cf4c4e1ff879816cbfd91967",
+   "card": "site-haven-retreat",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=haven-retreat"
+  },
+  {
+   "path": "media/templates/site-haven-retreat.webp",
+   "bytes": 31802,
+   "sha256": "50b684c9d606010b35bd7e5f67ba8f637ee2e8c16b258acaf0ab44e6cb28292c",
+   "card": "site-haven-retreat",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=haven-retreat"
+  },
+  {
+   "path": "media/templates/site-margin-journal.mp4",
+   "bytes": 140981,
+   "sha256": "a0ddcca77185c058e5b0746c97c191232c0ab6fe558bd32d43b2f163ad159bb3",
+   "card": "site-margin-journal",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=margin-journal"
+  },
+  {
+   "path": "media/templates/site-margin-journal.webp",
+   "bytes": 11224,
+   "sha256": "e44856a56a775d6b0be0334a909d0f9b200ad9f149590ca4ef04173d032826ed",
+   "card": "site-margin-journal",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=margin-journal"
+  },
+  {
+   "path": "media/templates/site-frame-interiors.mp4",
+   "bytes": 155829,
+   "sha256": "3ed6afde07b5e9c0e81531bf398ea590b5898b18e6dfcd4ecc068b641f4533ec",
+   "card": "site-frame-interiors",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=frame-interiors"
+  },
+  {
+   "path": "media/templates/site-frame-interiors.webp",
+   "bytes": 15918,
+   "sha256": "9570f6bf96154093d1c47b1355bee0ebe48f138302693289ecf7a985a9e832b3",
+   "card": "site-frame-interiors",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=frame-interiors"
+  },
+  {
+   "path": "media/templates/site-signal-podcast.mp4",
+   "bytes": 121897,
+   "sha256": "9d9ee4815ab890a8c0ce42ce19023da30bd496f038976df19a68e754b8d9936b",
+   "card": "site-signal-podcast",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=signal-podcast"
+  },
+  {
+   "path": "media/templates/site-signal-podcast.webp",
+   "bytes": 14672,
+   "sha256": "11b7292cac29a8dedb12ad0986f67d25d36bc35e090ca56160ba4db58b24a006",
+   "card": "site-signal-podcast",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=signal-podcast"
+  },
+  {
+   "path": "media/templates/site-northline-travel.mp4",
+   "bytes": 149246,
+   "sha256": "be426fa8656db418b0ca51bda0e478ec619fb4a037cf0e43557e217eb144b220",
+   "card": "site-northline-travel",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=northline-travel"
+  },
+  {
+   "path": "media/templates/site-northline-travel.webp",
+   "bytes": 8478,
+   "sha256": "eb88e12bbaf7133435d9104dd6e3ce48ec497af930acab0c27a308c9ee4501ab",
+   "card": "site-northline-travel",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=northline-travel"
+  },
+  {
+   "path": "media/templates/site-fieldwork-outdoors.mp4",
+   "bytes": 84547,
+   "sha256": "1d313f31fa26913c039a829d809324314b9e06bedf536d4d0562416e5192cf3f",
+   "card": "site-fieldwork-outdoors",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=fieldwork-outdoors"
+  },
+  {
+   "path": "media/templates/site-fieldwork-outdoors.webp",
+   "bytes": 7884,
+   "sha256": "d96ed7c9587ea1cc7d936b82cd72358dd8d31a114b41303931683753176f89dc",
+   "card": "site-fieldwork-outdoors",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=fieldwork-outdoors"
+  },
+  {
+   "path": "media/templates/site-index-advisory.mp4",
+   "bytes": 88961,
+   "sha256": "08351f811e27338d68946e71156c38c8d4661c45eb4192676d76e8390c1a6322",
+   "card": "site-index-advisory",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=index-advisory"
+  },
+  {
+   "path": "media/templates/site-index-advisory.webp",
+   "bytes": 10300,
+   "sha256": "396f47960e38d388e5bb6bcf174d896c31ee4c680850c996660aef53b6a800dc",
+   "card": "site-index-advisory",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=index-advisory"
+  },
+  {
+   "path": "media/templates/site-folio-learning.mp4",
+   "bytes": 96636,
+   "sha256": "0b05c8b5a68d220ce44ea68a55d3ec7f234ac10cb7c58047d8774b90f76a625b",
+   "card": "site-folio-learning",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=folio-learning"
+  },
+  {
+   "path": "media/templates/site-folio-learning.webp",
+   "bytes": 13076,
+   "sha256": "8a3a0da6168b7ced2acf0df6c23e4622892c626b779de19434305a8969130e19",
+   "card": "site-folio-learning",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=folio-learning"
+  },
+  {
+   "path": "media/templates/site-form-architecture.mp4",
+   "bytes": 251716,
+   "sha256": "440b14c5913a126e3fdb0768f32b975eb416800a8ac3e07afee55b686e5fea68",
+   "card": "site-form-architecture",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=form-architecture"
+  },
+  {
+   "path": "media/templates/site-form-architecture.webp",
+   "bytes": 12598,
+   "sha256": "c19cc14a7e425465d9175856ca3ada7101bac9fdbaf14b3958ee3731ef6670cf",
+   "card": "site-form-architecture",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=form-architecture"
+  },
+  {
+   "path": "media/templates/site-common-table.mp4",
+   "bytes": 142520,
+   "sha256": "bf00a40d6dfb02fe3165eb417bf88a2153d2981b3ff96b367d181580b0de32d7",
+   "card": "site-common-table",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=common-table"
+  },
+  {
+   "path": "media/templates/site-common-table.webp",
+   "bytes": 15582,
+   "sha256": "283ae758e1fa94a19f7fcc2f47916e1c9ed5f0cec8e8d5c56410ed70fce3872b",
+   "card": "site-common-table",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=common-table"
+  },
+  {
+   "path": "media/templates/site-orbit-developer.mp4",
+   "bytes": 184000,
+   "sha256": "5618a8dd0905ac338c9c90621fe4ecf0062e40d7cbbe5f18d064c058db125d44",
+   "card": "site-orbit-developer",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=orbit-developer"
+  },
+  {
+   "path": "media/templates/site-orbit-developer.webp",
+   "bytes": 18314,
+   "sha256": "5ed0a0629625eb0b7a6cdb5d0482251b60c5f6ec65c1de45ab58f96af1dea735",
+   "card": "site-orbit-developer",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=orbit-developer"
+  },
+  {
+   "path": "media/templates/site-vow-celebrations.mp4",
+   "bytes": 126436,
+   "sha256": "1b5f694aa8024efe168fc76864e957c2789e3ce979983e1dbc7c14a6d05d2628",
+   "card": "site-vow-celebrations",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=vow-celebrations"
+  },
+  {
+   "path": "media/templates/site-vow-celebrations.webp",
+   "bytes": 9166,
+   "sha256": "635d5d50f946fd7903b98b510e01f40ff71ed475ad789351a84aeb8e2b2617d4",
+   "card": "site-vow-celebrations",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=vow-celebrations"
+  },
+  {
+   "path": "media/templates/site-still-life.mp4",
+   "bytes": 94195,
+   "sha256": "e19bf69467c0755ebce8bf30000e7bc85ea67b2974c69120bea33e8f1f7e10b9",
+   "card": "site-still-life",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=still-life"
+  },
+  {
+   "path": "media/templates/site-still-life.webp",
+   "bytes": 9618,
+   "sha256": "ce35c07faab0be91b721484b610f13725b5bbc4dc6097a5c903343d97bcfc72d",
+   "card": "site-still-life",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=still-life"
+  },
+  {
+   "path": "media/templates/site-echo-festival.mp4",
+   "bytes": 212236,
+   "sha256": "64baec9b97da5fcb80bf81f296d899587c69c4f43b3a4341d9d34074df4c78e2",
+   "card": "site-echo-festival",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=echo-festival"
+  },
+  {
+   "path": "media/templates/site-echo-festival.webp",
+   "bytes": 14856,
+   "sha256": "6a20a72d9e1a5dcac45d26d929148e60bbaa9f9dfd661bd9de5913a45d499e51",
+   "card": "site-echo-festival",
+   "source": "website-studio-screenshots",
+   "recorded_from": "/website?template=echo-festival"
   }
  ]
 }
