@@ -372,7 +372,7 @@ export async function gpuJob({ job, input, engine, lab = false, signal, onProgre
   let delay = 2000;
   try {
     while (!["COMPLETED", "FAILED", "CANCELLED", "TIMED_OUT", "SUBMISSION_UNKNOWN"].includes(j.status)) {
-      onProgress?.({ status: j.status, message: j.status === "IN_QUEUE" ? "Waiting for a space to open. Your video hasn’t started yet." : j.status === "IN_PROGRESS" && j.percent >= 80 ? "Finishing your video…" : "Creating your video…", percent: j.percent ?? null });
+      onProgress?.({ status: j.status, message: j.status === "IN_QUEUE" ? "Waiting for a space to open. Your creation hasn’t started yet." : j.status === "IN_PROGRESS" && j.percent >= 80 ? "Finishing your creation…" : "Creating…", percent: j.percent ?? null });
       if (Date.now() > deadline) {
         await cancel();
         throw new Error("This took too long and was stopped. Try again.");
@@ -385,10 +385,10 @@ export async function gpuJob({ job, input, engine, lab = false, signal, onProgre
       if (!r.ok) throw new Error(j.error || "Lost track of this one. Try again.");
     }
     if (j.status !== "COMPLETED") throw new Error(j.status === "CANCELLED" ? "Cancelled." : (j.error || "Couldn't finish this one. Try again."));
-    onProgress?.({ status: "COMPLETED", message: "Ready", percent: 100 });
+    onProgress?.({ status: "COMPLETED", message: "Ready", percent: 100, id });
     const get = async (part) => {
       const f = await fetch("/api/generations/" + id + "/" + part, { signal, headers: await auth() });
-      if (!f.ok) throw new Error("The result could not be downloaded.");
+      if (!f.ok) throw Object.assign(new Error("Your video is ready, but the download failed. Use Retry download."), {jobId:id});
       return f.blob();
     };
     return { blob: await get("file"), audio: j.output?.audio ? await get("audio") : undefined, output: j.output, costCents: j.costCents, id };
@@ -435,4 +435,16 @@ export async function promoVideoJob({ prompt, duration, resolution, image, signa
   const f = await fetch("/api/promo-video/" + id + "/file", { signal, headers: await auth() });
   if (!f.ok) throw new Error("Couldn't download the video. Try again.");
   return { blob: await f.blob(), costCents: j.costCents, id };
+}
+
+/** Recover a finished creation without paying for a new generation. */
+export async function gpuResult(id) {
+  if (!/^[0-9a-f-]{36}$/.test(id)) throw new Error('Invalid creation.');
+  const headers = { Authorization: 'Bearer ' + await accessToken() };
+  const r = await fetch('/api/generations/' + id, { headers });
+  const job = await r.json();
+  if (!r.ok || job.status !== 'COMPLETED') throw new Error(job.error || 'This creation is not ready.');
+  const file = await fetch('/api/generations/' + id + '/file', { headers });
+  if (!file.ok) throw Object.assign(new Error('The download is temporarily unavailable. Try again.'), {jobId:id});
+  return { id, blob: await file.blob(), output:job.output, costCents:job.costCents };
 }

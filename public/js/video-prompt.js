@@ -1,5 +1,5 @@
 // One generation form in the sidebar; completed clips belong on the stage.
-import { accessToken, cloudConfig, gpuBudget, gpuJob, promoBudget, promoVideoJob, session } from './cloud.js';
+import { accessToken, cloudConfig, gpuBudget, gpuJob, gpuResult, promoBudget, promoVideoJob, session } from './cloud.js';
 const KEEP = 'chucksi.video-prompt';
 const h = (tag, attrs = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -33,6 +33,7 @@ async function mount(el) {
   const shape = h('select',{id:'vp-shape','aria-label':'Aspect ratio'},h('option',{value:'16:9',text:'Landscape · 16:9'}),h('option',{value:'9:16',text:'Portrait · 9:16'}),h('option',{value:'1:1',text:'Square · 1:1'}));
   const resolution = h('select',{'aria-label':'Video resolution'},h('option',{value:'480p',text:'480p'}),h('option',{value:'720p',text:'720p'}));
   const go = h('button',{type:'submit',class:'btn-accent vp-go',form:'video-create-form'},'Generate video ↗');
+  const retry = h('button',{type:'button',class:'btn-ghost',text:'Retry download',hidden:true});
   const stop = h('button',{type:'button',class:'btn-ghost',text:'Stop waiting',hidden:true});
   const status = h('p',{class:'vp-status',role:'status','aria-live':'polite'});
   const allowance = h('p',{class:'vp-allowance'});
@@ -48,9 +49,9 @@ async function mount(el) {
     upload,remove,h('label',{class:'vp-field'},h('span',{text:'Prompt'}),prompt),idea,
     h('div',{class:'vp-options'},h('label',{class:'vp-field'},h('span',{text:'Mode'}),engine),h('label',{class:'vp-field'},h('span',{text:'Resolution'}),resolution)),
     h('label',{class:'vp-field',id:'vp-shape-field'},h('span',{text:'Frame'}),shape),h('div',{class:'vp-duration'},h('span',{text:'Duration'}),h('strong',{text:'5 seconds'})),hint);
-  el.replaceChildren(form,h('div',{class:'vp-footer'},status,allowance,go,stop));
+  el.replaceChildren(form,h('div',{class:'vp-footer'},status,allowance,go,stop,retry));
   const out=document.querySelector('#vp-output');
-  let ctl,busy=false,frame=null,frameVersion=0,outputUrl;
+  let ctl,busy=false,frame=null,frameVersion=0,outputUrl,recoveryId;
   const setStatus=(text,error=false)=>{status.textContent=text;status.classList.toggle('is-error',error);};
   const sync=()=>{const managed=engine.value==='managed-wan';resolution.querySelector('[value=\"480p\"]').disabled=managed;shape.querySelector('[value=\"1:1\"]').disabled=managed;if(managed){resolution.value='720p';if(shape.value==='1:1')shape.value='16:9';}hint.textContent=engines.find(e=>e.id===engine.value)?.hint||'';shape.closest('label').hidden=engine.value==='free';};
   const refresh=async()=>{
@@ -77,7 +78,7 @@ async function mount(el) {
     store.set(text);
     if(!session()){try{sessionStorage.setItem('chucksi.after-signin','/video');}catch{}location.href='/projects/#account';return;}
     const selected=engine.value,selectedShape=selected==='free'?'16:9':shape.value,selectedResolution=resolution.value,startFrame=frame;
-    busy=true;ctl=new AbortController();go.disabled=true;stop.hidden=false;
+    busy=true;retry.hidden=true;ctl=new AbortController();go.disabled=true;stop.hidden=false;
     for(const control of form.elements)control.disabled=true;
     out.hidden=false;out.replaceChildren(h('div',{class:'vp-progress'},h('span',{class:'vp-spinner','aria-hidden':true}),h('h2',{text:'Your idea is becoming a film.'}),h('p',{text:'You can explore the effects while this finishes. Keep this page open.'})));
     const progress=message=>{setStatus(message);out.querySelector('.vp-progress p').textContent=message;};
@@ -92,10 +93,24 @@ async function mount(el) {
       setStatus('Ready. Saving to My library…');
       try{const {saveAsset}=await import('./assets.js');await saveAsset(result.blob,{name:'chucksi-video.mp4',engine:selected==='free'?c.promoVideo.model:'wan-2.2',settings:{prompt:text,resolution:selectedResolution,aspect:selectedShape}});setStatus('Ready. Saved to My library.');}catch{setStatus('Ready. Download your video before leaving; it couldn’t be saved.',true);}
       store.set('');
-    }catch(err){setStatus(err.name==='AbortError'?'Stopped waiting. A video that already started may still count toward today’s creations.':err.message||'Couldn’t create the video. Please try again.',true);out.hidden=true;}
+    }catch(err){if(err.jobId){recoveryId=err.jobId;retry.hidden=false;}setStatus(err.name==='AbortError'?'Stopped waiting. A video that already started may still count toward today’s creations.':err.message||'Couldn’t create the video. Please try again.',true);out.hidden=true;}
     finally{busy=false;stop.hidden=true;for(const control of form.elements)control.disabled=false;go.disabled=false;refresh();}
   });
-  stop.addEventListener('click',()=>ctl?.abort());
+  const recover=async id=>{
+    if(busy)return;busy=true;go.disabled=true;retry.disabled=true;setStatus('Recovering your video…');
+    try{
+      const result=await gpuResult(id);
+      if(outputUrl)URL.revokeObjectURL(outputUrl);outputUrl=URL.createObjectURL(result.blob);
+      out.hidden=false;out.replaceChildren(h('div',{class:'vp-result-heading'},h('h2',{text:'Your film is ready.'}),h('a',{href:outputUrl,download:'chucksi-video.mp4',class:'btn-accent',text:'Download MP4 ↓'})),h('video',{src:outputUrl,controls:true,autoplay:true,muted:true,loop:true,playsinline:true,'aria-label':'Generated video'}));out.querySelector('video').muted=true;
+      document.querySelector('#video-welcome').hidden=true;retry.hidden=true;
+      try{const {saveAsset}=await import('./assets.js');await saveAsset(result.blob,{name:'chucksi-video.mp4',engine:'wan-2.2',settings:{recoveredJob:id}});setStatus('Ready. Saved to My library.');}catch{setStatus('Ready. Download your video before leaving; it couldn’t be saved.',true);}
+    }catch(e){recoveryId=id;retry.hidden=false;setStatus(e.message,true);}
+    finally{busy=false;go.disabled=false;retry.disabled=false;refresh();}
+  };
+  retry.addEventListener('click',()=>recover(recoveryId));
+  const requestedJob=new URLSearchParams(location.search).get('job');
+  if(requestedJob&&session())recover(requestedJob);
+  stop.addEventListener('click' ,()=>ctl?.abort());
   window.addEventListener('massless-session',refresh);
   window.addEventListener('pagehide',()=>{if(outputUrl)URL.revokeObjectURL(outputUrl);});
   await refresh();

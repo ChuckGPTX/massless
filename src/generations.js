@@ -212,7 +212,7 @@ export class GenerationLedger {
         );
         if (job.kind === "gpu") {
           job = await this.updateGpu(key, result);
-          return this.gpuResponse(job, match[2]);
+          return await this.gpuResponse(job, match[2]);
         }
         await this.ctx.storage.transaction(async (tx) => {
           job = await tx.get(key);
@@ -261,7 +261,7 @@ export class GenerationLedger {
           await tx.put(key, job);
         });
       }
-      if (job.kind === "gpu") return this.gpuResponse(job, match[2]);
+      if (job.kind === "gpu") return await this.gpuResponse(job, match[2]);
       if (match[2] === "/image") {
         if (job.status !== "COMPLETED" || !job.imageChunks)
           return reply({ error: "The image is not ready." }, 409);
@@ -561,7 +561,7 @@ export class GenerationLedger {
       if (Date.now() - job.createdAt > 6 * 86400000) return reply({ error: 'This result has expired.' }, 410);
       const url = videoResultURL({ result: job.resultURL });
       if (!url) return reply({ error: 'The result could not be downloaded.' }, 502);
-      const r = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(25000) });
+      const r = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(25000) });
       if (!r.ok) return reply({ error: 'The result could not be downloaded.' }, 502);
       return new Response(r.body, { headers: { 'content-type': 'video/mp4', 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff' } });
     }
