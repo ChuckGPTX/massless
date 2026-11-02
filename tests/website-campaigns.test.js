@@ -20,7 +20,7 @@ function campaign(variant) {
 }
 
 test('campaign heroes preserve editable image paths and export through the hosting validator', () => {
-  for (const variant of ['mosaic', 'object']) {
+  for (const variant of ['mosaic', 'object', 'kinetic', 'stack', 'reel']) {
     const site = campaign(variant), hero = site.pages[0].sections[0], home = sitePages(site)[0];
     assert.equal(hero.variant, variant);
     const edit = renderPage(site, home, { mode: 'edit' });

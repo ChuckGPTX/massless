@@ -35,7 +35,7 @@ export const TONES = { base: 'Page', alt: 'Soft', inv: 'Inverse', acc: 'Brand co
 export const SECTIONS = {
   hero: {
     name: 'Hero', group: 'Intro', hint: 'Headline, intro and the main button',
-    variants: { split: 'Split', centered: 'Centered', cover: 'Full photo', editorial: 'Editorial', banner: 'Page header', portrait: 'Portrait', ambient: 'Ambient', runway: 'Runway', minimal: 'Name card', mosaic: 'Image mosaic', object: 'Object campaign' },
+    variants: { split: 'Split', centered: 'Centered', cover: 'Full photo', editorial: 'Editorial', banner: 'Page header', portrait: 'Portrait', ambient: 'Ambient', runway: 'Runway', minimal: 'Name card', mosaic: 'Image mosaic', object: 'Object campaign', kinetic: 'Kinetic type', stack: 'Layered cards', reel: 'Film strip' },
     fields: { eyebrow: 'text', title: 'text', subtitle: 'para', cta: 'link', cta2: 'link', note: 'text', image: IMG, images: { max: 6, item: { image: IMG } } },
     labels: { cta: 'Main button', cta2: 'Second button', note: 'Small print', images: 'Mosaic images' },
   },
@@ -204,7 +204,7 @@ export const SITE_RULES = `You design small, beautiful websites. Reply with JSON
 Pages: "Home" first, then 0 to 4 more pages (for example Services, About, Menu, Shows, Contact). Home has 6 to 9 sections; other pages have 3 to 6. Every page starts with a hero (inner pages use the "banner" variant) and ends with a footer.
 A section is {"type": string, "variant": string, ...fields}. Image fields are a short photo prompt: subject, setting, light; never text, logos or faces of real people. A link is {"label": max 24 chars, "href": "#contact" | "/about" (a page title in lowercase with dashes) | "mailto:..." | "tel:..." | "https://..."}. Put *asterisks* around one to three words of a title to highlight them.
 Section types (variants): fields
-- hero (split|centered|cover|editorial|banner|mosaic|object): eyebrow, title (max 70 chars), subtitle (max 220 chars), cta, cta2, note, image; mosaic also has images [{image}], 4 to 6 supporting photographs
+- hero (split|centered|cover|editorial|banner|mosaic|object|kinetic|stack|reel): eyebrow, title (max 70 chars), subtitle (max 220 chars), cta, cta2, note, image; mosaic also has images [{image}], 4 to 6 supporting photographs
 - logos (row|marquee): title, items [{name}]: service areas, platforms or credentials named in the prompt; never invented clients, partners or press
 - features (cards|icons|rows|bento): eyebrow, title, subtitle, items [{icon, title, text, image}], 3 to 6 items; rows and bento need an image per item
 - about (split|centered): eyebrow, title, text (two short paragraphs separated by a blank line), points [{text}], cta, image

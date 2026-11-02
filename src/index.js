@@ -1,3 +1,4 @@
+import { templateCatalog } from './template-catalog.js';
 import { generationAPI } from './generations.js';
 import { signApi, signGated, signCleanup } from './sign.js';
 import { sitesApi, sitesGated, siteHost, serveSite } from './sites.js';
@@ -408,7 +409,7 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/games': '/games/index.html', '/website': '/website/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
+const PAGES = { '/console': '/console/index.html', '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/games': '/games/index.html', '/website': '/website/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
 for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studios/${studio}`] = `/studios/${studio}/index.html`;
 PAGES['/sign'] = '/sign/index.html';
 PAGES['/report'] = '/report/index.html';
@@ -455,7 +456,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects|library|edit|build|games|website|cut|scene|sign|report)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects|library|edit|build|games|website|cut|scene|sign|report|console)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
@@ -477,6 +478,11 @@ export default {
     // browser keeps any #fragment, so signing links still work). APIs answer on every host so open tabs keep working.
     if ((url.hostname === 'massless.chucksi.com' || url.hostname === 'www.chucksi.com') && !url.pathname.startsWith('/api/') && (request.method === 'GET' || request.method === 'HEAD')) {
       return new Response(null, { status: 301, headers: { location: `https://chucksi.com${url.pathname}${url.search}`, 'cache-control': 'public, max-age=3600' } });
+    }
+    if (url.pathname === '/api/v1/templates' || url.pathname.startsWith('/api/v1/templates/')) return templateCatalog(request);
+    if (url.pathname === '/api/v1/openapi.json' && ['GET', 'HEAD'].includes(request.method)) {
+      const res = env.ASSETS ? await env.ASSETS.fetch(new Request(new URL('/console/openapi.json', request.url), request)) : await fromOrigin(new Request(new URL('/console/openapi.json', request.url), request), env, ctx);
+      const out = new Response(res.body, res); out.headers.set('access-control-allow-origin', '*'); return out;
     }
     if (url.pathname === '/api/config' || url.pathname.startsWith('/api/generations') || url.pathname.startsWith('/api/promo-video')) return generationAPI(request, env);
     if (url.pathname === '/api/human') return humanPass(request, env);

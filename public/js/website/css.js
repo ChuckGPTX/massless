@@ -942,6 +942,26 @@ html[data-motion="none"] .marquee .logos[aria-hidden]{display:none}
 html[data-motion="none"] .marquee .logos{flex-wrap:wrap}
 html[data-motion="none"] .marquee-track{width:auto;justify-content:center}
 @media print{.site-head,.menu,.embed{display:none}.sec{padding-block:24px}}
+
+/* Three campaign layouts: motion is gated by visibility and the visitor's preference. */
+.kinetic-hero{position:relative;min-height:680px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:5vw;align-items:center;padding-bottom:100px}
+.kinetic-copy{position:relative;z-index:2;min-width:0}.kinetic-copy .h1{font-size:clamp(38px,4.6vw,74px);line-height:.96;letter-spacing:-.055em}
+.kinetic-window{transform:rotate(-5deg);border:1px solid currentColor;padding:12px}.kinetic-window .media{border-radius:0}
+.kinetic-rule{position:absolute;bottom:28px;left:0;right:0;display:flex;gap:10px;height:45px;align-items:center}
+.kinetic-rule i{display:block;flex:1;height:100%;background:var(--accent);transform:scaleY(.2)}
+.hero-live .kinetic-rule i{animation:signal-pulse 2s ease-in-out infinite alternate}.kinetic-rule i:nth-child(3n){animation-delay:-.7s}.kinetic-rule i:nth-child(3n+1){animation-delay:-1.4s}
+@keyframes signal-pulse{to{transform:scaleY(1)}}
+.stack-grid .campaign-copy .h1{font-size:clamp(2.7rem,4.4vw,4.6rem);max-width:13ch}
+.stack-cards{list-style:none;position:relative;min-height:600px;padding:50px 0;margin:0;perspective:1000px}
+.stack-cards li{position:absolute;width:64%;left:calc(7% + var(--card)*10%);top:calc(35px + var(--card)*45px);transform:rotate(calc(-9deg + var(--card)*8deg));z-index:calc(5 - var(--card));box-shadow:0 25px 70px #0002}
+.stack-cards li .media{border:6px solid var(--bg);border-radius:8px}.stack-cards .hero-drift{transition:transform .4s ease}
+.hero-live .stack-cards li .hero-drift{transform:translate3d(calc(var(--mx,0)*14px),calc(var(--my,0)*-12px),0)}
+.reel-hero{overflow:hidden}.reel-hero>.hero-in{padding-bottom:32px}.reel-hero .h1{max-width:1000px;font-size:clamp(54px,8vw,120px)}
+.reel-cards{display:flex;list-style:none;gap:24px;padding:24px max(24px,4vw) 56px;margin:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory}
+.reel-cards li{flex:0 0 40%;scroll-snap-align:center;transform:rotate(calc(-3deg + var(--card)*2deg))}.reel-cards .media{border-radius:6px}.reel-cards .hero-drift{transition:transform .3s ease}
+.hero-live .reel-cards .hero-drift{transform:translateY(calc(var(--my,0)*-10px))}
+@media(max-width:700px){.kinetic-hero{grid-template-columns:1fr;min-height:0;gap:40px;padding-bottom:100px}.kinetic-window{width:85%;margin:auto}.stack-grid{display:block}.stack-cards{min-height:460px;max-width:440px;margin:auto}.reel-cards li{flex-basis:83%}.reel-cards{gap:18px}}
+@media(prefers-reduced-motion:reduce){.hero-live .kinetic-rule i{animation:none}.hero-live .stack-cards li .hero-drift,.hero-live .reel-cards .hero-drift{transform:none;transition:none}}
 `;
 
 /** Only in the editor: hover outlines, the inline editing state, placeholders and the section bar. */

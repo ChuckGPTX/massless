@@ -104,6 +104,14 @@ R.hero = (s, c) => {
     return `<div class="wrap hero-in">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 h1-xl')}<div class="ed-row">${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}<div>${actions(c, s)}${note}</div></div>${hasImg(s.image) || c.edit ? media(c, s.image, P(s, 'image'), { ar: '21/9', eager: true, sizes: '100vw', cls: 'ed-media' }) : ''}</div>`;
   }
   const copy = `${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}${note}`;
+  if (v === 'kinetic') {
+    return `<div class="wrap hero-in kinetic-hero"${c.motion ? ' data-hero-motion' : ''}><div class="kinetic-copy">${copy}</div><div class="kinetic-window hero-drift">${media(c, s.image, P(s, 'image'), { ar: '4/3', eager: true, sizes: '(max-width: 700px) 90vw, 36vw' })}</div><div class="kinetic-rule" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>`;
+  }
+  if (v === 'stack' || v === 'reel') {
+    const shots = [{ image: s.image, path: P(s, 'image') }, ...(s.images || []).slice(0, 4).map((item, i) => ({ image: item.image, path: PI(s, 'images', i, 'image') }))];
+    const cards = shots.map((shot, i) => `<li style="--card:${i}"><div class="hero-drift">${media(c, shot.image, shot.path, { ar: v === 'stack' ? '4/5' : '4/3', eager: i === 0, sizes: '(max-width: 700px) 85vw, 40vw' })}</div></li>`).join('');
+    return `<div class="${v === 'stack' ? 'wrap campaign-grid stack-grid' : 'reel-hero'}"${c.motion ? ' data-hero-motion' : ''}><div class="${v === 'reel' ? 'wrap hero-in' : 'hero-in campaign-copy'}">${copy}</div><ul class="${v}-cards" aria-label="Selected images">${cards}</ul></div>`;
+  }
   if (v === 'mosaic') {
     const shots = [{ image: s.image, path: P(s, 'image') }, ...(s.images || []).slice(0, 6).map((item, i) => ({ image: item.image, path: PI(s, 'images', i, 'image') }))];
     const tiles = shots.map((shot, i) => `<li class="mosaic-tile mosaic-tile-${i}" style="--tile:${i}"><div class="hero-drift">${media(c, shot.image, shot.path, { ar: i ? '4/3' : '4/5', eager: i === 0, sizes: '(max-width: 700px) 90vw, 34vw' })}</div></li>`).join('');
