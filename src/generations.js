@@ -2,6 +2,7 @@
 // One ledger for every hosted GPU job: MOSS Image (its own endpoint, a lifetime allowance) and the GPU worker's
 // jobs (workers/gpu: animate, motion, lipsync, upscale_video, music, upscale, and Lab jobs when LAB_ENABLED), all
 // inside one daily budget.
+import { FRAME_TTL, MANAGED_VIDEO_ENDPOINT, MANAGED_VIDEO_RESERVE, managedVideoOn, managedVideoRequest, videoFirstFrame, managedVideoCost, videoResultURL } from './managed-video.js';
 import { promoAPI, promoConfig } from './promo-video.js';
 import { FOLEY_BLOCKED, LAB_JOBS, QUEUE_SEC, STARTUP_SEC, actualCents, gpuSettings, quotes, reserveCents, utcDay, validateGpuJob } from './gpu-jobs.js';
 const reply = (body, status = 200) =>
@@ -16,7 +17,7 @@ export function generationConfig(env) {
   const g = gpuSettings(env);
   const ready = !!(env.GENERATION_LEDGER && env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY);
   return {
-    gpu: { on: ready && g.on, lab: ready && g.lab, perUserDaily: g.on ? g.perUser : 0 },
+    gpu: { on: ready && g.on, lab: ready && g.lab, managedVideo: ready && g.on && managedVideoOn(env), perUserDaily: g.on ? g.perUser : 0 },
     promoVideo: ready ? promoConfig(env) : { on: false },
     cloud: !!(env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY),
     supabaseUrl: env.SUPABASE_URL || "",
@@ -75,6 +76,11 @@ async function sha256Hex(text) {
 export async function generationAPI(request, env) {
   const url = new URL(request.url);
   if (url.pathname === "/api/config") return reply(generationConfig(env));
+  // Only a short-lived, unguessable capability can read a first frame. No account token goes to Runpod.
+  if (/^\/api\/generations\/frame\/[0-9a-f-]{36}\/[0-9a-f-]{36}$/.test(url.pathname) && request.method === 'GET') {
+    if (!env.GENERATION_LEDGER) return reply({ error: 'Not found' }, 404);
+    return env.GENERATION_LEDGER.get(env.GENERATION_LEDGER.idFromName('moss-development-v1')).fetch(new Request(request.url));
+  }
   const promo = url.pathname.startsWith("/api/promo-video");
   if (promo ? !env.GENERATION_LEDGER : !env.GENERATION_LEDGER || !env.RUNPOD_API_KEY)
     return reply(
@@ -143,6 +149,13 @@ export class GenerationLedger {
   async fetch(request) {
     const url = new URL(request.url),
       owner = request.headers.get("x-owner-id");
+    const frame = url.pathname.match(/^\/api\/generations\/frame\/([0-9a-f-]{36})\/([0-9a-f-]{36})$/);
+    if (frame && request.method === 'GET') {
+      const j = await this.ctx.storage.get('job:' + frame[1]);
+      if (!j || j.frameToken !== frame[2] || Date.now() - j.createdAt > FRAME_TTL || !j.frame)
+        return reply({ error: 'Not found' }, 404);
+      return this.readFile(j.id, 'source', j.frame);
+    }
     if (!owner) return reply({ error: "Unauthorized" }, 401);
     if (url.pathname.startsWith("/api/promo-video")) {
       try {
@@ -316,14 +329,15 @@ export class GenerationLedger {
   }
   endpointOf(job) {
     if (job.kind !== "gpu") return this.env.MOSS_ENDPOINT_ID;
+    if (job.provider === "managed-wan") return MANAGED_VIDEO_ENDPOINT;
     return job.lab ? this.env.LAB_ENDPOINT_ID : this.env.GPU_ENDPOINT_ID;
   }
   // Return the unused part of a job's reservation to the day it was reserved on. MOSS's lifetime allowance
   // (reservedCents) is never refunded; the daily budget is, once RunPod reports what the job really used.
   async settle(tx, job, result, centsPerHour) {
     if (!job.day || job.costCents !== undefined) return;
-    const actual = actualCents(result, centsPerHour);
-    job.costCents = actual === null ? job.reservedCents : Math.min(actual, job.reservedCents);
+    const actual = job.provider === "managed-wan" ? managedVideoCost(result, job.firstFrameCents || 0) : actualCents(result, centsPerHour);
+    job.costCents = actual === null ? job.reservedCents : actual;
     const dayKey = "day:" + job.day;
     const used = (await tx.get(dayKey)) || 0;
     await tx.put(dayKey, Math.max(0, used - (job.reservedCents - job.costCents)));
@@ -377,10 +391,16 @@ export class GenerationLedger {
         error: "HunyuanVideo-Foley's license does not cover the EU, the UK or South Korea, so it can't run for you here. MMAudio does the same job: choose it instead.",
         suggest: { model: "mmaudio" },
       }, 451);
-    const sec = v.seconds + STARTUP_SEC;
-    const cents = reserveCents(v.seconds, lab ? g.labRate : g.rate);
+    const managed = body.engine === 'managed-wan';
+    if (body.engine && !managed) return reply({ error: 'Choose a supported video mode.' }, 400);
+    if (managed && (!managedVideoOn(this.env) || v.job !== 'animate')) return reply({ error: 'This video mode is unavailable.' }, 503);
+    if (managed) {
+      try { managedVideoRequest(v.input, ''); } catch (e) { return reply({ error: e.message }, 400); }
+    }
+    const sec = managed ? 600 : v.seconds + STARTUP_SEC;
+    const cents = managed ? MANAGED_VIDEO_RESERVE : reserveCents(v.seconds, lab ? g.labRate : g.rate);
     // a hash, not the input: images and clips can be several MB and storage values are limited to 2 MB
-    const fingerprint = await sha256Hex(JSON.stringify([v.job, v.input, !!lab]));
+    const fingerprint = await sha256Hex(JSON.stringify([v.job, v.input, !!lab, ...(managed ? ["managed-wan"] : [])]));
     const day = utcDay();
     let job, isNew = false;
     try {
@@ -409,6 +429,7 @@ export class GenerationLedger {
         }
         job = {
           id: crypto.randomUUID(), kind: "gpu", owner, job: v.job, lab, fingerprint,
+          ...(managed ? { provider: "managed-wan", firstFrameCents: v.input.image ? 0 : 1 } : {}),
           status: "SUBMITTING", createdAt: Date.now(), reservedCents: cents, day, timeoutSec: sec + QUEUE_SEC,
         };
         const queue = ((await tx.get("queue")) || []).slice(-200);
@@ -429,11 +450,28 @@ export class GenerationLedger {
       return reply({ error: "This request identifier was already used for a different job." }, 409);
     if (!isNew) return reply(this.publicJob(job), 202);
     await this.pruneFiles();
+    if (managed) {
+      try {
+        const frame = await videoFirstFrame(this.env, v.input);
+        job.frameToken = crypto.randomUUID();
+        await this.ctx.storage.transaction(async tx => {
+          job.frame = await this.putFile(tx, job.id, 'source', frame.data, frame.mime);
+          await tx.put('job:' + job.id, job);
+        });
+      } catch (e) {
+        job.status = 'FAILED'; job.error = e.message;
+        await this.ctx.storage.transaction(async tx => {
+          await this.settle(tx, job, { status: 'FAILED' }, 0);
+          await tx.put('job:' + job.id, job);
+        });
+        return reply(this.publicJob(job), 502);
+      }
+    }
     try {
       const result = await this.provider("/run", {
         method: "POST",
         body: JSON.stringify({
-          input: { ...v.input, job: v.job },
+          input: managed ? managedVideoRequest(v.input, `https://chucksi.com/api/generations/frame/${job.id}/${job.frameToken}`) : { ...v.input, job: v.job },
           policy: { executionTimeout: sec * 1000, ttl: (sec + QUEUE_SEC) * 1000 },
         }),
       }, this.endpointOf(job));
@@ -449,6 +487,9 @@ export class GenerationLedger {
   }
   async updateGpu(key, result) {
     let job;
+    const previous = await this.ctx.storage.get(key);
+    let managedURL;
+    if (previous?.provider === 'managed-wan' && result.status === 'COMPLETED') managedURL = videoResultURL(result.output);
     await this.ctx.storage.transaction(async (tx) => {
       job = await tx.get(key);
       if (this.terminal(job.status)) return;
@@ -457,7 +498,7 @@ export class GenerationLedger {
       if (job.status === "IN_PROGRESS" && result.status === "IN_QUEUE") return;
       job.status = result.status;
       if (result.status === "IN_QUEUE")
-        job.message = Date.now() - job.createdAt > 15000 ? "Waking up the GPU (a cold start takes about a minute)…" : "Waiting for the GPU…";
+        job.message = Date.now() - job.createdAt > 15000 ? "Waiting for a space to open…" : "Your video is in the queue…";
       if (result.status === "IN_PROGRESS") {
         const o = result.output;
         job.message = (o && typeof o === "object" ? o.text : typeof o === "string" ? o : "") || "Rendering…";
@@ -465,7 +506,11 @@ export class GenerationLedger {
       }
       if (result.status === "COMPLETED") {
         const o = result.output || {};
-        if (o.error || typeof o.data !== "string" || !/^[A-Za-z0-9+/=]+$/.test(o.data.slice(0, 1000)) || o.data.length > 15_000_000) {
+        if (job.provider === 'managed-wan' && managedURL) {
+          job.resultURL = managedURL;
+          job.output = { mime: 'video/mp4', model: 'wan-2.2', duration: 5, resolution: '720p' };
+          job.message = 'Done'; job.percent = 100;
+        } else if (o.error || typeof o.data !== "string" || !/^[A-Za-z0-9+/=]+$/.test(o.data.slice(0, 1000)) || o.data.length > 15_000_000) {
           job.status = "FAILED";
           job.error = typeof o.error === "string" ? o.error.slice(0, 400) : "The GPU returned no result.";
         } else {
@@ -512,9 +557,20 @@ export class GenerationLedger {
   }
   async gpuResponse(job, suffix) {
     if (suffix !== "/file" && suffix !== "/audio") return reply(this.publicJob(job));
+    if (job.provider === 'managed-wan' && suffix === '/file' && job.status === 'COMPLETED' && job.resultURL) {
+      if (Date.now() - job.createdAt > 6 * 86400000) return reply({ error: 'This result has expired.' }, 410);
+      const url = videoResultURL({ result: job.resultURL });
+      if (!url) return reply({ error: 'The result could not be downloaded.' }, 502);
+      const r = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(25000) });
+      if (!r.ok) return reply({ error: 'The result could not be downloaded.' }, 502);
+      return new Response(r.body, { headers: { 'content-type': 'video/mp4', 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff' } });
+    }
     const f = job.files && job.files[suffix.slice(1)];
     if (job.status !== "COMPLETED" || !f) return reply({ error: "The result is not ready." }, 409);
-    const parts = await Promise.all(Array.from({ length: f.parts }, (_, i) => this.ctx.storage.get("file:" + job.id + ":" + suffix.slice(1) + ":" + i)));
+    return this.readFile(job.id, suffix.slice(1), f);
+  }
+  async readFile(id, name, f) {
+    const parts = await Promise.all(Array.from({ length: f.parts }, (_, i) => this.ctx.storage.get("file:" + id + ":" + name + ":" + i)));
     if (parts.some((p) => typeof p !== "string")) return reply({ error: "This result has expired." }, 410);
     const raw = atob(parts.join(""));
     const bytes = new Uint8Array(raw.length);
