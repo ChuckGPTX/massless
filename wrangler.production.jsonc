@@ -1,0 +1,102 @@
+// Production serves versioned static files from GitHub; keep existing dashboard variables and secrets.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "massless",
+  "keep_vars": true,
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "ai": {
+    "binding": "AI"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "MASSLESS_KV",
+      "id": "3535dddb25a642238792cef5f666aff6"
+    }
+  ],
+  "vars": {
+    "DAILY_CAP": "120",
+    "PER_VISITOR_CAP": "12",
+    "BEATS_CAP": "60",
+    "PER_VISITOR_BEATS": "10",
+    "ASK_CAP": "30",
+    "PER_VISITOR_ASK": "8",
+    "TTS_CAP": "300",
+    "PER_VISITOR_TTS": "40",
+    "ASR_CAP": "120",
+    "PER_VISITOR_ASR": "15",
+    "ASSET_REF": "main",
+    "AI_GATEWAY": "massless",
+    "TURNSTILE_SITEKEY": "0x4AAAAAAFtDPWdw4pzGXhHG",
+    "PER_VISITOR_SIGN": "20",
+    "SIGN_CAP": "2000",
+    "PROMO_VIDEO_BUDGET_CENTS": "0",
+    "MANAGED_VIDEO_ENABLED": "true"
+  },
+  "r2_buckets": [
+    {
+      "binding": "SIGN_BUCKET",
+      "bucket_name": "massless-sign"
+    },
+    {
+      "binding": "SITES_BUCKET",
+      "bucket_name": "chucksi-sites"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "SIGN_DB",
+      "database_name": "massless-sign",
+      "database_id": "367039b3-12c6-4c6a-8cd0-632b0012b885",
+      "migrations_dir": "migrations/sign"
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "17 4 * * *"
+    ]
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "GENERATION_LEDGER",
+        "class_name": "GenerationLedger"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "massless-generations-v1",
+      "new_sqlite_classes": [
+        "GenerationLedger"
+      ]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "chucksi.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.chucksi.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "massless.chucksi.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "v2web.site/*",
+      "zone_name": "v2web.site"
+    },
+    {
+      "pattern": "*.v2web.site/*",
+      "zone_name": "v2web.site"
+    }
+  ]
+}

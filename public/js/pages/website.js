@@ -5,9 +5,10 @@
 import { KINDS, SECTIONS, SECTION_GROUPS, COLLECTIONS, TONES, templateSite, sanitizeSite, newSection, newItem, getIn, setIn, uid, slugify, checklist, isPlaceholder, embedFor, tidySite } from '../website/spec.js';
 import { STYLES, PALETTES, FONTS, HEADING_FONTS, BODY_FONTS, themeFor, themeCss, fontsHref, contrastReport, tokens, headingWeight, fontFamily } from '../website/theme.js';
 import { TEMPLATES, TEMPLATES_LIST, buildTemplate } from '../website/templates.js';
-import { TEMPLATE_CATEGORIES, filterTemplates, personalizeSite, launchReview } from '../website/studio-tools.js';
+import { TEMPLATE_CATEGORIES, templateCategory, filterTemplates, personalizeSite, launchReview } from '../website/studio-tools.js';
 import { MOTIFS } from '../website/art.js';
 import { renderParts, renderSingle, makeContext, usedCollection, GEN_JS } from '../website/render.js';
+import { HERO_JS } from '../website/runtime.js';
 import { renderSection, inline, paras } from '../website/sections.js';
 import { BASE_CSS, EDIT_CSS } from '../website/css.js';
 import { exportZip, exportSingle, faviconSvg } from '../website/export.js';
@@ -259,12 +260,13 @@ function renderPreview(hint = 'full') {
   if (!state.frameReady || !state.site || hint === 'none') return;
   const doc = frame.contentDocument;
   const h = here();
-  if (hint === 'theme') { applyHead(doc); return; }
+  if (hint === 'theme') { applyHead(doc); startMotion(doc); return; }
   if (hint && typeof hint === 'object' && hint.sid && h.kind === 'page' && !state.replaying) {
     const node = doc.querySelector(`[data-sid="${hint.sid}"]`);
     const sec = h.page.sections.find((x) => x.id === hint.sid);
     if (node && sec) {
       if (state.editing && node.contains(state.editing.el)) return;
+      stopMotion(doc);
       node.outerHTML = renderSection(sec, sectionContext(h, sec));
       markSelection();
       startMotion(doc);
@@ -277,17 +279,27 @@ function renderPreview(hint = 'full') {
   const win = frame.contentWindow;
   const y = win.scrollY;
   doc.title = p.title;
+  stopMotion(doc);
   doc.body.innerHTML = p.body;
   win.scrollTo(0, y);
   markSelection();
   startMotion(doc);
 }
 
-/** Run the ambient canvas in the preview too (the same code the exported site runs; it skips live canvases). */
+let previewReveal = null;
+function stopMotion(doc) {
+  doc._heroStop?.();
+  previewReveal?.disconnect();
+  previewReveal = null;
+}
+
+/** Use the same campaign and ambient motion as exports; ordinary edit mode stays still. */
 function startMotion(doc) {
-  if (!doc.querySelector('canvas[data-gen]:not([data-live])')) return;
+  const canvas = doc.querySelector('canvas[data-gen]:not([data-live])');
+  const campaign = doc.querySelector('[data-hero-motion]');
+  if (!canvas && !campaign) { doc._heroStop?.(); return; }
   const sc = doc.createElement('script');
-  sc.textContent = GEN_JS;
+  sc.textContent = (canvas ? GEN_JS : '') + (campaign ? HERO_JS : '');
   doc.body.appendChild(sc);
   sc.remove();
 }
@@ -1177,14 +1189,91 @@ function loadRecord(rec) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Templates: one-click example sites (the picker in Create, the dialog, and /website?template=<id>)
+// Templates: preview in the picker, apply explicitly; /website?template=<id> still opens directly.
 // ---------------------------------------------------------------------------------------------
 
 function templateCard(t, big = false) {
-  return el('button', { type: 'button', class: `ws-tpl${big ? ' big' : ''}`, 'data-template': t.id, 'aria-current': String(state.template === t.id), onclick: () => openTemplate(t.id) },
-    el('span', { class: 'ws-tpl-img' }, el('img', { src: t.thumb, alt: '', width: 640, height: 400, loading: 'lazy', decoding: 'async' }), t.isNew ? el('span', { class: 'ws-tpl-new' }, 'New') : null),
+  return el('button', { type: 'button', class: `ws-tpl${big ? ' big' : ''}`, 'data-template': t.id, 'aria-current': String(state.template === t.id), 'aria-haspopup': 'dialog', 'aria-controls': 'tpl-detail-dialog', 'aria-label': `Preview ${t.title}`, onclick: () => previewTemplate(t.id) },
+    el('span', { class: 'ws-tpl-img' }, el('img', { src: t.thumb, alt: '', width: 640, height: 400, loading: 'lazy', decoding: 'async' }), t.isNew ? el('span', { class: 'ws-tpl-new' }, 'New') : null, el('span', { class: 'ws-tpl-preview', 'aria-hidden': 'true' }, 'Preview design')),
     el('strong', {}, t.title), el('small', {}, t.description));
 }
+let templatePreviewId = null;
+let templatePreviewVersion = 0;
+let templateOpening = false;
+
+function stopTemplateVideo() {
+  const video = $('#tpl-detail-video');
+  video.pause();
+  try { video.currentTime = 0; } catch { /* no metadata loaded yet */ }
+  video.removeAttribute('src');
+  video.load();
+}
+
+function previewTemplate(id) {
+  const t = TEMPLATES[id];
+  if (!t) return false;
+  stopTemplateVideo();
+  templatePreviewId = id;
+  templatePreviewVersion++;
+  const site = buildTemplate(id);
+  const sections = site.pages.flatMap(page => page.sections).filter(section => !section.hidden);
+  $('#tpl-detail-title').textContent = t.title;
+  $('#tpl-detail-category').textContent = TEMPLATE_CATEGORIES[templateCategory(t)];
+  $('#tpl-detail-description').textContent = t.description;
+  $('#tpl-detail-includes').replaceChildren(
+    el('li', {}, `${site.pages.length} editable ${site.pages.length === 1 ? 'page' : 'pages'}`),
+    el('li', {}, `${sections.length} ready-made sections`),
+    el('li', {}, 'Your text, images, colors and fonts'),
+    el('li', {}, 'Free export and publishing options'),
+  );
+  $('#tpl-detail-error').hidden = true;
+  $('#tpl-detail-use').disabled = templateOpening;
+  const video = $('#tpl-detail-video');
+  const quiet = window.matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData;
+  video.poster = t.thumb;
+  video.preload = quiet ? 'none' : 'metadata';
+  video.muted = true;
+  video.src = `/media/templates/site-${id}.mp4`;
+  video.setAttribute('aria-label', `${t.title} design preview`);
+  $('#tpl-detail-caption').textContent = quiet ? 'Press play to watch the design. Automatic playback is off for your motion or data preferences.' : 'A short tour of this design. Pause or replay using the video controls.';
+  const dialog = $('#tpl-detail-dialog');
+  if (!dialog.open) dialog.showModal();
+  if (!quiet && !document.hidden) video.play().catch(() => { /* native controls remain available */ });
+  return true;
+}
+
+async function useTemplatePreview() {
+  if (!templatePreviewId || templateOpening) return;
+  const version = templatePreviewVersion;
+  const button = $('#tpl-detail-use');
+  button.disabled = true;
+  button.textContent = 'Saving your draft…';
+  try {
+    await openTemplate(templatePreviewId, { canReplace: () => version === templatePreviewVersion && $('#tpl-detail-dialog').open });
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Use this design';
+  }
+}
+
+function wireTemplatePreview() {
+  $('#tpl-detail-use').addEventListener('click', useTemplatePreview);
+  $('#tpl-detail-dialog').addEventListener('close', () => {
+    if ($('#tpl-detail-dialog').open) return;
+    templatePreviewId = null;
+    templatePreviewVersion++;
+    stopTemplateVideo();
+  });
+  $('#tpl-detail-video').addEventListener('error', () => {
+    if (templatePreviewId && $('#tpl-detail-video').getAttribute('src')) $('#tpl-detail-caption').textContent = 'The video could not load. The image shows the design, and you can still use it.';
+  });
+  // One set of listeners for the single detail player, never one per gallery card.
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  motion.addEventListener('change', () => { if (motion.matches) $('#tpl-detail-video').pause(); });
+  navigator.connection?.addEventListener('change', () => { if (navigator.connection.saveData) $('#tpl-detail-video').pause(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) $('#tpl-detail-video').pause(); });
+}
+
 let templateGoal = 'all';
 function renderTemplates() {
   $('#tpl-strip').replaceChildren(...TEMPLATES_LIST.slice(0, 6).map((t) => templateCard(t)));
@@ -1217,19 +1306,36 @@ function openLaunchReview() {
   $('#launch-checks').replaceChildren(...(items.length ? items : [{ level: 'ok', text: 'No unfinished details found by the automated checks.' }]).map(item => el('li', { class: item.level }, item.text)));
   $('#launch-dialog').showModal();
 }
-async function openTemplate(id) {
+async function openTemplate(id, { canReplace = () => true } = {}) {
+  if (templateOpening) return false;
   const site = buildTemplate(id);
   if (!site) return false;
-  commitEdit();
-  if (state.id && !state.demo) await save();
-  newProject(site, { demo: true });
-  state.template = id;
-  $('#prompt').value = site.prompt || '';
-  syncCreate();
-  if ($('#tpl-dialog').open) $('#tpl-dialog').close();
-  renderTemplates();
-  toast(`${TEMPLATES[id].title}: an example site. Click any text to make it yours; it saves once you edit.`);
-  return true;
+  templateOpening = true;
+  try {
+    commitEdit();
+    if (state.id && !state.demo) await save({ strict: true });
+    // Closing or changing the preview during a save cancels the replacement.
+    if (!canReplace()) return false;
+    newProject(site, { demo: true });
+    state.template = id;
+    $('#prompt').value = site.prompt || '';
+    syncCreate();
+    if ($('#tpl-detail-dialog').open) $('#tpl-detail-dialog').close();
+    if ($('#tpl-dialog').open) $('#tpl-dialog').close();
+    renderTemplates();
+    toast(`${TEMPLATES[id].title}: an example site. Click any text to make it yours; it saves once you edit.`);
+    return true;
+  } catch (error) {
+    const message = error.message || 'Your draft could not be saved. Export a copy before choosing another design.';
+    if ($('#tpl-detail-dialog').open) {
+      $('#tpl-detail-error').textContent = message;
+      $('#tpl-detail-error').hidden = false;
+    }
+    toast(message, 'error');
+    return false;
+  } finally {
+    templateOpening = false;
+  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1326,10 +1432,12 @@ function replayMotion() {
   state.replaying = true;
   doc.documentElement.classList.remove('editing');
   doc.documentElement.classList.add('rv');
+  stopMotion(doc);
   doc.body.innerHTML = p.body;
   win.scrollTo(0, 0);
   startMotion(doc);
   const io = new win.IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
+  previewReveal = io;
   doc.querySelectorAll('[data-rv]').forEach((n) => io.observe(n));
   toast('Scroll the preview to watch sections reveal. Click it to go back to editing.');
 }
@@ -1350,6 +1458,7 @@ function buildLibrary() {
 
 function wire() {
   bindDialogs();
+  wireTemplatePreview();
   document.querySelectorAll('[role="tab"][id^="t-"]').forEach((b) => b.addEventListener('click', () => switchTab(b.id.slice(2))));
   $('.ws-tabs').addEventListener('keydown', (e) => {
     const tabs = [...document.querySelectorAll('.ws-tabs [role="tab"]')];

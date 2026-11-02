@@ -73,7 +73,7 @@ function frameSent() {
 
 function loop(now) {
   rafId = requestAnimationFrame(loop);
-  if (state.recording || !state.current || gpuBusy()) return;
+  if (state.recording || !state.current || document.hidden || $('#effects-stage').hidden || gpuBusy()) return;
   const period = state.duration + (!state.effect && state.move === 'float' ? 0 : 0.7);
   const el2 = (now - loopStart) / 1000;
   drawFrame(state.playing ? Math.min(1, (el2 % period) / state.duration) : 0, now / 1000);
@@ -662,18 +662,33 @@ async function restoreBoard() {
 
 // ---------- tabs and bindings ----------
 function showTab(which) {
-  const board = which === 'board';
-  $('#t-move').setAttribute('aria-selected', String(!board));
-  $('#t-board').setAttribute('aria-selected', String(board));
-  $('#tab-move').hidden = board;
-  $('#tab-board').hidden = !board;
+  const create = which === 'create', board = which === 'board';
+  for (const [id, on] of [['create', create], ['move', !create && !board], ['board', board]]) {
+    $('#t-' + id).setAttribute('aria-selected', String(on));
+    $('#tab-' + id).hidden = !on;
+  }
+  $('#effect-footer').hidden = create;
   $('#foot-move').hidden = board;
   $('#foot-board').hidden = !board;
+  $('#create-stage').hidden = !create;
+  $('#effects-stage').hidden = create;
+  $('.video-studio').dataset.mode = which;
+  if (!create && renderer) setPreviewSize();
 }
 
-function bind() {
+function bindTabs() {
+  $('#t-create').addEventListener('click', () => showTab('create'));
+  document.querySelectorAll('[data-video-mode]').forEach(b => b.addEventListener('click', () => showTab(b.dataset.videoMode)));
+  document.querySelectorAll('.side-tabs [role=tab]').forEach((b, i, tabs) => b.addEventListener('keydown', e => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[next].focus(); tabs[next].click();
+  }));
   $('#t-move').addEventListener('click', () => showTab('move'));
   $('#t-board').addEventListener('click', () => showTab('board'));
+}
+function bind() {
   $('#frame-card').addEventListener('click', openPicker);
   $('#move-sel').addEventListener('click', () => $('#library').scrollIntoView({ behavior: 'smooth', block: 'start' }));
   $('#upload').addEventListener('change', (e) => loadFile(e.target.files[0]));
@@ -715,10 +730,13 @@ function bind() {
 
 function route() {
   if (location.hash === '#storyboard') showTab('board');
-  if (location.hash === '#library') $('#library').scrollIntoView({ block: 'start' });
+  if (['#library', '#preview'].includes(location.hash)) { showTab('move'); $(location.hash).scrollIntoView({ block: 'start' }); }
 }
 
 async function init() {
+  bindTabs();
+  bindDialogs();
+  autoplayVideos(document.querySelectorAll('.create-stage video[data-src]'));
   try { renderer = new Renderer($('#view')); effects = new EffectEngine(renderer); } catch (e) { status(e.message); return; }
   state.rig = await loadRig();
   syncLookControls();
@@ -726,10 +744,11 @@ async function init() {
   buildLibrary();
   buildSamples();
   bind();
-  bindDialogs();
   const p = new URLSearchParams(location.search);
   if (p.get('move')) selectMove(p.get('move'));
   if (p.get('effect') && effectById(p.get('effect'))) selectEffect(p.get('effect'), p.get('look'));
+  showTab(p.has('move') || p.has('effect') || p.has('shot') || p.has('sample') ? 'move' : 'create');
+  autoplayVideos(document.querySelectorAll('.create-stage video[data-src]'));
   startLoop();
   route();
   if (p.get('shot')) await loadShot(p.get('shot'));

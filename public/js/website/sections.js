@@ -104,6 +104,14 @@ R.hero = (s, c) => {
     return `<div class="wrap hero-in">${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1 h1-xl')}<div class="ed-row">${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}<div>${actions(c, s)}${note}</div></div>${hasImg(s.image) || c.edit ? media(c, s.image, P(s, 'image'), { ar: '21/9', eager: true, sizes: '100vw', cls: 'ed-media' }) : ''}</div>`;
   }
   const copy = `${eb}${H(c, s, 'title', P(s, 'title'), 1, 'h1')}${T(c, s, 'subtitle', P(s, 'subtitle'), 'p', 'lead')}${actions(c, s)}${note}`;
+  if (v === 'mosaic') {
+    const shots = [{ image: s.image, path: P(s, 'image') }, ...(s.images || []).slice(0, 6).map((item, i) => ({ image: item.image, path: PI(s, 'images', i, 'image') }))];
+    const tiles = shots.map((shot, i) => `<li class="mosaic-tile mosaic-tile-${i}" style="--tile:${i}"><div class="hero-drift">${media(c, shot.image, shot.path, { ar: i ? '4/3' : '4/5', eager: i === 0, sizes: '(max-width: 700px) 90vw, 34vw' })}</div></li>`).join('');
+    return `<div class="wrap campaign-grid mosaic-grid"${c.motion ? ' data-hero-motion' : ''}><div class="hero-in campaign-copy">${copy}</div><div class="mosaic-stage"><ul class="mosaic-wall n${shots.length}" aria-label="Selected images">${tiles}</ul></div></div>`;
+  }
+  if (v === 'object') {
+    return `<div class="wrap campaign-grid object-grid"${c.motion ? ' data-hero-motion' : ''}><div class="hero-in campaign-copy">${copy}</div><div class="object-stage"><span class="object-orbit" aria-hidden="true"><i></i></span><div class="object-photo hero-drift">${media(c, s.image, P(s, 'image'), { ar: '1/1', eager: true, sizes: '(max-width: 700px) 90vw, 58vw' })}</div></div></div>`;
+  }
   if (v === 'cover') {
     return `<div class="cover-media"${par}>${media(c, s.image, P(s, 'image'), { eager: true, sizes: '100vw' })}</div><div class="cover-shade" aria-hidden="true"></div><div class="wrap hero-in">${copy}</div>`;
   }

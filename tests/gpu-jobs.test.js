@@ -117,7 +117,7 @@ test('bad configuration fails closed; anonymous visitors get no GPU jobs', async
     assert.equal(gpuSettings({ ...ENV, ...bad }).on, false);
   }
   const env = { ...ENV, SUPABASE_URL: 'https://s.test', SUPABASE_PUBLISHABLE_KEY: 'pk', GENERATION_LEDGER: {} };
-  assert.deepEqual(generationConfig(env).gpu, { on: true, lab: false, perUserDaily: 10 });
+  assert.deepEqual(generationConfig(env).gpu, { on: true, lab: false, managedVideo: false, perUserDaily: 10 });
   assert.equal(gpuSettings(ENV).rate, 539, 'priced as the H100 by default');
   assert.equal(gpuSettings({ ...ENV, GPU_CENTS_PER_HOUR: '2001' }).on, false);
   assert.ok(!JSON.stringify(generationConfig(env)).includes('"k"'));

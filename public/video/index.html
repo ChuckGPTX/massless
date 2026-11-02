@@ -27,6 +27,7 @@
   <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/css/site.css">
   <link rel="stylesheet" href="/css/studio.css">
+  <link rel="stylesheet" href="/css/video.css">
   <link rel="stylesheet" href="/css/navigation.css">
   <script type="module" src="/js/navigation.js"></script>
 </head>
@@ -46,15 +47,16 @@
     </div>
   </header>
 
-  <main class="studio has-prompt">
-    <section class="video-prompt" data-video-prompt aria-label="Text to video" hidden></section>
+  <main class="studio video-studio" data-mode="create">
     <aside class="side" aria-label="Video controls">
       <div class="side-tabs" role="tablist">
-        <button role="tab" aria-selected="true" aria-controls="tab-move" id="t-move">Camera move</button>
+        <button role="tab" aria-selected="true" aria-controls="tab-create" id="t-create">Create video</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-move" id="t-move">Effects</button>
         <button role="tab" aria-selected="false" aria-controls="tab-board" id="t-board">Storyboard <span class="count" id="board-count">0</span></button>
       </div>
 
-      <div class="side-scroll" id="tab-move" role="tabpanel" aria-labelledby="t-move">
+      <section class="video-prompt" id="tab-create" data-video-prompt role="tabpanel" aria-labelledby="t-create"></section>
+      <div class="side-scroll" id="tab-move" role="tabpanel" aria-labelledby="t-move" hidden>
         <button type="button" class="frame-card" id="frame-card" aria-haspopup="dialog">
           <img id="frame-img" src="/media/art/rider.jpg" alt="">
           <span class="fc-label display" id="frame-name">Desert rider</span>
@@ -100,7 +102,7 @@
         <div class="board-total" id="board-total"></div>
       </div>
 
-      <div class="side-foot">
+      <div class="side-foot" id="effect-footer" hidden>
         <div class="foot-move" id="foot-move">
           <button type="button" class="btn-ghost wide" id="board-add"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Add to storyboard</button>
           <button type="button" class="go" id="record"><span id="record-label">Render clip</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"/></svg></button>
@@ -112,7 +114,25 @@
       </div>
     </aside>
 
-    <section class="stage" aria-label="Preview and move library">
+    <section class="stage create-stage" id="create-stage" aria-label="Video generation">
+      <div class="stage-top">
+        <div class="pills"><span class="pill on">✦ Create</span><a class="pill" href="/library/?type=video">My videos</a><button class="pill" type="button" data-dialog="video-guide">How it works</button></div>
+        <span class="src">YOUR NEXT GREAT SHOT</span>
+      </div>
+      <div id="vp-output" hidden></div>
+      <div class="video-welcome" id="video-welcome">
+        <div class="video-intro"><p class="video-eyebrow">THE VIDEO STUDIO</p><h1>From a spark.<br>To a <em>scene.</em></h1><p>Describe the moment. Start with an image.<br>Make something worth watching.</p><div class="video-steps"><span><b>01</b> Your idea</span><span><b>02</b> Your direction</span><span><b>03</b> Your film</span></div></div>
+        <a class="video-feature" href="/video?effect=lidar"><video muted loop playsinline preload="none" poster="/media/clips/effect-lidar-active.jpg" data-src="/media/clips/effect-lidar.mp4"></video><span class="video-feature-label"><small>EXPLORE THE IMPOSSIBLE</small><strong>See the unseen.</strong><span>Try LiDAR scan ↗</span></span></a>
+      </div>
+      <div class="video-section-heading"><div><p class="video-eyebrow">START SOMEWHERE UNEXPECTED</p><h2>A little direction. A lot of possibility.</h2></div><button class="pill" type="button" data-video-mode="move">All effects ↗</button></div>
+      <div class="video-inspiration">
+        <button class="video-idea" type="button" data-video-idea="Cinematic product film of sculptural ivory wireless headphones floating above a pale stone plinth, soft teal light, slow camera orbit, crisp premium materials."><img src="/media/website/aural-object/hero.webp" alt="Sculptural ivory headphones in a teal studio"><span><small>PRODUCT FILM</small><strong>Make the ordinary extraordinary.</strong><i>Use this idea ↗</i></span></button>
+        <a class="video-idea" href="/video?effect=vanish"><video muted loop playsinline preload="none" poster="/media/clips/effect-vanish-active.jpg" data-src="/media/clips/effect-vanish.mp4"></video><span><small>VANISH</small><strong>Here. Then gone.</strong><i>Try the effect ↗</i></span></a>
+        <button class="video-idea" type="button" data-video-idea="An intricate miniature city made entirely from folded pastel paper, tiny paper cars moving through streets, a gentle aerial camera gliding between buildings, warm studio lighting, charming stop-motion animation."><img src="/media/showcase/paper-city.jpg" alt="A colourful miniature paper city"><span><small>WORLDBUILDING</small><strong>Small worlds. Big imagination.</strong><i>Use this idea ↗</i></span></button>
+      </div>
+      <details class="video-more"><summary>More ways to create · Motion transfer, lip sync & upscale</summary><section class="gpu-panel" data-gpu-panel="animate" aria-label="More video tools" hidden></section></details>
+    </section>
+    <section class="stage effects-stage" id="effects-stage" aria-label="Preview and move library" hidden>
       <div class="stage-top">
         <div class="pills" role="tablist" aria-label="Stage sections">
           <a class="pill on" href="#preview"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z"/></svg>Preview</a>
@@ -124,7 +144,7 @@
 
       <div class="stage-head" id="preview">
         <div>
-          <h1 class="display">Turn one still<br>into a shot</h1>
+          <h2 class="display">One frame. Endless possibilities.</h2>
           <p>Pick a move and watch your still come alive. Tap the picture to set focus.</p>
         </div>
         <div class="stage-actions">
@@ -154,7 +174,6 @@
       <div class="lib" id="lib" role="radiogroup" aria-label="Camera move"></div>
     </section>
   </main>
-  <section class="gpu-panel" data-gpu-panel="animate" aria-label="More video tools" hidden></section>
 
   <dialog class="sheet picker" id="picker">
     <form method="dialog" class="sheet-head"><h2>Choose a start frame</h2><button class="x" aria-label="Close">×</button></form>
@@ -169,6 +188,7 @@
     <div class="pick-grid" id="pick-samples"></div>
   </dialog>
 
+  <dialog class="sheet" id="video-guide"><form method="dialog" class="sheet-head"><h2>From idea to finished video</h2><button class="x" aria-label="Close">×</button></form><p><strong>1. Describe a moment.</strong> Say who or what is in the scene, what moves, and how the camera should behave.</p><p><strong>2. Add a first frame, if you have one.</strong> An image helps guide the subject, style and composition.</p><p><strong>3. Generate and finish.</strong> Sign in to generate. Download the completed clip or find it in My library. Use Effects to animate a still directly, with no account needed.</p></dialog>
   <dialog class="sheet" id="how">
     <form method="dialog" class="sheet-head"><h2>Tips</h2><button class="x" aria-label="Close">×</button></form>
     <p>Moderate intensity gives the cleanest results. Big moves can stretch the background behind people and objects.</p>

@@ -3,6 +3,9 @@
 // Sites a visitor creates never get these by default: their empty slots keep the generated SVG art.
 
 export const PHOTOS = {
+  '/media/website/aural-object/hero.webp': { w: 1600, h: 900, sm: '/media/website/aural-object/hero-sm.webp', smW: 720 },
+  '/media/website/current-studio/hero.webp': { w: 1600, h: 900, sm: '/media/website/current-studio/hero-sm.webp', smW: 720 },
+  '/media/website/nightjar-film/hero.webp': { w: 1600, h: 900, sm: '/media/website/nightjar-film/hero-sm.webp', smW: 720 },
   '/media/website/property-story/detail.webp': { w: 1400, h: 788, sm: '/media/website/property-story/detail-sm.webp', smW: 720 },
   '/media/website/music-artist/detail.webp': { w: 1400, h: 788, sm: '/media/website/music-artist/detail-sm.webp', smW: 720 },
   '/media/website/wellness-studio/detail.webp': { w: 1400, h: 788, sm: '/media/website/wellness-studio/detail-sm.webp', smW: 720 },

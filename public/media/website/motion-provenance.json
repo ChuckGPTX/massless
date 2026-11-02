@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-02",
+  "source": "ChatGPT built-in image generation",
+  "prompts": "docs/website-motion-image-prompts.json",
+  "files": [
+    {
+      "path": "media/website/aural-object/hero.webp",
+      "bytes": 28170,
+      "sha256": "c085817a165a635575d3b5483190c932139dd99d98593fb27394c7fed2e0fcf9",
+      "width": 1600,
+      "height": 900,
+      "sourceFile": "exec-6bde1e4e-1b70-44e2-85ad-ff14cfa6858e.png"
+    },
+    {
+      "path": "media/website/aural-object/hero-sm.webp",
+      "bytes": 6650,
+      "sha256": "6e63e248874e0ffd24ef965d8964a5a72c8fd16b91ab9a8bd25d715f4d7b1ef5",
+      "width": 720,
+      "height": 405,
+      "sourceFile": "exec-6bde1e4e-1b70-44e2-85ad-ff14cfa6858e.png"
+    },
+    {
+      "path": "media/website/current-studio/hero.webp",
+      "bytes": 81304,
+      "sha256": "afce0057b666d2f24b61d56a8bbea698113feff320f94d12f69eed722caee68a",
+      "width": 1600,
+      "height": 900,
+      "sourceFile": "exec-0c439eab-5c45-48e5-b88b-18cb89a6c836.png"
+    },
+    {
+      "path": "media/website/current-studio/hero-sm.webp",
+      "bytes": 22050,
+      "sha256": "bb6664c9346753000472da8b1e62ae5a65a4dd82df62e8269e99bdb109648693",
+      "width": 720,
+      "height": 405,
+      "sourceFile": "exec-0c439eab-5c45-48e5-b88b-18cb89a6c836.png"
+    },
+    {
+      "path": "media/website/nightjar-film/hero.webp",
+      "bytes": 57132,
+      "sha256": "66de54ab5e1291af01351152ec4885d17fba6d086561918fbe1e3a84bd15315b",
+      "width": 1600,
+      "height": 900,
+      "sourceFile": "exec-73b4d204-9dc2-4e5d-a830-7145e8da3459.png"
+    },
+    {
+      "path": "media/website/nightjar-film/hero-sm.webp",
+      "bytes": 12482,
+      "sha256": "387632b32e987a754b57e70a2a8d0a0bbdac7acb541636221ee67913bfdcad53",
+      "width": 720,
+      "height": 405,
+      "sourceFile": "exec-73b4d204-9dc2-4e5d-a830-7145e8da3459.png"
+    }
+  ]
+}

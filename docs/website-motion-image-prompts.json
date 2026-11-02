@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-02",
+  "tool": "ChatGPT built-in image generation",
+  "mode": "generate",
+  "transparent_background": false,
+  "images": [
+    {
+      "id": "aural-object",
+      "prompt": "Original premium industrial design product photograph, landscape 16:9. A sculptural pair of over-ear headphones with soft ivory ear cushions, matte warm silver anodized aluminum arcs, beautifully engineered hinge details, shown floating at a gentle diagonal in an entirely seamless off-white studio, soft diffused lighting and subtle realistic shadow, pleasing high-end design editorial quality, large centered object, refined and quiet, no brand mark, no logo, no lettering, no UI, no watermark. A fictional product design, not a copy of an existing branded device. Photographic 3D render with immaculate material detail.",
+      "sourceFile": "exec-6bde1e4e-1b70-44e2-85ad-ff14cfa6858e.png"
+    },
+    {
+      "id": "current-studio",
+      "prompt": "Original design studio campaign still life, landscape 16:9. A monumental sculptural ribbon made of polished cobalt blue and brushed silver metal twisting through an architectural terracotta-red space, one soft yellow sphere in the foreground, hard sunlight and beautiful dramatic shadows, the geometry is refined and playful, premium contemporary graphic-design art direction, unusually clear bold composition, material richness, museum-quality experimental industrial design photography. No text, no typography, no logo, no watermark, no user interface. Full image only.",
+      "sourceFile": "exec-0c439eab-5c45-48e5-b88b-18cb89a6c836.png"
+    },
+    {
+      "id": "nightjar-film",
+      "prompt": "Original cinematic film still, landscape 16:9, premium independent science fiction art direction. A lone astronaut in a weathered ivory suit stands on a vast black volcanic shore at blue hour, a huge luminous orange moon low over an almost perfectly calm sea, light mist, tiny distant futuristic observatory in silhouette. Wide panoramic composition, astronaut on right third and negative space on left, exquisite tactile analog film grain, deep navy and ember palette, realistic lens and lighting, emotional restrained cinema. No text, no logos, no watermark, no border, no existing film character or franchise.",
+      "sourceFile": "exec-73b4d204-9dc2-4e5d-a830-7145e8da3459.png"
+    }
+  ]
+}

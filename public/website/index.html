@@ -166,11 +166,34 @@
 
   <dialog class="sheet ws-dialog wide" id="tpl-dialog">
     <form method="dialog" class="sheet-head"><h2>Start from a template</h2><button class="x" aria-label="Close">×</button></form>
-    <p>Each template is a complete example site. Open one, then click any word or image to make it yours. Your current site stays in Your sites.</p>
+    <p>Preview a complete example site, then choose a design to make it yours. Your current draft is saved before you switch.</p>
     <div class="ws-template-search"><label for="tpl-search">Find your starting point</label><input id="tpl-search" type="search" placeholder="Try music, property, portfolio…" autocomplete="off"></div>
     <div class="ws-template-goals" id="tpl-goals" role="group" aria-label="Website goal"></div>
     <p class="ws-note" id="tpl-count" role="status"></p>
     <div class="ws-tpl-grid" id="tpl-grid"></div>
+  </dialog>
+
+  <dialog class="sheet ws-dialog ws-tpl-detail" id="tpl-detail-dialog" aria-labelledby="tpl-detail-title" aria-describedby="tpl-detail-description">
+    <form method="dialog" class="sheet-head">
+      <div><p class="ws-eyebrow" id="tpl-detail-category"></p><h2 id="tpl-detail-title">Preview a design</h2></div>
+      <button class="x" aria-label="Close design preview" autofocus>×</button>
+    </form>
+    <div class="ws-tpl-detail-layout">
+      <div class="ws-tpl-detail-media">
+        <video id="tpl-detail-video" controls muted playsinline preload="none" aria-describedby="tpl-detail-caption">Your browser cannot play this preview video.</video>
+        <p class="ws-note" id="tpl-detail-caption"></p>
+      </div>
+      <div class="ws-tpl-detail-info">
+        <p id="tpl-detail-description"></p>
+        <h3>Make it your own</h3>
+        <ul id="tpl-detail-includes"></ul>
+        <div class="ws-tpl-detail-action">
+          <button type="button" class="btn-accent" id="tpl-detail-use">Use this design</button>
+          <p class="ws-note">Your current draft stays in Your sites. This example becomes a new draft when you edit it.</p>
+          <p id="tpl-detail-error" role="alert" hidden></p>
+        </div>
+      </div>
+    </div>
   </dialog>
 
   <dialog class="sheet ws-dialog" id="personalize-dialog" aria-labelledby="personalize-title">

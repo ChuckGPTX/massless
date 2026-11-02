@@ -354,13 +354,13 @@ export async function gpuBudget() {
   return r.ok ? { ...j, signedIn: true } : { on: true, signedIn: r.status !== 401, error: j.error };
 }
 /** Run one GPU job; resolves { blob, audio?, output, costCents }. onProgress({ status, message, percent }). */
-export async function gpuJob({ job, input, lab = false, signal, onProgress }) {
+export async function gpuJob({ job, input, engine, lab = false, signal, onProgress }) {
   const token = await accessToken();
   let r = await fetch("/api/generations", {
     method: "POST",
     signal,
     headers: { Authorization: "Bearer " + token, "content-type": "application/json" },
-    body: JSON.stringify({ job, input, ...(lab ? { lab: true } : {}), idempotencyKey: crypto.randomUUID() }),
+    body: JSON.stringify({ job, input, ...(engine ? { engine } : {}), ...(lab ? { lab: true } : {}), idempotencyKey: crypto.randomUUID() }),
   });
   let j = await r.json().catch(() => ({}));
   if (!r.ok) throw Object.assign(new Error(j.error || "Couldn't start. Try again."), { status: r.status, budget: !!j.budget });
@@ -372,7 +372,7 @@ export async function gpuJob({ job, input, lab = false, signal, onProgress }) {
   let delay = 2000;
   try {
     while (!["COMPLETED", "FAILED", "CANCELLED", "TIMED_OUT", "SUBMISSION_UNKNOWN"].includes(j.status)) {
-      onProgress?.({ status: j.status, message: j.status === "IN_PROGRESS" && j.percent >= 80 ? "Almost done…" : "Creating…", percent: j.percent ?? null });
+      onProgress?.({ status: j.status, message: j.status === "IN_QUEUE" ? "Waiting for a space to open. Your video hasn’t started yet." : j.status === "IN_PROGRESS" && j.percent >= 80 ? "Finishing your video…" : "Creating your video…", percent: j.percent ?? null });
       if (Date.now() > deadline) {
         await cancel();
         throw new Error("This took too long and was stopped. Try again.");
@@ -384,7 +384,7 @@ export async function gpuJob({ job, input, lab = false, signal, onProgress }) {
       j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.error || "Lost track of this one. Try again.");
     }
-    if (j.status !== "COMPLETED") throw new Error(j.status === "CANCELLED" ? "Cancelled." : "Couldn't finish this one. Try again.");
+    if (j.status !== "COMPLETED") throw new Error(j.status === "CANCELLED" ? "Cancelled." : (j.error || "Couldn't finish this one. Try again."));
     onProgress?.({ status: "COMPLETED", message: "Ready", percent: 100 });
     const get = async (part) => {
       const f = await fetch("/api/generations/" + id + "/" + part, { signal, headers: await auth() });
@@ -421,7 +421,7 @@ export async function promoVideoJob({ prompt, duration, resolution, image, signa
   let delay = 3000;
   while (!["completed", "failed", "cancelled", "expired", "unknown"].includes(j.status)) {
     const s = Math.round((Date.now() - started) / 1000);
-    onProgress?.(s > 60 ? "Almost done…" : "Creating…");
+    onProgress?.(s > 60 ? "Still creating your video…" : "Creating your video…");
     if (Date.now() - started > 10 * 60 * 1000) throw new Error("The clip took too long. Try again later.");
     await new Promise((resolve) => setTimeout(resolve, delay));
     if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");

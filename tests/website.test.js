@@ -176,7 +176,7 @@ test("template sections render with edit hooks and generated art, motion is opti
   still.theme.motion = "none";
   assert.doesNotMatch(renderPage(still, sitePages(still)[0], { mode: "zip" }), /data-scrub|data-rail|data-rv/);
   // the runtime is small, valid and respects reduced motion
-  assert.ok(SITE_JS.length < 6500, `site.js is ${SITE_JS.length} bytes`);
+  assert.ok(SITE_JS.length < 7500, `site.js is ${SITE_JS.length} bytes`);
   new Function(SITE_JS);
   assert.match(SITE_JS, /prefers-reduced-motion: no-preference/);
 });
@@ -282,6 +282,6 @@ test("motion hooks are there when motion is on and gone when it is off or reduce
   for (const k of ["mz-kb", "mz-mask", "mz-clip"]) assert.ok(BASE_CSS.slice(guard, end).includes(k), k);
   assert.match(GEN_JS, /prefers-reduced-motion: no-preference/);
   assert.match(GEN_JS, /data-motion'\)!=='none'/);
-  assert.ok(SITE_JS.length < 6500, `site.js is ${SITE_JS.length} bytes`);
+  assert.ok(SITE_JS.length < 7500, `site.js is ${SITE_JS.length} bytes`);
   assert.ok(SITE_JS.includes(GEN_JS), "the export runs the same canvas code as the editor");
 });
