@@ -1,5 +1,5 @@
 {
- "date": "2026-11-01",
+ "date": "2026-11-02",
  "notice": "Loops and posters depict Chucksi's own tools using media already in this repository. Each source below describes its capture method: original headless recordings or CUA browser screenshots for the Website Studio starters. No people were filmed and no outside footage was used. Encoded with ffmpeg: H.264, no audio, 24 fps; posters are WebP. See the listed recording and packaging scripts.",
  "sources": {
   "video-renderer": "Drawn frame by frame by the Video page's own depth renderer, camera moves and effect engine (massless.drawFrame) on the bundled sample stills in /media/art with their precomputed depth maps (record-video.cjs). Camera moves play forward then back (ping-pong); effects close with a short crossfade into their first frame.",
@@ -16,7 +16,9 @@
   "clip-workroom": "The Clip workroom burning three typed captions into its bundled LiDAR sample clip, seeking the clip frame by frame (jobs/tools.js).",
   "office": "Chucksi Office on its bundled sample document and contract templates, driven with scripted clicks and typing, captured frame by frame.",
   "optical-effects-pack": "15 original browser effects rendered by EffectEngine and the existing recordSegments exporter through tests/optical-effects.html. Bundled sample stills and depth maps only; no external footage, generation API or provider model. Each loop returns to its original frame. Packaged with tools/package_effect_previews.py.",
-  "website-studio-screenshots": "Actual complete template pages captured in Chrome through CUA with reduced motion, then cropped into a six-second forward/back scroll using ffmpeg. Original generated photography and original template code. No external footage."
+  "website-studio-screenshots": "Actual complete template pages captured in Chrome through CUA with reduced motion, then cropped into a six-second forward/back scroll using ffmpeg. Original generated photography and original template code. No external footage.",
+  "website-motion-recording": "Real Chrome screen recordings captured through CUA from Chucksi's rendered Aural, Current, and Nightjar template pages. Ordered JPEG frames use their original times.json elapsed timestamps in ffmpeg concat durations, sampled at 24 fps without motion interpolation, panning, zooming, reversing, or speed changes. Recordings shorter than six seconds hold the last actual captured frame; per-file timing records show the hold. Static top-aligned crop to 854x480, square pixels, silent H.264 and faststart. Packaged by tools/package_motion_starter_previews.py.",
+  "website-motion-screenshot": "Actual desktop Chrome screenshots of Chucksi's own Aural, Current, and Nightjar template pages, captured through CUA. Static top-aligned crops and Lanczos resizing only: 640x400 template thumbnails and 768x432 workflow posters. Packaged by tools/package_motion_starter_previews.py; screenshot hashes are recorded per file."
  },
  "files": [
   {
@@ -1762,6 +1764,117 @@
    "card": "site-property-story",
    "source": "website-studio-screenshots",
    "recorded_from": "/website?template=property-story"
+  },
+  {
+   "path": "media/website/tpl-aural-object.webp",
+   "bytes": 9854,
+   "sha256": "2b13ddb56549de7e4082b632180f6909dba9f6f5e9175415b028f491316db3e6",
+   "card": "site-aural-object",
+   "source": "website-motion-screenshot",
+   "recorded_from": "/website?template=aural-object",
+   "screenshot": "aural-object.png",
+   "screenshot_sha256": "16d15cbd79f2374c89de52a3902643fe5ad1dbf476ac1fb3675b9de17f4fdf50"
+  },
+  {
+   "path": "media/templates/site-aural-object.webp",
+   "bytes": 12334,
+   "sha256": "2c0c8adcf60cb5a19311b4904ee1c406811a248b3cdc1e39076de1bf7406628c",
+   "card": "site-aural-object",
+   "source": "website-motion-screenshot",
+   "recorded_from": "/website?template=aural-object",
+   "screenshot": "aural-object.png",
+   "screenshot_sha256": "16d15cbd79f2374c89de52a3902643fe5ad1dbf476ac1fb3675b9de17f4fdf50"
+  },
+  {
+   "path": "media/templates/site-aural-object.mp4",
+   "bytes": 30259,
+   "sha256": "f78bc1d175936924bbd2d69672690b6a3b124fa4d0cbdb67c71111b287493c4c",
+   "card": "site-aural-object",
+   "source": "website-motion-recording",
+   "recorded_from": "/website?template=aural-object",
+   "captured_frames": 33,
+   "used_frames": 33,
+   "first_capture_timestamp_seconds": 1793632284.522407,
+   "last_capture_timestamp_seconds": 1793632289.838724,
+   "source_elapsed_seconds": 5.316317,
+   "final_frame_hold_seconds": 0.683683,
+   "timestamps_sha256": "65f0e88fc6c5298c07a4712511401bde865c47341616873114e7fce8ee4db4d5",
+   "timing": "Original elapsed timestamps; nearest 24 fps output samples repeat captured frames without interpolation. Final captured frame held to six seconds when necessary.",
+   "recording": "recordings/aural-object/times.json"
+  },
+  {
+   "path": "media/website/tpl-current-studio.webp",
+   "bytes": 18734,
+   "sha256": "e6f45f800c47a0d427efb39b4cefe37dc1bc15b7c30fe41d99bf638c6fbe9b6f",
+   "card": "site-current-studio",
+   "source": "website-motion-screenshot",
+   "recorded_from": "/website?template=current-studio",
+   "screenshot": "current-studio.png",
+   "screenshot_sha256": "182b6213d871bdbc78d372ca34322bfdcf8c462b3313d16c3c52c2b0bfbc65b8"
+  },
+  {
+   "path": "media/templates/site-current-studio.webp",
+   "bytes": 19380,
+   "sha256": "61e7339393dac5a956b9dfad13cbb380ebc8c97e77e6d4ce44711688159d5b75",
+   "card": "site-current-studio",
+   "source": "website-motion-screenshot",
+   "recorded_from": "/website?template=current-studio",
+   "screenshot": "current-studio.png",
+   "screenshot_sha256": "182b6213d871bdbc78d372ca34322bfdcf8c462b3313d16c3c52c2b0bfbc65b8"
+  },
+  {
+   "path": "media/templates/site-current-studio.mp4",
+   "bytes": 257049,
+   "sha256": "21d24fe8994980e179d55e2d0d4b8db8414c9780c182ad01b910d03acfce2402",
+   "card": "site-current-studio",
+   "source": "website-motion-recording",
+   "recorded_from": "/website?template=current-studio",
+   "captured_frames": 49,
+   "used_frames": 49,
+   "first_capture_timestamp_seconds": 1793632414.11464,
+   "last_capture_timestamp_seconds": 1793632416.181219,
+   "source_elapsed_seconds": 2.066579,
+   "final_frame_hold_seconds": 3.933421,
+   "timestamps_sha256": "2c14eea6adc3e95cbd5d84b66c55739fd182c279f288051f0c326c808430ce1b",
+   "timing": "Original elapsed timestamps; nearest 24 fps output samples repeat captured frames without interpolation. Final captured frame held to six seconds when necessary.",
+   "recording": "recordings/current-studio/times.json"
+  },
+  {
+   "path": "media/website/tpl-nightjar-film.webp",
+   "bytes": 18524,
+   "sha256": "c3a12355674a9f4397604a03abe84cd2bfcb43319ac6420d49645f06c101791b",
+   "card": "site-nightjar-film",
+   "source": "website-motion-screenshot",
+   "recorded_from": "/website?template=nightjar-film",
+   "screenshot": "nightjar-film.png",
+   "screenshot_sha256": "c78c52e777a4a52c825023aa0ff8afc3c3d5c05d221e13389c22bb22fe0fdab1"
+  },
+  {
+   "path": "media/templates/site-nightjar-film.webp",
+   "bytes": 22340,
+   "sha256": "a7e7d48b17e3863ba0e1d3f931fd6cddee91a41b2a9b661cff0ea115b312ac68",
+   "card": "site-nightjar-film",
+   "source": "website-motion-screenshot",
+   "recorded_from": "/website?template=nightjar-film",
+   "screenshot": "nightjar-film.png",
+   "screenshot_sha256": "c78c52e777a4a52c825023aa0ff8afc3c3d5c05d221e13389c22bb22fe0fdab1"
+  },
+  {
+   "path": "media/templates/site-nightjar-film.mp4",
+   "bytes": 59666,
+   "sha256": "a230a3a8280d832bbf13e1ab012ccb9f8bc4fca29aaab85cd92c64498d3abdfe",
+   "card": "site-nightjar-film",
+   "source": "website-motion-recording",
+   "recorded_from": "/website?template=nightjar-film",
+   "captured_frames": 157,
+   "used_frames": 157,
+   "first_capture_timestamp_seconds": 1793633064.740115,
+   "last_capture_timestamp_seconds": 1793633070.705758,
+   "source_elapsed_seconds": 5.965643,
+   "final_frame_hold_seconds": 0.034357,
+   "timestamps_sha256": "07a4117884d2cf5a733989a6458fc767214b19603c5dba6f7a519c6103b851d0",
+   "timing": "Original elapsed timestamps; nearest 24 fps output samples repeat captured frames without interpolation. Final captured frame held to six seconds when necessary.",
+   "recording": "recordings/nightjar-film/times.json"
   }
  ]
 }

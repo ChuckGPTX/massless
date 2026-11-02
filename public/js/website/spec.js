@@ -35,9 +35,9 @@ export const TONES = { base: 'Page', alt: 'Soft', inv: 'Inverse', acc: 'Brand co
 export const SECTIONS = {
   hero: {
     name: 'Hero', group: 'Intro', hint: 'Headline, intro and the main button',
-    variants: { split: 'Split', centered: 'Centered', cover: 'Full photo', editorial: 'Editorial', banner: 'Page header', portrait: 'Portrait', ambient: 'Ambient', runway: 'Runway', minimal: 'Name card' },
-    fields: { eyebrow: 'text', title: 'text', subtitle: 'para', cta: 'link', cta2: 'link', note: 'text', image: IMG },
-    labels: { cta: 'Main button', cta2: 'Second button', note: 'Small print' },
+    variants: { split: 'Split', centered: 'Centered', cover: 'Full photo', editorial: 'Editorial', banner: 'Page header', portrait: 'Portrait', ambient: 'Ambient', runway: 'Runway', minimal: 'Name card', mosaic: 'Image mosaic', object: 'Object campaign' },
+    fields: { eyebrow: 'text', title: 'text', subtitle: 'para', cta: 'link', cta2: 'link', note: 'text', image: IMG, images: { max: 6, item: { image: IMG } } },
+    labels: { cta: 'Main button', cta2: 'Second button', note: 'Small print', images: 'Mosaic images' },
   },
   logos: {
     name: 'Logo strip', group: 'Intro', hint: 'Places you serve, platforms, credentials',
@@ -204,7 +204,7 @@ export const SITE_RULES = `You design small, beautiful websites. Reply with JSON
 Pages: "Home" first, then 0 to 4 more pages (for example Services, About, Menu, Shows, Contact). Home has 6 to 9 sections; other pages have 3 to 6. Every page starts with a hero (inner pages use the "banner" variant) and ends with a footer.
 A section is {"type": string, "variant": string, ...fields}. Image fields are a short photo prompt: subject, setting, light; never text, logos or faces of real people. A link is {"label": max 24 chars, "href": "#contact" | "/about" (a page title in lowercase with dashes) | "mailto:..." | "tel:..." | "https://..."}. Put *asterisks* around one to three words of a title to highlight them.
 Section types (variants): fields
-- hero (split|centered|cover|editorial|banner): eyebrow, title (max 70 chars), subtitle (max 220 chars), cta, cta2, note, image
+- hero (split|centered|cover|editorial|banner|mosaic|object): eyebrow, title (max 70 chars), subtitle (max 220 chars), cta, cta2, note, image; mosaic also has images [{image}], 4 to 6 supporting photographs
 - logos (row|marquee): title, items [{name}]: service areas, platforms or credentials named in the prompt; never invented clients, partners or press
 - features (cards|icons|rows|bento): eyebrow, title, subtitle, items [{icon, title, text, image}], 3 to 6 items; rows and bento need an image per item
 - about (split|centered): eyebrow, title, text (two short paragraphs separated by a blank line), points [{text}], cta, image
@@ -506,7 +506,7 @@ const fill = (tpl, N, L) => tpl
 
 const im = (prompt, alt) => ({ src: '', alt: alt || cap(clean(prompt, 120).replace(/^(a|an|the)\s+/i, '')), prompt });
 const link = (label, href) => ({ label, href });
-const sec = (type, variant, fields = {}, tone = 'base') => ({ id: uid('s'), type, variant, tone, ...fields });
+const sec = (type, variant, fields = {}, tone = 'base') => ({ id: uid('s'), type, variant, tone, ...(type === 'hero' ? { images: [] } : {}), ...fields });
 const placeholderReviews = (n = 3) => Array.from({ length: n }, () => ({ quote: 'Placeholder: paste a real review from a customer here, with their permission.', name: 'Customer name', role: 'Placeholder', ph: true }));
 
 /** Default content for a new section of any type (the editor's "Add section"). */
@@ -514,7 +514,7 @@ export function newSection(type, site = {}) {
   const N = site.name || 'Your site';
   const photo = (k) => im(`${['a bright modern interior with natural light', 'a detail shot of hands at work', 'an inviting storefront at golden hour', 'a calm landscape at sunrise'][k % 4]}`);
   const make = {
-    hero: () => sec('hero', 'split', { eyebrow: 'Welcome', title: `${N}, *at its best.*`, subtitle: 'Say what you do, who it is for and why it is worth a look, in one or two sentences.', cta: link('Get in touch', '#contact'), cta2: link('Learn more', '#services'), note: '', image: photo(0) }),
+    hero: () => sec('hero', 'split', { eyebrow: 'Welcome', title: `${N}, *at its best.*`, subtitle: 'Say what you do, who it is for and why it is worth a look, in one or two sentences.', cta: link('Get in touch', '#contact'), cta2: link('Learn more', '#services'), note: '', image: photo(0), images: [] }),
     logos: () => sec('logos', 'row', { title: 'Proudly serving', items: ['[Town one]', '[Town two]', '[Town three]', '[Town four]'].map((name) => ({ name, ph: true })) }),
     features: () => sec('features', 'cards', { eyebrow: 'What we do', title: 'Everything you *need*', subtitle: '', items: [['sparkle', 'First feature', 'One or two sentences about what it is and why it helps.'], ['shield', 'Second feature', 'One or two sentences about what it is and why it helps.'], ['clock', 'Third feature', 'One or two sentences about what it is and why it helps.']].map(([icon, title, text], k) => ({ icon, title, text, image: photo(k) })) }),
     about: () => sec('about', 'split', { eyebrow: 'About', title: 'The story *so far*', text: 'Tell visitors who you are and how you started.\n\nThen say what you care about, in plain words.', points: [{ text: 'A promise you keep' }, { text: 'Another promise you keep' }], cta: link('Get in touch', '#contact'), image: photo(1) }, 'alt'),

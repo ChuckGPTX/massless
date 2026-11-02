@@ -3,6 +3,9 @@
 // /website?template=<id>. Thumbnails are screenshots of the templates themselves (tests/website_thumbs.py).
 
 export const TEMPLATES_LIST = [
+  { id: 'nightjar-film', title: 'Nightjar · Film', description: 'A cinematic image wall, atmospheric collection and a story-led project enquiry.', style: 'swiss', kind: 'portfolio', isNew: true, motionLabel: 'Perspective mosaic' },
+  { id: 'aural-object', title: 'Aural · Product', description: 'A floating product campaign, quiet typography and a considered path to an enquiry.', style: 'ai-product', kind: 'product', isNew: true, motionLabel: 'Floating object' },
+  { id: 'current-studio', title: 'Current · Design', description: 'Oversized editorial type, a moving discipline strip and a sideways project archive.', style: 'bold', kind: 'cases', isNew: true, motionLabel: 'Editorial motion' },
   { id: 'wellness-studio', title: 'Stillform · Wellness', description: 'A sunlit studio, class introductions and a gentle path to a first visit.', style: 'studio', kind: 'business', isNew: true },
   { id: 'music-artist', title: 'After Hours · Music', description: 'A cinematic live stage, artist story, show dates and booking enquiries.', style: 'bold', kind: 'band', isNew: true },
   { id: 'property-story', title: 'Lake & Light · Property', description: 'A full-screen architectural story, property facts and viewing enquiries.', style: 'editorial', kind: 'realestate', isNew: true },

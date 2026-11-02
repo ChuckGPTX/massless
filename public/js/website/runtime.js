@@ -14,7 +14,13 @@ size();box.classList.add('live');addEventListener('resize',size);if(!run)return;
 if('IntersectionObserver'in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting}).observe(cv);
 (function loop(){if(!cv.isConnected)return;if(vis&&!d.hidden){t+=.0055;draw()}requestAnimationFrame(loop)})()})})(document);`;
 
-/** The runtime every exported page loads (about 5 KB): reveal, scroll scrub and parallax, the case-study rail, the ambient canvas. Kept as a string so it can be inlined or saved. */
+/** Campaign motion: one observer, no animation loop, fine-pointer input at most once per frame. */
+export const HERO_JS = `(function(){var d=document;if(d._heroStop)d._heroStop();var a=[].slice.call(d.querySelectorAll('[data-hero-motion]')),m=matchMedia('(prefers-reduced-motion: no-preference)'),p=matchMedia('(hover: hover) and (pointer: fine)');if(!a.length||!('IntersectionObserver'in window))return;var ctl=new AbortController(),opt={signal:ctl.signal};
+function reset(e){e.style.removeProperty('--mx');e.style.removeProperty('--my')}
+function sync(){a.forEach(function(e){var on=e._hv&&!d.hidden&&m.matches&&d.documentElement.dataset.motion!=='none';e.classList.toggle('hero-live',!!on);if(!on||!p.matches)reset(e)})}
+var o=new IntersectionObserver(function(es){es.forEach(function(x){x.target._hv=x.isIntersecting});sync()});a.forEach(function(e){e.setAttribute('data-hero-live','');o.observe(e);e.addEventListener('pointermove',function(x){e._hp=x;if(e._hr)return;e._hr=requestAnimationFrame(function(){e._hr=0;if(!e.classList.contains('hero-live')||!p.matches)return;var r=e.getBoundingClientRect(),q=e._hp;e.style.setProperty('--mx',Math.max(-1,Math.min(1,(q.clientX-r.left)/r.width*2-1)).toFixed(3));e.style.setProperty('--my',Math.max(-1,Math.min(1,(q.clientY-r.top)/r.height*2-1)).toFixed(3))})},opt);e.addEventListener('pointerleave',function(){cancelAnimationFrame(e._hr);e._hr=0;reset(e)},opt)});d.addEventListener('visibilitychange',sync,opt);m.addEventListener('change',sync,opt);p.addEventListener('change',sync,opt);d._heroStop=function(){ctl.abort();o.disconnect();a.forEach(function(e){cancelAnimationFrame(e._hr);e._hr=0;e._hv=false;e.classList.remove('hero-live');e.removeAttribute('data-hero-live');reset(e)});delete d._heroStop};sync()})();`;
+
+/** The runtime every exported page loads: reveal, scroll scrub and parallax, case-study rail and ambient motion. Kept as a string so it can be inlined or saved. */
 export const SITE_JS = `(function(){var d=document,de=d.documentElement;
 if(de.classList.contains('rv')&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{rootMargin:'0px 0px -6% 0px',threshold:.06});d.querySelectorAll('[data-rv]').forEach(function(el){io.observe(el)})}
 var audio,cur;function set(b,on){b.setAttribute('aria-pressed',on?'true':'false')}
@@ -33,6 +39,7 @@ function lay(){var on=rv&&wide.matches;rails.forEach(function(r){var tr=r.queryS
 function tick(){busy=0;var vh=innerHeight;rails.forEach(function(r){if(!r.classList.contains('on'))return;var b=r.getBoundingClientRect(),p=Math.min(1,Math.max(0,-b.top/(r._d||1))),tr=r.querySelector('.rail-track'),y=r.querySelector('[data-year-out]'),cur;tr.style.transform='translate3d('+(-p*r._d).toFixed(1)+'px,0,0)';var tx=innerWidth*(.2+.6*p),bd=1e9;[].forEach.call(tr.children,function(li){var q=li.getBoundingClientRect(),dd=Math.abs(q.left+q.width/2-tx);if(dd<bd){bd=dd;cur=li}});if(y&&cur&&y.textContent!==cur.getAttribute('data-year'))y.textContent=cur.getAttribute('data-year')});
 scr.forEach(function(e){var b=e.getBoundingClientRect(),p=e.classList.contains('on')?-b.top/Math.max(1,b.height-vh):e.getAttribute('data-scrub')==='par'?(vh-b.top)/(vh+b.height):(vh*.92-b.top)/(b.height*.55+vh*.45);e.style.setProperty('--p',Math.min(1,Math.max(0,p)).toFixed(3))})}
 if(rv&&(rails.length||scr.length)){addEventListener('scroll',function(){if(!busy){busy=1;requestAnimationFrame(tick)}},{passive:true});addEventListener('resize',lay);if(wide.addEventListener)wide.addEventListener('change',lay);addEventListener('load',lay);lay()}
+${HERO_JS}
 ${GEN_JS}
 if(location.protocol==='file:')d.querySelectorAll('a[href]').forEach(function(a){var h=a.getAttribute('href');if(!/^[a-z][\\w+.-]*:|^#|^\\/\\//i.test(h)&&/\\/(#.*)?$/.test(h))a.setAttribute('href',h.replace(/\\/(#.*)?$/,'/index.html$1'))});
 })();`;

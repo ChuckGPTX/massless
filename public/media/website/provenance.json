@@ -38,7 +38,7 @@
   ],
   "template_photography": {
     "date": "2026-11-01",
-    "generator": "Higgsfield API, text to image",
+    "generator": "See individual image records: Higgsfield API or ChatGPT built-in image generation.",
     "notice": "Original images generated for the Chucksi website templates. Fictional people only; prompts asked for no logos, text or watermarks and every image was reviewed by eye. Cropped and converted to WebP (a large copy and a small -sm copy).",
     "images": [
       {
@@ -710,6 +710,42 @@
         "prompt": "Photorealistic natural editorial architecture photograph, landscape 16:9. Inside a fictional contemporary cedar-and-limestone lakeside home: understated cream sofa, oak coffee table, limestone fireplace at left, broad wall of glass overlooking calm lake and mature grasses at peach dusk. Warm interior lighting, generous negative space, believable proportions and natural materials, premium interior design photography. No people, no readable text, no logo, no watermark. Full photograph, not a website mockup.",
         "bytes": 151060,
         "sha256": "bd3fa0800b579e3c47ee73bae207cc46f66309d0edce5310aac92a312edfbfe4"
+      },
+      {
+        "path": "media/website/aural-object/hero.webp",
+        "bytes": 28170,
+        "sha256": "c085817a165a635575d3b5483190c932139dd99d98593fb27394c7fed2e0fcf9",
+        "width": 1600,
+        "height": 900,
+        "sourceFile": "exec-6bde1e4e-1b70-44e2-85ad-ff14cfa6858e.png",
+        "small": "media/website/aural-object/hero-sm.webp",
+        "generator": "ChatGPT built-in image generation",
+        "prompt_record": "docs/website-motion-image-prompts.json",
+        "notice": "Original generated photography for an original fictional template."
+      },
+      {
+        "path": "media/website/current-studio/hero.webp",
+        "bytes": 81304,
+        "sha256": "afce0057b666d2f24b61d56a8bbea698113feff320f94d12f69eed722caee68a",
+        "width": 1600,
+        "height": 900,
+        "sourceFile": "exec-0c439eab-5c45-48e5-b88b-18cb89a6c836.png",
+        "small": "media/website/current-studio/hero-sm.webp",
+        "generator": "ChatGPT built-in image generation",
+        "prompt_record": "docs/website-motion-image-prompts.json",
+        "notice": "Original generated photography for an original fictional template."
+      },
+      {
+        "path": "media/website/nightjar-film/hero.webp",
+        "bytes": 57132,
+        "sha256": "66de54ab5e1291af01351152ec4885d17fba6d086561918fbe1e3a84bd15315b",
+        "width": 1600,
+        "height": 900,
+        "sourceFile": "exec-73b4d204-9dc2-4e5d-a830-7145e8da3459.png",
+        "small": "media/website/nightjar-film/hero-sm.webp",
+        "generator": "ChatGPT built-in image generation",
+        "prompt_record": "docs/website-motion-image-prompts.json",
+        "notice": "Original generated photography for an original fictional template."
       }
     ]
   }
