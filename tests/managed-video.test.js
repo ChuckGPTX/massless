@@ -73,3 +73,20 @@ test('text prompts create one opening frame and failed frame generation never ca
   const g=fixture();g.env.AI.run=async()=>{throw new Error('Unavailable');};
   assert.equal((await g.call('/api/generations',body)).status,502);assert.equal(g.calls.length,0);
 });
+test('completed video proxy streams bytes, uses Worker-supported redirect mode, and sends no credentials',async()=>{
+  const f=fixture(), j=await (await f.call('/api/generations',input)).json();
+  await f.ledger.updateGpu('job:'+j.id,{status:'COMPLETED',output:{cost:.3,result:'https://image.runpod.ai/result.mp4'}});
+  const original=globalThis.fetch;
+  try {
+    globalThis.fetch=async(url,options)=>{
+      assert.equal(url,'https://image.runpod.ai/result.mp4');
+      assert.equal(options.redirect,'manual');assert.equal(options.headers,undefined);
+      return new Response(new Uint8Array([0,0,0,24,102,116,121,112]),{headers:{'content-type':'video/mp4'}});
+    };
+    const response=await f.call('/api/generations/'+j.id+'/file');
+    assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'video/mp4');
+    assert.equal((await response.arrayBuffer()).byteLength,8);
+    globalThis.fetch=async()=>new Response(null,{status:302,headers:{location:'https://untrusted.test/'}});
+    assert.equal((await f.call('/api/generations/'+j.id+'/file')).status,502);
+  } finally { globalThis.fetch=original; }
+});
