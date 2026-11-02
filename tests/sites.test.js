@@ -216,6 +216,15 @@ test('API: sign-in, publish, owner checks, update, list, limits, unpublish', asy
   assert.ok(manifest.files['index.html'] && manifest.files['about/index.html'] && manifest.files['assets/img/photo.jpg']);
   assert.ok(await env.SITES_BUCKET.get('sites/cedar-lawn/v1/index.html'));
 
+  // Knowing a published slug never grants permission to overwrite or remove it.
+  for (const [token, status] of [[undefined, 401], ['tok-nobody', 401], ['tok-new', 403]]) {
+    for (const method of ['PUT', 'DELETE']) {
+      const response = await call(env, method, '/api/sites/cedar-lawn', { token, ...(method === 'PUT' ? { form: uploadForm('cedar-lawn', files) } : {}) });
+      assert.equal(response.status, status, `${method} rejects ${token || 'guest'}`);
+    }
+  }
+  assert.equal(JSON.parse(await (await env.SITES_BUCKET.get('sites/cedar-lawn/manifest.json')).text()).version, 1, 'rejected requests do not change the live site');
+
   assert.equal((await call(env, 'GET', '/api/sites/check?slug=cedar-lawn')).data.taken, true);
   const again = await call(env, 'POST', '/api/sites', { token: 'tok-alice', form: uploadForm('cedar-lawn', files) });
   assert.equal(again.status, 409);

@@ -67,8 +67,9 @@ function media(c, slot, path, o = {}) {
   const srcset = c.srcset ? c.srcset(slot.src) : '';
   const sizes = srcset && o.sizes ? ` sizes="${o.sizes}"` : '';
   const alt = slot.decorative ? '' : slot.alt || '';
+  const focus = Number.isFinite(info.focalX) ? ` style="object-position:${Math.max(0, Math.min(100, info.focalX))}% 50%"` : '';
   const load = o.eager ? ' fetchpriority="high"' : ' loading="lazy"';
-  return `<div class="${cls}"${ar}><img src="${esc(url)}"${srcset ? ` srcset="${esc(srcset)}"${sizes}` : ''} alt="${esc(alt)}" width="${info.w || 1600}" height="${info.h || 1067}"${load} decoding="async"${hook}></div>`;
+  return `<div class="${cls}"${ar}><img src="${esc(url)}"${srcset ? ` srcset="${esc(srcset)}"${sizes}` : ''} alt="${esc(alt)}" width="${info.w || 1600}" height="${info.h || 1067}"${load} decoding="async"${focus}${hook}></div>`;
 }
 const hasImg = (slot) => !!(slot && (slot.src || slot.prompt));
 

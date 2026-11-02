@@ -656,6 +656,60 @@
         "variant": 1,
         "bytes": 88246,
         "sha256": "370a8531807584c09db16949c51c24c0a2ae2709ef1bb509866936461a2f853a"
+      },
+      {
+        "path": "media/website/property-story/hero.webp",
+        "small": "media/website/property-story/hero-sm.webp",
+        "model": "ChatGPT built-in image generation",
+        "sourceFile": "exec-cb8246b1-c49e-4985-a363-35043aec63bb.png",
+        "prompt": "Use case: photorealistic-natural. Asset type: wide website hero photograph for an original fictional architecture / property listing template. Create a premium editorial architecture photograph, landscape 16:9 composition, of a small contemporary cedar-and-limestone lakeside house in the American Midwest, wall-to-wall glass living room facing the water, a warmly lit interior, mature grasses, an oak tree, blue hour turning to peach sunset. Architectural Digest quality but original architecture. Camera across a calm garden path at human eye level, honest physical construction, fine natural wood grain and limestone texture, relaxed spacious framing. The house occupies the right two thirds; left third has soft dark garden and evening sky suitable for white headline overlay. No people, no readable text, no logo, no watermark, no borders. Photographic image only, not a website mockup.",
+        "bytes": 170250,
+        "sha256": "0c869576613cd37b803f217541f1c3ad7ae401ac834f3eef4e5784a5cafc98c9"
+      },
+      {
+        "path": "media/website/wellness-studio/hero.webp",
+        "small": "media/website/wellness-studio/hero-sm.webp",
+        "model": "ChatGPT built-in image generation",
+        "sourceFile": "exec-dd4f63e1-1498-4b8b-b6c9-7b8037722050.png",
+        "prompt": "Use case: photorealistic-natural. Asset type: landscape 16:9 website hero photograph for an original fictional movement studio called Stillform. A beautiful warm minimalist movement and yoga studio, limewashed cream walls, pale oak floor, broad arch window casting natural late-morning light and soft diagonal shadows, one sculptural travertine bench, carefully placed muted clay yoga mats in two rows, linen curtains softly moving, a small olive tree near the window. Premium interior editorial photography with believable texture and natural daylight, human eye level, inviting rather than clinical. Spacious composition, no people, no readable text, no logos, no watermark, no borders. This is the full photograph, not a website mockup.",
+        "bytes": 126702,
+        "sha256": "29e256fa1a54066ea463883f7af7f31e772935c14c2bd879d57a9db60d062a22"
+      },
+      {
+        "path": "media/website/music-artist/hero.webp",
+        "small": "media/website/music-artist/hero-sm.webp",
+        "model": "ChatGPT built-in image generation",
+        "sourceFile": "exec-42850e2d-d5d0-43ce-8cd1-04a12778c992.png",
+        "prompt": "Use case: photorealistic-natural. Asset type: wide 16:9 website hero photograph for a fictional independent music artist template, original creative photography. A small alternative soul band on an intimate theater stage, Black female singer in a simple black tailored outfit at a microphone slightly right of center, bassist and drummer deeper in the background, dramatic indigo blue and soft amber spotlights through light theatrical haze, subtle analog film grain, rich inky shadows, energy of a real live performance, tasteful concert editorial photography. Wide framing with dark open stage at left for a headline. Sharp natural face and hands, plausible instruments, high aesthetic quality. No readable text, no logos, no watermark, no border. Photograph only, not a website design.",
+        "bytes": 61498,
+        "sha256": "94e36814f6fc01cd5f0f829f4cb64b91c1c1d2db215bc270791898be15c54dfe"
+      },
+      {
+        "path": "media/website/wellness-studio/detail.webp",
+        "small": "media/website/wellness-studio/detail-sm.webp",
+        "model": "ChatGPT built-in image generation",
+        "sourceFile": "exec-f2c530df-dc0b-4deb-935b-351236f26f27.png",
+        "prompt": "Photorealistic natural editorial photograph, landscape 16:9. Intimate detail inside a warm minimalist movement studio: rolled clay and ivory yoga mats, a folded linen towel and a ceramic carafe on a pale oak bench, limewashed cream wall and softly focused olive tree, warm late morning sunlight. Quiet luxury, natural texture, restrained cream and terracotta palette. No people, no text, no logo, no watermark. Full photograph, not a website mockup.",
+        "bytes": 98298,
+        "sha256": "a9fa7e63d9ffd16590c152deb06bf2216d07c4c5312293bcaf3a4cd4f38938ff"
+      },
+      {
+        "path": "media/website/music-artist/detail.webp",
+        "small": "media/website/music-artist/detail-sm.webp",
+        "model": "ChatGPT built-in image generation",
+        "sourceFile": "exec-8ea8e480-b04b-40ca-8448-c072d46ce6f4.png",
+        "prompt": "Original editorial music still-life photograph, landscape 16:9. A well-loved electric bass guitar leaning by a black studio amplifier and a vintage dynamic microphone, warm amber practical light from the right and indigo blue evening light from the left. Intimate independent soul music rehearsal room, dramatic inky shadows, realistic tactile detail, subtle film grain, cinematic art direction. No people, no visible brand logos, no readable text, no watermark. Photograph only, not a website mockup.",
+        "bytes": 117734,
+        "sha256": "bc8aef0180670a1b803abfcd3b3e882d4e00110661df0a0cdf09e3e3949313cb"
+      },
+      {
+        "path": "media/website/property-story/detail.webp",
+        "small": "media/website/property-story/detail-sm.webp",
+        "model": "ChatGPT built-in image generation",
+        "sourceFile": "exec-a5704149-16e1-4582-9cc7-1e552b903c52.png",
+        "prompt": "Photorealistic natural editorial architecture photograph, landscape 16:9. Inside a fictional contemporary cedar-and-limestone lakeside home: understated cream sofa, oak coffee table, limestone fireplace at left, broad wall of glass overlooking calm lake and mature grasses at peach dusk. Warm interior lighting, generous negative space, believable proportions and natural materials, premium interior design photography. No people, no readable text, no logo, no watermark. Full photograph, not a website mockup.",
+        "bytes": 151060,
+        "sha256": "bd3fa0800b579e3c47ee73bae207cc46f66309d0edce5310aac92a312edfbfe4"
       }
     ]
   }

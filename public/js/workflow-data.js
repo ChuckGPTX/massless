@@ -222,6 +222,9 @@ const SHOWCASE_CARDS = [
   ["festival", "fest-mustard", "Mustard edition", "The same series in a new palette", "4/5"],
 ].map(([make, example, name, line, ar]) => card(`design-${example}`, "design", name, line, `${makeURL(make)}&example=${example}`, ar));
 const SITE_CARDS = [
+  ["wellness-studio", "Stillform · Wellness", "A warm studio with a welcoming first-visit flow"],
+  ["music-artist", "After Hours · Music", "An artist story, live dates and booking enquiries"],
+  ["property-story", "Lake & Light · Property", "An architectural story with a path to a viewing"],
   ["editorial-shop", "Editorial shop", "A shop that reads like a magazine"],
   ["manifesto", "Manifesto", "Big statements over a moving line field"],
   ["portfolio-timeline", "Portfolio timeline", "Case studies in order, scrolling sideways"],
@@ -233,7 +236,7 @@ const SITE_CARDS = [
   ["restaurant", "Restaurant", "Menu, photos, hours and table requests"],
   ["book-launch", "Book launch", "Chapters, the author and a free sample"],
   ["app-waitlist", "App waitlist", "A night-sky page with an early-access form"],
-].map(([id, name, line]) => card(`site-${id}`, "websites", name, line, `/website?template=${id}`, "3/4"));
+].map(([id, name, line]) => card(`site-${id}`, "websites", name, line, `/website?template=${id}`, ["wellness-studio", "music-artist", "property-story"].includes(id) ? "16/9" : "3/4"));
 const GAME_CARDS = [
   ["t1-street-run", "Street run", "Hop the cones, stomp the rivals"],
   ["sky-tower", "Sky tower", "Stack a skyscraper floor by floor"],

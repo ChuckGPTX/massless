@@ -5,6 +5,7 @@
 
 import { TEMPLATES_LIST } from './templates-list.js';
 import { KINDS, templateSite, sanitizeSite, newSection } from './spec.js';
+import { buildStarter } from './starters.js';
 
 export { TEMPLATES_LIST };
 export const TEMPLATES = Object.fromEntries(TEMPLATES_LIST.map((t) => [t.id, t]));
@@ -258,6 +259,8 @@ const PHOTOGRAPHY = {
 export function buildTemplate(id) {
   const t = TEMPLATES[id];
   if (!t) return null;
+  const starter = buildStarter(id);
+  if (starter) return starter;
   const site = templateSite({ prompt: KINDS[t.kind].example, kind: t.kind, style: t.style });
   POLISH[id]?.(site);
   PHOTOGRAPHY[id]?.(site);

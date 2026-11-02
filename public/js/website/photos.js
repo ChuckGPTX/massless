@@ -1,8 +1,15 @@
-// Template photography: generated with Higgsfield Soul for the template example sites (prompts and dates in
+// Template photography: original generated images for the template example sites (prompts and dates in
 // public/media/website/provenance.json). Each photo has a large WebP and a small one ("-sm") for srcset.
 // Sites a visitor creates never get these by default: their empty slots keep the generated SVG art.
 
 export const PHOTOS = {
+  '/media/website/property-story/detail.webp': { w: 1400, h: 788, sm: '/media/website/property-story/detail-sm.webp', smW: 720 },
+  '/media/website/music-artist/detail.webp': { w: 1400, h: 788, sm: '/media/website/music-artist/detail-sm.webp', smW: 720 },
+  '/media/website/wellness-studio/detail.webp': { w: 1400, h: 788, sm: '/media/website/wellness-studio/detail-sm.webp', smW: 720 },
+  '/media/website/property-story/hero.webp': { w: 1600, h: 900, sm: '/media/website/property-story/hero-sm.webp', smW: 720 },
+  '/media/website/wellness-studio/hero.webp': { w: 1600, h: 900, sm: '/media/website/wellness-studio/hero-sm.webp', smW: 720 },
+  '/media/website/music-artist/hero.webp': { focalX: 80, w: 1600, h: 900, sm: '/media/website/music-artist/hero-sm.webp', smW: 720 },
+
   '/media/website/editorial-shop/hero.webp': { w: 1200, h: 1600, sm: '/media/website/editorial-shop/hero-sm.webp', smW: 560 },
   '/media/website/editorial-shop/field-jacket-black.webp': { w: 880, h: 1275, sm: '/media/website/editorial-shop/field-jacket-black-sm.webp', smW: 560 },
   '/media/website/editorial-shop/wool-coat-olive.webp': { w: 880, h: 1275, sm: '/media/website/editorial-shop/wool-coat-olive-sm.webp', smW: 560 },
