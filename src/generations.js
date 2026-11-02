@@ -508,7 +508,7 @@ export class GenerationLedger {
         const o = result.output || {};
         if (job.provider === 'managed-wan' && managedURL) {
           job.resultURL = managedURL;
-          job.output = { mime: 'video/mp4', model: 'wan-2.2', duration: 5, resolution: '720p' };
+          job.output = { mime: 'video/mp4', model: 'wan-2.2', duration: 5, resolution: 'auto', aspect: 'source' };
           job.message = 'Done'; job.percent = 100;
         } else if (o.error || typeof o.data !== "string" || !/^[A-Za-z0-9+/=]+$/.test(o.data.slice(0, 1000)) || o.data.length > 15_000_000) {
           job.status = "FAILED";
