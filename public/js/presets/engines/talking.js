@@ -3,6 +3,7 @@
 // The mouth moves with the voice's loudness; precise lip-sync is not offered yet.
 import { loadImage, canvas, cover, clamp, ease, span, setFont, fitText, FONT, meanColor, rgbCss, luma, mix } from '../common.js';
 import { PRESENTERS } from '../catalog.js';
+import { apiFetch } from '../../human.js';
 
 export const kind = 'video';
 export const heavy = ['presenter'];
@@ -47,7 +48,7 @@ export async function audio(ctx, params) {
   const text = String(params.script || '').trim();
   if (!text) return null;
   try {
-    const r = await fetch('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, lang: 'en' }) });
+    const r = await apiFetch('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, lang: 'en' }) });
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'The voice could not be made.');
     const buf = await r.arrayBuffer();
     const ac = new OfflineAudioContext(1, 48000, 48000);
