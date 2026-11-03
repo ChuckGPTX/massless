@@ -1,10 +1,809 @@
 {
   "openapi": "3.1.0",
-  "info": {"title":"Chucksi Template Catalog", "version":"2026-11-02", "description":"Read-only catalog of bundled public website examples. No key is required. This API does not generate media, access private projects or publish websites. Publishing remains an authenticated action in the website studio."},
-  "servers":[{"url":"https://console.chucksi.com"}],
-  "paths": {
-    "/api/v1/templates": {"get":{"operationId":"listTemplates","summary":"List editable website templates","parameters":[{"name":"kind","in":"query","required":false,"schema":{"type":"string"},"description":"Filter by an exact kind such as business, portfolio, landing, event or shop."}],"responses":{"200":{"description":"Public catalog","content":{"application/json":{"schema":{"type":"object","required":["version","count","templates"],"properties":{"version":{"type":"string"},"count":{"type":"integer"},"templates":{"type":"array","items":{"$ref":"#/components/schemas/Template"}}}}}}}}}},
-    "/api/v1/templates/{id}": {"get":{"operationId":"getTemplate","summary":"Get a public template and its editable site specification","parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string","pattern":"^[a-z0-9-]+$"},"example":"echo-festival"}],"responses":{"200":{"description":"Template and editable website data","content":{"application/json":{"schema":{"type":"object","required":["version","template","site","mediaBase","usage"],"properties":{"version":{"type":"string"},"template":{"$ref":"#/components/schemas/Template"},"site":{"type":"object","description":"Chucksi website spec version 1: theme, navigation, pages, sections and collections. Renderer and sanitizer: https://github.com/ChuckGPTX/massless/tree/main/public/js/website .","additionalProperties":true},"mediaBase":{"type":"string","format":"uri"},"usage":{"type":"string"}}}}}},"404":{"description":"Unknown template","content":{"application/json":{"schema":{"type":"object","properties":{"error":{"type":"string"}}}}}}}}}
+  "info": {
+    "title": "Chucksi Agent API",
+    "version": "2026-11-02",
+    "description": "Connect an AI assistant or application to public Chucksi studio tools, presets and workflow recipes. Public discovery requires no key. Returned studio URLs are handoffs, not remote execution. Generation, uploads, private projects and publishing are not connected."
   },
-  "components":{"schemas":{"Template":{"type":"object","required":["id","title","kind","description","href","thumb","api","motion"],"properties":{"id":{"type":"string"},"title":{"type":"string"},"kind":{"type":"string"},"description":{"type":"string"},"href":{"type":"string"},"thumb":{"type":"string"},"api":{"type":"string"},"motion":{"type":"string"}},"additionalProperties":true}}}
+  "servers": [
+    {
+      "url": "https://console.chucksi.com"
+    }
+  ],
+  "paths": {
+    "/api/v1/tools": {
+      "get": {
+        "operationId": "listTools",
+        "summary": "Discover studio tools",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "description": "Exact category match. Presets: effects or moves."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public discovery response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "count",
+                    "items"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DiscoveryResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Search query too long",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Read-only endpoint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/{id}": {
+      "get": {
+        "operationId": "getTool",
+        "summary": "Get one tool and its studio handoff",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$",
+              "maxLength": 80
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public discovery response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "item"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "item": {
+                      "$ref": "#/components/schemas/DiscoveryResource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Search query too long",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Read-only endpoint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/presets": {
+      "get": {
+        "operationId": "listPresets",
+        "summary": "Discover effects and camera presets",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "description": "Exact category match. Presets: effects or moves."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public discovery response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "count",
+                    "items"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DiscoveryResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Search query too long",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Read-only endpoint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/presets/{id}": {
+      "get": {
+        "operationId": "getPreset",
+        "summary": "Get one preset and its studio handoff",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$",
+              "maxLength": 80
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public discovery response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "item"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "item": {
+                      "$ref": "#/components/schemas/DiscoveryResource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Search query too long",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Read-only endpoint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflows": {
+      "get": {
+        "operationId": "listWorkflows",
+        "summary": "Discover workflow recipes",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "description": "Exact category match. Presets: effects or moves."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public discovery response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "count",
+                    "items"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DiscoveryResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Search query too long",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Read-only endpoint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflows/{id}": {
+      "get": {
+        "operationId": "getWorkflow",
+        "summary": "Get one workflow and its studio handoff",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$",
+              "maxLength": 80
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public discovery response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "item"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "item": {
+                      "$ref": "#/components/schemas/DiscoveryResource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Search query too long",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Read-only endpoint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/capabilities": {
+      "get": {
+        "operationId": "getCapabilities",
+        "summary": "Check connection capabilities and remote-action availability",
+        "responses": {
+          "200": {
+            "description": "Supported actions and exact access limits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "remoteActions",
+                    "authentication",
+                    "handoff"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "remoteActions": {
+                      "type": "object",
+                      "properties": {
+                        "generateMedia": {
+                          "const": false
+                        },
+                        "uploadFiles": {
+                          "const": false
+                        },
+                        "readPrivateProjects": {
+                          "const": false
+                        },
+                        "publishWebsites": {
+                          "const": false
+                        }
+                      }
+                    },
+                    "authentication": {
+                      "type": "string"
+                    },
+                    "handoff": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/templates": {
+      "get": {
+        "operationId": "listTemplates",
+        "summary": "List editable website templates",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by an exact kind such as business, portfolio, landing, event or shop."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "count",
+                    "templates"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "templates": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Template"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Website compatibility"
+        ]
+      }
+    },
+    "/api/v1/templates/{id}": {
+      "get": {
+        "operationId": "getTemplate",
+        "summary": "Get a public template and its editable site specification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "example": "echo-festival"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template and editable website data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "template",
+                    "site",
+                    "mediaBase",
+                    "usage"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "template": {
+                      "$ref": "#/components/schemas/Template"
+                    },
+                    "site": {
+                      "type": "object",
+                      "description": "Chucksi website spec version 1: theme, navigation, pages, sections and collections. Renderer and sanitizer: https://github.com/ChuckGPTX/massless/tree/main/public/js/website .",
+                      "additionalProperties": true
+                    },
+                    "mediaBase": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "usage": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown template",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Website compatibility"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Template": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "description",
+          "href",
+          "thumb",
+          "api",
+          "motion"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "thumb": {
+            "type": "string"
+          },
+          "api": {
+            "type": "string"
+          },
+          "motion": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      },
+      "DiscoveryResource": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "execution",
+          "remoteExecution"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "studioUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "category": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "output": {
+            "type": "string"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "preview": {
+            "type": "object",
+            "properties": {
+              "image": {
+                "type": "string",
+                "format": "uri"
+              },
+              "video": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "studioUrl"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "studioUrl": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "execution": {
+            "const": "studio"
+          },
+          "remoteExecution": {
+            "const": false
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
 }

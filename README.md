@@ -32,19 +32,18 @@ Five showcase pages introduce the tools: `/studios/image/`, `/studios/video/`, `
 
 Saved shots and audio live in the visitor's browser (IndexedDB). New saves never automatically delete older originals. The Image page loads older shots in batches of 24. If a save fails, the result stays available for download in that session and is visibly marked as unsaved. Optional accounts support cloud projects and website publishing. Browser data can still be cleared or evicted, so download work you want to keep.
 
-## Developer console and website assistant
+## Website Studio and agent connections
 
-[console.chucksi.com](https://console.chucksi.com/) hosts the public template catalog, OpenAPI specification and six help guides. The studio remains at [chucksi.com/website](https://chucksi.com/website/). Old `/console/` URLs redirect to the new subdomain.
+Website templates, the visual builder and publishing guides live under [Website](https://chucksi.com/website/). Browse the [32-design gallery](https://chucksi.com/website/templates/) or use the builder’s template picker. Manual editing and export work without AI; hosted publishing requires sign-in and existing ownership checks.
 
-- REST: `GET /api/v1/templates`, `GET /api/v1/templates/:id`, and `GET /api/v1/openapi.json`.
-- Streamable HTTP MCP: `https://console.chucksi.com/mcp`, using the official MCP SDK and Cloudflare's stateless handler. Tools: `list_templates`, `get_template`, `get_help`. These expose only public designs; private projects, generation, edits and publishing are not exposed.
-- Website studio: **Ask AI** uses `nvidia/nemotron-3.5-super-vl:free` through OpenRouter. It can propose copy, accent-colour and supported hero-layout changes to the selected page or a new template draft. The visitor explicitly agrees to send the brief and editable text, reviews a diff, then applies or discards it. Apply is one undoable edit. Changed drafts invalidate old proposals.
-- Free requests are reserved atomically: five per visitor per UTC day, 40 shared, and a 30-second cooldown. Failed attempts count. A cleanup alarm deletes salted visitor counters within two days. No prompt text is stored in the limiter. The provider may log inputs and outputs, and free availability is not guaranteed.
-- Deployment requires the existing `OPENROUTER_API_KEY` and `PASS_KEY` Worker secrets, the `WEBSITE_AI_LIMITS` binding, and the `chucksi-website-ai-v1` migration in `wrangler.production.jsonc`. Provider fallbacks are disabled and maximum inference prices are zero. Model changes require review; the browser never receives the key.
+[console.chucksi.com](https://console.chucksi.com/) is the separate connection hub for AI assistants and agents across Chucksi’s tools. It includes a real REST playground, MCP setup and integration guides.
 
-The 32 templates, manual editing and export work without AI. Publishing to a free subdomain still requires sign-in and the existing ownership checks. Read the [API and MCP guides](https://console.chucksi.com/docs/) for client examples and exact limitations.
+- REST: `GET /api/v1/tools`, `/presets`, `/workflows` and their `/:id` detail routes. Lists accept `q` and `category`; `/api/v1/capabilities` reports actual available actions.
+- MCP: `https://console.chucksi.com/mcp` (Streamable HTTP). Tools: `list_tools`, `get_tool`, `list_presets`, `get_preset`, `list_workflows`, `get_workflow`, `get_help`. The older `list_templates` and `get_template` remain for compatibility.
+- Public discovery needs no key. Presets use the studio’s own data, including LiDAR, Vanish and camera moves. Returned studio URLs are handoffs: **remote generation, uploads, private account data and publishing are not exposed**. No account protections are bypassed.
+- OpenAPI: `/api/v1/openapi.json`. Guides: [console help](https://console.chucksi.com/docs/). Old website-guide URLs redirect to `/website/docs/`.
+- Website’s optional assistant uses `POST /api/website-assistant` with Turnstile and atomic shared limits. It pins `nvidia/nemotron-3.5-super-vl:free` with zero token-price caps, no paid fallback, bounded validated edits and explicit sharing consent. It requires a valid `OPENROUTER_API_KEY`; the last live check returned a provider authentication error, so successful live AI edits are not yet verified.
 
-What it rebuilds, clean-room from public behavior (see [SPEC.md](SPEC.md)): the shot designer, camera-motion presets, takes, storyboard and voiceover of paywalled AI film studios.
 
 ## How it stays free
 

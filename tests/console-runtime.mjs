@@ -10,7 +10,7 @@ try {
   const transport=new StreamableHTTPClientTransport(new URL('https://console.chucksi.com/mcp'),{fetch:(url,opts)=>mf.dispatchFetch(String(url),opts)});
   await client.connect(transport);
   const listed=await client.listTools();
-  assert.deepEqual(listed.tools.map(t=>t.name).sort(),['get_help','get_template','list_templates']);
+  assert.deepEqual(listed.tools.map(t=>t.name).sort(),['get_help','get_preset','get_template','get_tool','get_workflow','list_presets','list_templates','list_tools','list_workflows']);
   assert.ok(listed.tools.every(t=>t.annotations.readOnlyHint && !t.annotations.destructiveHint));
   const catalog=await client.callTool({name:'list_templates',arguments:{}});
   assert.equal(catalog.structuredContent.count,32);
@@ -18,9 +18,20 @@ try {
   assert.ok(item.structuredContent.site.pages.length);
   assert.ok(item.structuredContent.template.href.startsWith('https://chucksi.com/'));
   assert.equal((await client.callTool({name:'get_template',arguments:{id:'not-a-template'}})).isError,true);
+  const tools = await client.callTool({name:'list_tools',arguments:{q:'video'}});
+  assert.ok(tools.structuredContent.items.some(t=>t.id==='video'));
+  const presets = await client.callTool({name:'list_presets',arguments:{q:'lidar'}});
+  assert.ok(presets.structuredContent.items.some(t=>t.id==='fx-lidar-cyan'));
+  const recipe = await client.callTool({name:'get_preset',arguments:{id:'fx-vanish-embers'}});
+  assert.equal(recipe.structuredContent.item.settings.effect,'vanish');
+  assert.equal(recipe.structuredContent.item.remoteExecution,false);
+  const flow = await client.callTool({name:'get_workflow',arguments:{id:'release-teaser'}});
+  assert.equal(flow.structuredContent.item.steps.length,3);
+  assert.equal((await client.callTool({name:'get_preset',arguments:{id:'not-real'}})).isError,true);
+  assert.ok(Object.values((await client.callTool({name:'get_help',arguments:{}})).structuredContent.remoteActions).every(v=>v===false));
   const rejected=await mf.dispatchFetch('https://console.chucksi.com/mcp',{method:'POST',headers:{origin:'https://untrusted.example','content-type':'application/json',accept:'application/json, text/event-stream'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/list',params:{}})});
   assert.equal(rejected.status,403);
-  console.log('MCP runtime: real SDK initialize, discovery, catalog, template, missing template and origin checks passed.');
+  console.log('MCP runtime: real SDK initialize, tools, presets, workflow recipes, capability limits, legacy templates and origin checks passed.');
 } finally {await client.close();await mf.dispose();}
 
 const limit=await build({entryPoints:['src/website-assistant.js'],bundle:true,format:'esm',platform:'browser',write:false});

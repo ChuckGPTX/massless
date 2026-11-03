@@ -39,7 +39,8 @@ test('catalog refuses mutations, handles unknown templates and implements HEAD/O
 test('OpenAPI describes the implemented public routes without promising write tools',()=>{
   const spec=JSON.parse(readFileSync(new URL('../public/console/openapi.json',import.meta.url)));
   assert.equal(spec.openapi,'3.1.0');
-  assert.deepEqual(Object.keys(spec.paths),['/api/v1/templates','/api/v1/templates/{id}']);
+  assert.ok(spec.paths['/api/v1/templates']);
+  assert.ok(spec.paths['/api/v1/templates/{id}']);
   assert.ok(Object.values(spec.paths).every(p=>Object.keys(p).join()==='get'));
 });
 

@@ -1,14 +1,18 @@
 # Chucksi Developers
 
-Public read-only website template catalog and MCP. No login or API key. No private projects, media generation or publishing tools.
+Connect AI assistants and agents to Chucksi via MCP or REST. Public discovery is live: studio tools, effect/camera presets and workflow recipes. Remote generation, uploads, private projects and publishing are not connected. No account/key required for public discovery.
 
-- REST: https://console.chucksi.com/api/v1/templates
+- Capabilities: https://console.chucksi.com/api/v1/capabilities
+- Tools: https://console.chucksi.com/api/v1/tools
+- Presets: https://console.chucksi.com/api/v1/presets
+- Workflows: https://console.chucksi.com/api/v1/workflows
 - OpenAPI: https://console.chucksi.com/api/v1/openapi.json
 - MCP (Streamable HTTP): https://console.chucksi.com/mcp
+- Website templates: https://chucksi.com/website/templates/
 
-- [Your first Chucksi API request](https://console.chucksi.com/docs/quick-start/): Get a complete editable design in two requests.
-- [Template API reference](https://console.chucksi.com/docs/api-reference/): Endpoints, response fields and practical examples.
-- [Connect your AI assistant](https://console.chucksi.com/docs/connect-mcp/): Browse Chucksi designs from any compatible remote MCP client.
-- [Create with Nemotron](https://console.chucksi.com/docs/website-assistant/): Turn a brief into editable changes you control.
-- [From example to live website](https://console.chucksi.com/docs/publish-and-export/): A clear path through editing, review and publishing.
-- [Troubleshooting & limits](https://console.chucksi.com/docs/troubleshooting/): Get unstuck without losing your work.
+- [Connect your AI to Chucksi](https://console.chucksi.com/docs/quick-start/): Give an assistant access to Chucksi’s public tools, presets and workflow recipes.
+- [Connect with MCP](https://console.chucksi.com/docs/connect-mcp/): Let a compatible assistant discover Chucksi tools and prepare a studio workflow.
+- [Chucksi API reference](https://console.chucksi.com/docs/api-reference/): Connect your application to the same tools and recipes used by Chucksi.
+- [Work with effects & camera presets](https://console.chucksi.com/docs/presets/): Find the exact recipe behind a Chucksi effect.
+- [Connect tools into workflows](https://console.chucksi.com/docs/workflows/): Help an agent choose the steps from an idea to a finished project.
+- [Access, limits & troubleshooting](https://console.chucksi.com/docs/troubleshooting/): Understand the connection and resolve common errors.
