@@ -436,3 +436,10 @@ test('routes: /explore is a page, unknown explore paths are not', async () => {
   assert.equal((await call(makeEnv(), 'GET', '/api/explore/bad!id')).status, 404);
   assert.equal((await call(makeEnv(), 'PUT', '/api/explore')).status, 405);
 });
+
+test('starter posts point at the example clips already on the site', async () => {
+  const { serveExploreMedia } = await import('../src/explore.js');
+  const r = await serveExploreMedia(new Request('https://chucksi.com/explore-media/chucksi01/media.mp4'), { SITES_BUCKET: { head: async () => null }, MASSLESS_KV: { get: async () => null } });
+  assert.equal(r.status, 302);
+  assert.match(r.headers.get('location'), /^\/media\/templates\/[\w.-]+\.mp4$/);
+});
