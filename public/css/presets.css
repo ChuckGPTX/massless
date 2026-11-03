@@ -1,0 +1,71 @@
+/* One-tap presets (/workflows?preset=<id>) on top of the maker shell in make.css, and gallery badges. */
+
+.pz-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+.pz-tab { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 999px; border: 1px solid #36363c; color: #c9c9cf; font-size: 13px; line-height: 1.2; transition: border-color 0.18s, background-color 0.18s, color 0.18s; }
+.pz-tab small { color: #85858c; font-size: 11px; }
+.pz-tab:hover { border-color: #6a6a72; }
+.pz-tab[aria-selected='true'] { background-color: #ffc127; border-color: #ffc127; color: #141414; }
+.pz-tab[aria-selected='true'] small { color: #3d3000; }
+.pz-tab:focus-visible, .pz-choice:focus-visible, .pz-sample:focus-visible { outline: 2px solid #ffc127; outline-offset: 2px; }
+
+.pz-frame { position: relative; margin: 0 auto; max-width: 100%; max-height: min(74vh, 900px); display: flex; justify-content: center; }
+.pz-frame.is-tall { max-width: min(100%, calc(min(74vh, 900px) * 0.5625)); }
+.pz-frame.is-wide { max-height: none; }
+.pz-canvas { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 6px; background: #1b1b1f; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05); }
+.pz-canvas.is-draggable { cursor: grab; touch-action: none; }
+.pz-under { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 12px; min-height: 30px; }
+.pz-disclosure { color: #a9a9b0; font-size: 12px; border: 1px solid #36363c; border-radius: 999px; padding: 4px 10px; }
+
+.pz-image > span { margin-bottom: 8px; }
+.pz-samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 8px; margin-top: 8px; }
+.pz-sample { all: unset; box-sizing: border-box; cursor: pointer; display: grid; gap: 4px; justify-items: center; padding: 4px; border-radius: 10px; border: 1px solid #2c2c31; background: #1d1d21; transition: border-color 0.18s; }
+.pz-sample img { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: 6px; background: #2a2a2f; }
+.pz-sample small { font-size: 11px; color: #a9a9b0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pz-sample[aria-checked='true'], .pz-upload.is-on { border-color: #ffc127; }
+.pz-upload > span, .pz-none > span { width: 100%; aspect-ratio: 1; display: grid; place-items: center; font-size: 26px; color: #ffc127; border: 1px dashed #4a4a52; border-radius: 6px; }
+.pz-none > span { color: #85858c; }
+.pz-rough { display: grid; gap: 6px; margin-top: 8px; padding: 10px; border-radius: 10px; background: #2a2412; }
+.pz-rough small { color: #e8d9a8 !important; margin: 0 !important; }
+.pz-rough[hidden] { display: none; }
+
+.pz-choices { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pz-choice { all: unset; cursor: pointer; padding: 7px 11px; border-radius: 9px; border: 1px solid #36363c; background: #202024; font-size: 13px; color: #d9d9de; transition: border-color 0.18s, background-color 0.18s; }
+.pz-choice[aria-checked='true'] { border-color: #ffc127; background-color: #2d2610; color: #fff; }
+.hub .maker-field input[type='color'] { padding: 2px; height: 40px; width: 100%; cursor: pointer; }
+
+.pz-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-top: 22px; }
+.pz-results:empty { display: none; }
+.pz-result { margin: 0; min-width: 0; }
+.pz-result img, .pz-result video { width: 100%; max-height: 320px; object-fit: contain; background: #111; border-radius: 6px; }
+.pz-result figcaption { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: #c9c9cf; }
+.pz-result figcaption small { display: block; color: #75757c; font-size: 11px; }
+
+.pz-strip { display: grid; grid-auto-flow: column; grid-auto-columns: 112px; gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
+.pz-scene { scroll-snap-align: start; display: grid; gap: 6px; color: #c9c9cf !important; font-size: 12px; text-decoration: none; }
+.pz-scene img { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 10px; border: 2px solid transparent; background: #222226; transition: border-color 0.18s; }
+.pz-scene.is-card img { aspect-ratio: 4 / 5; }
+.pz-scene:hover img, .pz-scene.is-on img { border-color: #ffc127; }
+
+/* gallery badges, the collapsed camera-moves card and the sort switch */
+.wf-badge { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; vertical-align: middle; background: #ffc127; color: #141414; }
+.wf-badge.is-trending { background: #ff5a36; color: #fff; }
+.wf-card .wf-badge { position: absolute; top: 10px; left: 10px; margin: 0; z-index: 2; }
+.wf-sort { display: flex; gap: 6px; align-items: center; justify-content: flex-end; margin: -6px 0 14px; color: #85858c; font-size: 13px; }
+.wf-sort button { all: unset; cursor: pointer; padding: 5px 11px; border-radius: 999px; border: 1px solid #36363c; color: #c9c9cf; transition: border-color 0.18s, background-color 0.18s, color 0.18s; }
+.wf-sort button[aria-pressed='true'] { background-color: #e8e8e4; color: #141414; border-color: #e8e8e4; }
+.wf-sort button:focus-visible { outline: 2px solid #ffc127; outline-offset: 2px; }
+
+@media (max-width: 900px) {
+  .pz-frame, .pz-frame.is-tall { max-height: 70vh; }
+  .pz-frame.is-tall { max-width: min(100%, calc(70vh * 0.5625)); }
+}
+@media (max-width: 650px) {
+  .pz-samples { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pz-results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pz-result figcaption { flex-direction: column; align-items: flex-start; }
+  .wf-sort { justify-content: flex-start; }
+}
+.pz-note { color: #85858c; font-size: 12px; }
+.pz-under { flex-wrap: wrap; }
+.pz-make-here { display: none; }
+@media (max-width: 900px) { .pz-make-here { display: inline-flex; } }

@@ -1,0 +1,644 @@
+{
+ "about": "Example inputs and backdrops for the presets. Made once for Chucksi with a text-to-image service from the prompts below (about $0.006 a picture); no people's likeness, brands or text. Every preview loop and every visitor's result is rendered on device by Chucksi's preset engines.",
+ "files": [
+  {
+   "path": "presets/plates/beach-rocks-l.webp",
+   "bytes": 130210,
+   "sha256": "1c61128c18fb29aa6fe5aa8f4d64dab6735bbc743ebe1f040166d0e4725efb84",
+   "source": "scene-beach-rocks-l-0",
+   "request": "01a19f7f-f34e-7004-a9e0-85df8603aee1",
+   "prompt": "smooth dark beach pebbles and a flat rock on pale sand, calm turquoise sea and soft sky behind, warm late sun from the right, shallow depth of field, product photography, empty flat rock in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/beach-rocks-p.webp",
+   "bytes": 132898,
+   "sha256": "f0010a3313535cf1882acb93aafcdf94d93a8fc5dbce6c945342cdf7f081a9ba",
+   "source": "scene-beach-rocks-p-1",
+   "request": "01a19f7f-eee0-7379-8450-bd6503045644",
+   "prompt": "smooth dark beach pebbles and a flat rock on pale sand, calm turquoise sea and soft sky behind, warm late sun from the right, shallow depth of field, product photography, empty flat rock in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/black-gloss-l.webp",
+   "bytes": 48656,
+   "sha256": "382ffec4e8bc339414c85fda5b1168a411f3c866a4b9245f3627370be7793b4e",
+   "source": "scene-black-gloss-l-0",
+   "request": "01a19f80-4f1f-7f8d-a94c-d258a0b35730",
+   "prompt": "luxury black glossy floor and black backdrop, thin vertical light strips behind, mirror-like reflections, dramatic rim light, premium product photography, empty centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/black-gloss-p.webp",
+   "bytes": 40588,
+   "sha256": "5cbb1f46f7eb117e5c9ef1281e3405a9cc84c93ae5db0c5a8f42fbdcbb72d586",
+   "source": "scene-black-gloss-p-1",
+   "request": "01a19f80-4af8-7564-b6de-a69cae2a2400",
+   "prompt": "luxury black glossy floor and black backdrop, thin vertical light strips behind, mirror-like reflections, dramatic rim light, premium product photography, empty centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/bokeh-night-l.webp",
+   "bytes": 108650,
+   "sha256": "e5fb05404f208c6edfa050e6adb48a5f22e1aeffde39913739a8a8cb4e8ff94d",
+   "source": "scene-bokeh-night-l-0",
+   "request": "01a19f80-89fc-708a-ab1e-09e0a22e5f3b",
+   "prompt": "deep burgundy velvet podium with warm golden bokeh lights in the dark background, festive holiday product photography, glossy surface, empty podium top, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/bokeh-night-p.webp",
+   "bytes": 149126,
+   "sha256": "91b8920e0d08948ff3db75a35fb41dbec5be5439cb3841798a02c59cb9dd494e",
+   "source": "scene-bokeh-night-p-0",
+   "request": "01a19f80-8605-76cc-94e4-c8f26d080449",
+   "prompt": "deep burgundy velvet podium with warm golden bokeh lights in the dark background, festive holiday product photography, glossy surface, empty podium top, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/botanical-shadows-l.webp",
+   "bytes": 80422,
+   "sha256": "022d46671f93451adda2f74ee4afc77aace07309c95f682344559094d4ab8135",
+   "source": "scene-botanical-shadows-l-0",
+   "request": "01a19f80-0bde-7b89-94d4-64c5d5f79ee8",
+   "prompt": "warm off-white plaster wall and floor with crisp palm leaf shadows cast by low afternoon sun, a low plaster block in the centre, minimal product photography, empty block top, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/botanical-shadows-p.webp",
+   "bytes": 101686,
+   "sha256": "f153fa7568464b8de4e9cd270186f96026a4ac03636633405c2b25ebc3e74a30",
+   "source": "scene-botanical-shadows-p-1",
+   "request": "01a19f80-07e0-7960-9e88-6480d0bdf721",
+   "prompt": "warm off-white plaster wall and floor with crisp palm leaf shadows cast by low afternoon sun, a low plaster block in the centre, minimal product photography, empty block top, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/concrete-plinth-l.webp",
+   "bytes": 179356,
+   "sha256": "8aa3241255a7ccc5d3fb4590f28390d27e0acbafc0f7c00f76a96213fb0c04b0",
+   "source": "scene-concrete-plinth-l-0",
+   "request": "01a19f80-46fd-7adc-a34a-4b5c38ed86d5",
+   "prompt": "brutalist raw concrete blocks and plinth under hard midday sun, deep geometric shadows, pale blue sky backdrop, architectural product photography, empty plinth top in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q78"
+  },
+  {
+   "path": "presets/plates/concrete-plinth-p.webp",
+   "bytes": 149728,
+   "sha256": "eca1e26a277d4c7cbc7ff559725ba6c81c2df3b5eef74ea1e593a536f503262c",
+   "source": "scene-concrete-plinth-p-1",
+   "request": "01a19f80-4315-7f6a-9d2b-ec07d2eedc07",
+   "prompt": "brutalist raw concrete blocks and plinth under hard midday sun, deep geometric shadows, pale blue sky backdrop, architectural product photography, empty plinth top in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/earth-1.webp",
+   "bytes": 192318,
+   "sha256": "39cd859167100b414274fa8761f91f16d8bd7ea0506f332976191e9e85efcc5f",
+   "source": "earth-1-1",
+   "request": "01a19f84-3ee5-7331-881e-c153abda62e7",
+   "prompt": "straight-down aerial drone photo of a sunny city rooftop terrace with plants and the surrounding streets and rooftops, top-down nadir view, midday, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1080x1920, WebP q38"
+  },
+  {
+   "path": "presets/plates/earth-2.webp",
+   "bytes": 189534,
+   "sha256": "6a31ab628a5daa3fe69dc83fe16975c3c7b78304baf6cc2f33f6e6e45555c426",
+   "source": "earth-2-0",
+   "request": "01a19f84-4383-7b0f-8191-4a0ffc0e1d11",
+   "prompt": "straight-down satellite photo of a dense coastal city with a harbour and city blocks, top-down nadir view, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1080x1920, WebP q38"
+  },
+  {
+   "path": "presets/plates/earth-3.webp",
+   "bytes": 199112,
+   "sha256": "793500bac3d93f80eddf0ecd5003a54b18e19f0bc23b885f254f6b3d4356f76d",
+   "source": "earth-3-2",
+   "request": "01a19f84-47af-7acd-98bf-a57bd3695b27",
+   "prompt": "straight-down satellite image of a green coastline with forests, fields, mountains and turquoise sea, a few scattered clouds, top-down nadir view, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1080x1920, WebP q50"
+  },
+  {
+   "path": "presets/plates/earth-4.webp",
+   "bytes": 198714,
+   "sha256": "f0d5828746b35d10908241d76724f89761c5b0c1fcf9de6bf018240da8b0c8a9",
+   "source": "earth-4-1",
+   "request": "01a19f84-4cd2-7d04-88a6-07aa55480e71",
+   "prompt": "satellite view from high orbit straight down at the edge of a continent and a deep blue ocean with large swirling white cloud bands, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1080x1920, WebP q58"
+  },
+  {
+   "path": "presets/plates/earth-5.webp",
+   "bytes": 81220,
+   "sha256": "376e23e2e3707d7bb9f119c4c058b9c2dab96ed880b30e7e7a3d8bd2300d4d74",
+   "source": "earth-5-0",
+   "request": "01a19f84-50b5-7a6d-9a2c-cc6ec4383f90",
+   "prompt": "planet Earth seen from deep space, the whole round planet fully visible and centred, small in the frame, blue oceans, green and brown continents, white clouds, thin glowing blue atmosphere, black space with faint stars, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/ice-cubes-l.webp",
+   "bytes": 62830,
+   "sha256": "e974a2da84e0464c0289bfd1b5b31fd8f7da76935e12a155bb7fb57ba03ffbca",
+   "source": "scene-ice-cubes-l-2",
+   "request": "01a19f85-d033-70bb-9bac-0ce2569a23b8",
+   "prompt": "front view at table height, clear ice cubes scattered at the sides of a glossy icy blue surface, cool blue gradient backdrop, crisp refreshing product photography, open space in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/ice-cubes-p.webp",
+   "bytes": 50914,
+   "sha256": "86474bfd1810e515d0f7997a95680d758412f6b26dcf47ddfa7e900d174d81e3",
+   "source": "scene-ice-cubes-p-3",
+   "request": "01a19f80-6c9d-71ab-92e6-143e61b64ca9",
+   "prompt": "clear ice cubes scattered on a glossy icy blue surface, cool blue gradient backdrop, crisp refreshing drink product photography, empty space in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/kitchen-counter-l.webp",
+   "bytes": 37696,
+   "sha256": "99d3ed6198086f0994b2d052cadffd877b2e8ae09e348b0ca0975b3741f7c12d",
+   "source": "scene-kitchen-counter-l-0",
+   "request": "01a19f7f-fbc7-7c49-b5bb-ae7b91901a86",
+   "prompt": "clean white stone kitchen counter, white subway tile backsplash, wooden cutting board and a ceramic bowl blurred to the side, soft morning window light from the left, lifestyle product photography, empty space in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/kitchen-counter-p.webp",
+   "bytes": 43846,
+   "sha256": "2bdc7cccb2062b7996aadec16bebbaa0cabc058bf443bdae02ff5af5447ee6e3",
+   "source": "scene-kitchen-counter-p-3",
+   "request": "01a19f7f-f796-790f-b7f7-2b4e3450448e",
+   "prompt": "clean white stone kitchen counter, white subway tile backsplash, wooden cutting board and a ceramic bowl blurred to the side, soft morning window light from the left, lifestyle product photography, empty space in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/linen-l.webp",
+   "bytes": 124418,
+   "sha256": "6b56424da8cd1d4f27570491906f40c36a56188cacbe6ec641066cdef38e408a",
+   "source": "scene-linen-l-0",
+   "request": "01a19f80-2e1b-7487-8aa3-8b243d826c06",
+   "prompt": "soft cream linen fabric draped over a block with gentle folds, warm natural light, calm neutral product photography, flat empty area in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/linen-p.webp",
+   "bytes": 89256,
+   "sha256": "6853d8f8544c058ca235c524f455757afb73af3eebe9c12f3bb2e9e6a87a976f",
+   "source": "scene-linen-p-0",
+   "request": "01a19f80-29e0-752b-a3e8-713985365f49",
+   "prompt": "soft cream linen fabric draped over a block with gentle folds, warm natural light, calm neutral product photography, flat empty area in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/marble-podium-l.webp",
+   "bytes": 61752,
+   "sha256": "3b5c9a44158ead40f777e13debcb33218d2ab9e47fad15de1d65a0f803751f99",
+   "source": "scene-marble-podium-l-0",
+   "request": "01a19f7f-ead6-7038-923f-274c0d6d36f7",
+   "prompt": "empty round white marble podium on a warm beige seamless backdrop, soft window light from the left, a taller travertine plinth behind, product photography, 85mm, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/marble-podium-p.webp",
+   "bytes": 50022,
+   "sha256": "c679e8ea979b81243e43dc3925fab0535f139a7bfeabbc4556d6ed87536e09c3",
+   "source": "scene-marble-podium-p-1",
+   "request": "01a19f7e-16f4-7e25-996b-e038a69943a8",
+   "prompt": "empty round white marble podium on a warm beige seamless backdrop, soft window light from the left, a taller travertine plinth behind, product photography, 85mm, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, nothing standing on the surface, no product, no bottle, no people, no hands, no text, no letters, no logos, no watermark",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/mockup-billboard.webp",
+   "bytes": 50254,
+   "sha256": "3e3b9a90e32ed0b8450cbfce657a9104f8e7fef089577545cf31900208e9aa5f",
+   "source": "mockup-billboard-3",
+   "request": "01a19f84-2a0d-715b-b545-846e64e65724",
+   "prompt": "a large blank pure white rectangular billboard on a tall steel pole beside a highway at golden hour, the whole billboard face is a plain blank white panel, seen from below at a slight angle, warm sky, photorealistic street photography, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/mockup-box-truck.webp",
+   "bytes": 178928,
+   "sha256": "47dbddf3e1beee1275d84da90a41ad6b7a1212987b647e281341fc4b55e01b52",
+   "source": "mockup-box-truck-3",
+   "request": "01a19f84-2e58-7f8b-92e0-0d4918879a6c",
+   "prompt": "a white box truck parked on a quiet city street on a sunny day, three-quarter side view, the large cargo box side panel is completely plain empty white, clean truck, street photography, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/mockup-phone.webp",
+   "bytes": 39780,
+   "sha256": "a255e4e0694bc55a760b73006e11c9a579e44ee78edffc00cf37439d77f9ed5f",
+   "source": "mockup-phone-hand-1",
+   "request": "01a19f84-32a2-7b4a-b85f-15e190fe7973",
+   "prompt": "close-up of a single hand holding a modern black smartphone upright facing the camera, the phone screen is plain empty white and fully visible, blurred cafe background with warm bokeh, natural window light, product photography, only one hand and wrist visible, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1080x1440, WebP q82"
+  },
+  {
+   "path": "presets/plates/mockup-storefront.webp",
+   "bytes": 93924,
+   "sha256": "156318eb44fc45d52331716e502a4478aeb9980e384b7aa81a41ec80891389db",
+   "source": "mockup-storefront-0",
+   "request": "01a19f84-3abe-7a21-9407-04583e2effe0",
+   "prompt": "a minimalist shop storefront at street level in daylight, a large plain empty white poster panel stands inside behind the clean glass window, soft reflections on the glass, architecture photography, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/mockup-street-poster.webp",
+   "bytes": 166238,
+   "sha256": "b06effa728eddd51bb41f5a71551968a36b9566657faf423797018fb1cd2df7c",
+   "source": "mockup-street-poster-1",
+   "request": "01a19f84-36ae-7a59-a5ad-d0041e881293",
+   "prompt": "a blank plain white portrait poster pasted flat on a weathered concrete wall in a city street, front view, evening light, the poster is fully empty white paper with slight wrinkles, street photography, photorealistic, quiet and deserted, clean plain surfaces",
+   "processing": "resized to 1080x1440, WebP q78"
+  },
+  {
+   "path": "presets/plates/neon-shelf-l.webp",
+   "bytes": 39148,
+   "sha256": "f2346687da4078297480c705cf4963f9788d3f109b9060a46c3e1f5529a9f5df",
+   "source": "scene-neon-shelf-l-0",
+   "request": "01a19f80-2579-79c5-a389-2071c1363ada",
+   "prompt": "dark moody room, glossy black shelf, pink and blue neon light tubes on a dark concrete wall behind, reflections on the shelf, product photography, empty spot on the shelf in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/neon-shelf-p.webp",
+   "bytes": 24992,
+   "sha256": "88b966652751f2f59a322ad8e72548262b865c7c2aeb3c3ed2f3e67fd8033916",
+   "source": "scene-neon-shelf-p-1",
+   "request": "01a19f85-bdac-7f85-a41f-6e2dfe22986a",
+   "prompt": "dark moody room, a glossy black shelf running across the lower part of the frame, pink and blue neon light tubes mounted on a dark concrete wall behind, soft reflections on the empty shelf top, product photography, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/pastel-arches-l.webp",
+   "bytes": 32718,
+   "sha256": "9167e82981716faa5553e854fc477aa87376431fb88dfedf76e5207dcb3eab92",
+   "source": "scene-pastel-arches-l-0",
+   "request": "01a19f80-3f04-76b6-938f-6fab6da30f10",
+   "prompt": "blush pink wall with tall arched openings showing a soft pastel sky, pink stepped cylinder podiums, dreamy soft light, product photography, empty top step in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/pastel-arches-p.webp",
+   "bytes": 31920,
+   "sha256": "4c53fa036680cf3f8d780dc8c2f2ac4731a3fcdca94d504b411f895bfe4b9383",
+   "source": "scene-pastel-arches-p-2",
+   "request": "01a19f80-3ad0-7380-af36-a7aceeea8e8f",
+   "prompt": "blush pink wall with tall arched openings showing a soft pastel sky, pink stepped cylinder podiums, dreamy soft light, product photography, empty top step in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/pop-blocks-l.webp",
+   "bytes": 50676,
+   "sha256": "aedc79bcdc38eb448268eabdfe79e3c2663acdeb9dee8b515e8aa650a1678cdf",
+   "source": "scene-pop-blocks-l-0",
+   "request": "01a19f80-81cf-7303-acd9-4eb74d99d8d8",
+   "prompt": "playful colour-block set, yellow cylinder podium, red sphere, cobalt arch and mint backdrop, bright even light, bold pop product photography, empty podium top, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/pop-blocks-p.webp",
+   "bytes": 35302,
+   "sha256": "26df5f707d9fc3d3a1b9069220dd082bd9cd7808eb5f1ac12e2db0a8785e702e",
+   "source": "scene-pop-blocks-p-0",
+   "request": "01a19f80-7db8-7876-80ff-2ea9d9190ac5",
+   "prompt": "playful colour-block set, yellow cylinder podium, red sphere, cobalt arch and mint backdrop, bright even light, bold pop product photography, empty podium top, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/sand-dune-l.webp",
+   "bytes": 170182,
+   "sha256": "6e1b40a432c687b94ab4fcb6cf3a285e0dd64147cc550797a75a218ab0a375c0",
+   "source": "scene-sand-dune-l-3",
+   "request": "01a19f85-c76b-79d3-833d-2d75cb7576ae",
+   "prompt": "rolling desert sand dunes at golden hour, a smooth flat sandstone slab resting on the nearest dune crest, rippled untouched sand, long soft shadows, warm hazy sky, product photography, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/sand-dune-p.webp",
+   "bytes": 132356,
+   "sha256": "e1dab9aa463e3858b04f6d0eeeb720439f6327fd1e123d513b92b8cf01605857",
+   "source": "scene-sand-dune-p-1",
+   "request": "01a19f85-b87a-7d85-b8aa-f8d12600a660",
+   "prompt": "rolling desert sand dunes at golden hour, a smooth flat sandstone slab resting on the nearest dune crest, rippled untouched sand, long soft shadows, warm hazy sky, product photography, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/sky-clouds-l.webp",
+   "bytes": 59942,
+   "sha256": "0bc9a3b3e90fdb937f9e46123a2278f4971d74c9a8772750489faf1d6b4740c4",
+   "source": "scene-sky-clouds-l-0",
+   "request": "01a19f80-6888-7841-872b-938d74ca1eff",
+   "prompt": "white round podium floating among soft fluffy clouds in a pastel blue and pink sky, dreamy light, surreal product photography, empty podium top, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/sky-clouds-p.webp",
+   "bytes": 64594,
+   "sha256": "3177315260e6f57ce0ff31c0df747dee2036c18324cd0192ae5aa7715fc2c601",
+   "source": "scene-sky-clouds-p-1",
+   "request": "01a19f80-6475-7fe1-b70c-dfc3150ee6e3",
+   "prompt": "white round podium floating among soft fluffy clouds in a pastel blue and pink sky, dreamy light, surreal product photography, empty podium top, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/stone-steps-l.webp",
+   "bytes": 100500,
+   "sha256": "39f83d9108e732f853d404d0ff86053ff0415af1d560d1a03c1a542fe472464b",
+   "source": "scene-stone-steps-l-0",
+   "request": "01a19f80-5fdc-78da-bf81-ddea819c86dc",
+   "prompt": "stacked travertine stone slabs forming soft steps against a muted sage backdrop, gentle diffused light, spa-like calm product photography, empty top slab in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/stone-steps-p.webp",
+   "bytes": 106204,
+   "sha256": "ce8d598ce8ce2efac0c55fbec7c027fd16a199f0f642b544d6bc9b5886fafadd",
+   "source": "scene-stone-steps-p-2",
+   "request": "01a19f80-5b75-75a6-b9bd-0596fd71756f",
+   "prompt": "stacked travertine stone slabs forming soft steps against a muted sage backdrop, gentle diffused light, spa-like calm product photography, empty top slab in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/studio-sweep-l.webp",
+   "bytes": 26748,
+   "sha256": "eddbe4f0f56d3f6eb83cea0b5b39abf23a617fad91254d4c4af8ebd092f6170f",
+   "source": "scene-studio-sweep-l-3",
+   "request": "01a19f85-cbce-7b81-b998-61e91b1ac2b5",
+   "prompt": "seamless peach paper studio sweep, two large softboxes, soft even light, clean minimal product photography backdrop with a low round white platform, the platform top bare, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/studio-sweep-p.webp",
+   "bytes": 41134,
+   "sha256": "0c235bc832fce3a73ce7d1f29eb4e40a45aec84ecb24a5f649e90aa717fa4548",
+   "source": "scene-studio-sweep-p-1",
+   "request": "01a19f7f-ffce-7be1-8394-db24da0678ee",
+   "prompt": "seamless peach paper studio sweep, two large softboxes, soft even light, clean minimal product photography backdrop with a low round platform, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/terrazzo-l.webp",
+   "bytes": 192148,
+   "sha256": "ff63b0dc73eaa935d904352a9532b8a5db5c901f3cf92e75e5ab2b310df337b6",
+   "source": "scene-terrazzo-l-0",
+   "request": "01a19f80-36b2-7433-b229-d6f5b49ed746",
+   "prompt": "terrazzo cube podium on a terrazzo floor against a sage green wall, crisp late morning sun with a hard shadow, colourful stone chips, playful product photography, empty cube top, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q66"
+  },
+  {
+   "path": "presets/plates/terrazzo-p.webp",
+   "bytes": 188098,
+   "sha256": "30969f0bb6aa999ce666241cb83d3fdd88d0f5646a1d2e9838a15a4a9c505a73",
+   "source": "scene-terrazzo-p-1",
+   "request": "01a19f80-3269-7c33-8a3f-f3e464327e18",
+   "prompt": "terrazzo cube podium on a terrazzo floor against a sage green wall, crisp late morning sun with a hard shadow, colourful stone chips, playful product photography, empty cube top, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q74"
+  },
+  {
+   "path": "presets/plates/tropical-leaves-l.webp",
+   "bytes": 163358,
+   "sha256": "cf7c79128f9b4bba9d4361ae4051519b8de019c646d8908d43faf7049159b41b",
+   "source": "scene-tropical-leaves-l-0",
+   "request": "01a19f80-78d6-7f37-8dc3-8dacedc302cb",
+   "prompt": "beige round podium framed by lush monstera and palm leaves, dappled tropical light, warm summer product photography, empty podium top in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q78"
+  },
+  {
+   "path": "presets/plates/tropical-leaves-p.webp",
+   "bytes": 130712,
+   "sha256": "f58886aacd68005a3cc0ddb48b08edd30d2efc5f1c0e708b35c79b8fe6a54eca",
+   "source": "scene-tropical-leaves-p-1",
+   "request": "01a19f80-74ef-7cd2-bcff-eae9942b2873",
+   "prompt": "beige round podium framed by lush monstera and palm leaves, dappled tropical light, warm summer product photography, empty podium top in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/water-splash-l.webp",
+   "bytes": 115706,
+   "sha256": "61fa559bdca697b34b1403f00123fd6d2b6830b6036486fadd0dda4306631272",
+   "source": "scene-water-splash-l-3",
+   "request": "01a19f85-c25e-7d35-8079-6709e6fe3aae",
+   "prompt": "a small round clear acrylic disc platform standing in shallow turquoise water, gentle ripples and floating droplets, bright aqua gradient background, fresh clean product photography, the disc top is bare, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/water-splash-p.webp",
+   "bytes": 52302,
+   "sha256": "f864233763ad7055051d84f683af349def57e523b5ca3181ed5efdc477f3d7fa",
+   "source": "scene-water-splash-p-1",
+   "request": "01a19f85-b427-7264-ba12-19dfdf3aa4d8",
+   "prompt": "a small round clear acrylic disc platform standing in shallow turquoise water, gentle ripples and floating droplets, bright aqua gradient background, fresh clean product photography, the disc top is bare, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/plates/wood-window-l.webp",
+   "bytes": 104736,
+   "sha256": "14ceedb92dd6e292744976a007862c0a7cbdc06fea3b138aede81d5f7355fba4",
+   "source": "scene-wood-window-l-0",
+   "request": "01a19f80-5739-705f-b8b7-647fe11d0eac",
+   "prompt": "warm oak wooden table against a plaster wall, late afternoon sun through a window casting window-frame shadows, cosy lifestyle product photography, empty table space in the centre, wide frame, camera at eye level slightly above the surface, the empty spot sits in the centre of the frame, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1920x1080, WebP q82"
+  },
+  {
+   "path": "presets/plates/wood-window-p.webp",
+   "bytes": 151580,
+   "sha256": "257c56d856499bae85c985390e93de1aa62bf00b9693930688b5efd15057cba3",
+   "source": "scene-wood-window-p-0",
+   "request": "01a19f80-5344-7484-9f08-c5cd100629b8",
+   "prompt": "warm oak wooden table against a plaster wall, late afternoon sun through a window casting window-frame shadows, cosy lifestyle product photography, empty table space in the centre, vertical frame, camera at eye level slightly above the surface, the empty spot sits centred in the lower half of the frame with open space above, photorealistic, clean minimal set, the surface is bare and completely empty",
+   "processing": "resized to 1080x1920, WebP q82"
+  },
+  {
+   "path": "presets/samples/can.webp",
+   "bytes": 23486,
+   "sha256": "67f7aa234b5853c1a21c2cd91c7a884d1873c647372f72dea6b39a4c858f0ce4",
+   "source": "product-can-1",
+   "request": "01a19f84-614e-7ea5-a911-b377fab0b1cb",
+   "prompt": "a plain glossy coral pink aluminium drink can, smooth seamless solid colour metal, standing upright, centred, whole object visible with margin, bare and unprinted, smooth plain surfaces all around, on a seamless plain light grey studio background, soft even studio light, gentle contact shadow, minimal commercial product photography",
+   "processing": "background removed with BiRefNet lite, trimmed, 453x900, WebP q86"
+  },
+  {
+   "path": "presets/samples/candle.webp",
+   "bytes": 72268,
+   "sha256": "15d3dcd9743f835e745d89efce4d9ab824929fd5254724dc55284b44f470d97b",
+   "source": "product-candle-2",
+   "request": "01a19f84-6590-7907-b991-b70414847cb4",
+   "prompt": "a scented candle in a ribbed amber glass jar with a light wooden lid leaning beside it, standing upright, centred, whole object visible with margin, bare and unprinted, smooth plain surfaces all around, on a seamless plain light grey studio background, soft even studio light, gentle contact shadow, minimal commercial product photography",
+   "processing": "background removed with BiRefNet lite, trimmed, 637x900, WebP q86"
+  },
+  {
+   "path": "presets/samples/headphones.webp",
+   "bytes": 81598,
+   "sha256": "072904574ff89ad7a689a9333be96829731440234987e6bb53651efaf19e2f99",
+   "source": "product-headphones-3",
+   "request": "01a19f8b-2183-7bef-be74-3a97c05fd16b",
+   "prompt": "chunky retro over-ear headphones with round cushions, matte mustard yellow plastic cups, a padded tan leather headband and a coiled cable, standing upright, centred, whole object visible with margin, bare and unprinted, smooth plain surfaces all around, on a seamless plain light grey studio background, soft even studio light, gentle contact shadow, minimal commercial product photography",
+   "processing": "background removed with BiRefNet lite, trimmed, 738x900, WebP q86"
+  },
+  {
+   "path": "presets/samples/matte-astronaut.webp",
+   "bytes": 1074,
+   "sha256": "45e44c203b54008adb7aa0a986253a8e44dc2b78505ad03c0739e692b9c4a692",
+   "source": "media/art/astronaut.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 720x405, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-canyon.webp",
+   "bytes": 594,
+   "sha256": "116480c6649d40ca65af3faa5555de5eeb0d1e334044e9e3d79e947fa0bf01f0",
+   "source": "media/art/canyon.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 720x405, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-dancer.webp",
+   "bytes": 1826,
+   "sha256": "ab8e008c4468b5983441f4dbd65abdb8919a080a061227720781aba9978ccfd9",
+   "source": "media/art/dancer.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 720x405, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-diner.webp",
+   "bytes": 3156,
+   "sha256": "5cde507e80d5847c43c864c91eebe3c20ebd59a9571b88a388400c09e06f96d3",
+   "source": "media/art/diner.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 720x405, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-fisherman.webp",
+   "bytes": 2186,
+   "sha256": "a3a3a45fa9d15818080cf2c19b6b3660dbf2fc3eb9c1afda4134191e59785918",
+   "source": "media/art/fisherman.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 405x720, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-jellyfish.webp",
+   "bytes": 594,
+   "sha256": "ec8ee530b0ae000f74117e7c51f11e0c11b747b8976fbd9a8451af2f495030a0",
+   "source": "media/art/jellyfish.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 405x720, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-lighthouse.webp",
+   "bytes": 594,
+   "sha256": "116480c6649d40ca65af3faa5555de5eeb0d1e334044e9e3d79e947fa0bf01f0",
+   "source": "media/art/lighthouse.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 720x405, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-neon.webp",
+   "bytes": 1898,
+   "sha256": "08f0e8f20eef7d3862443e5560e9a8eaaf975cac479bfaa1e31678a85d361766",
+   "source": "media/art/neon.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 720x405, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-rider.webp",
+   "bytes": 594,
+   "sha256": "116480c6649d40ca65af3faa5555de5eeb0d1e334044e9e3d79e947fa0bf01f0",
+   "source": "media/art/rider.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 720x405, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-summit.webp",
+   "bytes": 594,
+   "sha256": "ec8ee530b0ae000f74117e7c51f11e0c11b747b8976fbd9a8451af2f495030a0",
+   "source": "media/art/summit.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 405x720, WebP q80"
+  },
+  {
+   "path": "presets/samples/matte-train.webp",
+   "bytes": 2762,
+   "sha256": "a3a3939e0dd5f75d65c95ff5fb246d9b28291396b01a99d2fcbca3fe570acd87",
+   "source": "media/art/train.jpg",
+   "request": "",
+   "prompt": "",
+   "processing": "subject matte from BiRefNet lite, 720x405, WebP q80"
+  },
+  {
+   "path": "presets/samples/mug.webp",
+   "bytes": 96882,
+   "sha256": "5ac07c643e454f121df0756a10041eccaf306373608b24aa9ec85612bcb2214c",
+   "source": "product-mug-3",
+   "request": "01a19f84-697b-7b33-8d74-a716f2ace86e",
+   "prompt": "a speckled terracotta ceramic coffee mug with a handle on the right, standing upright, centred, whole object visible with margin, bare and unprinted, smooth plain surfaces all around, on a seamless plain light grey studio background, soft even studio light, gentle contact shadow, minimal commercial product photography",
+   "processing": "background removed with BiRefNet lite, trimmed, 900x890, WebP q86"
+  },
+  {
+   "path": "presets/samples/perfume.webp",
+   "bytes": 33722,
+   "sha256": "02b803af9c439b81798f25394c1b425ddcf98437b7f22ebd1b2472ff3b8981d7",
+   "source": "product-perfume-0",
+   "request": "01a19f84-6d8f-742d-b8de-647e3e029ccd",
+   "prompt": "a bare square clear glass perfume bottle with pale pink liquid and a heavy gold cap, standing upright, centred, whole object visible with margin, bare and unprinted, smooth plain surfaces all around, on a seamless plain light grey studio background, soft even studio light, gentle contact shadow, minimal commercial product photography",
+   "processing": "background removed with BiRefNet lite, trimmed, 523x900, WebP q86"
+  },
+  {
+   "path": "presets/samples/presenter-ava.webp",
+   "bytes": 132990,
+   "sha256": "d8bbad4d8a3fc8ccedaaa2110c2686d084302d6defd92a45f6d3b21625c2bd8c",
+   "source": "presenter-ava-1",
+   "request": "01a19f84-7171-7eae-82f4-d4ca922fa9cd",
+   "prompt": "a friendly fictional woman in her early thirties with shoulder-length dark curly hair and a mustard sweater, upper body, facing the camera and looking straight into the lens, mouth gently closed in a relaxed smile, head and shoulders centred with space above, plain soft pastel studio wall behind, soft natural light, photorealistic portrait photography, ordinary person, plain clothes",
+   "processing": "resized to 1080x1440, WebP q82"
+  },
+  {
+   "path": "presets/samples/presenter-leo.webp",
+   "bytes": 57992,
+   "sha256": "72fbabbadc612bb6a73f8ecdd8eb4b200d7255dca9adc65a690f30642e9e25c1",
+   "source": "presenter-leo-2",
+   "request": "01a19f84-7577-739f-9971-2fd0be3a567a",
+   "prompt": "a friendly fictional man in his late thirties with short hair, light stubble and a navy overshirt, upper body, facing the camera and looking straight into the lens, mouth gently closed in a relaxed smile, head and shoulders centred with space above, plain soft pastel studio wall behind, soft natural light, photorealistic portrait photography, ordinary person, plain clothes",
+   "processing": "resized to 1080x1440, WebP q82"
+  },
+  {
+   "path": "presets/samples/presenter-mei.webp",
+   "bytes": 84178,
+   "sha256": "d068c210355deda9cca3a85afdf9297f34b4cc3d1ccbe347fa8e55ce67c0447b",
+   "source": "presenter-mei-1",
+   "request": "01a19f84-79cb-73de-a4e3-31e6e8528bc7",
+   "prompt": "a cheerful fictional woman in her late twenties with a straight black bob and a cream knit top, upper body, facing the camera and looking straight into the lens, mouth gently closed in a relaxed smile, head and shoulders centred with space above, plain soft pastel studio wall behind, soft natural light, photorealistic portrait photography, ordinary person, plain clothes",
+   "processing": "resized to 1080x1440, WebP q82"
+  },
+  {
+   "path": "presets/samples/serum.webp",
+   "bytes": 25400,
+   "sha256": "304bb945a09b66f6e1e2f6d9d742158eb3e2f7fb9bf4c353d419965080b1ac45",
+   "source": "product-serum-0",
+   "request": "01a19f84-54dd-7272-9eb3-17bb1ebff5ff",
+   "prompt": "a bare smooth amber glass serum bottle with a black rubber dropper cap, standing upright, centred, whole object visible with margin, bare and unprinted, smooth plain surfaces all around, on a seamless plain light grey studio background, soft even studio light, gentle contact shadow, minimal commercial product photography",
+   "processing": "background removed with BiRefNet lite, trimmed, 315x900, WebP q86"
+  },
+  {
+   "path": "presets/samples/sneaker.webp",
+   "bytes": 31892,
+   "sha256": "86820ff977e65931ced6dcd083a2846a72b6181c83553480c349aaca6502a579",
+   "source": "product-sneaker-3",
+   "request": "01a19f84-58ea-77d8-86b2-0156e3b585b3",
+   "prompt": "a single plain running sneaker in white and bright orange, side profile view facing left, standing upright, centred, whole object visible with margin, bare and unprinted, smooth plain surfaces all around, on a seamless plain light grey studio background, soft even studio light, gentle contact shadow, minimal commercial product photography",
+   "processing": "background removed with BiRefNet lite, trimmed, 900x353, WebP q86, rotated to stand on its sole"
+  }
+ ]
+}

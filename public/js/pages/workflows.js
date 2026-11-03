@@ -32,6 +32,21 @@ if (makeId && DESIGN_WORKFLOWS.some((w) => w.id === makeId)) {
       console.warn(e);
     });
 }
+// One-tap presets open in place too: /workflows?preset=<id>
+const presetId = new URLSearchParams(location.search).get("preset");
+if (presetId && !makeId) {
+  document.body.classList.add("making");
+  import("../presets/runtime.js")
+    .then((m) => m.start(presetId, $("#maker")))
+    .then((ok) => {
+      if (!ok) throw new Error("Unknown preset");
+    })
+    .catch((e) => {
+      document.body.classList.remove("making");
+      $("#maker").hidden = true;
+      console.warn(e);
+    });
+}
 // The gallery: every Chucksi workflow as a looping card. #<category> opens that category.
 const making = document.body.classList.contains("making");
 // "All" deals the categories out in turn so the grid opens mixed; each chip keeps its own order.
@@ -45,6 +60,7 @@ const gallery = making ? null : mountGallery({
   grid: $("#wf-grid"),
   chips: $("#wf-chips"),
   track: $("#wf-track"),
+  sortBox: $("#wf-sort"),
   initial: location.hash.slice(1),
 });
 addEventListener("hashchange", () => {

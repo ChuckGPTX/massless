@@ -3,6 +3,8 @@
 // once (the most visible ones); nothing plays off-screen, in a hidden tab, with Save-Data, or for anyone who
 // prefers reduced motion (they get the posters).
 
+import { counts, bump, byPopularity } from "./presets/popular.js";
+
 export const MAX_PLAYING = 6;
 
 const el = (tag, cls, text) => {
@@ -99,6 +101,11 @@ export function cardFor(item, catName) {
   if (item.ar === "16/9") a.classList.add("is-wide");
   a.setAttribute("aria-label", `${item.name}. ${item.line}. ${catName}`);
   const inner = el("span", "wf-inner");
+  if (item.badge) {
+    const b = el("span", `wf-badge is-${item.badge}`, item.badge === "trending" ? "TRENDING" : "NEW");
+    inner.append(b);
+    a.setAttribute("aria-label", `${item.badge === "trending" ? "Trending" : "New"}: ${item.name}. ${item.line}. ${catName}`);
+  }
   const more = el("span", "wf-more");
   more.append(el("span", "wf-line", item.line), el("span", "wf-use", "Use workflow ↗"));
   inner.append(loop(item), el("span", "wf-name", item.name), more);
@@ -127,7 +134,7 @@ function masonry(grid) {
   return layout;
 }
 
-export function mountGallery({ items, categories, featured, grid, chips, track, initial = "all" }) {
+export function mountGallery({ items, categories, featured, grid, chips, track, sortBox = null, initial = "all" }) {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
   const player = createLoopPlayer();
   const names = Object.fromEntries(categories.map((c) => [c.id, c.name]));
@@ -175,6 +182,7 @@ export function mountGallery({ items, categories, featured, grid, chips, track, 
   const touch = matchMedia("(hover: none)");
   grid.addEventListener("click", (e) => {
     const c = e.target.closest(".wf-card");
+    if (c && (!touch.matches || c.classList.contains("is-open"))) bump(c.dataset.id);
     if (!c || !touch.matches || c.classList.contains("is-open")) return;
     e.preventDefault();
     grid.querySelector(".wf-card.is-open")?.classList.remove("is-open");
@@ -229,6 +237,34 @@ export function mountGallery({ items, categories, featured, grid, chips, track, 
     }
     player.sync();
   }
+  // sort: the curated order, or what this browser opens most ("Popular", kept on this device)
+  const original = [...grid.children];
+  let order = "featured";
+  const sortButtons = [];
+  function sortBy(next) {
+    order = next;
+    for (const b of sortButtons) b.setAttribute("aria-pressed", String(b.dataset.sort === next));
+    const list = next === "popular" ? byPopularity(original, counts(), (c) => c.dataset.id) : original;
+    grid.append(...list);
+    layout();
+    player.sync();
+    try { localStorage.setItem("chucksi.workflow-sort.v1", next); } catch { /* optional */ }
+  }
+  if (sortBox) {
+    sortBox.append(el("span", "", "Sort"));
+    for (const [id, name] of [["featured", "Featured"], ["popular", "Popular"]]) {
+      const b = el("button", "", name);
+      b.type = "button";
+      b.dataset.sort = id;
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", () => sortBy(id));
+      sortButtons.push(b);
+      sortBox.append(b);
+    }
+    let saved = "featured";
+    try { saved = localStorage.getItem("chucksi.workflow-sort.v1") || "featured"; } catch { /* optional */ }
+    sortBy(saved === "popular" ? "popular" : "featured");
+  }
   filter(initial);
-  return { filter, player, get current() { return current; } };
+  return { filter, sortBy, player, get current() { return current; }, get order() { return order; } };
 }
