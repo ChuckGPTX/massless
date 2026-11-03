@@ -124,13 +124,15 @@ const mockupSpecs = MOCKUPS.map((m, i) => spec({
 // ---------- 4. Earth zoom out ----------
 const earthSpec = spec({
   id: 'earth-zoom-out', title: 'Earth zoom out', summary: 'Pull back from your photo to the whole planet', badge: 'trending',
-  description: 'Starts on your photo and rises through rooftops, the city, the coast and the clouds until the whole Earth hangs in space.',
+  description: 'Starts on your photo and rises through rooftops, the city, the coast and the clouds until the whole Earth hangs in space. Name a real place and the climb flies out over it.',
   category: 'effects', tags: ['viral', 'zoom', 'travel'], engine: 'earth',
   steps: [{ op: 'pullBack' }, { op: 'layers' }, { op: 'clouds' }, { op: 'globe' }, { op: 'label' }],
   inputs: [
     { key: 'photo', type: 'image', label: 'Your photo', hint: 'A place, a moment, a product: anything shot outdoors works well.', samples: ['lighthouse', 'canyon', 'astronaut', 'train', 'rider'].map((k) => ({ src: `/media/art/${k}.jpg`, label: PHOTOS[k] })) },
-    { key: 'place', type: 'text', label: 'Place name (optional)', max: 32, default: 'Somewhere on Earth' },
+    { key: 'where', type: 'text', label: 'Where was this photo taken?', max: 80, default: '', go: 'Fly there', placeholder: 'A city, landmark or address', hint: 'Optional. Press Fly there and the climb rises over real satellite views of that place. Only the words you type are sent, to look the place up on OpenStreetMap.' },
+    { key: 'place', type: 'text', label: 'Name on screen', max: 32, default: 'Somewhere on Earth', hint: 'Leave it as it is to show the name of the place you picked.' },
   ],
+  note: 'Satellite views: EOxCloudless 2016 by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016), CC BY 4.0. Places: © OpenStreetMap contributors.',
   outputs: [{ type: 'video', sizes: [STORY, SQUARE], duration: 7, fps: 30, label: 'Vertical and square clips' }],
   preview: { ar: '9/16' },
 });

@@ -185,6 +185,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
   // ---------- form ----------
   const rough = {};
   const edited = new Set();
+  const unsent = {};
   function noteRough(key, isRough) {
     const box = rough[key];
     if (!box) return;
@@ -216,6 +217,14 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
     el.dataset.key = input.key;
     if (input.type === 'toggle') el.checked = !!params[input.key];
     else el.value = params[input.key] ?? '';
+    // A text field with a button (input.go): the words reach the engine only when the visitor presses the button,
+    // presses Enter or presses Make it, never while typing.
+    if (input.go) {
+      unsent[input.key] = () => el.value !== (params[input.key] ?? '');
+      const go = () => { params[input.key] = el.value; edited.add(input.key); changed(input, true); };
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+      return h('label', { class: 'maker-field', for: fid }, h('span', {}, input.label), h('span', { class: 'pz-go' }, el, h('button', { type: 'button', class: 'btn-ghost small', onclick: go }, input.go)), input.hint ? h('small', {}, input.hint) : null);
+    }
     const on = () => { params[input.key] = input.type === 'toggle' ? el.checked : input.type === 'range' ? Number(el.value) : el.value; edited.add(input.key); changed(input); };
     el.addEventListener('input', on);
     el.addEventListener('change', on);
@@ -295,7 +304,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
       const c = await engine.prepare(spec, io, params);
       if (mine !== token) return;
       ctx = c;
-      status.textContent = engine.kind === 'video' ? 'Preview is playing. Press Make it for the full-size files.' : 'Ready. Change anything and it updates; press Make it for every size.';
+      status.textContent = (engine.kind === 'video' ? 'Preview is playing. Press Make it for the full-size files.' : 'Ready. Change anything and it updates; press Make it for every size.') + (c.note ? ` ${c.note}` : '');
       drawNow();
       startLoop();
     } catch (e) {
@@ -377,6 +386,11 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
     return encodeMP4(c, { duration, fps: o.fps, audio, onProgress, draw: (cv, t) => engine.render(ctx, cv, { w: o.w, h: o.h, t, duration, params, preview: false }) });
   }
   async function makeAll() {
+    // Make it also submits words typed into a field with a button but not sent yet.
+    if (spec.inputs.some((i) => unsent[i.key]?.())) {
+      for (const i of spec.inputs) if (unsent[i.key]?.()) params[i.key] = form.querySelector(`[data-key="${i.key}"]`).value;
+      await prepare();
+    }
     if (!ctx) return;
     if (outputs.some((o) => o.type === 'video') && !canExportVideo()) toast('Video export needs a recent Chrome, Edge or Safari. Stills still download.', 'error');
     makeBtn.disabled = true;
@@ -399,6 +413,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
       zipBtn.disabled = saveBtn.disabled = shareBtn.disabled = !results.length;
       status.textContent = `Done: ${results.length} file${results.length === 1 ? '' : 's'}. Download them one by one, as a ZIP, or save them to My library.`;
       if (spec.engine === 'talking' && ctx?.voiceNote) status.textContent += ` ${ctx.voiceNote}`;
+      if (ctx?.note) status.textContent += ` ${ctx.note}`;
     } catch (e) {
       status.textContent = `Couldn’t finish: ${e.message}`;
       console.warn(e);
