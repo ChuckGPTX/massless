@@ -16,7 +16,7 @@ function fixture() {
   const call=(path,body,owner='alice')=>ledger.fetch(new Request('https://chucksi.com'+path,{method:body?'POST':'GET',headers:{'x-owner-id':owner,'content-type':'application/json'},body:body?JSON.stringify(body):undefined}));
   return {ledger,store,calls,call,env};
 }
-const input={job:'animate',engine:'managed-wan',input:{prompt:'A fox walking in snow',mode:'quick',resolution:'720p',aspect:'16:9',image:JPEG},idempotencyKey:'managed-video-test-00001'};
+const input={job:'animate',engine:'managed-wan',input:{prompt:'A fox walking in snow',mode:'quick',resolution:'720p',aspect:'16:9',image:JPEG},idempotencyKey:'managed-video-test-00001',rights:true};
 test('managed video stays within fixed model, duration and supported dimensions',()=>{
   const r=managedVideoRequest(input.input,'https://example.com/frame');
   assert.equal(r.duration,5);assert.equal(r.num_inference_steps,30);assert.equal(r.enable_safety_checker,true);

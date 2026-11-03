@@ -206,6 +206,8 @@ async function mount(el) {
   const go = h("button", { type: "submit", class: "btn-accent", text: "Create" });
   const stop = h("button", { type: "button", class: "btn-ghost", text: "Cancel", hidden: true });
   const out = h("div", { class: "gpu-result" });
+  const rightsBox = h("input", { type: "checkbox", name: "rights" });
+  const rights = h("label", { class: "gpu-rights" }, rightsBox, " I own this image or have permission, and anyone in it has agreed.");
   const tabs = h("div", { class: "gpu-modes", role: "tablist", hidden: names.length < 2 });
   let budget = null;
   const showCost = () => {
@@ -216,7 +218,9 @@ async function mount(el) {
   const render = () => {
     const m = kind.modes[mode];
     note.textContent = m.note;
-    form.replaceChildren(...m.fields(), go, stop);
+    const people = ["animate", "motion", "lipsync"].includes(mode);
+    rightsBox.checked = false;
+    form.replaceChildren(...m.fields(), ...(people ? [rights] : []), go, stop);
     for (const b of tabs.children) b.setAttribute("aria-selected", String(b.dataset.mode === mode));
     out.replaceChildren();
     status.textContent = "";
@@ -257,8 +261,9 @@ async function mount(el) {
       await accessToken();
       status.textContent = "Creating…";
       const input = await m.input(form.elements);
+      if (input && input.image && ["animate", "motion", "lipsync"].includes(mode) && !rightsBox.checked) throw new Error("Please confirm you have permission to use this image.");
       status.textContent = "Creating…";
-      const r = await gpuJob({ job: mode, input, signal: ctl.signal, onProgress: (p) => (status.textContent = p.message) });
+      const r = await gpuJob({ job: mode, input, rights: rightsBox.checked, signal: ctl.signal, onProgress: (p) => (status.textContent = p.message) });
       const a = h("a", { href: URL.createObjectURL(r.blob), download: m.file, class: "btn-ghost", text: "Download" });
       out.replaceChildren(m.show(r.blob), a);
       status.textContent = "Ready";

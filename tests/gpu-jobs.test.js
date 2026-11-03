@@ -51,7 +51,7 @@ function ledger(env = {}) {
     }));
     return { status: r.status, r, j: r.headers.get('content-type')?.includes('json') ? await r.json() : null };
   };
-  const submit = (job, input, owner, extra = {}, country) => call('/api/generations', owner, { job, input, idempotencyKey: key(), ...extra }, country);
+  const submit = (job, input, owner, extra = {}, country) => call('/api/generations', owner, { job, input, rights: true, idempotencyKey: key(), ...extra }, country);
   return { l, store, calls, jobs, call, submit };
 }
 
@@ -220,4 +220,12 @@ test('MOSS images count against the same daily budget and settle to their real c
   await call('/api/generations/' + m.j.id, 'm1');
   assert.equal(await store.get(day), Math.ceil((81 + 20 + 5) * 122 / 3600), 'settled to about 4¢');
   assert.equal(await store.get('reservedCents'), 50, 'the lifetime MOSS allowance is never refunded');
+});
+
+test('bringing a photo to life needs the uploader to confirm rights and consent', async () => {
+  const { submit } = ledger();
+  const r = await submit('animate', { image: JPEG }, 'nr', { rights: false });
+  assert.equal(r.status, 400);
+  assert.equal(r.j.rights, true);
+  assert.equal((await submit('animate', { prompt: 'a fox in snow' }, 'nr2', { rights: false })).status, 202, 'text-only needs no confirmation');
 });

@@ -354,13 +354,13 @@ export async function gpuBudget() {
   return r.ok ? { ...j, signedIn: true } : { on: true, signedIn: r.status !== 401, error: j.error };
 }
 /** Run one GPU job; resolves { blob, audio?, output, costCents }. onProgress({ status, message, percent }). */
-export async function gpuJob({ job, input, engine, lab = false, signal, onProgress }) {
+export async function gpuJob({ job, input, engine, lab = false, rights = false, signal, onProgress }) {
   const token = await accessToken();
   let r = await fetch("/api/generations", {
     method: "POST",
     signal,
     headers: { Authorization: "Bearer " + token, "content-type": "application/json" },
-    body: JSON.stringify({ job, input, ...(engine ? { engine } : {}), ...(lab ? { lab: true } : {}), idempotencyKey: crypto.randomUUID() }),
+    body: JSON.stringify({ job, input, ...(engine ? { engine } : {}), ...(lab ? { lab: true } : {}), ...(rights ? { rights: true } : {}), idempotencyKey: crypto.randomUUID() }),
   });
   let j = await r.json().catch(() => ({}));
   if (!r.ok) throw Object.assign(new Error(j.error || "Couldn't start. Try again."), { status: r.status, budget: !!j.budget });

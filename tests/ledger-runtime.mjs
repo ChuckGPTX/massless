@@ -106,7 +106,7 @@ try {
     gpu.dispatchFetch("http://massless.test/api/generations", {
       method: "POST",
       headers: { "x-owner-id": owner, "content-type": "application/json" },
-      body: JSON.stringify({ job: "animate", input: { image: "/9j/" + "A".repeat(100) }, idempotencyKey: "gpu-runtime-key-" + String(i).padStart(4, "0") }),
+      body: JSON.stringify({ job: "animate", rights: true, input: { image: "/9j/" + "A".repeat(100) }, idempotencyKey: "gpu-runtime-key-" + String(i).padStart(4, "0") }),
     });
   const results = await Promise.all(Array.from({ length: 8 }, (_, i) => submit("user" + i, i).then(async (r) => ({ status: r.status, j: await r.json() }))));
   const accepted = results.filter((r) => r.status === 202);
