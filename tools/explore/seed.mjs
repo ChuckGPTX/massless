@@ -13,7 +13,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { GALLERY } from '../../public/js/workflow-data.js';
+import { GALLERY, CAMERA_MOVES } from '../../public/js/workflow-data.js';
 import { checkMeta, checkMedia, MEDIA_TYPES } from '../../src/explore.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -56,7 +56,7 @@ const sql = (v) => (v === null || v === undefined ? 'NULL' : typeof v === 'numbe
 
 export function seedPosts() {
   return SEED_PICKS.map(([cardId, tool, tags], i) => {
-    const card = GALLERY.find((c) => c.id === cardId);
+    const card = [...GALLERY, ...CAMERA_MOVES].find((c) => c.id === cardId); // camera moves are one gallery card now
     if (!card) throw new Error(`seed: no gallery card ${cardId}`);
     const [width, height] = SIZE[card.ar] || [960, 1200];
     const meta = checkMeta({ title: card.name, tool, remix: card.href, tags, width, height });
