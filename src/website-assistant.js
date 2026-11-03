@@ -44,7 +44,19 @@ export async function websiteAssistant(request, env) {
       headers: { authorization: `Bearer ${env.OPENROUTER_API_KEY}`, 'content-type': 'application/json', 'HTTP-Referer': 'https://chucksi.com', 'X-OpenRouter-Title': 'Chucksi Website Studio' },
       body: JSON.stringify({ model: NEMOTRON_MODEL, max_tokens: 5000, temperature: 0.4, reasoning: { enabled: false }, provider: { allow_fallbacks: false, max_price: { prompt: 0, completion: 0 } }, response_format: { type: 'json_object' }, messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: JSON.stringify({ instruction: input.instruction, fields: input.fields }) }] }),
     });
-    if (!result.ok) return json({ error: result.status === 429 ? 'The free assistant is busy. Try again later; your site is saved.' : 'The assistant could not complete this request. Your site has not changed.' }, result.status === 429 ? 429 : 502);
+    if (!result.ok) {
+      // Never log provider bodies: they may echo submitted page text or credentials.
+      console.warn('website_assistant_provider_error', { status: result.status });
+      const messages = {
+        400: 'The assistant provider rejected the request format. Your site has not changed.',
+        401: 'The assistant connection needs to be renewed by Chucksi. Your site has not changed.',
+        402: 'The free assistant is unavailable for this provider account. Your site has not changed.',
+        403: 'The assistant provider has restricted this connection. Your site has not changed.',
+        404: 'The free assistant model has no available route. Try again later; your site has not changed.',
+        429: 'The free assistant is busy. Try again later; your site is saved.',
+      };
+      return json({ error: messages[result.status] || 'The assistant provider is unavailable. Try again later; your site has not changed.' }, result.status === 429 ? 429 : 502);
+    }
     const data = await result.json();
     const proposal = validateProposal(JSON.parse(data.choices?.[0]?.message?.content || ''), input.fields);
     return json({ ...proposal, model: NEMOTRON_MODEL });
