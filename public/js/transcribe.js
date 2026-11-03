@@ -122,7 +122,7 @@ export function shiftResult(data, offset) {
   const segs = (data.segments || []).filter((s) => String(s.text || '').trim());
   const segments = segs.map((s) => {
     const out = { start: round(Number(s.start) + offset), end: round(Number(s.end) + offset), text: String(s.text).trim() };
-    for (const k of ['avg_logprob', 'no_speech_prob']) if (Number.isFinite(s[k])) out[k] = s[k];
+    for (const k of ['avg_logprob', 'no_speech_prob', 'compression_ratio']) if (Number.isFinite(s[k])) out[k] = s[k];
     const own = (Array.isArray(s.words) ? s.words : [])
       .map((w) => ({ text: String(w.word ?? w.text ?? ''), start: round(Number(w.start) + offset), end: round(Number(w.end) + offset) }))
       .filter((w) => w.text.trim() && Number.isFinite(w.start) && Number.isFinite(w.end));
