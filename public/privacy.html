@@ -64,6 +64,7 @@
       <li>Captions, transcripts and edit by text: only the sound of your file, downsampled to 16 kHz mono, is sent to Cloudflare, and only when you press Transcribe.</li>
       <li>Ask a PDF: the text of the PDF open in Edit (up to 12,000 characters) and your question are sent to Cloudflare. The file itself is not uploaded.</li>
       <li>Launch film scripts: your brief is sent to Cloudflare when “Write it with AI” is on.</li>
+      <li>Earth zoom out, real place: when you press Fly there (or Make it), the place name you typed is sent to Chucksi, which looks it up on <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (Nominatim) and keeps the answer for 30 days so the same name is not asked twice. Your photo and your location are never sent, and OpenStreetMap does not see your IP address; the satellite views are fetched through Chucksi from EOX, so EOX does not see it either. See the <a href="https://osmfoundation.org/wiki/Privacy_Policy">OpenStreetMap Foundation's privacy policy</a>.</li>
       <li>Full 3D objects: your image is sent only to the object service address you enter.</li>
       <li>Verify a signed PDF: only a fingerprint (SHA-256) of the file is sent.</li>
     </ul>

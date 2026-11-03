@@ -26,9 +26,14 @@ export const DENY = [
   'starbucks', "mcdonald's", 'mcdonalds', 'disney', 'marvel', 'pixar', 'ghibli', 'barbie', 'lego', 'tesla', 'amazon', 'google', 'youtube premium',
   'tiktok', 'instagram', 'netflix', 'red bull', 'sephora', 'ikea', 'taylor swift', 'beyonce', 'elon musk', 'kardashian', 'mrbeast', 'drake',
   'us dollar', 'dollar bill', 'euro note', 'banknote replica', 'federal reserve', 'higgsfield', 'kling', 'pika', 'runway', 'flux', 'gpu', 'model',
+  'api', 'tile', 'tiles', 'geocode', 'geocoding', 'geocoder', 'lat/lon', 'latitude', 'longitude', 'wmts', 'nominatim',
 ];
-// "model", "flux" and "gpu" stay out of customer copy (title, summary, labels, hints); see denyHits.
-const COPY_ONLY = new Set(['flux', 'gpu', 'model', 'kling', 'pika', 'runway', 'higgsfield']);
+// "model", "flux", "gpu" and the map words ("tiles", "API", "geocode"…) stay out of customer copy (title, summary,
+// labels, hints, notes); see denyHits and copyHits.
+const COPY_ONLY = new Set(['flux', 'gpu', 'model', 'kling', 'pika', 'runway', 'higgsfield', 'api', 'tile', 'tiles', 'geocode', 'geocoding', 'geocoder', 'lat/lon', 'latitude', 'longitude', 'wmts', 'nominatim']);
+const hasWord = (text, w) => new RegExp(`(^|[^a-z0-9])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`).test(text);
+/** Deny-listed words in text a visitor reads outside a spec (an engine's status lines, say). */
+export const copyHits = (...texts) => { const t = texts.join(' \n ').toLowerCase(); return DENY.filter((w) => hasWord(t, w)); };
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const parseSize = (s) => {
@@ -38,9 +43,9 @@ export const parseSize = (s) => {
 
 /** Every string in the visible copy of a spec (what visitors read). */
 export function copyStrings(spec) {
-  const out = [spec.title, spec.summary, spec.description];
+  const out = [spec.title, spec.summary, spec.description, spec.note];
   for (const i of spec.inputs || []) {
-    out.push(i.label, i.hint, i.placeholder, typeof i.default === 'string' ? i.default : '');
+    out.push(i.label, i.hint, i.placeholder, i.go, typeof i.default === 'string' ? i.default : '');
     for (const o of i.options || []) out.push(o.label, o.hint);
   }
   for (const o of spec.outputs || []) out.push(o.label);
@@ -51,10 +56,7 @@ export function denyHits(spec) {
   const all = JSON.stringify({ ...spec, preview: undefined }).toLowerCase();
   const copy = copyStrings(spec).join(' \n ').toLowerCase();
   const hits = [];
-  for (const w of DENY) {
-    const re = new RegExp(`(^|[^a-z0-9])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`);
-    if (re.test(COPY_ONLY.has(w) ? copy : all)) hits.push(w);
-  }
+  for (const w of DENY) if (hasWord(COPY_ONLY.has(w) ? copy : all, w)) hits.push(w);
   return hits;
 }
 
@@ -92,6 +94,7 @@ export function validateSpec(spec) {
       need(new Set(ids).size === ids.length && ids.every((x) => SLUG.test(x || '')), `input ${i.key}: option ids are unique slugs`);
       need(ids.includes(i.default), `input ${i.key}: default must be an option`);
     }
+    if (i.go !== undefined) need(i.type === 'text' && typeof i.go === 'string' && i.go.length >= 2 && i.go.length <= 16, `input ${i.key}: go is a short button label on a text input`);
     if (i.type === 'text' || i.type === 'textarea') need(Number.isInteger(i.max) && i.max > 0 && i.max <= 2000 && (i.default ?? '').length <= i.max, `input ${i.key}: max length and a default that fits`);
     if (i.type === 'color') need(/^#[0-9a-f]{6}$/i.test(i.default || ''), `input ${i.key}: default colour #rrggbb`);
     if (i.type === 'toggle') need(typeof i.default === 'boolean', `input ${i.key}: default true or false`);
