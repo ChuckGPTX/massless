@@ -74,3 +74,18 @@ test('inference pins zero-priced Nemotron, validates outputs and never retries p
   globalThis.fetch.mock.mockImplementation(async()=>Response.json({choices:[{message:{content:'{"summary":"bad","changes":[{"path":"private.token","value":"bad"}]}'}}]}));
   const invalid=await websiteAssistant(request(),env());assert.equal(invalid.status,502);assert.ok(!(await invalid.text()).includes('private.token'));
 });
+
+test('provider errors explain connection failures without exposing provider bodies or retrying', async t => {
+  t.mock.method(console, 'warn', () => {});
+  const mock = t.mock.method(globalThis, 'fetch');
+  const messages = {400:'request format',401:'renewed',402:'provider account',403:'restricted',404:'no available route',429:'busy',503:'unavailable'};
+  for (const [code, message] of Object.entries(messages)) {
+    mock.mock.mockImplementation(async () => Response.json({error:{message:'SECRET echoed page content'}},{status:Number(code)}));
+    const before = mock.mock.callCount();
+    const response = await websiteAssistant(request(),env());
+    assert.equal(response.status, Number(code) === 429 ? 429 : 502);
+    const text = await response.text();
+    assert.ok(text.includes(message)); assert.ok(!text.includes('SECRET'));
+    assert.equal(mock.mock.callCount() - before, 1);
+  }
+});

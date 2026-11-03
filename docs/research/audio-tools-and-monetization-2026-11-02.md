@@ -43,3 +43,7 @@ Recommended fit: keep the human-facing studio, template catalog and basic MCP br
 - A bounded, optional NVIDIA Nemotron website assistant through OpenRouter's explicit free route, with consent, validated edits, before/after review and undo.
 
 The audio workflows above still require implementation and quality/cost testing. Exposing generation to external MCP/API clients should follow ownership, quota and job-lifecycle controls, rather than simply forwarding an unrestricted GPU endpoint.
+
+## Live verification result
+
+The developer console, all six guides, public REST catalog, OpenAPI and the real MCP client connection passed live checks. The catalog returns 32 templates and MCP exposes three read-only tools. The Nemotron integration is deployed, but the live provider rejected the saved OpenRouter connection with HTTP 401. A successful AI edit is not yet verified; renew the Worker’s `OPENROUTER_API_KEY` secret before repeating preview/apply/undo testing. The test used a public Stillform template and its content remained unchanged. No paid fallback was used.
