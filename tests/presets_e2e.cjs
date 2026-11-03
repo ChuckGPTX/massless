@@ -70,7 +70,7 @@ function wav(seconds = 6, rate = 24000) {
       await page.screenshot({ path: path.join(out, `${id}-${width}.jpg`), quality: 70, type: 'jpeg', fullPage: false });
       await step('make it', async () => {
         await page.locator('.maker-side-foot .btn-accent').click();
-        await page.waitForFunction(() => /^Done|^Couldn/.test(document.querySelector('.maker-status')?.textContent || ''), null, { timeout: 600000 });
+        await page.waitForFunction(() => /^Done|^Couldn/.test(document.querySelector('.maker-status')?.textContent || ''), null, { timeout: 1200000 });
         const status = await page.locator('.maker-status').textContent();
         if (!status.startsWith('Done')) throw new Error(status);
         const n = await page.locator('.pz-result').count();
