@@ -11,13 +11,15 @@ import {
   compositeOver,
   holeFromStrokes,
 } from "../image-tools.js";
+import { requestEdit, sharpen, pickFromLibrary, imageFiles, IDEAS, PRIVACY_NOTE } from "../edit-words-ui.js";
+import { editRefusal } from "../edit-words.js";
 
 const $ = (s) => document.querySelector(s),
   canvas = $("#art"),
   ctx = canvas.getContext("2d");
 let image, sourceId;
 const message = (t) => ($("#status").textContent = t);
-const TOOLS = ["compose", "remove-bg", "upscale", "erase"];
+const TOOLS = ["compose", "remove-bg", "upscale", "erase", "words"];
 const BACKDROPS = {
   studio: ["#eee6d7", "#c2ad91"],
   botanical: ["#d2e0bc", "#254d3e"],
@@ -35,6 +37,8 @@ const T = {
   history: [],
   busy: false,
 };
+// Edit with words: reference pictures, and the steps Undo walks back ({ base, result } before each step).
+const W = { refs: [], steps: [], prompt: "" };
 
 function makeCanvas(w, h) {
   const c = document.createElement("canvas");
@@ -177,6 +181,7 @@ async function load(blob, id) {
   image?.close?.();
   image = await createImageBitmap(blob);
   sourceId = id;
+  W.steps = [];
   const scaled = setBase(image);
   refresh();
   message(
@@ -229,6 +234,9 @@ function refresh() {
   $("#compare-row").hidden = !toolView || !T.result;
   $("#result-actions").hidden = !toolView || !T.result;
   $("#er-undo").disabled = !T.history.length || T.busy;
+  $("#we-keep").disabled = !T.result || T.busy;
+  $("#we-undo").disabled = !W.steps.length || T.busy;
+  $("#we-sharpen").disabled = !T.result || T.busy || Math.max(T.result.width, T.result.height) > 1024;
   updateUpscaleHint();
   draw();
 }
@@ -237,6 +245,7 @@ async function updateNote() {
   const tool = T.tool;
   const el = document.querySelector(`[data-note="${tool}"]`);
   if (!el) return;
+  if (tool === "words") return;
   let id = { "remove-bg": $("#bg-model").value, upscale: "esrgan", erase: "migan" }[tool];
   if (tool === "erase" && $("#er-method").value === "patch") {
     el.dataset.model = "patch";
@@ -267,7 +276,7 @@ function updateUpscaleHint() {
 
 function setBusy(on) {
   T.busy = on;
-  for (const b of document.querySelectorAll("#bg-run,#up-run,#er-run,#tool-save,#er-clear,.tool-tabs button"))
+  for (const b of document.querySelectorAll("#bg-run,#up-run,#er-run,#we-run,#tool-save,#er-clear,#from-library,.tool-tabs button"))
     b.disabled = on;
   $("#progress").hidden = !on;
   if (on) $("#progress").removeAttribute("value");
@@ -467,6 +476,113 @@ async function erase() {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Edit with words
+// ---------------------------------------------------------------------------------------------
+
+const toCanvas = (img) => {
+  const c = makeCanvas(img.width, img.height);
+  c.getContext("2d").drawImage(img, 0, 0);
+  return c;
+};
+const remember = () => W.steps.push({ base: T.base, result: T.result });
+
+function renderRefs() {
+  const row = $("#we-refs");
+  row.replaceChildren();
+  W.refs.forEach((blob, i) => {
+    const box = document.createElement("div");
+    box.className = "we-ref";
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(blob);
+    img.alt = `Reference ${i + 1}`;
+    const x = document.createElement("button");
+    x.type = "button";
+    x.className = "we-ref-x";
+    x.textContent = "×";
+    x.setAttribute("aria-label", `Remove reference ${i + 1}`);
+    x.onclick = () => {
+      URL.revokeObjectURL(img.src);
+      W.refs.splice(i, 1);
+      renderRefs();
+    };
+    box.append(img, x);
+    row.append(box);
+  });
+  if (W.refs.length < 3) {
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "we-ref-add";
+    add.textContent = "+";
+    add.setAttribute("aria-label", "Add a reference picture");
+    add.onclick = () => $("#we-ref-file").click();
+    row.append(add);
+  }
+}
+function addRefs(files) {
+  for (const f of imageFiles(files)) if (W.refs.length < 3) W.refs.push(f);
+  renderRefs();
+}
+
+async function editWithWords() {
+  const text = $("#we-prompt").value.trim();
+  if (!T.base) return message("Open an image first.");
+  if (!text) {
+    $("#we-prompt").focus();
+    return message("Say what to change first, like “make it sunset”.");
+  }
+  const refusal = editRefusal(text);
+  if (refusal) return message(refusal);
+  let left = null;
+  await tool("Edited", async () => {
+    message("Editing… this takes a few seconds.");
+    const out = await requestEdit({ prompt: text, images: [T.base, ...W.refs], size: $("#we-size").value });
+    const bmp = await createImageBitmap(out.blob);
+    remember();
+    T.result = toCanvas(bmp);
+    bmp.close?.();
+    left = out.left;
+    W.prompt = text;
+    T.meta = {
+      name: `Edited: ${text.slice(0, 60)}`,
+      engine: "word-edit",
+      settings: { tool: "words", prompt: text, size: $("#we-size").value, references: W.refs.length },
+    };
+    $("#compare").value = "50";
+  });
+  if (Number.isFinite(left))
+    message(`${$("#status").textContent} ${left} free edit${left === 1 ? "" : "s"} left today.`);
+}
+function keepEditing() {
+  if (!T.result || T.busy) return;
+  remember();
+  const next = T.result;
+  setBase(next);
+  $("#we-prompt").value = "";
+  refresh();
+  $("#we-prompt").focus();
+  message("Now editing the result. Say what to change next.");
+}
+function undoWords() {
+  const prev = W.steps.pop();
+  if (!prev || T.busy) return;
+  T.base = prev.base;
+  T.result = prev.result;
+  T.baseData = null;
+  T.strokes = makeCanvas(T.base.width, T.base.height);
+  refresh();
+  message("Undone.");
+}
+async function sharpenResult() {
+  if (!T.result) return;
+  await tool("Sharpened", async () => {
+    const c = await sharpen(T.result, onProgress);
+    remember();
+    T.result = c;
+    T.meta = { ...T.meta, name: `${T.meta?.name || "Edited"} (sharpened)`, settings: { ...T.meta?.settings, sharpened: true } };
+  });
+}
+
+// ---------------------------------------------------------------------------------------------
 // Results: save, download, keep editing
 // ---------------------------------------------------------------------------------------------
 
@@ -540,6 +656,53 @@ for (const b of document.querySelectorAll(".tool-tabs button"))
 $("#bg-run").onclick = removeBackground;
 $("#up-run").onclick = upscale;
 $("#er-run").onclick = erase;
+$("#we-run").onclick = editWithWords;
+$("#we-keep").onclick = keepEditing;
+$("#we-undo").onclick = undoWords;
+$("#we-sharpen").onclick = sharpenResult;
+$("#we-prompt").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    editWithWords();
+  }
+});
+$("#we-ref-file").onchange = (e) => {
+  addRefs(e.target.files);
+  e.target.value = "";
+};
+$("#we-note").textContent = PRIVACY_NOTE;
+for (const idea of IDEAS) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "we-idea";
+  b.textContent = idea;
+  b.onclick = () => {
+    $("#we-prompt").value = idea;
+    $("#we-prompt").focus();
+  };
+  $("#we-ideas").append(b);
+}
+renderRefs();
+$("#from-library").onclick = async () => {
+  const pick = await pickFromLibrary();
+  if (pick) await load(pick.blob, pick.id).catch((err) => message(err.message));
+};
+// Drop a picture on the preview to open it (on Edit with words, extra pictures become references).
+const stageEl = $(".stage");
+stageEl.addEventListener("dragover", (e) => {
+  if ([...(e.dataTransfer?.types || [])].includes("Files")) e.preventDefault();
+});
+stageEl.addEventListener("drop", async (e) => {
+  const files = imageFiles(e.dataTransfer?.files);
+  if (!files.length || T.busy) return;
+  e.preventDefault();
+  try {
+    await load(files[0]);
+    if (T.tool === "words" && files.length > 1) addRefs(files.slice(1));
+  } catch (err) {
+    message(err.message);
+  }
+});
 $("#er-clear").onclick = () => {
   T.strokes?.getContext("2d").clearRect(0, 0, T.strokes.width, T.strokes.height);
   draw();
@@ -606,7 +769,7 @@ if (!startTool) {
   }
 }
 await setTool(startTool || "compose", { remember: false });
-window.massless = { edit: T, setTool };
+window.massless = { edit: T, words: W, setTool };
 try {
   const item = await selectedAsset();
   if (item?.blob?.type.startsWith("image/")) await load(item.blob, item.id);

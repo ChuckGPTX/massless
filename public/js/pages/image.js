@@ -3,6 +3,7 @@ import { loadRig, compilePrompt, pick, DEFAULT_SEL } from '../rig.js';
 import { shoot, MODELS, MODEL_GROUPS, DEFAULT_MODEL, negativeFor } from '../engines.js';
 import * as store from '../store.js';
 import { autoplayVideos, bindDialogs, toast, el, download, SAMPLES } from '../ui.js';
+import { mountWordEdit } from '../edit-words-ui.js';
 
 const $ = (s) => document.querySelector(s);
 const ls = {
@@ -192,6 +193,7 @@ async function toJpeg(image) {
 /** The model that actually rendered a shot. Older saved shots only know their engine. */
 function shotLabel(item) {
   if (item.engine === 'upload') return 'Your still';
+  if (item.engine === 'word-edit') return 'Edited with words';
   if (item.model === 'comfy' || item.engine === 'comfy') return comfyLabel(item.ckpt);
   if (MODELS[item.model]) return MODELS[item.model].short;
   return { pollinations: 'Pollinations', workers: 'FLUX.1 schnell' }[item.engine] || 'Shot';
@@ -206,6 +208,7 @@ function shotCard(item, fresh = false) {
     el('div', { class: 'acts' },
       item.unsaved ? null : el('a', { class: 'go', href: `/video?shot=${encodeURIComponent(item.id)}` }, 'Animate'),
       item.unsaved ? null : el('a', { href: `/edit/?shot=${encodeURIComponent(item.id)}` }, 'Edit'),
+      el('button', { type: 'button', onclick: () => editWithWords(item.blob, item.unsaved ? null : item.id) }, 'Edit with words'),
       item.unsaved ? null : el('a', { href: `/3d?shot=${encodeURIComponent(item.id)}` }, '3D'),
       el('button', { type: 'button', onclick: () => download(item.blob, `${item.id}.jpg`) }, 'Download'),
       item.prompt ? el('button', { type: 'button', onclick: () => { $('#compiled').value = item.prompt; state.edited = true; $('#prompt-peek').open = true; toast('Prompt loaded. Press Generate to shoot it again.'); } }, 'Reuse prompt') : null,
@@ -332,6 +335,30 @@ async function loadUpload(file) {
   toast(item.unsaved ? 'This still could not be saved. Download it before leaving.' : 'Still added. Press Animate on it to move the camera.', item.unsaved ? 'error' : undefined);
 }
 
+// ---------- edit with words ----------
+let wordEdit = null;
+function setMode(mode, { remember = true } = {}) {
+  const words = mode === 'words';
+  $('#mode-create').setAttribute('aria-selected', String(!words));
+  $('#mode-words').setAttribute('aria-selected', String(words));
+  $('#create-mode').hidden = words;
+  $('#word-edit').hidden = !words;
+  if (words && !wordEdit) wordEdit = mountWordEdit($('#word-edit-panel'), { onSaved: (item) => { $('#results-wrap').hidden = false; $('#results').prepend(shotCard(item, true)); } });
+  if (remember) {
+    const u = new URL(location.href);
+    if (words) u.searchParams.set('mode', 'words');
+    else u.searchParams.delete('mode');
+    history.replaceState(null, '', u.pathname + u.search + u.hash);
+  }
+}
+/** The quick action on every shot: open it in Edit with words. */
+function editWithWords(blob, id) {
+  setMode('words');
+  wordEdit.load(blob, id);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => $('#we-prompt')?.focus({ preventScroll: true }), 300);
+}
+
 // ---------- inspiration ----------
 function buildInspo() {
   const grid = $('#inspo');
@@ -364,6 +391,13 @@ async function init() {
   connectedConfig=await cloudConfig();
   state.rig = await loadRig();
   const params = new URLSearchParams(location.search);
+  $('#mode-create').addEventListener('click', () => setMode('create'));
+  $('#mode-words').addEventListener('click', () => setMode('words'));
+  if (params.get('mode') === 'words') {
+    setMode('words', { remember: false });
+    const linked = params.get('shot') && (await store.get(params.get('shot')).catch(() => null));
+    if (linked?.blob?.type?.startsWith('image/')) wordEdit.load(linked.blob, linked.id);
+  }
   // Remembered model; earlier visits stored an engine instead.
   const legacy = { pollinations: 'sana', comfy: 'comfy' }[ls.get('massless.engine')];
   const saved = ls.get('massless.image-model') || legacy;
@@ -399,7 +433,7 @@ async function init() {
     chip.focus();
     openPop(kind, chip);
   }
-  window.massless = { state };
+  window.massless = { state, setMode, editWithWords };
 }
 
 init();

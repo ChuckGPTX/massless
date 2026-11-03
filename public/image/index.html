@@ -27,6 +27,7 @@
   <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/css/site.css">
   <link rel="stylesheet" href="/css/image.css">
+  <link rel="stylesheet" href="/css/edit-words.css">
   <link rel="stylesheet" href="/css/navigation.css">
   <script type="module" src="/js/navigation.js"></script>
 </head>
@@ -47,7 +48,17 @@
   </header>
 
   <main>
-    <section class="wrap">
+    <div class="wrap"><div class="img-modes" role="tablist" aria-label="Mode"><button type="button" role="tab" id="mode-create" aria-selected="true" aria-controls="create-mode">Create</button><button type="button" role="tab" id="mode-words" aria-selected="false" aria-controls="word-edit">Edit with words</button></div></div>
+
+    <section class="wrap we-wrap" id="word-edit" role="tabpanel" aria-labelledby="mode-words" hidden>
+      <div class="we-head">
+        <h1 class="display">Edit an image<br>with words</h1>
+        <p>Drop in a picture and say what to change. Keep editing the result until it's right.</p>
+      </div>
+      <div id="word-edit-panel"></div>
+    </section>
+
+    <section class="wrap" id="create-mode" role="tabpanel" aria-labelledby="mode-create">
       <div class="img-hero">
         <video muted loop playsinline preload="none" poster="/media/art/canyon.jpg" data-src="/media/clips/promo-canyon.mp4"></video>
         <div class="hero-copy">
