@@ -1,4 +1,5 @@
 import { templateCatalog } from './template-catalog.js';
+import { integrationAPI } from './integration-api.js';
 import { mcpHandler } from './mcp.js';
 import { consoleTarget, CONSOLE_HOST } from './console-routing.js';
 import { websiteAssistant } from './website-assistant.js';
@@ -417,6 +418,7 @@ const PAGES = { '/console': '/console/index.html', '/': '/index.html', '/index.h
 for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studios/${studio}`] = `/studios/${studio}/index.html`;
 PAGES['/sign'] = '/sign/index.html';
 PAGES['/report'] = '/report/index.html';
+for (const path of ['templates', 'docs/website-assistant', 'docs/publish-and-export']) PAGES[`/website/${path}`] = `/website/${path}/index.html`;
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
 
 async function page(request, ref, file, ctx) {
@@ -497,6 +499,7 @@ export default {
       return new Response(null, { status: 301, headers: { location: `https://chucksi.com${url.pathname}${url.search}`, 'cache-control': 'public, max-age=3600' } });
     }
     if (url.pathname === '/api/v1/templates' || url.pathname.startsWith('/api/v1/templates/')) return templateCatalog(request);
+    if (/^\/api\/v1\/(capabilities|tools|presets|workflows)(\/|$)/.test(url.pathname)) return integrationAPI(request);
     if (url.pathname === '/api/v1/openapi.json' && ['GET', 'HEAD'].includes(request.method)) {
       const res = env.ASSETS ? await env.ASSETS.fetch(new Request(new URL('/console/openapi.json', request.url), request)) : await fromOrigin(new Request(new URL('/console/openapi.json', request.url), request), env, ctx);
       const out = new Response(res.body, res); out.headers.set('access-control-allow-origin', '*'); return out;
