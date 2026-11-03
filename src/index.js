@@ -1,4 +1,8 @@
 import { templateCatalog } from './template-catalog.js';
+import { mcpHandler } from './mcp.js';
+import { consoleTarget, CONSOLE_HOST } from './console-routing.js';
+import { websiteAssistant } from './website-assistant.js';
+export { WebsiteAiLimits } from './website-assistant.js';
 import { generationAPI } from './generations.js';
 import { signApi, signGated, signCleanup } from './sign.js';
 import { sitesApi, sitesGated, siteHost, serveSite } from './sites.js';
@@ -474,6 +478,19 @@ export default {
     // Hosted sites (<slug>.v2web.site) are answered first: every path there is the site's own, even /api/.
     const hosted = siteHost(url.hostname, env);
     if (hosted) return serveSite(request, env, ctx, hosted);
+    const consoleRoute = consoleTarget(request);
+    if (consoleRoute?.redirect) return Response.redirect(consoleRoute.redirect, 301);
+    if (url.pathname === '/mcp') return mcpHandler(request, env, ctx);
+    // The console exposes public developer resources only, never account or generation APIs.
+    if (url.hostname === CONSOLE_HOST && url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/v1/')) return json({ error: 'Use chucksi.com for account and studio actions.' }, 404);
+    if (consoleRoute?.asset && ['GET', 'HEAD'].includes(request.method)) {
+      const target = new Request(new URL(consoleRoute.asset, request.url), request);
+      return env.ASSETS ? env.ASSETS.fetch(target) : fromOrigin(target, env, ctx);
+    }
+    if (url.pathname === '/api/website-assistant') {
+      if (request.method === 'POST') { const stop = await needsHuman(request, env); if (stop) return stop; }
+      return websiteAssistant(request, env);
+    }
     // The site lives at chucksi.com. Old and www addresses redirect there with the same path (and the
     // browser keeps any #fragment, so signing links still work). APIs answer on every host so open tabs keep working.
     if ((url.hostname === 'massless.chucksi.com' || url.hostname === 'www.chucksi.com') && !url.pathname.startsWith('/api/') && (request.method === 'GET' || request.method === 'HEAD')) {

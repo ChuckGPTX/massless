@@ -40,7 +40,7 @@
   </header>
   <main class="legal">
     <h1>Privacy policy</h1>
-    <p class="updated">Last updated November 1, 2026</p>
+    <p class="updated">Last updated November 2, 2026</p>
     <p>Chucksi (chucksi.com) is a free, open-source set of creative tools. The short version: most tools run entirely in your browser, we keep as little as we can, and we never sell your data or use it for advertising. The code that does all of this is public on <a href="https://github.com/ChuckGPTX/massless">GitHub</a>.</p>
 
     <h2>What stays on your device</h2>
@@ -53,11 +53,12 @@
     <p>When you save a project to the cloud, its files and settings are stored in our database and private storage so you can open them again. Only your account can read them. You can ask us at any time to delete a project or your whole account and everything in it.</p>
 
     <h2>Server-run AI tools</h2>
-    <p>Some features send the text, audio or images you provide to a server to process. That input is used only to produce your result. It is not used to train models, and we do not keep it after the job is done unless you save the result. Our GPU provider holds a finished result only briefly, until it is delivered to you. In detail:</p>
+    <p>Some features send the text, audio or images you provide to a server to process. Chucksi does not train models on your inputs. The providers that process them have their own retention and data-use terms; free AI providers may log inputs and outputs. Avoid sending confidential information. In detail:</p>
     <ul>
       <li>Creating images (Image, design workflows, website, slide and game art): your description is sent to Cloudflare. If you pick the Backup style, or when the free images are busy or used up, some tools send it to Pollinations instead. If you connect your own image workflow, it goes only to the address you enter.</li>
       <li>Best quality images, text to video, Animate, Motion, Lip sync, Upscale video and Write a song: your description and any image, clip or audio you add are sent to RunPod GPU servers.</li>
       <li>Fast text to video (members video): your description and any start frame are sent to OpenRouter and the video provider it uses.</li>
+      <li>Website AI assistant: after you confirm the sharing notice and press Preview AI changes, your brief and selected editable page text are sent through OpenRouter to NVIDIA Nemotron. Images, uploads, account tokens and other project pages are not included. Chucksi's allowance counter stores a salted daily address hash and counts, not your brief or page text. The provider may log inputs and outputs; see <a href="https://openrouter.ai/privacy">OpenRouter's privacy policy</a> and <a href="https://www.nvidia.com/en-us/about-nvidia/privacy-policy/">NVIDIA's privacy policy</a>. You review changes before applying them.</li>
       <li>Voiceover in six languages: your script is sent to Cloudflare, in short parts. English voices are made on your device.</li>
       <li>Captions, transcripts and edit by text: only the sound of your file, downsampled to 16 kHz mono, is sent to Cloudflare, and only when you press Transcribe.</li>
       <li>Ask a PDF: the text of the PDF open in Edit (up to 12,000 characters) and your question are sent to Cloudflare. The file itself is not uploaded.</li>
@@ -65,7 +66,7 @@
       <li>Full 3D objects: your image is sent only to the object service address you enter.</li>
       <li>Verify a signed PDF: only a fingerprint (SHA-256) of the file is sent.</li>
     </ul>
-    <p>Everything else, including editing, converting and signing PDFs, background removal, upscaling and erasing in the Image workroom, camera moves and effects, sound beds, extracting and mastering audio, slides, websites and games, runs on your own device.</p>
+    <p>Editing, converting and signing PDFs, background removal, upscaling and erasing in the Image workroom, camera moves and effects, sound beds, extracting and mastering audio, and manual slide, website and game editing run on your own device. Optional AI generation and cloud saving are exceptions described above.</p>
 
     <h2>Chucksi Sign</h2>
     <p>Documents sent with Chucksi Sign are encrypted in your browser before upload, and the key stays in the link, so we cannot read them. Encrypted envelopes are deleted automatically 30 days after sending if unsigned, and 90 days after completion.</p>
@@ -78,13 +79,14 @@
     <p>To keep free tools free, we count daily use with a one-way hash of your IP address. These counters expire within about two days. We use Cloudflare Turnstile to tell people from bots. Standard request logs are kept briefly by our hosting provider for security and debugging.</p>
 
     <h2>Service providers</h2>
-    <p>Chucksi runs on these providers, each of which processes data only to deliver the service:</p>
+    <p>Chucksi uses these providers. Their own privacy policies govern how they handle the data sent to them:</p>
     <ul>
       <li>Cloudflare: hosting, security, Turnstile and some AI models</li>
       <li>Pollinations: the Backup image style (your description is sent to make the image)</li>
       <li>Supabase: accounts, saved projects and file storage</li>
       <li>RunPod: GPU servers for heavier video and audio jobs</li>
-      <li>OpenRouter: the free members video model (your prompt and any start frame are sent to make the clip)</li>
+      <li>OpenRouter: members video and the optional website AI assistant</li>
+      <li>NVIDIA: the Nemotron model used by the website AI assistant</li>
       <li>Google, GitHub, LinkedIn, X and Facebook: only if you choose to sign in with them</li>
       <li>GitHub and jsDelivr: delivery of the site's code and open models</li>
     </ul>

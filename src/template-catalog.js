@@ -12,7 +12,7 @@ const headers = {
   'cache-control': 'public, max-age=300',
   'x-content-type-options': 'nosniff',
 };
-const detail = t => ({ ...t, api: `${BASE}/${t.id}`, motion: t.motionLabel || 'Reveal and scroll motion' });
+const detail = t => ({ ...t, href: new URL(t.href, 'https://chucksi.com').href, thumb: new URL(t.thumb, 'https://chucksi.com').href, api: `${BASE}/${t.id}`, motion: t.motionLabel || 'Reveal and scroll motion' });
 
 export function templateCatalog(request) {
   const url = new URL(request.url);

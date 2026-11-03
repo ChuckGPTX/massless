@@ -1,0 +1,14 @@
+# Chucksi Developers
+
+Public read-only website template catalog and MCP. No login or API key. No private projects, media generation or publishing tools.
+
+- REST: https://console.chucksi.com/api/v1/templates
+- OpenAPI: https://console.chucksi.com/api/v1/openapi.json
+- MCP (Streamable HTTP): https://console.chucksi.com/mcp
+
+- [Your first Chucksi API request](https://console.chucksi.com/docs/quick-start/): Get a complete editable design in two requests.
+- [Template API reference](https://console.chucksi.com/docs/api-reference/): Endpoints, response fields and practical examples.
+- [Connect your AI assistant](https://console.chucksi.com/docs/connect-mcp/): Browse Chucksi designs from any compatible remote MCP client.
+- [Create with Nemotron](https://console.chucksi.com/docs/website-assistant/): Turn a brief into editable changes you control.
+- [From example to live website](https://console.chucksi.com/docs/publish-and-export/): A clear path through editing, review and publishing.
+- [Troubleshooting & limits](https://console.chucksi.com/docs/troubleshooting/): Get unstuck without losing your work.

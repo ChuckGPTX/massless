@@ -44,7 +44,8 @@ for (const file of list) {
     assert.equal(one("og:type"), "website");
     assert.equal(one("og:site_name"), "Chucksi");
     const url = one("og:url");
-    assert.match(url, /^https:\/\/chucksi\.com\//, `${name}: og:url is on chucksi.com`);
+    const host = name.startsWith('console/') ? 'console.chucksi.com' : 'chucksi.com';
+    assert.equal(new URL(url).origin, `https://${host}`, `${name}: og:url uses its canonical host`);
     assert.equal(canonical.length, 1, `${name}: one canonical link`);
     assert.equal(canonical[0], url, `${name}: canonical matches og:url`);
     for (const k of ["og:title", "og:description", "twitter:title", "twitter:description", "description"]) {
