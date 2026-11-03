@@ -140,7 +140,8 @@ for (const flow of WORKFLOWS) {
   img.height = 72;
   button.append(img, make("span", "", flow.name));
   button.title = flow.description;
-  button.onclick = () =>
+  button.onclick = () => {
+    if (flow.id === "song-lyrics") { location.href = "/lyrics/"; return; }
     openPlan({
       version: 1,
       workflowId: flow.id,
@@ -148,6 +149,7 @@ for (const flow of WORKFLOWS) {
       shotId: "",
       done: flow.steps.map(() => false),
     });
+  };
   $("#workflow-cards").append(button);
 }
 shots = (await all().catch(() => [])).filter((x) =>

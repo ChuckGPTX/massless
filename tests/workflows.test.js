@@ -9,7 +9,7 @@ import {
 test("plan import uses known workflows and rejects malformed states", () => {
   const p = {
     version: 1,
-    workflowId: WORKFLOWS[0].id,
+    workflowId: WORKFLOWS.find(w => w.steps.length === 3).id,
     brief: "Release",
     done: [false, true, false],
     shotId: "saved",
@@ -57,4 +57,12 @@ test("every workflow preview and selected community graph is a real bundled file
     );
     assert.match(p.comfy_app, /^https:\/\//);
   }
+});
+
+test("old lyric plans migrate to the single creation flow",()=>{
+ const base={version:1,workflowId:'song-lyrics',brief:'Song',shotId:''};
+ assert.deepEqual(validatePlan({...base,done:[true,false,true]}).done,[false]);
+ assert.deepEqual(validatePlan({...base,done:[true,true,true]}).done,[true]);
+ assert.deepEqual(validatePlan({...base,done:[false]}).done,[false]);
+ assert.throws(()=>validatePlan({...base,done:[true,1,true]}));
 });
