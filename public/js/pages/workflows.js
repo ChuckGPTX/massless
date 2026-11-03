@@ -47,6 +47,18 @@ if (presetId && !makeId) {
       console.warn(e);
     });
 }
+// From My library ("Use in a preset"): /workflows?asset=<id> carries the saved item into whichever preset is opened.
+const assetId = new URLSearchParams(location.search).get("asset");
+if (assetId && !presetId) {
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest?.('a[href*="preset="]');
+    if (!a) return;
+    const u = new URL(a.href, location.href);
+    u.searchParams.set("asset", assetId);
+    a.href = u.pathname + u.search;
+  }, true);
+  import("../ui.js").then((m) => m.toast("Pick a preset and your saved picture goes in.")).catch(() => {});
+}
 // The gallery: every Chucksi workflow as a looping card. #<category> opens that category.
 const making = document.body.classList.contains("making");
 // "All" deals the categories out in turn so the grid opens mixed; each chip keeps its own order.

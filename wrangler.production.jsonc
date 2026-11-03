@@ -35,8 +35,14 @@
     "GPU_DAILY_BUDGET_CENTS": "250",
     "EDIT_MODEL": "@cf/black-forest-labs/flux-2-klein-4b",
     "EDIT_CAP": "600",
-    "PER_VISITOR_EDIT": "15"
+    "PER_VISITOR_EDIT": "15",
+    "PLACE_CAP": "1500",
+    "PER_VISITOR_PLACE": "25"
   },
+  // Earth zoom out: per-visitor burst limit on satellite views that miss the edge cache (src/place.js).
+  "ratelimits": [
+    { "name": "TILE_LIMITER", "namespace_id": "4201", "simple": { "limit": 600, "period": 60 } }
+  ],
   "r2_buckets": [
     {
       "binding": "SIGN_BUCKET",
@@ -66,7 +72,8 @@
       {
         "name": "GENERATION_LEDGER",
         "class_name": "GenerationLedger"
-      }
+      },
+      { "name": "PLACE_GATE", "class_name": "PlaceGate" }
     ]
   },
   "migrations": [
@@ -76,7 +83,8 @@
         "GenerationLedger"
       ]
     },
-    { "tag": "chucksi-website-ai-v1", "new_sqlite_classes": ["WebsiteAiLimits"] }
+    { "tag": "chucksi-website-ai-v1", "new_sqlite_classes": ["WebsiteAiLimits"] },
+    { "tag": "chucksi-place-gate-v1", "new_sqlite_classes": ["PlaceGate"] }
   ],
   "observability": {
     "enabled": true

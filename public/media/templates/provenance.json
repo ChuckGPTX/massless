@@ -2215,16 +2215,16 @@
   },
   {
    "path": "media/presets/talking-ad.mp4",
-   "bytes": 132620,
-   "sha256": "1434553c1aa7cf9c4c9525b995fa86487b7ce94459ccf7cb0871f30124b1a01e",
+   "bytes": 151694,
+   "sha256": "056771e01e7d757f7ba3f3cda3ce77e8401f6d263fabdea8975a509e58fb7966",
    "card": "preset-talking-ad",
    "source": "preset-factory",
    "recorded_from": "/workflows?preset=talking-ad"
   },
   {
    "path": "media/presets/talking-ad.webp",
-   "bytes": 32758,
-   "sha256": "fe6de75c2bd2cfa4a2c14145cc4a545a26e056bbcaff718c4dd138c15f8ac108",
+   "bytes": 10716,
+   "sha256": "b54f00540803685875ad6494970b0e515375099d7a0b77163d7aee7cc02fbf90",
    "card": "preset-talking-ad",
    "source": "preset-factory",
    "recorded_from": "/workflows?preset=talking-ad"
