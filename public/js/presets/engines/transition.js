@@ -8,7 +8,7 @@ const STYLES = ['whip', 'zoom', 'leak', 'ink', 'glitch', 'spin', 'iris', 'liquid
 const FS = `#version 300 es
 precision highp float;
 in vec2 v_uv; out vec4 o;
-uniform sampler2D u_a, u_b; uniform vec2 u_ra, u_rb; uniform float u_ar, u_p, u_za, u_zb, u_time; uniform int u_style;
+uniform sampler2D u_a, u_b; uniform vec2 u_ra, u_rb; uniform float u_ar, u_p, u_za, u_zb, u_time; uniform int u_style, u_taps;
 ${GLSL_LIB}
 vec2 fitUV(vec2 uv, float ia, float zoom) {
   vec2 s = vec2(1.0);
@@ -22,17 +22,19 @@ void main() {
   vec2 uv = v_uv; float p = u_p; vec4 col;
   if (u_style == 0) { // whip pan
     float e = p * p * (3.0 - 2.0 * p); float blur = sin(p * 3.14159) * 0.18; col = vec4(0.0);
-    for (int i = 0; i < 24; i++) { float k = (float(i) / 23.0 - 0.5) * blur;
+    float n = 0.0;
+    for (int i = 0; i < 24; i++) { if (i >= u_taps) break; float k = (float(i) / float(u_taps - 1) - 0.5) * blur;
       vec2 ua = uv + vec2(e * 1.0 + k, 0.0), ub = uv + vec2(e * 1.0 - 1.0 + k, 0.0);
-      col += (ua.x <= 1.0 ? A(ua) : B(ub)); }
-    col /= 24.0;
+      col += (ua.x <= 1.0 ? A(ua) : B(ub)); n += 1.0; }
+    col /= n;
   } else if (u_style == 1) { // zoom punch
     float e = p; vec4 sa = vec4(0.0), sb = vec4(0.0); float str = sin(p * 3.14159) * 0.25;
-    for (int i = 0; i < 20; i++) { float k = float(i) / 19.0;
+    float n = 0.0;
+    for (int i = 0; i < 20; i++) { if (i >= u_taps) break; float k = float(i) / float(u_taps - 1);
       vec2 c = uv - 0.5;
       sa += A(0.5 + c / (1.0 + e * 1.5) * (1.0 - str * k));
-      sb += B(0.5 + c * (1.0 + (1.0 - e) * 0.6) * (1.0 - str * k)); }
-    col = mix(sa / 20.0, sb / 20.0, smoothstep(0.42, 0.58, p));
+      sb += B(0.5 + c * (1.0 + (1.0 - e) * 0.6) * (1.0 - str * k)); n += 1.0; }
+    col = mix(sa / n, sb / n, smoothstep(0.42, 0.58, p));
     col.rgb += vec3(1.0) * exp(-pow((p - 0.5) * 9.0, 2.0)) * 0.25;
   } else if (u_style == 2) { // light leak
     vec4 a = A(uv), b = B(uv); float m = smoothstep(0.3, 0.7, p);
@@ -64,10 +66,11 @@ void main() {
   } else if (u_style == 5) { // spin swap
     float e = p * p * (3.0 - 2.0 * p); vec4 s = vec4(0.0); float ang = e * 6.28318; float bl = sin(p * 3.14159) * 0.5;
     vec2 c = (uv - 0.5) * vec2(u_ar, 1.0);
-    for (int i = 0; i < 16; i++) { float k = (float(i) / 15.0 - 0.5) * bl;
+    float n = 0.0;
+    for (int i = 0; i < 16; i++) { if (i >= u_taps) break; float k = (float(i) / float(u_taps - 1) - 0.5) * bl;
       vec2 r = rot(c, ang + k) / vec2(u_ar, 1.0) / (1.0 - sin(p * 3.14159) * 0.35) + 0.5;
-      s += p < 0.5 ? A(r) : B(r); }
-    col = s / 16.0;
+      s += p < 0.5 ? A(r) : B(r); n += 1.0; }
+    col = s / n;
   } else if (u_style == 6) { // iris
     vec2 c = (uv - 0.5) * vec2(u_ar, 1.0); float d = length(c);
     float r = ease(p) * (0.5 * length(vec2(u_ar, 1.0)) + 0.05);
@@ -82,7 +85,15 @@ void main() {
   o = vec4(col.rgb, 1.0);
 }`.replace('float r = ease(p)', 'float r = (p * p * (3.0 - 2.0 * p))');
 
-let kit = null, prog = null;
+let kit = null, prog = null, soft = null;
+/** Software rendering (no GPU) gets fewer blur taps so exports stay quick. */
+function softwareGL() {
+  if (soft === null) {
+    const ext = kit.gl.getExtension('WEBGL_debug_renderer_info');
+    soft = /swiftshader|llvmpipe|software/i.test(ext ? kit.gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : '');
+  }
+  return soft;
+}
 const texCache = new Map();
 export async function prepare(spec, io, params) {
   const imgs = [];
@@ -131,6 +142,7 @@ export function render(ctx, c, { w, h, t, params, gallery }) {
   const za = drift((T - i * (hold + tr)) / (hold + tr + 0.001)), zb = drift(0);
   prog.i('u_a', 0).i('u_b', 1).f('u_ra', a.width, a.height).f('u_rb', b.width, b.height).f('u_ar', w / h).f('u_p', p > 0 ? ease.inOut(p) * 0.0 + p : 0).f('u_za', za).f('u_zb', zb).f('u_time', T);
   kit.gl.uniform1i(kit.gl.getUniformLocation(prog.p, 'u_style'), Math.max(0, ctx.style));
+  kit.gl.uniform1i(kit.gl.getUniformLocation(prog.p, 'u_taps'), softwareGL() ? 6 : 20);
   kit.quad(prog);
   const g = c.getContext('2d');
   g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';

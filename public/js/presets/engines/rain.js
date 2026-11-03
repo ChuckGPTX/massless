@@ -70,6 +70,10 @@ function sprites(kind) {
       out.push(c);
     }
   }
+  // near particles are out of focus: blurred copies made once, instead of a blur filter per particle per frame
+  const soft = (c) => { const b = canvas(c.width + 16, c.height + 16), g = b.getContext('2d'); g.filter = 'blur(4px)'; g.drawImage(c, 8, 8); return b; };
+  for (const c of out) c.soft = soft(c);
+  if (out.coin) out.coin.soft = soft(out.coin);
   return out;
 }
 
@@ -131,24 +135,25 @@ function drawParticle(ctx, g, p, w, h, T, D) {
   g.save();
   g.translate(x, y);
   g.globalAlpha = k === 'snow' ? 0.55 + p.z * 0.45 : 1;
-  if (p.z > 0.88 && k !== 'snow') g.filter = `blur(${(scale * 3).toFixed(1)}px)`;
+  const near = p.z > 0.88 && k !== 'snow';
+  const pick = (c) => (near && c.soft ? c.soft : c);
   if (p.z < 0.2) g.globalAlpha *= 0.75;
   if (k === 'money') {
-    if (p.coin) { const s = ctx.sprites.coin; g.rotate(ang); g.scale(scale * 0.55 * Math.max(0.15, Math.abs(flipA)), scale * 0.55); g.drawImage(s, -s.width / 2, -s.height / 2); }
+    if (p.coin) { const s = pick(ctx.sprites.coin); g.rotate(ang); g.scale(scale * 0.55 * Math.max(0.15, Math.abs(flipA)), scale * 0.55); g.drawImage(s, -s.width / 2, -s.height / 2); }
     else {
-      const s = ctx.sprites[p.sprite % ctx.sprites.length];
+      const s = pick(ctx.sprites[p.sprite % ctx.sprites.length]);
       g.rotate(ang * 0.4 + p.sway);
       g.scale(scale * 0.7 * flipA, scale * 0.7 * (0.75 + 0.25 * Math.cos((T / D) * Math.PI * 2 * Math.round(p.flip) + 1)));
       g.drawImage(s, -s.width / 2, -s.height / 2);
       if (flipA < 0) { g.globalAlpha *= 0.25; g.fillStyle = '#000'; g.fillRect(-s.width / 2, -s.height / 2, s.width, s.height); }
     }
   } else if (k === 'confetti') {
-    const s = ctx.sprites[p.sprite % ctx.sprites.length];
+    const s = pick(ctx.sprites[p.sprite % ctx.sprites.length]);
     g.rotate(ang);
     g.scale(scale * 1.3, scale * 1.3 * Math.max(0.12, Math.abs(flipA)));
     g.drawImage(s, -s.width / 2, -s.height / 2);
   } else if (k === 'petals') {
-    const s = ctx.sprites[p.sprite % ctx.sprites.length];
+    const s = pick(ctx.sprites[p.sprite % ctx.sprites.length]);
     g.rotate(ang * 0.6);
     g.scale(scale * 1.1 * Math.max(0.2, Math.abs(flipA)), scale * 1.1);
     g.drawImage(s, -s.width / 2, -s.height / 2);

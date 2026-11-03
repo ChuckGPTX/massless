@@ -76,13 +76,17 @@ function drawText(g, s, params, w, h, productTop) {
   const top = margin;
   const room = Math.max(h * 0.12, productTop - top - h * 0.04);
   const maxW = wide ? w * 0.6 : w - margin * 2;
-  const ink = s.ink;
+  // the scene's ink, unless the photo behind the words is too close to it
+  const behind = luma(meanColor(g.canvas, w * 0.15, top, w * 0.7, Math.min(room, h * 0.18)));
+  const want = luma(hexRgb(s.ink));
+  const contrast = (Math.max(behind, want) + 0.05) / (Math.min(behind, want) + 0.05);
+  const ink = contrast >= 2.6 ? s.ink : behind > 0.45 ? '#1d1a17' : '#ffffff';
   const light = luma(hexRgb(ink)) > 0.6;
   g.save();
   g.textAlign = 'center';
   g.textBaseline = 'top';
-  g.shadowColor = light ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.25)';
-  g.shadowBlur = Math.round(h * 0.012);
+  g.shadowColor = light ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.35)';
+  g.shadowBlur = Math.round(h * (light ? 0.02 : 0.012));
   g.fillStyle = ink;
   let y = top;
   if (brand) {

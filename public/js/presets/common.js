@@ -140,6 +140,20 @@ export function quickCutout(img) {
     for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, y > 0 ? i - w : -1, y < h - 1 ? i + w : -1])
       if (j >= 0 && !bg[j] && dist[j] < T) { bg[j] = 1; stack.push(j); }
   }
+  // enclosed gaps of backdrop colour (a mug's handle, the space between straps) are backdrop too
+  {
+    const seen = new Uint8Array(w * h), comp = [];
+    for (let i = 0; i < w * h; i++) {
+      if (bg[i] || seen[i] || dist[i] >= T * 0.7) continue;
+      comp.length = 0; stack.push(i); seen[i] = 1;
+      while (stack.length) {
+        const p = stack.pop(), x = p % w, y = (p / w) | 0; comp.push(p);
+        for (const j of [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, y > 0 ? p - w : -1, y < h - 1 ? p + w : -1])
+          if (j >= 0 && !bg[j] && !seen[j] && dist[j] < T * 0.7) { seen[j] = 1; stack.push(j); }
+      }
+      if (comp.length > w * h * 0.002) for (const p of comp) bg[p] = 1;
+    }
+  }
   // keep the largest object
   const lab = new Int32Array(w * h).fill(-1);
   let best = -1, bestN = 0, n = 0;
@@ -472,12 +486,10 @@ export async function encodeMP4(c, { duration, fps = 30, draw, audio = null, onP
       }
     }
     const total = Math.max(2, Math.round(duration * fps));
-    const gl = c.getContext?.('webgl2') ? null : null;
     for (let i = 0; i < total; i++) {
       if (signal?.aborted) throw new Error('Cancelled');
       if (failure) throw failure;
       await draw(c, i / fps, i / total);
-      void gl;
       const frame = new VideoFrame(c, { timestamp: Math.round((i * 1e6) / fps), duration: Math.round(1e6 / fps) });
       venc.encode(frame, { keyFrame: i % (fps * 2) === 0 });
       frame.close();

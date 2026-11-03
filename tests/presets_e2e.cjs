@@ -13,7 +13,7 @@ const widths = opt('--widths', '1440,390').split(',').map(Number);
 const out = opt('--out', path.join(require('os').tmpdir(), 'chucksi-presets-e2e'));
 fs.mkdirSync(out, { recursive: true });
 const PRODUCT = path.join(__dirname, 'fixtures', 'preset-product.jpg');
-const PHOTO = path.join(__dirname, '..', 'public', 'media', 'art', 'canyon.jpg');
+const PHOTO = path.join(__dirname, '..', 'public', 'media', 'art', 'botanical.jpg');
 
 // a short spoken-sounding WAV for the voice request (the real one is made by the site)
 function wav(seconds = 6, rate = 24000) {
@@ -37,7 +37,8 @@ function wav(seconds = 6, rate = 24000) {
     const errors = [];
     page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
     page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-    page.on('requestfailed', (r) => errors.push('requestfailed: ' + r.url()));
+    // a media element dropping its own range request for a result it is about to replace is not a failure
+    page.on('requestfailed', (r) => { if (!(r.url().startsWith('blob:') && /ABORTED/.test(r.failure()?.errorText || ''))) errors.push(`requestfailed: ${r.url()} ${r.failure()?.errorText}`); });
     page.on('response', (r) => { if (r.status() >= 400 && !r.url().includes('/api/tts')) errors.push(`${r.status()}: ${r.url()}`); });
     await page.route('**/api/tts', (r) => r.fulfill({ status: 200, contentType: 'audio/wav', body: wav() }));
     const step = async (name, fn) => { try { await fn(); } catch (e) { throw new Error(`${name}: ${e.message.split('\n')[0]}`); } };

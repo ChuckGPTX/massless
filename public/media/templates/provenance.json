@@ -18,7 +18,8 @@
   "optical-effects-pack": "15 original browser effects rendered by EffectEngine and the existing recordSegments exporter through tests/optical-effects.html. Bundled sample stills and depth maps only; no external footage, generation API or provider model. Each loop returns to its original frame. Packaged with tools/package_effect_previews.py.",
   "website-studio-screenshots": "Actual complete template pages captured in Chrome through CUA with reduced motion, then cropped into a six-second forward/back scroll using ffmpeg. Original generated photography and original template code. No external footage.",
   "website-motion-recording": "Real Chrome screen recordings captured through CUA from Chucksi's rendered Aural, Current, and Nightjar template pages. Ordered JPEG frames use their original times.json elapsed timestamps in ffmpeg concat durations, sampled at 24 fps without motion interpolation, panning, zooming, reversing, or speed changes. Recordings shorter than six seconds hold the last actual captured frame; per-file timing records show the hold. Static top-aligned crop to 854x480, square pixels, silent H.264 and faststart. Packaged by tools/package_motion_starter_previews.py.",
-  "website-motion-screenshot": "Actual desktop Chrome screenshots of Chucksi's own Aural, Current, and Nightjar template pages, captured through CUA. Static top-aligned crops and Lanczos resizing only: 640x400 template thumbnails and 768x432 workflow posters. Packaged by tools/package_motion_starter_previews.py; screenshot hashes are recorded per file."
+  "website-motion-screenshot": "Actual desktop Chrome screenshots of Chucksi's own Aural, Current, and Nightjar template pages, captured through CUA. Static top-aligned crops and Lanczos resizing only: 640x400 template thumbnails and 768x432 workflow posters. Packaged by tools/package_motion_starter_previews.py; screenshot hashes are recorded per file.",
+  "preset-factory": "Preset gallery loops rendered on device by each preset's own engine through /workflows?preset=<id>&capture=1 (tools/presets/render-previews.cjs), from the bundled sample inputs (public/presets/provenance.json). Encoded with ffmpeg; no external footage."
  },
  "files": [
   {
@@ -2115,6 +2116,934 @@
    "card": "site-echo-festival",
    "source": "website-studio-screenshots",
    "recorded_from": "/website?template=echo-festival"
+  },
+  {
+   "path": "media/presets/product-spin.mp4",
+   "bytes": 48191,
+   "sha256": "bc01fe47f872ec59500fd4c01197e4b04a709b93274128c0b0831c8d917de586",
+   "card": "preset-product-spin",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=product-spin"
+  },
+  {
+   "path": "media/presets/product-spin.webp",
+   "bytes": 5670,
+   "sha256": "ec14fb563cbaedeeabba181dab4d510e4cdcb6b29c4b65d236f265a53d451ae5",
+   "card": "preset-product-spin",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=product-spin"
+  },
+  {
+   "path": "media/presets/mockup-billboard.mp4",
+   "bytes": 87421,
+   "sha256": "ea40194250d4a1301fa11bcf1abec0bfa683a15d7dad87cef596c0e2971d234d",
+   "card": "preset-mockup-billboard",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-billboard"
+  },
+  {
+   "path": "media/presets/mockup-billboard.webp",
+   "bytes": 10860,
+   "sha256": "5b25b1347ed267c7b802b4df58c9a0fb67777ef2b3965447af9a2464a032e661",
+   "card": "preset-mockup-billboard",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-billboard"
+  },
+  {
+   "path": "media/presets/mockup-box-truck.mp4",
+   "bytes": 152461,
+   "sha256": "b8c39bdf9d79259b4a446ff8593835cb71b5cff7793207ff3bfed364cac91a01",
+   "card": "preset-mockup-box-truck",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-box-truck"
+  },
+  {
+   "path": "media/presets/mockup-box-truck.webp",
+   "bytes": 26680,
+   "sha256": "22996d3785291da67224a7a4a0bc0a2823a6f4c90ffc047665eb405ff140a7c8",
+   "card": "preset-mockup-box-truck",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-box-truck"
+  },
+  {
+   "path": "media/presets/mockup-phone.mp4",
+   "bytes": 71244,
+   "sha256": "314fa59a9678f165ad95c32fe0b349bc970acdfd37a137c0b4898415cd7cafc9",
+   "card": "preset-mockup-phone",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-phone"
+  },
+  {
+   "path": "media/presets/mockup-phone.webp",
+   "bytes": 12560,
+   "sha256": "bd66c25adff96222b5d1504aba2ec4a6c3787c596bd28e691c44bdf23f2b7837",
+   "card": "preset-mockup-phone",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-phone"
+  },
+  {
+   "path": "media/presets/mockup-street-poster.mp4",
+   "bytes": 131518,
+   "sha256": "4a4f8b7bb3484eb3ba59d3eebcfecb876076e572af096f160e610d20bebe886a",
+   "card": "preset-mockup-street-poster",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-street-poster"
+  },
+  {
+   "path": "media/presets/mockup-street-poster.webp",
+   "bytes": 20958,
+   "sha256": "4188e14b15f6a43042ae6f286aa33a60adea21ad4082884b7bbe50236ec56de8",
+   "card": "preset-mockup-street-poster",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-street-poster"
+  },
+  {
+   "path": "media/presets/mockup-storefront.mp4",
+   "bytes": 133578,
+   "sha256": "ad439d3cef18e30d5478a26dcdaec8439dd21fa248a0d052c773a2ab26703cbe",
+   "card": "preset-mockup-storefront",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-storefront"
+  },
+  {
+   "path": "media/presets/mockup-storefront.webp",
+   "bytes": 16268,
+   "sha256": "1c43a038d00a3fae922a8a6987c3ae5418296be4fcb183e78b64aded16211903",
+   "card": "preset-mockup-storefront",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=mockup-storefront"
+  },
+  {
+   "path": "media/presets/talking-ad.mp4",
+   "bytes": 132620,
+   "sha256": "1434553c1aa7cf9c4c9525b995fa86487b7ce94459ccf7cb0871f30124b1a01e",
+   "card": "preset-talking-ad",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=talking-ad"
+  },
+  {
+   "path": "media/presets/talking-ad.webp",
+   "bytes": 32758,
+   "sha256": "fe6de75c2bd2cfa4a2c14145cc4a545a26e056bbcaff718c4dd138c15f8ac108",
+   "card": "preset-talking-ad",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=talking-ad"
+  },
+  {
+   "path": "media/presets/earth-zoom-out.mp4",
+   "bytes": 133588,
+   "sha256": "7099f198f2e707211c82d1122514ffaa87084e427e7aed8e9dba2b6c12c9725d",
+   "card": "preset-earth-zoom-out",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=earth-zoom-out"
+  },
+  {
+   "path": "media/presets/earth-zoom-out.webp",
+   "bytes": 26002,
+   "sha256": "cff7625a7e30d45792f44e35e4e0d2d07ccc5c406f017b9b3d28185d0a2cb8ff",
+   "card": "preset-earth-zoom-out",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=earth-zoom-out"
+  },
+  {
+   "path": "media/presets/squish.mp4",
+   "bytes": 37712,
+   "sha256": "bda1c7c2483a290e2e97c30ec159983c797d1a1c4c1f0fc2e8007379e7fc8b1c",
+   "card": "preset-squish",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=squish"
+  },
+  {
+   "path": "media/presets/squish.webp",
+   "bytes": 6182,
+   "sha256": "51c96606f9f102b539d2814efb9a48335d949a9686d52657fc0dc1a5ca65ab0b",
+   "card": "preset-squish",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=squish"
+  },
+  {
+   "path": "media/presets/inflate.mp4",
+   "bytes": 40783,
+   "sha256": "2d468a643d994db951d7c0d6fe25dec2987e6bfabd4ec7033dbcfd3922996af0",
+   "card": "preset-inflate",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=inflate"
+  },
+  {
+   "path": "media/presets/inflate.webp",
+   "bytes": 10278,
+   "sha256": "598fc6b5b8e96d948fd90fb46a9f348ff2afccee5daeb3a69c4435cd3355889c",
+   "card": "preset-inflate",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=inflate"
+  },
+  {
+   "path": "media/presets/levitate.mp4",
+   "bytes": 66437,
+   "sha256": "11de373f253d1aaacd577e1f25dd96f681d8f76de208f4f475776f5aff69d984",
+   "card": "preset-levitate",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=levitate"
+  },
+  {
+   "path": "media/presets/levitate.webp",
+   "bytes": 9324,
+   "sha256": "edd572b79ad7d1092afeb6fcc368a9da7ec389f8f0956ba90a77f9d2f84b761c",
+   "card": "preset-levitate",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=levitate"
+  },
+  {
+   "path": "media/presets/poke.mp4",
+   "bytes": 21082,
+   "sha256": "46fbf51ed34232c33a7d5d64093c877d39d69306448e5af74088c9ca7fb74aeb",
+   "card": "preset-poke",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=poke"
+  },
+  {
+   "path": "media/presets/poke.webp",
+   "bytes": 7306,
+   "sha256": "fe0c9a9f7ee5716923d294659acf01c5ecf18ee7cdb409d275e3204669e47f55",
+   "card": "preset-poke",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=poke"
+  },
+  {
+   "path": "media/presets/melt.mp4",
+   "bytes": 49419,
+   "sha256": "80092dcaec51e4eeafb83d7ca98d6305840d1d1f768934a941907fa90eba8a74",
+   "card": "preset-melt",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=melt"
+  },
+  {
+   "path": "media/presets/melt.webp",
+   "bytes": 9148,
+   "sha256": "5ed7d30ceba1c8c4b81bb17f263fc0cde50467683d5a6e90f3f4415b24c8890c",
+   "card": "preset-melt",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=melt"
+  },
+  {
+   "path": "media/presets/money-rain.mp4",
+   "bytes": 160339,
+   "sha256": "4fc347849787c0586f3e9657357c39a06fb1b35dfa24e87b82a1e8671ca94cc3",
+   "card": "preset-money-rain",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=money-rain"
+  },
+  {
+   "path": "media/presets/money-rain.webp",
+   "bytes": 24678,
+   "sha256": "4e0236a578673138c938afdd8b77f8ec88d9dbeeea54c049d5c5df9877a1c730",
+   "card": "preset-money-rain",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=money-rain"
+  },
+  {
+   "path": "media/presets/confetti-rain.mp4",
+   "bytes": 152225,
+   "sha256": "4e751937c0d09b3d32a3c46d280d11a9517d4549a7f1cac54bba2e7ebcc3c02a",
+   "card": "preset-confetti-rain",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=confetti-rain"
+  },
+  {
+   "path": "media/presets/confetti-rain.webp",
+   "bytes": 10654,
+   "sha256": "e7cf444402e53392865adc6ee14e8dc689270993b941d3094c1a1b1a7d9ecc1b",
+   "card": "preset-confetti-rain",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=confetti-rain"
+  },
+  {
+   "path": "media/presets/petal-rain.mp4",
+   "bytes": 111179,
+   "sha256": "496ab5e780552383da24fd4bef2057ff35bd509103e38ce43acd38726be5032b",
+   "card": "preset-petal-rain",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=petal-rain"
+  },
+  {
+   "path": "media/presets/petal-rain.webp",
+   "bytes": 8588,
+   "sha256": "d2d6a7da398235f8364f69a14503c7615ce169f0e09e6403bd20dca1e2ed1dd0",
+   "card": "preset-petal-rain",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=petal-rain"
+  },
+  {
+   "path": "media/presets/snowfall.mp4",
+   "bytes": 100374,
+   "sha256": "5eb2852b3f9b82f526dc95ad148008ce2b6c72d81adc48d9abd0cd14809cf4c5",
+   "card": "preset-snowfall",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=snowfall"
+  },
+  {
+   "path": "media/presets/snowfall.webp",
+   "bytes": 7670,
+   "sha256": "f0fd0230a5d8693ce58b5f7e0c9ee757bf47a74fc754f9b9bd813d7a9f831881",
+   "card": "preset-snowfall",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=snowfall"
+  },
+  {
+   "path": "media/presets/fireworks.mp4",
+   "bytes": 144810,
+   "sha256": "a5c13652d8adebaef5adb8dc8675b194a210574c543ba2d19eff6d67171ccf82",
+   "card": "preset-fireworks",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=fireworks"
+  },
+  {
+   "path": "media/presets/fireworks.webp",
+   "bytes": 12002,
+   "sha256": "714b14dc00632049d5d6173384119241f4af10506a2e414000eadc4c4c682202",
+   "card": "preset-fireworks",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=fireworks"
+  },
+  {
+   "path": "media/presets/whip-pan.mp4",
+   "bytes": 64382,
+   "sha256": "8e8ddf5104bdc4c8154b7435948ea00067a2a4e085f6a86daadb53484f2ba768",
+   "card": "preset-whip-pan",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=whip-pan"
+  },
+  {
+   "path": "media/presets/whip-pan.webp",
+   "bytes": 8288,
+   "sha256": "22c556722d173805cf8f80d4133a25214e9b8857518fdaf68678a57803f851d3",
+   "card": "preset-whip-pan",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=whip-pan"
+  },
+  {
+   "path": "media/presets/zoom-punch.mp4",
+   "bytes": 76942,
+   "sha256": "76838215f260094e392593a78cc84dacf170e3153395582e12550d33aaa25bde",
+   "card": "preset-zoom-punch",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=zoom-punch"
+  },
+  {
+   "path": "media/presets/zoom-punch.webp",
+   "bytes": 8226,
+   "sha256": "dc3269757f1fdc1c3b1a3c818f4f21d0561697c2cfa4bd7e42296e6d9b263216",
+   "card": "preset-zoom-punch",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=zoom-punch"
+  },
+  {
+   "path": "media/presets/light-leak.mp4",
+   "bytes": 96160,
+   "sha256": "db8bb617843215b4bb02dd9eba39475bdeacce32d70e2b23ca3ca7649dc95cb9",
+   "card": "preset-light-leak",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=light-leak"
+  },
+  {
+   "path": "media/presets/light-leak.webp",
+   "bytes": 8204,
+   "sha256": "f3f4f21a7113b908e9ab89157940b96ffbb51056ee4f2a44bfa763d8e51c43d2",
+   "card": "preset-light-leak",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=light-leak"
+  },
+  {
+   "path": "media/presets/ink-wipe.mp4",
+   "bytes": 55348,
+   "sha256": "a08e5b50ec7a7e76f7e49b3f98ad9f6b677fd681217f212b2d55f1dbba43b321",
+   "card": "preset-ink-wipe",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=ink-wipe"
+  },
+  {
+   "path": "media/presets/ink-wipe.webp",
+   "bytes": 8226,
+   "sha256": "dc3269757f1fdc1c3b1a3c818f4f21d0561697c2cfa4bd7e42296e6d9b263216",
+   "card": "preset-ink-wipe",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=ink-wipe"
+  },
+  {
+   "path": "media/presets/glitch-cut.mp4",
+   "bytes": 123421,
+   "sha256": "8112c9d2be197c6f26a34ac9db3b12a821ead0ddac77ac72830834b55125b6f5",
+   "card": "preset-glitch-cut",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=glitch-cut"
+  },
+  {
+   "path": "media/presets/glitch-cut.webp",
+   "bytes": 8226,
+   "sha256": "dc3269757f1fdc1c3b1a3c818f4f21d0561697c2cfa4bd7e42296e6d9b263216",
+   "card": "preset-glitch-cut",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=glitch-cut"
+  },
+  {
+   "path": "media/presets/spin-swap.mp4",
+   "bytes": 94134,
+   "sha256": "07e082375056b3bde9141bf08020be4accc621466d013db18dd888c8c04e9587",
+   "card": "preset-spin-swap",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=spin-swap"
+  },
+  {
+   "path": "media/presets/spin-swap.webp",
+   "bytes": 8226,
+   "sha256": "dc3269757f1fdc1c3b1a3c818f4f21d0561697c2cfa4bd7e42296e6d9b263216",
+   "card": "preset-spin-swap",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=spin-swap"
+  },
+  {
+   "path": "media/presets/iris-reveal.mp4",
+   "bytes": 58727,
+   "sha256": "9b678c1c7090112baeb0bdb8e7089c63738b97048aefa7dbb3fc4e5da490c80c",
+   "card": "preset-iris-reveal",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=iris-reveal"
+  },
+  {
+   "path": "media/presets/iris-reveal.webp",
+   "bytes": 8286,
+   "sha256": "2eec851dfda6bf720753ab4e61db4f7aa4ebac1f88f8b9ea40c240ae989230ff",
+   "card": "preset-iris-reveal",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=iris-reveal"
+  },
+  {
+   "path": "media/presets/liquid-morph.mp4",
+   "bytes": 109751,
+   "sha256": "9a01d9c3e0b289721c81249da5bf739fc9ef4e2f443d861e3b92a3f057595923",
+   "card": "preset-liquid-morph",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=liquid-morph"
+  },
+  {
+   "path": "media/presets/liquid-morph.webp",
+   "bytes": 8226,
+   "sha256": "dc3269757f1fdc1c3b1a3c818f4f21d0561697c2cfa4bd7e42296e6d9b263216",
+   "card": "preset-liquid-morph",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=liquid-morph"
+  },
+  {
+   "path": "media/presets/social-launch.mp4",
+   "bytes": 55081,
+   "sha256": "220d2e4024aeb30ec2287e02d86858500041aa36e6b9c7a0b6ceed234a46fca6",
+   "card": "preset-social-launch",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-launch"
+  },
+  {
+   "path": "media/presets/social-launch.webp",
+   "bytes": 10478,
+   "sha256": "f72bb4eed617c002ca29ec0feb4c62ee2635f227c9faf8ea285e96b2e36da02d",
+   "card": "preset-social-launch",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-launch"
+  },
+  {
+   "path": "media/presets/social-sale.mp4",
+   "bytes": 66661,
+   "sha256": "2a1a23e6d38dc03f115ff2f09a577dc34ffab4c55bd5f606157065649a8601d3",
+   "card": "preset-social-sale",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-sale"
+  },
+  {
+   "path": "media/presets/social-sale.webp",
+   "bytes": 12170,
+   "sha256": "e9b9dd76c07988e0961ef3cae5acf33686524a382da37de5fc616471729f88b8",
+   "card": "preset-social-sale",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-sale"
+  },
+  {
+   "path": "media/presets/social-quote.mp4",
+   "bytes": 45693,
+   "sha256": "2585db2bb51e69c7b6cf99ea8667312f88915f9558da19fb94546704a24fe6d9",
+   "card": "preset-social-quote",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-quote"
+  },
+  {
+   "path": "media/presets/social-quote.webp",
+   "bytes": 11146,
+   "sha256": "219ef469d742abe9613da648c1c6662fdd19e3f4fc99879a561e5803fd98c044",
+   "card": "preset-social-quote",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-quote"
+  },
+  {
+   "path": "media/presets/social-review.mp4",
+   "bytes": 50194,
+   "sha256": "992f6c9c357fc5cc84ae28c5b9bf2137a7c451d6e0ca118905341725c4a0ebec",
+   "card": "preset-social-review",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-review"
+  },
+  {
+   "path": "media/presets/social-review.webp",
+   "bytes": 13734,
+   "sha256": "61c256d602934ae67a1ea5d4a619e55085371c83496ce3e33fcdcce4bfc83987",
+   "card": "preset-social-review",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-review"
+  },
+  {
+   "path": "media/presets/social-event.mp4",
+   "bytes": 58325,
+   "sha256": "1efffad85f948df91686eea60715735399c64ca718e23ea84740265e46b81a76",
+   "card": "preset-social-event",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-event"
+  },
+  {
+   "path": "media/presets/social-event.webp",
+   "bytes": 14398,
+   "sha256": "97db69ba7a14b1446063fca172a7c2c914800b677f0691b865f46a3e65b5128c",
+   "card": "preset-social-event",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-event"
+  },
+  {
+   "path": "media/presets/social-tips.mp4",
+   "bytes": 68719,
+   "sha256": "9cb08b5c3938eec15f1190a2f8815ddd94bce1aff6c7f4442858856e6fd374e0",
+   "card": "preset-social-tips",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-tips"
+  },
+  {
+   "path": "media/presets/social-tips.webp",
+   "bytes": 13204,
+   "sha256": "9270b14f136845707a91f5ebccdb0ddc3dcb764fadcc7e2737fd71aa84604e23",
+   "card": "preset-social-tips",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-tips"
+  },
+  {
+   "path": "media/presets/social-before-after.mp4",
+   "bytes": 61248,
+   "sha256": "4a4ca67124b9a83bd709e1beb4eb692d3cb7d7c76c587cc561d1a0043a3b11f2",
+   "card": "preset-social-before-after",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-before-after"
+  },
+  {
+   "path": "media/presets/social-before-after.webp",
+   "bytes": 14478,
+   "sha256": "79ac4415ef639ea976c8129e07d9a22a746f90c0482705b80c380a454752365f",
+   "card": "preset-social-before-after",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-before-after"
+  },
+  {
+   "path": "media/presets/social-countdown.mp4",
+   "bytes": 75259,
+   "sha256": "fd5dc52831e03641fe637770971b3b59caa4fbf6f64053d952c2e62dfa751084",
+   "card": "preset-social-countdown",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-countdown"
+  },
+  {
+   "path": "media/presets/social-countdown.webp",
+   "bytes": 9168,
+   "sha256": "813b46db0eede8ddf215bfeebdd4f03ce0b837b45a832e02456ac9123e2e3a65",
+   "card": "preset-social-countdown",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-countdown"
+  },
+  {
+   "path": "media/presets/social-stat.mp4",
+   "bytes": 44200,
+   "sha256": "39de40b57791b16324ce50abdaf7db60034c3d530de8620802efa36625773120",
+   "card": "preset-social-stat",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-stat"
+  },
+  {
+   "path": "media/presets/social-stat.webp",
+   "bytes": 9146,
+   "sha256": "7b9fc7d472eeb0bcb5836604104be098f1494585e0f69fd4b43571bc1b1d2221",
+   "card": "preset-social-stat",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-stat"
+  },
+  {
+   "path": "media/presets/social-thumbnail.mp4",
+   "bytes": 102144,
+   "sha256": "eae0d87ce93dd7bddf4885c51176c85c128ace14ff4be765d34b2517986f17d5",
+   "card": "preset-social-thumbnail",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-thumbnail"
+  },
+  {
+   "path": "media/presets/social-thumbnail.webp",
+   "bytes": 20926,
+   "sha256": "c5da1d38f690eb9613001c0ee717359f3d58a350405da3e75b207e74b2a4a8e8",
+   "card": "preset-social-thumbnail",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-thumbnail"
+  },
+  {
+   "path": "media/presets/social-podcast.mp4",
+   "bytes": 71808,
+   "sha256": "806e202115e2ac208b32fc8863591edf325d8b1432ce16e4894eb782caf58392",
+   "card": "preset-social-podcast",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-podcast"
+  },
+  {
+   "path": "media/presets/social-podcast.webp",
+   "bytes": 12132,
+   "sha256": "f88c596e7b443706b02a224a00ef2cce1382ca8c364f815096042b54b4384be7",
+   "card": "preset-social-podcast",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-podcast"
+  },
+  {
+   "path": "media/presets/social-price-list.mp4",
+   "bytes": 50077,
+   "sha256": "895f0e2f62fd38e6e1630709196e0b65161b8147ba7d387939d29606c3268747",
+   "card": "preset-social-price-list",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-price-list"
+  },
+  {
+   "path": "media/presets/social-price-list.webp",
+   "bytes": 11104,
+   "sha256": "1b3400077223b7e51f3553e2e8a38d8a6fd9abc20a542268166fba918c2c8968",
+   "card": "preset-social-price-list",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=social-price-list"
+  },
+  {
+   "path": "media/presets/scene-marble-podium.mp4",
+   "bytes": 62983,
+   "sha256": "258c09d004ec26148f53e09e0f9afb9952220e556fbfcdc2236e0dfa9521801b",
+   "card": "preset-scene-marble-podium",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-marble-podium"
+  },
+  {
+   "path": "media/presets/scene-marble-podium.webp",
+   "bytes": 8882,
+   "sha256": "043074173bc367b921538704657b19a865e85f2daf6366ac7b4d491a6712f227",
+   "card": "preset-scene-marble-podium",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-marble-podium"
+  },
+  {
+   "path": "media/presets/scene-beach-rocks.mp4",
+   "bytes": 87012,
+   "sha256": "6360dfa2bb6884d5fadfcc35ac42fc15c21c92e38ceed2189cc6b77e9a08cd70",
+   "card": "preset-scene-beach-rocks",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-beach-rocks"
+  },
+  {
+   "path": "media/presets/scene-beach-rocks.webp",
+   "bytes": 16644,
+   "sha256": "069b6f758600fab1d0f065ba6db44641e5fbff8a83acd8c85f6e33fcf5483ecc",
+   "card": "preset-scene-beach-rocks",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-beach-rocks"
+  },
+  {
+   "path": "media/presets/scene-kitchen-counter.mp4",
+   "bytes": 69614,
+   "sha256": "0da209f0254095f756bfb4062a5f8edb638175eebc1757adb91c22a1a9c6c15b",
+   "card": "preset-scene-kitchen-counter",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-kitchen-counter"
+  },
+  {
+   "path": "media/presets/scene-kitchen-counter.webp",
+   "bytes": 9286,
+   "sha256": "9a43b147dd151147333fb71f17ca719e11f1da64db47ad0fb508fce9df36ba48",
+   "card": "preset-scene-kitchen-counter",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-kitchen-counter"
+  },
+  {
+   "path": "media/presets/scene-studio-sweep.mp4",
+   "bytes": 70378,
+   "sha256": "24b4c8fbf135837d6342700aefe5d91bec48c321845379d33b9299c7ca0b2731",
+   "card": "preset-scene-studio-sweep",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-studio-sweep"
+  },
+  {
+   "path": "media/presets/scene-studio-sweep.webp",
+   "bytes": 9240,
+   "sha256": "997b2105ac219cfaf54e6cd36274e2634d3a97b6b4d37cad28e7c3d263aa48d2",
+   "card": "preset-scene-studio-sweep",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-studio-sweep"
+  },
+  {
+   "path": "media/presets/scene-botanical-shadows.mp4",
+   "bytes": 56201,
+   "sha256": "0dbf721a370802392a5a3fea104e39a5d316a291c4f5e010536545c689455feb",
+   "card": "preset-scene-botanical-shadows",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-botanical-shadows"
+  },
+  {
+   "path": "media/presets/scene-botanical-shadows.webp",
+   "bytes": 9590,
+   "sha256": "a564b3c3e41dc89d36b655906ee8b1f7e2c807c1903bca2c0f6fa2e762c10c19",
+   "card": "preset-scene-botanical-shadows",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-botanical-shadows"
+  },
+  {
+   "path": "media/presets/scene-water-splash.mp4",
+   "bytes": 76061,
+   "sha256": "a4f0f2154e1cdc0a1f746c33639ac944386927cdd2b64f6fab7ad78cfff02208",
+   "card": "preset-scene-water-splash",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-water-splash"
+  },
+  {
+   "path": "media/presets/scene-water-splash.webp",
+   "bytes": 10222,
+   "sha256": "7b69c874ecccb1c5811dc657c05728b366d06b1a2aec12e9ab10a1902b3d6eca",
+   "card": "preset-scene-water-splash",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-water-splash"
+  },
+  {
+   "path": "media/presets/scene-sand-dune.mp4",
+   "bytes": 71554,
+   "sha256": "3e85e394427b8238e8163ab4425035bb3071e7202055933c974d191b18027301",
+   "card": "preset-scene-sand-dune",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-sand-dune"
+  },
+  {
+   "path": "media/presets/scene-sand-dune.webp",
+   "bytes": 10870,
+   "sha256": "20bfe10bf9fa2f0ac5084b080eda09421d6f60be03cae50b5592357813de4474",
+   "card": "preset-scene-sand-dune",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-sand-dune"
+  },
+  {
+   "path": "media/presets/scene-neon-shelf.mp4",
+   "bytes": 57080,
+   "sha256": "bf28b22b250f8c14bd7f311d98b33bb8ce2d736d4c4204cb60c9984b8c2fffe3",
+   "card": "preset-scene-neon-shelf",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-neon-shelf"
+  },
+  {
+   "path": "media/presets/scene-neon-shelf.webp",
+   "bytes": 6492,
+   "sha256": "411a4f8e5c4923fe77c456360e53ea9ba7786eec92831de2f9d88282ddb2e4cb",
+   "card": "preset-scene-neon-shelf",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-neon-shelf"
+  },
+  {
+   "path": "media/presets/scene-linen.mp4",
+   "bytes": 59835,
+   "sha256": "14136221c373a1c9e570a870fbc927784acf3a00d35c892f1becf2520fdfb8b1",
+   "card": "preset-scene-linen",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-linen"
+  },
+  {
+   "path": "media/presets/scene-linen.webp",
+   "bytes": 9880,
+   "sha256": "d5d8f716b6dbe3119b6030c0d80e9fd7900b05681b1becef24c73783cea69865",
+   "card": "preset-scene-linen",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-linen"
+  },
+  {
+   "path": "media/presets/scene-terrazzo.mp4",
+   "bytes": 136017,
+   "sha256": "c77b11a0c71890f8ff962d2178ae6bbc9ea089ef91a6f0f01cd6136de31eebf1",
+   "card": "preset-scene-terrazzo",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-terrazzo"
+  },
+  {
+   "path": "media/presets/scene-terrazzo.webp",
+   "bytes": 23204,
+   "sha256": "662dcc2136bedc989e3e45bc3e8a63e2dddf46dbff93b52c9309a0ae6f7fb63d",
+   "card": "preset-scene-terrazzo",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-terrazzo"
+  },
+  {
+   "path": "media/presets/scene-pastel-arches.mp4",
+   "bytes": 62587,
+   "sha256": "335e258bdd214d8a0d463752b8e6aace8c928f251ead878e3cecbc0b0b86a52f",
+   "card": "preset-scene-pastel-arches",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-pastel-arches"
+  },
+  {
+   "path": "media/presets/scene-pastel-arches.webp",
+   "bytes": 8504,
+   "sha256": "aa5c46687d12e93d86a6fe0ee4bd0dc3fe0cd6d73674ebd71456e6baaae277d3",
+   "card": "preset-scene-pastel-arches",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-pastel-arches"
+  },
+  {
+   "path": "media/presets/scene-concrete-plinth.mp4",
+   "bytes": 76612,
+   "sha256": "f706dab51ff92d5781c8ff20ac640ee54ba39fa9f244da13f34f2b5e34534283",
+   "card": "preset-scene-concrete-plinth",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-concrete-plinth"
+  },
+  {
+   "path": "media/presets/scene-concrete-plinth.webp",
+   "bytes": 10994,
+   "sha256": "bdd12076205ef9821d3acd4febb5eb82bbd7b755ff6275358ef560fd3e14e0b9",
+   "card": "preset-scene-concrete-plinth",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-concrete-plinth"
+  },
+  {
+   "path": "media/presets/scene-black-gloss.mp4",
+   "bytes": 74869,
+   "sha256": "128814b367e378a7fe785641830cd1a261f91552611104e143c929fbed750459",
+   "card": "preset-scene-black-gloss",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-black-gloss"
+  },
+  {
+   "path": "media/presets/scene-black-gloss.webp",
+   "bytes": 10232,
+   "sha256": "f32a97d662977db702fd84f31513f81a6ee29d4c83cfca55ed3ff74d5541dc04",
+   "card": "preset-scene-black-gloss",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-black-gloss"
+  },
+  {
+   "path": "media/presets/scene-wood-window.mp4",
+   "bytes": 77460,
+   "sha256": "fc3cdd4d12f43121a8f3ab6f56c88478ecf5bdf19ad53f47d2902d0294cc3124",
+   "card": "preset-scene-wood-window",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-wood-window"
+  },
+  {
+   "path": "media/presets/scene-wood-window.webp",
+   "bytes": 12708,
+   "sha256": "f9deb617a2da5a76af5ccdbd5949cc04dd0b9f89bdbf383b3b025100e7c2b8d6",
+   "card": "preset-scene-wood-window",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-wood-window"
+  },
+  {
+   "path": "media/presets/scene-stone-steps.mp4",
+   "bytes": 62301,
+   "sha256": "729651f5259e04c8b54bb082d8f03c35d46de7d20fd9e2d4d5996a0790d00451",
+   "card": "preset-scene-stone-steps",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-stone-steps"
+  },
+  {
+   "path": "media/presets/scene-stone-steps.webp",
+   "bytes": 7488,
+   "sha256": "a4cd720ca2fce7e2eff4238db44ce33e0be0bc90187a15d8b786f1f80c644242",
+   "card": "preset-scene-stone-steps",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-stone-steps"
+  },
+  {
+   "path": "media/presets/scene-sky-clouds.mp4",
+   "bytes": 78140,
+   "sha256": "32bd777c0822819b4a9628a0dd2d84ee0640ce19a9ab94bfe96bb8e4837181a6",
+   "card": "preset-scene-sky-clouds",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-sky-clouds"
+  },
+  {
+   "path": "media/presets/scene-sky-clouds.webp",
+   "bytes": 13538,
+   "sha256": "d86233b417e7392ee6162c3802025ba09aed66e4aa607a1ac8b0015a1c286b38",
+   "card": "preset-scene-sky-clouds",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-sky-clouds"
+  },
+  {
+   "path": "media/presets/scene-ice-cubes.mp4",
+   "bytes": 55300,
+   "sha256": "379cdb2c197e73e23c49a091e0e30e1fc86a8da42729b3cedce520094bd99ed0",
+   "card": "preset-scene-ice-cubes",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-ice-cubes"
+  },
+  {
+   "path": "media/presets/scene-ice-cubes.webp",
+   "bytes": 6578,
+   "sha256": "0d25179ed8581d1e17e316805fcc7433e7e4301598901a359df506824e9e4d80",
+   "card": "preset-scene-ice-cubes",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-ice-cubes"
+  },
+  {
+   "path": "media/presets/scene-tropical-leaves.mp4",
+   "bytes": 108742,
+   "sha256": "3a0fcbc4cb2230371745a9164d159f5596ead46b05425800a5a55ea3436cfd47",
+   "card": "preset-scene-tropical-leaves",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-tropical-leaves"
+  },
+  {
+   "path": "media/presets/scene-tropical-leaves.webp",
+   "bytes": 20160,
+   "sha256": "84e2e5cb606e36ab4a499a6ca1380da25f4ad426f7aad169bb97d83e02fb579a",
+   "card": "preset-scene-tropical-leaves",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-tropical-leaves"
+  },
+  {
+   "path": "media/presets/scene-pop-blocks.mp4",
+   "bytes": 66313,
+   "sha256": "579f722e91c7a74a346e39d2dd840439a4d771d8e75eb17ab4601ba62804b43d",
+   "card": "preset-scene-pop-blocks",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-pop-blocks"
+  },
+  {
+   "path": "media/presets/scene-pop-blocks.webp",
+   "bytes": 8210,
+   "sha256": "878709f152556e2fc4a454b69e7e12478b8f5177bd2dcd6bc2fcffef67a54079",
+   "card": "preset-scene-pop-blocks",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-pop-blocks"
+  },
+  {
+   "path": "media/presets/scene-bokeh-night.mp4",
+   "bytes": 113662,
+   "sha256": "33b375021065df867a65f53d7147f24b1ef457202c6db44dd0dcffbd364c312c",
+   "card": "preset-scene-bokeh-night",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-bokeh-night"
+  },
+  {
+   "path": "media/presets/scene-bokeh-night.webp",
+   "bytes": 17732,
+   "sha256": "ec486de3dbf4314e5b81d448c79042ca78ec01ef8c2f08cb858587528039c932",
+   "card": "preset-scene-bokeh-night",
+   "source": "preset-factory",
+   "recorded_from": "/workflows?preset=scene-bokeh-night"
   }
  ]
 }

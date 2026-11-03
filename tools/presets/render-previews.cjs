@@ -12,6 +12,8 @@ const TMP = path.join(require('os').tmpdir(), 'chucksi-previews');
 const FPS = 24;
 const args = process.argv.slice(2);
 const si = args.indexOf('--sheet'); const sheet = si >= 0 ? args.splice(si, 2)[1] : null;
+const ei = args.indexOf('--encode-only'); const encodeOnly = ei >= 0 && !!args.splice(ei, 1);
+const MAX = 160 * 1024; // keeps the whole gallery's loops under its 16 MB budget
 fs.mkdirSync(OUT, { recursive: true });
 function encode(dir, dst, crf) {
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', String(FPS), '-i', path.join(dir, '%04d.jpg'), '-an', '-c:v', 'libx264', '-preset', 'slow', '-crf', String(crf), '-pix_fmt', 'yuv420p', '-movflags', '+faststart', dst]);
@@ -27,21 +29,27 @@ function encode(dir, dst, crf) {
   const strip = [];
   for (const id of ids) {
     const t0 = Date.now();
+    const dir = path.join(TMP, id);
+    let info, n;
+    if (encodeOnly && fs.existsSync(dir)) {
+      n = fs.readdirSync(dir).filter((f) => f.endsWith('.jpg')).length;
+      info = { duration: n / FPS };
+    } else {
     await pg.goto(`${BASE}/workflows?preset=${id}&capture=1`);
     await pg.waitForFunction(() => window.__presetCapture && /Ready|playing/.test(document.querySelector('.maker-status')?.textContent || ''), null, { timeout: 120000 });
-    const info = await pg.evaluate(() => window.__presetCapture.setup());
-    const dir = path.join(TMP, id);
+    info = await pg.evaluate(() => window.__presetCapture.setup());
     fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
-    const n = sheet ? 6 : Math.round(info.duration * FPS);
+    n = sheet ? 6 : Math.round(info.duration * FPS);
     for (let i = 0; i < n; i++) {
       const t = sheet ? (i / n) * info.duration + 0.2 : i / FPS;
       const url = await pg.evaluate(([t, d]) => window.__presetCapture.frame(t, d), [t, info.duration]);
       fs.writeFileSync(path.join(dir, `${String(i).padStart(4, '0')}.jpg`), Buffer.from(url.split(',')[1], 'base64'));
     }
+    }
     if (sheet) { strip.push(dir); console.log(id, 'frames', Date.now() - t0, 'ms'); continue; }
     const mp4 = path.join(OUT, `${id}.mp4`);
-    let crf = 26, size = encode(dir, mp4, crf);
-    while (size > 300 * 1024 && crf < 40) { crf += 3; size = encode(dir, mp4, crf); }
+    let crf = 28, size = encode(dir, mp4, crf);
+    while (size > MAX && crf < 40) { crf += 2; size = encode(dir, mp4, crf); }
     // poster: a settled frame
     const spec = PRESETS.find((p) => p.id === id);
     const pick = Math.min(n - 1, Math.round(n * (spec.preview.posterAt ?? (spec.preview.loop === 'samples' ? 0.2 : 0.62))));
