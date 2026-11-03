@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="/css/site.css" />
     <link rel="stylesheet" href="/css/navigation.css" />
     <link rel="stylesheet" href="/css/workbench.css" />
+    <link rel="stylesheet" href="/css/edit-words.css" />
     <script type="module" src="/js/navigation.js"></script>
     <script type="module" src="/js/pages/edit.js"></script>
   </head>
@@ -57,8 +58,8 @@
         <p class="eyebrow">IMAGE WORKROOM</p>
         <h1>A fresh setting.</h1>
         <p>
-          Remove a background, upscale, erase what does not belong, then
-          reframe and finish.
+          Remove a background, upscale, erase what does not belong, change
+          anything with words, then reframe and finish.
         </p>
       </section>
       <div class="workroom">
@@ -70,13 +71,14 @@
                 type="file"
                 accept="image/*"
                 hidden /></label
-            ><a href="/library/">Choose from library ↗</a>
+            ><button id="from-library" class="btn-ghost" type="button">From my library</button>
           </div>
           <div class="tool-tabs" role="tablist" aria-label="Tools">
             <button role="tab" id="tab-compose" data-tool="compose" aria-selected="true">Compose</button
             ><button role="tab" id="tab-remove-bg" data-tool="remove-bg" aria-selected="false">Remove background</button
             ><button role="tab" id="tab-upscale" data-tool="upscale" aria-selected="false">Upscale</button
-            ><button role="tab" id="tab-erase" data-tool="erase" aria-selected="false">Erase object</button>
+            ><button role="tab" id="tab-erase" data-tool="erase" aria-selected="false">Erase object</button
+            ><button role="tab" id="tab-words" data-tool="words" aria-selected="false">Edit with words</button>
           </div>
           <div class="panel" data-panel="compose" role="tabpanel" aria-labelledby="tab-compose">
             <label
@@ -205,6 +207,36 @@
               ><button id="er-undo" class="btn-ghost" disabled>Undo</button>
             </div>
             <p class="model-note" data-note="erase"></p>
+          </div>
+          <div class="panel" data-panel="words" role="tabpanel" aria-labelledby="tab-words" hidden>
+            <label
+              >What should change?<textarea
+                id="we-prompt"
+                rows="3"
+                maxlength="1000"
+                placeholder="Make it sunset"
+              ></textarea></label>
+            <div class="we-ideas" id="we-ideas" role="group" aria-label="Ideas"></div>
+            <div class="we-field">
+              <span>Use another picture too (optional)</span>
+              <p class="hint">Up to three, like “use the style of this”.</p>
+              <div class="we-refs" id="we-refs"></div>
+              <input id="we-ref-file" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden />
+            </div>
+            <label
+              >Shape<select id="we-size">
+                <option value="match">Match original</option>
+                <option value="square">Square</option>
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+              </select></label
+            ><button id="we-run" class="btn-accent">Edit</button>
+            <div class="actions">
+              <button id="we-keep" class="btn-ghost" disabled>Keep editing</button
+              ><button id="we-undo" class="btn-ghost" disabled>Undo</button
+              ><button id="we-sharpen" class="btn-ghost" disabled>Sharpen result</button>
+            </div>
+            <p class="hint" id="we-note"></p>
           </div>
           <div id="result-actions" class="result-actions" hidden>
             <button id="tool-save" class="btn-accent">Save to library</button

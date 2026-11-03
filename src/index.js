@@ -8,10 +8,12 @@ import { generationAPI } from './generations.js';
 import { signApi, signGated, signCleanup } from './sign.js';
 import { sitesApi, sitesGated, siteHost, serveSite } from './sites.js';
 import { exploreApi, exploreGated, serveExploreMedia, isExploreMedia } from './explore.js';
+import { editImage } from './image-edit.js';
 export { GenerationLedger } from './generations.js';
 // Massless Worker: serves the static app and the free-tier model APIs on Cloudflare Workers AI.
-// /api/shot (images), /api/beats and /api/ask (Llama 3.3), /api/tts (MeloTTS), /api/transcribe (Whisper).
-// Daily caps keep usage inside the 10,000 free Neurons per day, so this costs $0 on any plan.
+// /api/shot (images), /api/edit (edit a picture with words), /api/beats and /api/ask (Llama 3.3), /api/tts (MeloTTS), /api/transcribe (Whisper).
+// Daily caps keep usage inside the 10,000 free Neurons per day, so this costs $0 on any plan, except /api/edit:
+// its model is billed per edit and EDIT_CAP sets the daily ceiling (see src/image-edit.js).
 // /api/human trades a Cloudflare Turnstile token for a pass cookie that the model endpoints ask for.
 
 const MODEL = '@cf/black-forest-labs/flux-1-schnell';
@@ -43,7 +45,7 @@ const ai = (env, model, input) => (env.AI_GATEWAY ? env.AI.run(model, input, { g
 // Endpoints that spend the free allowance ask for a pass cookie. Without one they answer 401
 // { human: true, sitekey }; the page runs Turnstile, posts the token to /api/human and gets a signed
 // cookie for PASS_HOURS. The check is off unless TURNSTILE_SITEKEY, TURNSTILE_SECRET and PASS_KEY are set.
-const GATED = new Set(['/api/shot', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe']);
+const GATED = new Set(['/api/shot', '/api/edit', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe']);
 // Massless Sign POSTs (create, events, verify) also need a pass; see signGated() in src/sign.js.
 const PASS_COOKIE = 'ml_pass';
 const PASS_HOURS = 6;
@@ -339,6 +341,26 @@ async function allow(request, env, name, cap, perVisitor) {
   return null;
 }
 
+// Edit with words (src/image-edit.js). Counted like /api/shot: checked before the model runs, recorded after
+// a finished edit. Klein 9B costs real money per edit (about $0.016), so EDIT_CAP is the daily spend ceiling.
+function edit(request, env) {
+  const cap = async () => {
+    const dailyCap = Number(env.EDIT_CAP || 600);
+    const perVisitor = Number(env.PER_VISITOR_EDIT || 15);
+    const day = today();
+    const visitorKey = `ev:${day}:${await hashIp(request.headers.get('cf-connecting-ip') || 'unknown')}`;
+    const totalKey = `e:${day}`;
+    const [total, mine] = await Promise.all([counter(env.MASSLESS_KV, totalKey), counter(env.MASSLESS_KV, visitorKey)]);
+    if (total >= dailyCap) return json({ error: "Today's free edits are used up. Come back tomorrow." }, 429);
+    if (mine >= perVisitor) return json({ error: `You've used your ${perVisitor} free edits for today. Come back tomorrow.` }, 429);
+    return async () => {
+      await Promise.all([bump(env.MASSLESS_KV, totalKey, total + 1), bump(env.MASSLESS_KV, visitorKey, mine + 1)]);
+      return Math.max(0, perVisitor - mine - 1);
+    };
+  };
+  return editImage(request, env, { run: (model, input) => ai(env, model, input), json, cap });
+}
+
 async function health(env) {
   const total = await counter(env.MASSLESS_KV, `t:${today()}`).catch(() => 0);
   return json({ ok: true, app: 'massless', model: MODEL, framesToday: total, dailyCap: Number(env.DAILY_CAP || 120) });
@@ -513,6 +535,7 @@ export default {
       if (stop) return stop;
     }
     if (url.pathname === '/api/shot') return shot(request, env);
+    if (url.pathname === '/api/edit') return edit(request, env);
     if (url.pathname === '/api/beats') return beats(request, env);
     if (url.pathname === '/api/ask') return ask(request, env);
     if (url.pathname === '/api/tts') return tts(request, env);

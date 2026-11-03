@@ -67,7 +67,7 @@ function render() {
       node("h2", title),
       node(
         "p",
-        `${(item.kind === "deck" ? "deck" : kind).toUpperCase()} · ${new Date(item.created).toLocaleDateString()} · ${MODELS[item.model]?.short || { "mischief-1": "Text to video", "wan-2.2": "Text to video", "local-composite": "Image workroom", "camera-effects": "Camera & effects", "film-composer": "Launch film", "music-visualizer": "Music preview", "local-caption-render": "Caption & trim", "local-text-edit": "Edit by text", "local-master": "Master", "three-scene": "Scene studio", games: "Games", "design-kit": "Design kits", slides: "Slides", upload: "Your media" }[item.engine] || "Your media"}`,
+        `${(item.kind === "deck" ? "deck" : kind).toUpperCase()} · ${new Date(item.created).toLocaleDateString()} · ${MODELS[item.model]?.short || { "mischief-1": "Text to video", "wan-2.2": "Text to video", "local-composite": "Image workroom", "word-edit": "Edit with words", "camera-effects": "Camera & effects", "film-composer": "Launch film", "music-visualizer": "Music preview", "local-caption-render": "Caption & trim", "local-text-edit": "Edit by text", "local-master": "Master", "three-scene": "Scene studio", games: "Games", "design-kit": "Design kits", slides: "Slides", upload: "Your media" }[item.engine] || "Your media"}`,
       ),
     );
     const link = (label, path) => {
@@ -81,6 +81,7 @@ function render() {
       actions.append(a);
     } else if (kind === "image") {
       link("Edit", "/edit/");
+      link("Edit with words", "/edit/?tool=words");
       link("Animate", "/video");
       link("Music preview", "/music");
       link("3D", "/3d");
