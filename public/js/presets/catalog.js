@@ -80,14 +80,14 @@ const sceneSpecs = SCENES.map((s) => spec({
 // ---------- 2. Product spin ----------
 const spinSpec = spec({
   id: 'product-spin', title: 'Product spin', summary: 'Your product turning on a glossy turntable', badge: 'trending',
-  description: 'Your product cut out and turned in 3D on a reflective turntable, with a moving light sweep. Loops cleanly.',
+  description: 'Your product cut out, given real thickness and turned on a reflective turntable, with a slow push-in and a moving light sweep. Loops cleanly.',
   category: 'ads', tags: ['product', 'video', 'turntable'], engine: 'spin',
   steps: [{ op: 'cutout' }, { op: 'depth' }, { op: 'turntable' }, { op: 'floor' }, { op: 'lightSweep' }, { op: 'text' }],
   inputs: [
     productInput('sneaker'),
     { key: 'backdrop', type: 'choice', label: 'Backdrop', default: 'cream', options: [{ id: 'cream', label: 'Cream' }, { id: 'midnight', label: 'Midnight' }, { id: 'blush', label: 'Blush' }, { id: 'sage', label: 'Sage' }, { id: 'cobalt', label: 'Cobalt' }] },
     { key: 'brand', type: 'text', label: 'Brand or product name', max: 28, default: 'Stride One' },
-    { key: 'motion', type: 'choice', label: 'Motion', default: 'turn', options: [{ id: 'turn', label: 'Full turn' }, { id: 'sway', label: 'Gentle sway' }] },
+    { key: 'motion', type: 'choice', label: 'Motion', default: 'showcase', options: [{ id: 'showcase', label: 'Showcase turn' }, { id: 'sway', label: 'Gentle sway' }] },
   ],
   outputs: [{ type: 'video', sizes: [FEED, STORY, SQUARE], duration: 5, fps: 30, label: 'Looping clip' }],
   preview: { ar: '4/5' },
@@ -124,13 +124,15 @@ const mockupSpecs = MOCKUPS.map((m, i) => spec({
 // ---------- 4. Earth zoom out ----------
 const earthSpec = spec({
   id: 'earth-zoom-out', title: 'Earth zoom out', summary: 'Pull back from your photo to the whole planet', badge: 'trending',
-  description: 'Starts on your photo and rises through rooftops, the city, the coast and the clouds until the whole Earth hangs in space.',
+  description: 'Starts on your photo and rises through rooftops, the city, the coast and the clouds until the whole Earth hangs in space. Name a real place and the climb flies out over it.',
   category: 'effects', tags: ['viral', 'zoom', 'travel'], engine: 'earth',
   steps: [{ op: 'pullBack' }, { op: 'layers' }, { op: 'clouds' }, { op: 'globe' }, { op: 'label' }],
   inputs: [
     { key: 'photo', type: 'image', label: 'Your photo', hint: 'A place, a moment, a product: anything shot outdoors works well.', samples: ['lighthouse', 'canyon', 'astronaut', 'train', 'rider'].map((k) => ({ src: `/media/art/${k}.jpg`, label: PHOTOS[k] })) },
-    { key: 'place', type: 'text', label: 'Place name (optional)', max: 32, default: 'Somewhere on Earth' },
+    { key: 'where', type: 'text', label: 'Where was this photo taken?', max: 80, default: '', go: 'Fly there', placeholder: 'A city, landmark or address', hint: 'Optional. Press Fly there and the climb rises over real satellite views of that place. Only the words you type are sent, to look the place up on OpenStreetMap.' },
+    { key: 'place', type: 'text', label: 'Name on screen', max: 32, default: 'Somewhere on Earth', hint: 'Leave it as it is to show the name of the place you picked.' },
   ],
+  note: 'Satellite views: EOxCloudless 2016 by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016), CC BY 4.0. Places: © OpenStreetMap contributors.',
   outputs: [{ type: 'video', sizes: [STORY, SQUARE], duration: 7, fps: 30, label: 'Vertical and square clips' }],
   preview: { ar: '9/16' },
 });
@@ -244,10 +246,12 @@ const socialSpecs = SOCIAL.map(([id, title, summary, badge, d]) => spec({
 }));
 
 // ---------- 9. Talking product ad ----------
+// Drawn in code (presets/presenter.js). The earlier photo presenters stay in presets/samples with their provenance
+// but are no longer loaded.
 export const PRESENTERS = [
-  { id: 'ava', label: 'Ava', src: '/presets/samples/presenter-ava.webp', voice: 'en' },
-  { id: 'leo', label: 'Leo', src: '/presets/samples/presenter-leo.webp', voice: 'en' },
-  { id: 'mei', label: 'Mei', src: '/presets/samples/presenter-mei.webp', voice: 'en' },
+  { id: 'ava', label: 'Ava', voice: 'en' },
+  { id: 'leo', label: 'Leo', voice: 'en' },
+  { id: 'mei', label: 'Mei', voice: 'en' },
 ];
 const talkingSpec = spec({
   id: 'talking-ad', title: 'Talking product ad', summary: 'A presenter reads your script beside your product', badge: 'new',
@@ -255,10 +259,11 @@ const talkingSpec = spec({
   category: 'ads', tags: ['ugc', 'ad', 'voiceover'], engine: 'talking',
   cost: { tier: 'daily-free', estimateUSD: 0.001 },
   safety: { ...SAFE, disclosure: 'Digital presenter. Not a real person.' },
-  note: 'Precise lip-sync is coming soon. For now the mouth follows the voice.',
+  note: 'Mouth follows the words. The presenter is drawn, not filmed.',
   steps: [{ op: 'script' }, { op: 'voice' }, { op: 'presenter' }, { op: 'captions' }, { op: 'layout' }],
   inputs: [
     { key: 'presenter', type: 'choice', label: 'Presenter', default: 'ava', options: PRESENTERS.map((p) => ({ id: p.id, label: p.label })) },
+    { key: 'backdrop', type: 'choice', label: 'Backdrop', default: 'soft', options: [{ id: 'soft', label: 'Soft gradient' }, { id: 'brand', label: 'Product colour' }] },
     productInput('serum'),
     { key: 'script', type: 'textarea', label: 'Script', max: 320, default: 'Okay, my skin has never looked this good. This is Glow Serum. Three drops every morning, and it just sinks right in. Light, fast, no sticky feel. Tap the link and try it.' },
     { key: 'brand', type: 'text', label: 'Brand or product name', max: 28, default: 'Glow Serum' },

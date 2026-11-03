@@ -9,12 +9,15 @@ import { signApi, signGated, signCleanup } from './sign.js';
 import { sitesApi, sitesGated, siteHost, serveSite } from './sites.js';
 import { exploreApi, exploreGated, serveExploreMedia, isExploreMedia } from './explore.js';
 import { editImage } from './image-edit.js';
+import { placeApi, earthTile, isEarthTile } from './place.js';
+export { PlaceGate } from './place.js';
 export { GenerationLedger } from './generations.js';
 // Massless Worker: serves the static app and the free-tier model APIs on Cloudflare Workers AI.
 // /api/shot (images), /api/edit (edit a picture with words), /api/beats and /api/ask (Llama 3.3), /api/tts (MeloTTS), /api/transcribe (Whisper).
 // Daily caps keep usage inside the 10,000 free Neurons per day, so this costs $0 on any plan, except /api/edit:
 // its model is billed per edit and EDIT_CAP sets the daily ceiling (see src/image-edit.js).
 // /api/human trades a Cloudflare Turnstile token for a pass cookie that the model endpoints ask for.
+// /api/place and /earth-tiles/ serve Earth zoom out's real places (OpenStreetMap search, EOX satellite views); see src/place.js.
 
 const MODEL = '@cf/black-forest-labs/flux-1-schnell';
 // Open-weight image models on Workers AI, all inside the free daily allowance. Partner models are left out.
@@ -543,12 +546,15 @@ export default {
     if (url.pathname === '/api/tts') return tts(request, env);
     if (url.pathname === '/api/transcribe') return transcribe(request, env);
     if (url.pathname === '/api/health') return health(env);
+    if (url.pathname === '/api/place') return placeApi(request, env, { allow });
     if (url.pathname.startsWith('/api/sign/')) return signApi(request, env, ctx);
     if (url.pathname === '/api/sites' || url.pathname.startsWith('/api/sites/')) return sitesApi(request, env, ctx);
     if (url.pathname === '/api/explore' || url.pathname.startsWith('/api/explore/')) return exploreApi(request, env, ctx);
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
     // Explore media is user content in R2, served by the Worker (wrangler.jsonc runs the Worker first for it).
     if (isExploreMedia(url.pathname)) return serveExploreMedia(request, env);
+    // Satellite views for Earth zoom out (src/place.js), proxied so the page only fetches this site.
+    if (isEarthTile(url.pathname)) return earthTile(request, env, ctx, { hashIp });
     if (env.ASSETS) return env.ASSETS.fetch(request);
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
     return fromOrigin(request, env, ctx);

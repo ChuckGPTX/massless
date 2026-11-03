@@ -11,7 +11,7 @@
     "directory": "./public",
     "binding": "ASSETS",
     "html_handling": "drop-trailing-slash",
-    "run_worker_first": ["/api/*", "/mcp", "/console/*", "/explore-media/*"]
+    "run_worker_first": ["/api/*", "/mcp", "/console/*", "/explore-media/*", "/earth-tiles/*"]
   },
   "ai": { "binding": "AI" },
   "kv_namespaces": [
@@ -37,6 +37,8 @@
     // at most about $10 a day. Set EDIT_MODEL to @cf/black-forest-labs/flux-2-klein-4b for about $0.0012 an edit.
     "EDIT_CAP": "600",
     "PER_VISITOR_EDIT": "15",
+    "PLACE_CAP": "1500",
+    "PER_VISITOR_PLACE": "25",
     // Branch the Worker serves the app from when there is no ASSETS binding.
     "ASSET_REF": "main",
     // AI Gateway in front of every model call (logs and caching off; burst rate limit on).
@@ -68,8 +70,9 @@
     { "binding": "SIGN_DB", "database_name": "massless-sign", "database_id": "367039b3-12c6-4c6a-8cd0-632b0012b885", "migrations_dir": "migrations/sign" }
   ],
   // Daily sweep of expired Sign envelopes (see scheduled() in src/index.js).
+  "ratelimits": [{ "name": "TILE_LIMITER", "namespace_id": "4201", "simple": { "limit": 600, "period": 60 } }],
   "triggers": { "crons": ["17 4 * * *"] },
-  "durable_objects": { "bindings": [{ "name": "WEBSITE_AI_LIMITS", "class_name": "WebsiteAiLimits" }, { "name": "GENERATION_LEDGER", "class_name": "GenerationLedger" }] },
-  "migrations": [{ "tag": "massless-generations-v1", "new_sqlite_classes": ["GenerationLedger"] }, { "tag": "chucksi-website-ai-v1", "new_sqlite_classes": ["WebsiteAiLimits"] }],
+  "durable_objects": { "bindings": [{ "name": "WEBSITE_AI_LIMITS", "class_name": "WebsiteAiLimits" }, { "name": "GENERATION_LEDGER", "class_name": "GenerationLedger" }, { "name": "PLACE_GATE", "class_name": "PlaceGate" }] },
+  "migrations": [{ "tag": "massless-generations-v1", "new_sqlite_classes": ["GenerationLedger"] }, { "tag": "chucksi-website-ai-v1", "new_sqlite_classes": ["WebsiteAiLimits"] }, { "tag": "chucksi-place-gate-v1", "new_sqlite_classes": ["PlaceGate"] }],
   "observability": { "enabled": true }
 }
