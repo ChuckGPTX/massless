@@ -51,13 +51,17 @@ export async function exportMusic({
   });
   let failure;
   const venc = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    output: (chunk, meta) => {
+      try { muxer.addVideoChunk(chunk, meta); } catch (e) { failure = e; }
+    },
     error: (e) => {
       failure = e;
     },
   });
   const aenc = new AudioEncoder({
-    output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+    output: (chunk, meta) => {
+      try { muxer.addAudioChunk(chunk, meta); } catch (e) { failure = e; }
+    },
     error: (e) => {
       failure = e;
     },
