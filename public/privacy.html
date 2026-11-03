@@ -76,6 +76,9 @@
     <p>When you publish a site from the website builder, its files (pages, images, styles and sitemap) are uploaded and stored under your account so they can be served publicly at your v2web.site address. Anything you put on a published site is public. We keep the site's address, your account ID, file sizes and publish times, and count publishes per account and per hashed IP address to limit abuse. Unpublishing deletes the files right away. Visitors to hosted sites are served by Cloudflare like the rest of Chucksi; we add no tracking to hosted sites.</p>
     <p>If you report a site, we store your report, a one-way hash of your IP address and, only if you give one, your contact email, to review the report and prevent abuse.</p>
 
+    <h2 id="explore">Explore posts</h2>
+    <p>Posts you share to Explore are public. We store the image or video and its poster, the title, tags, tool and Remix link you chose, your account ID and the display name from your profile (never your email address), the time it was posted, and its like, remix and report counts. Likes are stored with your account ID so each account likes a post once; they are not shown publicly by name. When someone opens a Remix link we count it once per day using a one-way hash of their IP address. Deleting a post removes its media and likes right away. If you report a post, we store your report and a one-way hash of your IP address.</p>
+
     <h2>Abuse limits and security</h2>
     <p>To keep free tools free, we count daily use with a one-way hash of your IP address. These counters expire within about two days. We use Cloudflare Turnstile to tell people from bots. Standard request logs are kept briefly by our hosting provider for security and debugging.</p>
 

@@ -338,6 +338,26 @@ async function share() {
     toast(`Copy this link: ${url}`);
   }
 }
+// Share to Explore: a frame of the game as it plays now, and the same link Share copies (it reopens the game).
+async function shareExplore() {
+  const cur = state.current;
+  if (!cur) return;
+  try {
+    const canvases = [...cur.mount.frame.querySelectorAll('canvas')];
+    if (!canvases.length) throw new Error('Start the game first, then share it.');
+    cur.mount.game.render?.();
+    const src = canvases[0];
+    const c = document.createElement('canvas');
+    c.width = src.width;
+    c.height = src.height;
+    const ctx = c.getContext('2d');
+    for (const cv of canvases) ctx.drawImage(cv, 0, 0, c.width, c.height);
+    const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.88));
+    const remixUrl = cur.galleryId ? `/games#play=${cur.galleryId}` : `/games#g=${await encodeRecipe(cur.recipe)}`;
+    const m = await import('../explore-share.js');
+    await m.shareToExplore({ blob, title: cur.recipe.title, tool: 'games', remixUrl, width: c.width, height: c.height });
+  } catch (e) { toast(e.message, 'error'); }
+}
 async function downloadGame() {
   const cur = state.current;
   if (!cur) return;
@@ -500,6 +520,7 @@ function init() {
   $('#pl-restart').addEventListener('click', () => { state.current?.mount.play(); syncButtons(); });
   $('#pl-sound').addEventListener('click', () => { state.sound.unlock(); state.sound.setMuted(!state.sound.muted); syncButtons(); });
   $('#pl-share').addEventListener('click', share);
+  $('#pl-explore')?.addEventListener('click', shareExplore);
   $('#pl-download').addEventListener('click', downloadGame);
   $('#pl-remix').addEventListener('click', () => $('#pl-side').classList.toggle('open'));
   document.addEventListener('keydown', (e) => {

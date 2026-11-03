@@ -11,7 +11,7 @@
     "directory": "./public",
     "binding": "ASSETS",
     "html_handling": "drop-trailing-slash",
-    "run_worker_first": ["/api/*", "/mcp", "/console/*"]
+    "run_worker_first": ["/api/*", "/mcp", "/console/*", "/explore-media/*"]
   },
   "ai": { "binding": "AI" },
   "kv_namespaces": [
@@ -56,6 +56,10 @@
   // (schema in migrations/sites). Create once:  npx wrangler r2 bucket create chucksi-sites
   //   npx wrangler d1 execute massless-sign --remote --file migrations/sites/0001_init.sql
   // Routes: v2web.site/* and *.v2web.site/* on this Worker. See docs/SITE-HOSTING.md.
+  // Explore (chucksi.com/explore, src/explore.js): media in the same chucksi-sites bucket under explore/, posts, likes
+  // and reports in the Sign D1 database (schema in migrations/explore). Create once:
+  //   npx wrangler d1 execute massless-sign --remote --file migrations/explore/0001_init.sql
+  // Seed posts: node tools/explore/seed.mjs, then sh tools/explore/seed/apply.sh. See docs/EXPLORE.md.
   "r2_buckets": [
     { "binding": "SIGN_BUCKET", "bucket_name": "massless-sign" },
     { "binding": "SITES_BUCKET", "bucket_name": "chucksi-sites" }

@@ -77,13 +77,17 @@ export function initNavigation() {
       path === `/studios/${s.id}` ||
       (["/film", "/music"].includes(path) && s.id === "video"),
   );
-  const explore = node("a", "studio-explore", "Explore");
-  explore.href = "/";
-  if (path === "/") explore.setAttribute("aria-current", "page");
-  nav.replaceChildren(explore);
+  const home = node("a", "studio-explore", "Home");
+  home.href = "/";
+  if (path === "/") home.setAttribute("aria-current", "page");
+  nav.replaceChildren(home);
   const workflows = node("a", "studio-explore", "Workflows"); workflows.href="/workflows/";
   if(path==="/workflows")workflows.setAttribute("aria-current","page");
   nav.append(workflows);
+  // Explore: the public feed of things people made (/explore), between Workflows and the studios.
+  const feed = node("a", "studio-explore", "Explore"); feed.href = "/explore/";
+  if (path === "/explore") feed.setAttribute("aria-current", "page");
+  nav.append(feed);
   let hasSession=false;try{hasSession=!!JSON.parse(localStorage.getItem("massless.cloud-session")||"null")?.access_token}catch{/* private mode */}
   const mobileProjects=node("a","studio-explore mobile-projects",hasSession?"My projects":"Sign in");mobileProjects.href=hasSession?"/projects/":"/projects/#account";nav.append(mobileProjects);
   const library=node("a","btn-ghost","My library");library.href="/library/";
@@ -106,7 +110,7 @@ export function initNavigation() {
   toggle.setAttribute("aria-controls", nav.id);
   toggle.setAttribute("aria-label", "Browse studios");
   toggle.append(
-    node("span", "", active?.label || (path === "/workflows" ? "Workflows" : path === "/projects" ? "Projects" : path === "/library" ? "Library" : path === "/games" ? "Games" : path === "/website" ? "Website" : ["/edit","/build","/cut","/scene"].includes(path) ? "Create" : "Explore")),
+    node("span", "", active?.label || (path === "/workflows" ? "Workflows" : path === "/explore" ? "Explore" : path === "/projects" ? "Projects" : path === "/library" ? "Library" : path === "/games" ? "Games" : path === "/website" ? "Website" : ["/edit","/build","/cut","/scene"].includes(path) ? "Create" : "Home")),
     node("span", "studio-mobile-label", "Studios"),
     icon("chevron"),
   );
@@ -272,3 +276,19 @@ export function initNavigation() {
 }
 
 initNavigation();
+
+// Remix links from /explore carry ?from=<post id>: count the open once (the Worker de-duplicates per visitor and
+// day), then drop the parameter so reloads and shared links don't count again. Tools ignore it either way.
+function countRemix() {
+  const q = new URLSearchParams(location.search);
+  const id = q.get("from");
+  if (!id) return;
+  q.delete("from");
+  const s = q.toString();
+  history.replaceState(history.state, "", location.pathname + (s ? `?${s}` : "") + location.hash);
+  if (!/^[a-z0-9]{6,20}$/.test(id)) return;
+  try {
+    if (!navigator.sendBeacon?.(`/api/explore/${id}/remix`)) fetch(`/api/explore/${id}/remix`, { method: "POST", keepalive: true }).catch(() => {});
+  } catch { /* counting is best effort */ }
+}
+countRemix();

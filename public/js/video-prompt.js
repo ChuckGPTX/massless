@@ -22,13 +22,19 @@ async function frameData(file) {
   if (data.length>2_500_000) throw new Error('This image is too detailed. Try a smaller version.');
   return data;
 }
+// Share to Explore: the clip, titled with its prompt; Remix opens /video with the same prompt filled in.
+function shareBtn(blob, text) {
+  const b = h('button', { type: 'button', class: 'pill', text: 'Share to Explore' });
+  b.addEventListener('click', () => import('./explore-share.js').then((m) => m.shareToExplore({ blob, title: text.slice(0, 80), tool: 'video', remixUrl: `/video?prompt=${encodeURIComponent(text.slice(0, 1200))}` })).catch(() => {}));
+  return b;
+}
 async function mount(el) {
   const c = await cloudConfig();
   const engines = [];
   // Prefer the site's open video model. Only offer a hosted alternative when enabled.
   if (c.gpu?.on) engines.push({id:c.gpu.managedVideo?'managed-wan':'gpu',label:'Creative',hint:'Allow a few minutes for your video.'});
   if (c.promoVideo?.on) engines.push({id:'free',label:'Fast',hint:'Your video will appear here when it is ready.'});
-  const prompt = h('textarea',{id:'vp-prompt',rows:5,maxlength:1200,placeholder:'Describe the scene, the movement, the feeling…','aria-label':'Describe your video'}); prompt.value=store.get();
+  const prompt = h('textarea',{id:'vp-prompt',rows:5,maxlength:1200,placeholder:'Describe the scene, the movement, the feeling…','aria-label':'Describe your video'}); prompt.value=new URLSearchParams(location.search).get('prompt')?.slice(0,1200)||store.get(); // ?prompt= is a Remix from Explore
   const engine = h('select',{id:'vp-engine','aria-label':'Generation mode'},...engines.map(e=>h('option',{value:e.id,text:e.label})));
   const shape = h('select',{id:'vp-shape','aria-label':'Aspect ratio'},h('option',{value:'auto',text:'Auto · follows first frame',hidden:true}),h('option',{value:'16:9',text:'Landscape · 16:9'}),h('option',{value:'9:16',text:'Portrait · 9:16'}),h('option',{value:'1:1',text:'Square · 1:1'}));
   const resolution = h('select',{'aria-label':'Video resolution'},h('option',{value:'auto',text:'Automatic',hidden:true}),h('option',{value:'480p',text:'480p'}),h('option',{value:'720p',text:'720p'}));
@@ -100,7 +106,7 @@ async function mount(el) {
       const result=selected==='free'?await promoVideoJob({prompt:text,duration:5,resolution:selectedResolution,image:startFrame||undefined,signal:ctl.signal,onProgress:progress}):await gpuJob({job:'animate',engine:selected==='managed-wan'?selected:undefined,input:{prompt:text,mode:'quick',resolution:selected==='managed-wan'?'720p':selectedResolution,aspect:selected==='managed-wan'?'16:9':selectedShape,...(startFrame?{image:startFrame.split(',')[1]}:{})},rights:!!startFrame&&rightsBox.checked,signal:ctl.signal,onProgress:p=>progress(p.message)});
       if(!result.blob?.size)throw new Error('The video was empty. Please try again.');
       if(outputUrl)URL.revokeObjectURL(outputUrl);outputUrl=URL.createObjectURL(result.blob);
-      out.replaceChildren(h('div',{class:'vp-result-heading'},h('div',{},h('p',{class:'video-eyebrow',text:'READY FOR YOUR NEXT CHAPTER'}),h('h2',{text:'Your film is ready.'})),h('a',{href:outputUrl,download:'chucksi-video.mp4',class:'btn-accent',text:'Download MP4 ↓'})),h('video',{src:outputUrl,controls:true,autoplay:true,muted:true,loop:true,playsinline:true,'aria-label':'Generated video'}),h('p',{class:'vp-result-prompt',text}),h('div',{class:'vp-result-actions'},h('a',{href:'/cut/',class:'pill',text:'Caption & trim ↗'}),h('a',{href:'/library/',class:'pill',text:'My library ↗'})));
+      out.replaceChildren(h('div',{class:'vp-result-heading'},h('div',{},h('p',{class:'video-eyebrow',text:'READY FOR YOUR NEXT CHAPTER'}),h('h2',{text:'Your film is ready.'})),h('a',{href:outputUrl,download:'chucksi-video.mp4',class:'btn-accent',text:'Download MP4 ↓'})),h('video',{src:outputUrl,controls:true,autoplay:true,muted:true,loop:true,playsinline:true,'aria-label':'Generated video'}),h('p',{class:'vp-result-prompt',text}),h('div',{class:'vp-result-actions'},shareBtn(result.blob,text),h('a',{href:'/cut/',class:'pill',text:'Caption & trim ↗'}),h('a',{href:'/library/',class:'pill',text:'My library ↗'})));
       out.querySelector('video').muted=true;
       document.querySelector('#video-welcome').hidden=true;
       setStatus('Ready. Saving to My library…');

@@ -853,6 +853,17 @@ export async function saveToLibrary(btn = ui.save) {
     return item;
   });
 }
+// Share to Explore: the first slide as the picture, and the deck's share link (it opens the deck in Slides).
+async function shareExplore() {
+  finishEdit();
+  try {
+    const remixUrl = await shareUrl(state.deck, '/office?tab=slides&play=1');
+    if (remixUrl.length > 6000) throw new Error('This deck is too long to share on Explore. Share the link or export HTML instead.');
+    const blob = await coverBlob();
+    const m = await import('../explore-share.js');
+    await m.shareToExplore({ blob, title: plain(state.deck.title) || 'My deck', tool: 'slides', remixUrl, width: 960, height: 540 });
+  } catch (e) { toast(e.message, 'error'); }
+}
 async function copyShare() {
   finishEdit();
   const url = await shareUrl(state.deck);
@@ -922,6 +933,7 @@ function buildView(view) {
   ui.share = el('dialog', { class: 'sheet sd-sheet', 'aria-label': 'Share and export' },
     el('form', { method: 'dialog', class: 'sheet-head' }, el('h2', {}, 'Share & export'), el('button', { class: 'x', 'aria-label': 'Close' }, '×')),
     el('div', { class: 'sd-row' }, ui.shareOut, el('button', { type: 'button', class: 'btn-accent', id: 'sd-copy', onclick: copyShare }, 'Copy link')),
+    el('div', { class: 'sd-row' }, el('button', { type: 'button', class: 'btn-ghost', id: 'sd-explore', onclick: shareExplore }, 'Share to Explore')),
     ui.shareNote,
     el('div', { class: 'sd-exs' }, ui.exPdf, ui.exPptx, ui.exHtml, ui.exPng),
     el('p', { class: 'small muted' }, 'PDF keeps the text real and selectable. PowerPoint opens in PowerPoint, Keynote and Google Slides.'));

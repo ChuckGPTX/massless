@@ -7,6 +7,7 @@ export { WebsiteAiLimits } from './website-assistant.js';
 import { generationAPI } from './generations.js';
 import { signApi, signGated, signCleanup } from './sign.js';
 import { sitesApi, sitesGated, siteHost, serveSite } from './sites.js';
+import { exploreApi, exploreGated, serveExploreMedia, isExploreMedia } from './explore.js';
 import { editImage } from './image-edit.js';
 export { GenerationLedger } from './generations.js';
 // Massless Worker: serves the static app and the free-tier model APIs on Cloudflare Workers AI.
@@ -441,6 +442,7 @@ for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studio
 PAGES['/sign'] = '/sign/index.html';
 PAGES['/report'] = '/report/index.html';
 for (const path of ['templates', 'docs/website-assistant', 'docs/publish-and-export']) PAGES[`/website/${path}`] = `/website/${path}/index.html`;
+PAGES['/explore'] = '/explore/index.html';
 const MEDIA = /\.(mp4|webm|wav|mp3)$/;
 
 async function page(request, ref, file, ctx) {
@@ -484,7 +486,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects|library|edit|build|games|website|cut|scene|sign|report|console)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|demo-site|workflows|projects|library|edit|build|games|website|cut|scene|sign|report|console|explore)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
@@ -528,7 +530,7 @@ export default {
     }
     if (url.pathname === '/api/config' || url.pathname.startsWith('/api/generations') || url.pathname.startsWith('/api/promo-video')) return generationAPI(request, env);
     if (url.pathname === '/api/human') return humanPass(request, env);
-    if (((GATED.has(url.pathname) || signGated(url.pathname)) && request.method === 'POST') || sitesGated(request.method, url.pathname)) {
+    if (((GATED.has(url.pathname) || signGated(url.pathname)) && request.method === 'POST') || sitesGated(request.method, url.pathname) || exploreGated(request.method, url.pathname)) {
       const stop = await needsHuman(request, env);
       if (stop) return stop;
     }
@@ -541,7 +543,10 @@ export default {
     if (url.pathname === '/api/health') return health(env);
     if (url.pathname.startsWith('/api/sign/')) return signApi(request, env, ctx);
     if (url.pathname === '/api/sites' || url.pathname.startsWith('/api/sites/')) return sitesApi(request, env, ctx);
+    if (url.pathname === '/api/explore' || url.pathname.startsWith('/api/explore/')) return exploreApi(request, env, ctx);
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
+    // Explore media is user content in R2, served by the Worker (wrangler.jsonc runs the Worker first for it).
+    if (isExploreMedia(url.pathname)) return serveExploreMedia(request, env);
     if (env.ASSETS) return env.ASSETS.fetch(request);
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
     return fromOrigin(request, env, ctx);

@@ -199,6 +199,14 @@ function shotLabel(item) {
   return { pollinations: 'Pollinations', workers: 'FLUX.1 schnell' }[item.engine] || 'Shot';
 }
 
+// Share to Explore: the image, and a Remix link that opens Image with the same model and prompt.
+function shareShot(item) {
+  const q = new URLSearchParams();
+  if (item.model && Object.hasOwn(MODELS, item.model)) q.set('model', item.model);
+  if (item.prompt) q.set('prompt', item.prompt.slice(0, 1500));
+  const title = (item.prompt || 'Untitled image').split(/[,.]/)[0].slice(0, 80);
+  import('../explore-share.js').then((m) => m.shareToExplore({ blob: item.blob, title, tool: 'image', remixUrl: `/image${q.size ? `?${q}` : ''}` })).catch((e) => toast(e.message, 'error'));
+}
 function shotCard(item, fresh = false) {
   const url = URL.createObjectURL(item.thumb || item.blob);
   const label = shotLabel(item) + (item.unsaved ? ' · Not saved — download before leaving' : '');
@@ -211,6 +219,7 @@ function shotCard(item, fresh = false) {
       el('button', { type: 'button', onclick: () => editWithWords(item.blob, item.unsaved ? null : item.id) }, 'Edit with words'),
       item.unsaved ? null : el('a', { href: `/3d?shot=${encodeURIComponent(item.id)}` }, '3D'),
       el('button', { type: 'button', onclick: () => download(item.blob, `${item.id}.jpg`) }, 'Download'),
+      el('button', { type: 'button', onclick: () => shareShot(item) }, 'Share'),
       item.prompt ? el('button', { type: 'button', onclick: () => { $('#compiled').value = item.prompt; state.edited = true; $('#prompt-peek').open = true; toast('Prompt loaded. Press Generate to shoot it again.'); } }, 'Reuse prompt') : null,
       el('button', { type: 'button', 'aria-label': 'Delete shot', onclick: async () => {
         try { if (!item.unsaved) await store.del(item.id); }

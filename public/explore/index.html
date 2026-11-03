@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Explore | Chucksi</title>
+    <meta name="description" content="Videos, designs, websites and games people made with Chucksi. Open any of them with the same settings and make it yours.">
+    <link rel="canonical" href="https://chucksi.com/explore">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Chucksi">
+    <meta property="og:url" content="https://chucksi.com/explore">
+    <meta property="og:title" content="Explore | Chucksi">
+    <meta property="og:description" content="Videos, designs, websites and games people made with Chucksi. Open any of them with the same settings and make it yours.">
+    <meta property="og:image" content="https://chucksi.com/og.jpg?v=4">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Explore | Chucksi">
+    <meta name="twitter:description" content="Videos, designs, websites and games people made with Chucksi. Open any of them with the same settings and make it yours.">
+    <meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="/css/navigation.css" />
+    <link rel="stylesheet" href="/css/hubs.css" />
+    <link rel="stylesheet" href="/css/workflows.css" />
+    <link rel="stylesheet" href="/css/feed.css" />
+    <script type="module" src="/js/navigation.js"></script>
+    <script type="module" src="/js/pages/explore-feed.js"></script>
+  </head>
+  <body class="hub ex-page" data-human="lazy">
+    <header class="nav">
+      <a class="nav-logo" href="/" aria-label="Chucksi home"
+        ><svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3" />
+          <circle cx="16" cy="16" r="3.6" fill="currentColor" />
+          <path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3" /></svg
+      ></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/">Home</a><a href="/workflows/">Workflows</a><a href="/explore/" aria-current="page">Explore</a><a href="/studios/image/">Image</a
+        ><a href="/studios/video/">Video</a><a href="/studios/audio/">Audio</a
+        ><a href="/studios/3d/">3D</a><a href="/studios/office/">Office</a>
+      </nav>
+      <div class="nav-right"><a class="btn-accent" href="/image">Create an image ↗</a>
+      </div>
+    </header>
+    <main class="hub-main wf-main ex-main">
+      <section class="wf-hero ex-hero" aria-labelledby="ex-title">
+        <h1 id="ex-title">Explore</h1>
+        <p>Made by people on Chucksi. Press Remix to open it with the same settings.</p>
+      </section>
+
+      <div class="ex-bar">
+        <nav class="wf-chips ex-chips" id="ex-chips" aria-label="Filter by tool"></nav>
+        <div class="ex-sort" role="group" aria-label="Sort">
+          <button type="button" class="ex-sort-btn" data-sort="new" aria-pressed="true">New</button><button type="button" class="ex-sort-btn" data-sort="top" aria-pressed="false">Top</button>
+        </div>
+      </div>
+      <p class="ex-status" id="ex-status" role="status" aria-live="polite"></p>
+      <div class="wf-grid ex-grid" id="ex-grid" role="list" aria-label="Posts"></div>
+      <div class="ex-more"><button type="button" class="btn-ghost" id="ex-more" hidden>Load more</button></div>
+      <p class="ex-how">Share yours: press <b>Share to Explore</b> on a result in Video, Image, Workflows, Website, Games or Slides. <a href="/terms.html#explore">Rules</a> · <a href="/privacy.html#explore">Privacy</a></p>
+    </main>
+
+    <dialog class="ex-sheet" id="ex-sheet" aria-labelledby="ex-sheet-title">
+      <div class="ex-sheet-in">
+        <div class="ex-sheet-media" id="ex-sheet-media"></div>
+        <div class="ex-sheet-side">
+          <div class="ex-sheet-head">
+            <p class="ex-sheet-tool" id="ex-sheet-tool"></p>
+            <button type="button" class="ex-x" id="ex-close" aria-label="Close">×</button>
+          </div>
+          <h2 id="ex-sheet-title"></h2>
+          <p class="ex-sheet-by" id="ex-sheet-by"></p>
+          <p class="ex-sheet-tags" id="ex-sheet-tags"></p>
+          <div class="ex-sheet-acts">
+            <a class="btn-accent ex-remix" id="ex-remix" href="/">Remix ↗</a>
+            <button type="button" class="btn-ghost ex-like" id="ex-like" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-9.2-9A5 5 0 0 1 12 6a5 5 0 0 1 9.2 5C19 15.6 12 20 12 20z"/></svg><span id="ex-like-n">0</span><span class="sr-only"> likes</span></button>
+            <a class="btn-ghost" id="ex-live" href="/" target="_blank" rel="noopener" hidden>Open the site ↗</a>
+          </div>
+          <p class="ex-sheet-stats" id="ex-sheet-stats"></p>
+          <p class="ex-sheet-msg" id="ex-sheet-msg" role="status" aria-live="polite"></p>
+          <div class="ex-sheet-foot">
+            <button type="button" class="ex-link" id="ex-copy">Copy link</button>
+            <button type="button" class="ex-link" id="ex-report-open">Report</button>
+            <button type="button" class="ex-link ex-danger" id="ex-delete" hidden>Delete</button>
+          </div>
+          <form class="ex-report" id="ex-report" hidden>
+            <fieldset>
+              <legend>What is wrong with this post?</legend>
+              <div class="ex-reasons">
+                <label><input type="radio" name="reason" value="sexual" required> Sexual content</label>
+                <label><input type="radio" name="reason" value="violence"> Violence</label>
+                <label><input type="radio" name="reason" value="hate"> Hate</label>
+                <label><input type="radio" name="reason" value="harassment"> Harassment</label>
+                <label><input type="radio" name="reason" value="spam"> Spam</label>
+                <label><input type="radio" name="reason" value="illegal"> Illegal</label>
+                <label><input type="radio" name="reason" value="copyright"> Copyright</label>
+                <label><input type="radio" name="reason" value="other"> Other</label>
+              </div>
+            </fieldset>
+            <label for="ex-report-details">Details <small>(optional)</small></label>
+            <textarea id="ex-report-details" maxlength="2000" rows="3"></textarea>
+            <div class="ex-report-acts"><button type="button" class="btn-ghost" id="ex-report-cancel">Cancel</button><button type="submit" class="btn-accent">Send report</button></div>
+          </form>
+        </div>
+      </div>
+    </dialog>
+
+    <footer class="hub-footer">
+      <a href="/">CHUCKSI</a><nav class="foot-links" aria-label="Footer"><a href="/credits.html">Credits</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://github.com/ChuckGPTX/massless" rel="noopener">GitHub ↗</a></nav>
+    </footer>
+  </body>
+</html>

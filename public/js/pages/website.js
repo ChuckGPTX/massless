@@ -11,7 +11,7 @@ import { renderParts, renderSingle, makeContext, usedCollection, GEN_JS } from '
 import { HERO_JS } from '../website/runtime.js';
 import { renderSection, inline, paras } from '../website/sections.js';
 import { BASE_CSS, EDIT_CSS } from '../website/css.js';
-import { exportZip, exportSingle, faviconSvg } from '../website/export.js';
+import { exportZip, exportSingle, faviconSvg, ogImage } from '../website/export.js';
 import { initPublish } from '../website/publish.js';
 import { shareUrl, decodeSite } from '../website/share.js';
 import { ICON_NAMES, icon } from '../website/icons.js';
@@ -1407,6 +1407,21 @@ async function doSingle() {
     toast(`Export failed: ${e.message}`, 'error');
   }
 }
+// Share to Explore: the site's social image (the same one the export makes) and a Remix link that reopens this site
+// in the builder (#s=, without your own images); a template link when that is too long. The published address
+// travels too, when this project has one.
+async function doExplore() {
+  commitEdit();
+  try {
+    const blob = await ogImage(state.site, state.assets, frame.contentDocument);
+    let remix = await shareUrl(state.site, '/website');
+    if (remix.length > 6000) remix = state.template ? `/website?template=${encodeURIComponent(state.template)}` : '/website';
+    let link = '';
+    try { const slug = state.id && localStorage.getItem(`chucksi.site-slug:${state.id}`); if (slug) link = `https://${slug}.v2web.site`; } catch { /* private mode */ }
+    const m = await import('../explore-share.js');
+    await m.shareToExplore({ blob, title: state.site.name || 'My website', tool: 'website', remixUrl: remix, width: 1200, height: 630, link });
+  } catch (e) { toast(e.message, 'error'); }
+}
 async function doShare() {
   commitEdit();
   const url = await shareUrl(state.site);
@@ -1517,6 +1532,7 @@ function wire() {
   $('#add-page').addEventListener('click', addPage);
   $('#add-section').addEventListener('click', () => openAdd(null));
   $('#share').addEventListener('click', doShare);
+  $('#explore-share')?.addEventListener('click', doExplore);
   $('#copy-share').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText($('#share-url').value); toast('Link copied.'); } catch { $('#share-url').select(); toast('Select the link and copy it.'); }
   });
