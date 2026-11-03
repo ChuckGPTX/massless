@@ -112,6 +112,11 @@ function renderSteps() {
 }
 function openPlan(next, scroll = true) {
   plan = validatePlan(next);
+  if (plan.workflowId === "song-lyrics") {
+    $("#run-panel").hidden = true;
+    if (scroll) location.href = "/lyrics/";
+    return;
+  }
   if (plan.shotId && !shots.some((x) => x.id === plan.shotId)) plan.shotId = "";
   $("#run-panel").hidden = false;
   $("#run-title").textContent = WORKFLOWS.find(
@@ -130,6 +135,8 @@ function openPlan(next, scroll = true) {
     });
 }
 for (const flow of WORKFLOWS) {
+  // Automatic creators live in the gallery, not the step-by-step planner.
+  if (flow.id === "song-lyrics") continue;
   const button = make("button", "wf-plan");
   button.type = "button";
   const img = make("img");

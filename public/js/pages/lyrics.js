@@ -3,6 +3,7 @@ import { encodeWav } from '../audio-engine.js';
 import { apiFetch } from '../human.js';
 import { ASR_LANGS, shiftResult } from '../transcribe.js';
 import { exportMusic } from '../music-export.js';
+import { generateLyricVideo, directLyrics } from '../lyric-generation.js';
 
 const $ = s => document.querySelector(s);
 const canvas = $('#lyric-canvas'), audio = $('#song-audio');
@@ -14,24 +15,28 @@ const demoCues = [
 ];
 let cues = structuredClone(demoCues), score, buffer, analysis, art, originalFile;
 let look = 'kinetic', busy = false, cancel, demo = true, trackURL, resultURL, artURL;
-let playhead = 4.7, context, trackGeneration = 0;
+let playhead = 4.7, context, pendingFile, view = 'welcome';
 const message = text => { $('#status').textContent = text; };
 const format = n => `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2,'0')}`;
 const duration = () => score?.duration || 16;
 const config = () => ({cues,look,title:$('#song-title').value || 'Little moments',artist:$('#artist').value,analysis,art,motion:$('#motion').value==='on'});
 function invalidate() {
   if(resultURL) URL.revokeObjectURL(resultURL);
-  resultURL = null; $('#download-video').hidden = true;
+  resultURL = null; $('#download-video').hidden = true; $('#back-to-result').disabled = true;
+  $('#finished-video').pause(); $('#finished-video').removeAttribute('src'); $('#download-result').removeAttribute('href');
 }
 function setBusy(on, cancellable = false) {
   busy = on;
   document.querySelectorAll('.lyric-studio input,.lyric-studio select,.lyric-studio textarea,.lyric-studio button').forEach(e => { e.disabled = on; });
   $('#cancel-task').hidden = !cancellable;
   $('#cancel-task').disabled = false;
+  $('#cancel-generation').disabled = false;
+  $('#generating').setAttribute('aria-busy', String(on));
   if(!on) {
     for(const id of ['play','scrub','apply-lyrics','add-line']) $('#'+id).disabled = !score;
     $('#transcribe').disabled = !originalFile || demo;
     $('#export-video').disabled = !score || !cues.length;
+    $('#back-to-result').disabled = !resultURL;
   }
 }
 function render(t = playhead) {
@@ -110,55 +115,89 @@ function adoptScore(value) {
   $('#scrub').max=duration();$('#clip-start').max=Math.max(0,duration()-.1);$('#clip-start').value=0;
   waveform();invalidate();render();
 }
+function showView(next) {
+  view = next;
+  for (const id of ['welcome','generating','generation-error','finished','editor']) $('#'+id).hidden = id !== next;
+  window.scrollTo({top:0,behavior:'instant'});
+  const heading = $('#'+next).querySelector('h1');
+  if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+}
+function ensureActive(signal) { if(signal?.aborted) throw new DOMException('Cancelled','AbortError'); }
+async function openSong(file, signal) {
+  if(file.size>50*1024*1024) throw new Error('Choose a song smaller than 50 MB.');
+  context ||= new AudioContext({sampleRate:48000});
+  const decoded=await context.decodeAudioData(await file.arrayBuffer());
+  ensureActive(signal);
+  if(decoded.duration<.5 || decoded.duration>MAX_SONG_SECONDS) throw new Error('Choose audio between half a second and 6 minutes.');
+  buffer=decoded; originalFile=file;demo=false;cues=[];
+  if(trackURL)URL.revokeObjectURL(trackURL);trackURL=URL.createObjectURL(file);audio.src=trackURL;
+  $('#song-title').value=file.name.replace(/\.[^.]+$/,'').slice(0,60);$('#artist').value='';
+  $('#clip-length').value='full';
+  if(artURL)URL.revokeObjectURL(artURL);artURL=null;art=null;$('#art-file').value='';$('#remove-art').hidden=true;
+  adoptScore({sampleRate:decoded.sampleRate,channels:Array.from({length:Math.min(2,decoded.numberOfChannels)},(_,i)=>decoded.getChannelData(i)),duration:decoded.duration});
+  $('#song-info').textContent=`${file.name} · ${format(duration())}`;
+  $('#preview-kind').textContent='YOUR SONG';buildCueList();
+}
 async function loadSong(file) {
-  if(!file || busy) return;
-  if(file.size>50*1024*1024){message('Choose a song smaller than 50 MB.');return;}
-  pause();setBusy(true);message('Opening your song…');
-  const generation=++trackGeneration;
-  try {
-    context ||= new AudioContext({sampleRate:48000});
-    const decoded=await context.decodeAudioData(await file.arrayBuffer());
-    if(decoded.duration<.5 || decoded.duration>MAX_SONG_SECONDS) throw new Error('Choose audio between half a second and 6 minutes.');
-    if(generation!==trackGeneration)return;
-    buffer=decoded; originalFile=file;demo=false;cues=[];
-    if(trackURL)URL.revokeObjectURL(trackURL);trackURL=URL.createObjectURL(file);audio.src=trackURL;
-    $('#song-title').value=file.name.replace(/\.[^.]+$/,'');
-    adoptScore({sampleRate:decoded.sampleRate,channels:Array.from({length:Math.min(2,decoded.numberOfChannels)},(_,i)=>decoded.getChannelData(i)),duration:decoded.duration});
-    $('#song-info').textContent=`${file.name} · ${format(duration())} · ready`;
-    $('#preview-kind').textContent='YOUR SONG';$('#timing-note').textContent='Transcribe or paste lyrics to start. Review every phrase against the vocal.';
-    buildCueList();message('Song ready. Transcribe it, or paste your own lyrics.');
-  }catch(e){message(`Could not open this song. ${e.message}`);}finally{setBusy(false);}
+  if(!file || busy)return;
+  pendingFile=file;score=null;buffer=null;cues=[];originalFile=null;demo=false;
+  await runGeneration({file});
 }
-async function loadDemo() {
+async function prepareDemo(signal) {
+  const {renderScore}=await import('../score.js');
+  const value=await renderScore({style:'trap',bpm:120,beats:32,dropBeat:16,endBeat:28,seed:212045});value.duration=16;
+  ensureActive(signal);
+  if(trackURL)URL.revokeObjectURL(trackURL);trackURL=URL.createObjectURL(encodeWav(value.channels,value.sampleRate));audio.src=trackURL;
+  originalFile=null;buffer=null;pendingFile=null;demo=true;cues=structuredClone(demoCues);$('#song-title').value='Little moments';$('#artist').value='';$('#clip-length').value='full';
+  adoptScore(value);buildCueList();$('#preview-kind').textContent='DESIGN DEMO';$('#song-info').textContent='Original instrumental · 16 seconds · no vocals';$('#timing-note').textContent='Example words with an original instrumental. These words are not sung.';
+}
+async function loadDemo() { if(!busy)await runGeneration({demoMode:true}); }
+async function transcribeSong(signal) {
+  if(!buffer || !originalFile) throw new Error('Choose a song to start.');
+  const offline=new OfflineAudioContext(1,Math.ceil(buffer.duration*16000),16000), source=offline.createBufferSource();source.buffer=buffer;source.connect(offline.destination);source.start();
+  const mono=await offline.startRendering();ensureActive(signal);
+  const q=new URLSearchParams({mode:'lyrics'});if($('#language').value)q.set('lang',$('#language').value);
+  const response=await apiFetch('/api/transcribe?'+q,{method:'POST',headers:{'content-type':'audio/wav'},body:encodeWav([mono.getChannelData(0)],16000),signal});
+  const data=await response.json();ensureActive(signal);if(!response.ok)throw new Error(data.error||'We couldn’t hear the words clearly. Try again, or add your lyrics below.');
+  const result=shiftResult({...data,duration:duration()},0);
+  const next=fromTranscript(result.segments,duration());
+  if(!next.length)throw new Error('We couldn’t find lyrics in this track. Try a version with clearer vocals, or add your lyrics below.');
+  cues=next;buildCueList();invalidate();seek(0);
+  $('#timing-note').textContent='Automatic lyrics. Longer phrases use estimated timing. You can correct any words or adjust the IN / OUT times here.';
+}
+function generationStage(stage, progress) {
+  const text={prepare:'Opening your song…',transcribe:'Listening for every word…',compose:'Bringing the words and motion together…',render:'Making your video…'};
+  $('#generation-status').textContent=stage==='render' && Number.isFinite(progress)?`Making your video · ${Math.round(progress*100)}%`:text[stage];
+  const bar=$('#generation-progress');
+  if(stage==='render'&&Number.isFinite(progress))bar.value=Math.round(progress*100);else bar.removeAttribute('value');
+}
+async function runGeneration({file, demoMode=false, reuseLyrics=false}={}) {
   if(busy)return;
-  pause();setBusy(true);message('Preparing the original instrumental demo…');
+  pause();$('#finished-video').pause();setBusy(true,true);cancel=new AbortController();const signal=cancel.signal;
+  $('#generation-track').textContent=file?.name || (demoMode?'An original design demo':$('#song-title').value);
+  showView('generating');
   try {
-    const {renderScore}=await import('../score.js');
-    const value=await renderScore({style:'trap',bpm:120,beats:32,dropBeat:16,endBeat:28,seed:212045});value.duration=16;
-    if(trackURL)URL.revokeObjectURL(trackURL);trackURL=URL.createObjectURL(encodeWav(value.channels,value.sampleRate));audio.src=trackURL;
-    originalFile=null;buffer=null;demo=true;cues=structuredClone(demoCues);$('#song-title').value='Little moments';$('#artist').value='';
-    adoptScore(value);buildCueList();$('#preview-kind').textContent='DESIGN DEMO';$('#song-info').textContent='Original instrumental · 16 seconds · no vocals';$('#timing-note').textContent='Example words with an original instrumental. These words are not sung.';
-    message('Demo ready. Play it, change the look, or export a sample.');
-  }catch(e){message(e.message);}finally{setBusy(false);}
+    await generateLyricVideo({
+      signal,onStage:generationStage,
+      prepare:file?()=>openSong(file,signal):demoMode?()=>prepareDemo(signal):null,
+      transcribe:!demoMode&&!reuseLyrics?()=>transcribeSong(signal):null,
+      compose:()=>{if(!score||!cues.some(c=>c.text.trim()))throw new Error('Add lyrics before making this video.');if(!reuseLyrics)cues=directLyrics(cues);buildCueList();},
+      render:renderVideo,
+    });
+    $('#finished-song').textContent=$('#song-title').value;
+    $('#finished-details').textContent=`${format(duration())} song · ${LOOKS.find(l=>l.id===look).name} · Original audio`;
+    $('#finished-note').textContent=demo?'Original instrumental with sample words, not sung vocals. Upload your song to make your own.':'Give it a listen before sharing. You can correct any words or timing in Edit video.';
+    showView('finished');
+  } catch(e) {
+    const stopped=signal.aborted;
+    $('#error-title').innerHTML=stopped?'Whenever you’re ready.<br><em>Pick it back up.</em>':'Let’s give it<br><em>another take.</em>';
+    $('#generation-error-message').textContent=stopped?'Generation stopped. Your song and any completed lyrics are still here.':e.message;
+    $('#retry-generation').hidden=!pendingFile&&!score;
+    $('#recovery-lyrics').hidden=!score;
+    showView('generation-error');
+  } finally {setBusy(false);cancel=null;}
 }
-async function transcribe() {
-  if(!buffer || !originalFile || busy)return;
-  pause();setBusy(true,true);cancel=new AbortController();message('Listening to your song… You can cancel while this runs.');
-  try {
-    const offline=new OfflineAudioContext(1,Math.ceil(buffer.duration*16000),16000), source=offline.createBufferSource();source.buffer=buffer;source.connect(offline.destination);source.start();
-    const mono=await offline.startRendering();if(cancel.signal.aborted)throw new DOMException('Cancelled','AbortError');
-    const q=new URLSearchParams({mode:'lyrics'});if($('#language').value)q.set('lang',$('#language').value);
-    const response=await apiFetch('/api/transcribe?'+q,{method:'POST',headers:{'content-type':'audio/wav'},body:encodeWav([mono.getChannelData(0)],16000),signal:cancel.signal});
-    const data=await response.json();if(!response.ok)throw new Error(data.error||'Transcription could not finish.');
-    if(cancel.signal.aborted)throw new DOMException('Cancelled','AbortError');
-    const result=shiftResult({...data,duration:duration()},0);
-    const next=fromTranscript(result.segments,duration());
-    if(!next.length)throw new Error('No words were found. Try pasting your lyrics instead.');
-    cues=next;buildCueList();invalidate();seek(0);
-    $('#timing-note').textContent='Automatic draft. Long segments use estimated phrase spacing. Listen, correct misheard words and adjust the IN / OUT times.';
-    message(`${cues.length} lyric lines ready to review. Check the words and timing before exporting.`);
-  }catch(e){message(e.name==='AbortError'?'Transcription cancelled. Your current lyrics are unchanged.':e.message);}finally{setBusy(false);cancel=null;}
-}
+async function transcribe() { if(!busy)await runGeneration(); }
 function applyLyrics(text) {
   if(!score){message('Add your song or try the demo first.');return;}
   const result=parseLyrics(text,duration());
@@ -169,26 +208,42 @@ function applyLyrics(text) {
 }
 function download(blob,name) {const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 function fileName(ext) {return ($('#song-title').value||'chucksi-lyrics').replace(/[^\p{L}\p{N}_-]+/gu,'-').slice(0,60)+'.'+ext;}
-async function exportVideo() {
-  if(busy||!score)return;
+async function renderVideo(signal, onProgress) {
+  if(!score)throw new Error('Choose a song to start.');
   const start=Math.max(0,Math.min(duration()-.1,Number($('#clip-start').value)||0));
   const length=Math.min(duration()-start,$('#clip-length').value==='full'?duration():Number($('#clip-length').value));
-  if(!cues.some(c=>c.text.trim()&&c.start<start+length&&c.end>start)){message('This excerpt has no lyrics. Choose a start time inside a lyric line.');return;}
-  pause();setBusy(true,true);cancel=new AbortController();invalidate();message('Preparing your MP4…');
-  try {
-    await document.fonts.ready;
-    const target=document.createElement('canvas');target.width=canvas.width;target.height=canvas.height;
-    const settings={...config(),cues:cleanCues(cues,duration())};
-    const blob=await exportMusic({canvas:target,draw:(el,t)=>drawLyrics(el,start+t,settings),score:cropScore(score,start,length),duration:length,signal:cancel.signal,onProgress:p=>message(`Rendering your video · ${Math.round(p*100)}%`)});
-    resultURL=URL.createObjectURL(blob);$('#download-video').href=resultURL;$('#download-video').download=fileName('mp4');$('#download-video').hidden=false;
-    message(`Your ${length.toFixed(1)}-second MP4 is ready. Original audio included.`);
-  }catch(e){message(e.message);}finally{setBusy(false);cancel=null;render();}
+  if(!cues.some(c=>c.text.trim()&&c.start<start+length&&c.end>start))throw new Error('This excerpt has no lyrics. Choose a start time inside a lyric line.');
+  invalidate();await document.fonts.ready;ensureActive(signal);
+  const target=document.createElement('canvas');target.width=canvas.width;target.height=canvas.height;
+  const settings={...config(),cues:cleanCues(cues,duration())};
+  const blob=await exportMusic({canvas:target,draw:(el,t)=>drawLyrics(el,start+t,settings),score:cropScore(score,start,length),duration:length,signal,onProgress});
+  ensureActive(signal);
+  resultURL=URL.createObjectURL(blob);
+  for(const id of ['download-video','download-result']){const link=$('#'+id);link.href=resultURL;link.download=fileName('mp4');link.hidden=false;}
+  $('#finished-video').src=resultURL;
+  message(`Your ${length.toFixed(1)}-second video is ready. Original audio included.`);
+  render();return blob;
 }
+async function exportVideo() { await runGeneration({reuseLyrics:true}); }
 function setShape() {
   const dims={wide:[1280,720],portrait:[720,1280],square:[720,720]}[$('#shape').value];
   [canvas.width,canvas.height]=dims;$('.canvas-wrap').className='canvas-wrap '+$('#shape').value;invalidate();render();
 }
-$('#song-file').onchange=e=>loadSong(e.target.files[0]);$('#load-demo').onclick=loadDemo;$('#play').onclick=play;$('#transcribe').onclick=transcribe;
+$('#song-file').onchange=e=>loadSong(e.target.files[0]);
+$('#upload-song').onchange=e=>loadSong(e.target.files[0]);
+$('#try-demo').onclick=loadDemo;
+$('#cancel-generation').onclick=()=>{cancel?.abort();$('#generation-status').textContent='Stopping…';};
+$('#retry-generation').onclick=()=>runGeneration({file:score?null:pendingFile,reuseLyrics:!!score&&!!cues.length,demoMode:!score&&!pendingFile});
+$('#edit-result').onclick=()=>{$('#finished-video').pause();showView('editor');};
+$('#back-to-result').onclick=()=>{pause();if(resultURL)showView('finished');};
+function startOver(){pause();$('#finished-video').pause();$('#upload-song').value='';showView('welcome');}
+$('#new-song').onclick=startOver;$('#replace-song').onclick=startOver;
+$('#generate-from-lyrics').onclick=()=>{const parsed=parseLyrics($('#recovery-text').value,duration());if(!parsed.cues.length){$('#generation-error-message').textContent='Paste at least one lyric line to continue.';return;}applyLyrics($('#recovery-text').value);runGeneration({reuseLyrics:true});};
+const uploadZone=$('#upload-zone');
+for(const type of ['dragenter','dragover'])uploadZone.addEventListener(type,e=>{e.preventDefault();uploadZone.classList.add('dragging');});
+for(const type of ['dragleave','drop'])uploadZone.addEventListener(type,e=>{e.preventDefault();uploadZone.classList.remove('dragging');});
+uploadZone.addEventListener('drop',e=>loadSong(e.dataTransfer.files[0]));
+$('#load-demo').onclick=loadDemo;$('#play').onclick=play;$('#transcribe').onclick=transcribe;
 $('#cancel-task').onclick=()=>{cancel?.abort();message('Cancelling…');};$('#export-video').onclick=exportVideo;
 $('#scrub').oninput=e=>seek(Number(e.target.value));audio.onended=()=>{pause();playhead=duration();render();};
 $('#shape').onchange=setShape;
@@ -228,6 +283,11 @@ for(const [value,label] of ASR_LANGS){const option=document.createElement('optio
 if(matchMedia('(prefers-reduced-motion: reduce)').matches)$('#motion').value='off';
 await document.fonts.ready;
 styleThumbs();buildCueList();setBusy(false);waveform();render();
-function tick(){if(!audio.paused&&!busy){playhead=audio.currentTime;render();}requestAnimationFrame(tick);}requestAnimationFrame(tick);
+let welcomeFrame=0;
+function tick(now){
+  if(view==='welcome'&&now-welcomeFrame>80){welcomeFrame=now;drawLyrics($('#welcome-art'),matchMedia('(prefers-reduced-motion: reduce)').matches?1.5:1.5+(now/1000)%2,{cues:[{start:0,end:5,text:'WE ARE MADE OF LITTLE MOMENTS'}],look:'kinetic',title:'YOUR SONG. YOUR STORY.'});}
+  if(view==='editor'&&!audio.paused&&!busy){playhead=audio.currentTime;render();}
+  requestAnimationFrame(tick);
+}requestAnimationFrame(tick);
 window.addEventListener('beforeunload',e=>{if(busy){e.preventDefault();e.returnValue='';}});
 window.addEventListener('pagehide',()=>{pause();cancel?.abort();});

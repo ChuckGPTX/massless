@@ -3,7 +3,7 @@ import { COLLECTION_TEMPLATES } from './website/collection-list.js';
 import { PRESETS, presetURL } from './presets/catalog.js';
 
 export const WORKFLOWS = [
-  {id:'song-lyrics',name:'Your song becomes a lyric video',tag:'AUDIO + TYPE + MOTION',image:'/media/lyrics/lyric-studio.svg',description:'Upload a song, transcribe and correct the words, choose a visual style and export with your original audio.',output:'MP4 + SRT / LRC',steps:[['Upload and transcribe your song','/lyrics/'],['Edit phrases, timing and chorus emphasis','/lyrics/'],['Choose a look and export your video','/lyrics/']]},
+  {id:'song-lyrics',name:'Your song becomes a lyric video',tag:'AUDIO + TYPE + MOTION',image:'/media/lyrics/lyric-studio.svg',description:'Upload your song. Chucksi finds the lyrics, brings them to life and delivers a finished video. Edit afterward if you want.',output:'MP4 + SRT / LRC',steps:[['Upload your song — we’ll make the video','/lyrics/']]},
   {id:'image-workroom',name:'Image to campaign frame',tag:'IMAGE + DESIGN',image:'/media/website/ceramics.jpg',description:'Reframe an image, adjust its finish and add a headline. Save a new take, ready for motion.',output:'PNG + saved take',steps:[['Choose or create an image','/image'],['Compose a new take','/edit/'],['Use the saved take in your next tool','/library/']]},
   {id:'scene-stage',name:'Objects to a 3D scene',tag:'3D + IMAGE',image:'/media/art/observatory.jpg',description:'Stage real objects and lights, orbit the camera, and export a complete editable scene.',output:'GLB + PNG frame',steps:[['Stage your objects','/scene/'],['Set lighting and camera','/scene/'],['Export GLB or save a frame','/scene/']]},
   {id:'website-template',name:'A studio website of your own',tag:'IMAGE + WEBSITE',image:'/media/website/pavilion.jpg',description:'Describe a site, edit every word in place, add your own images and export a fast static site you can host free.',output:'Static HTML website',steps:[['Create your featured image','/image'],['Describe and edit your website','/website/'],['Preview and export HTML','/website/']]},
@@ -120,19 +120,21 @@ export function validatePlan(value) {
   )
     throw new Error("Choose a Chucksi workflow plan.");
   const spec = WORKFLOWS.find((x) => x.id === value.workflowId);
+  // Preserve saved lyric plans from the former three-step editor.
+  const done = value.workflowId === "song-lyrics" && Array.isArray(value.done) && value.done.length === 3 && value.done.every(x => typeof x === "boolean") ? [value.done.every(Boolean)] : value.done;
   if (
     typeof value.brief !== "string" ||
     value.brief.length > 4000 ||
-    !Array.isArray(value.done) ||
-    value.done.length !== spec.steps.length ||
-    value.done.some((x) => typeof x !== "boolean")
+    !Array.isArray(done) ||
+    done.length !== spec.steps.length ||
+    done.some((x) => typeof x !== "boolean")
   )
     throw new Error("This workflow plan has invalid fields.");
   return {
     version: 1,
     workflowId: value.workflowId,
     brief: value.brief,
-    done: value.done,
+    done,
     shotId: typeof value.shotId === "string" ? value.shotId.slice(0, 100) : "",
   };
 }
@@ -286,7 +288,7 @@ export const GALLERY = [
   ...SITE_CARDS,
   ...GAME_CARDS,
   card("film-launch", "film", "Launch film", "A brief becomes a scored, beat-cut film", "/film", "16/9"),
-  card("film-lyrics", "film", "Lyric Studio", "Your song, editable lyrics and six visual worlds", "/lyrics/", "16/9"),
+  card("film-lyrics", "film", "Lyric Studio", "Upload a song. Get a finished lyric video.", "/lyrics/", "16/9"),
   card("film-music", "film", "Music visualizer", "Artwork and your track, cut to the beat", "/music", "16/9"),
   card("film-captions", "film", "Captions", "Edit by text and burn in styled captions", "/cut/", "16/9"),
   card("film-voice", "film", "Voiceover", "Turn a script into a voice", "/audio?tab=voice", "16/9"),
