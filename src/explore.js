@@ -546,12 +546,15 @@ function mediaHeaders(type) {
 }
 const gone = (status, text) => new Response(text, { status, headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
 
+// The starter posts reuse the example clips already on the site instead of copies in storage.
+const SEED_MEDIA = {"chucksi01":{"media":"fx-hologram-ion.mp4","poster":"fx-hologram-ion.webp"},"chucksi02":{"media":"design-fest-harbourlight.mp4","poster":"design-fest-harbourlight.webp"},"chucksi03":{"media":"move-arc-right.mp4","poster":"move-arc-right.webp"},"chucksi04":{"media":"site-manifesto.mp4","poster":"site-manifesto.webp"},"chucksi05":{"media":"fx-lidar-cyan.mp4","poster":"fx-lidar-cyan.webp"},"chucksi06":{"media":"game-sky-tower.mp4","poster":"game-sky-tower.webp"},"chucksi07":{"media":"design-id-northwind.mp4","poster":"design-id-northwind.webp"},"chucksi08":{"media":"fx-shatter-spectrum.mp4","poster":"fx-shatter-spectrum.webp"},"chucksi09":{"media":"move-fpv.mp4","poster":"move-fpv.webp"},"chucksi10":{"media":"design-map-saltmere.mp4","poster":"design-map-saltmere.webp"},"chucksi11":{"media":"fx-vanish-embers.mp4","poster":"fx-vanish-embers.webp"},"chucksi12":{"media":"site-restaurant.mp4","poster":"site-restaurant.webp"},"chucksi13":{"media":"game-star-hornets.mp4","poster":"game-star-hornets.webp"},"chucksi14":{"media":"fx-portal-cosmic.mp4","poster":"fx-portal-cosmic.webp"},"chucksi15":{"media":"design-film-tide.mp4","poster":"design-film-tide.webp"},"chucksi16":{"media":"move-dolly-zoom.mp4","poster":"move-dolly-zoom.webp"},"chucksi17":{"media":"fx-ink-signature.mp4","poster":"fx-ink-signature.webp"},"chucksi18":{"media":"design-poe-weather.mp4","poster":"design-poe-weather.webp"},"chucksi19":{"media":"site-photographer.mp4","poster":"site-photographer.webp"},"chucksi20":{"media":"fx-clones-rainbow.mp4","poster":"fx-clones-rainbow.webp"},"chucksi21":{"media":"game-deep-snack.mp4","poster":"game-deep-snack.webp"},"chucksi22":{"media":"move-bullet-time.mp4","poster":"move-bullet-time.webp"},"chucksi23":{"media":"fx-kaleido-signature.mp4","poster":"fx-kaleido-signature.webp"},"chucksi24":{"media":"design-id-pebble.mp4","poster":"design-id-pebble.webp"},"chucksi25":{"media":"site-conference.mp4","poster":"site-conference.webp"},"chucksi26":{"media":"fx-freeze.mp4","poster":"fx-freeze.webp"}};
 export async function serveExploreMedia(request, env) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405, headers: { allow: 'GET, HEAD' } });
   const m = new URL(request.url).pathname.match(MEDIA_RE);
   if (!m || !bucket(env)) return gone(404, 'Not found');
   const [, id, name, ext] = m;
   if (await blockOf(env, id)) return gone(410, 'This post is unavailable.');
+  if (SEED_MEDIA[id] && SEED_MEDIA[id][name]) return new Response(null, { status: 302, headers: { location: '/media/templates/' + SEED_MEDIA[id][name], 'cache-control': 'public, max-age=3600' } });
   const key = mediaKey(id, name, ext);
   const b = bucket(env);
   const head = await b.head(key);
