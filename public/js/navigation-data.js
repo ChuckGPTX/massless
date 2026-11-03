@@ -115,6 +115,7 @@ export const STUDIOS = [
         "/video#storyboard",
         "grid",
       ),
+      item("Lyric Studio", "Your song, editable lyrics and an MP4", "/lyrics/", "text", "NEW"),
       item(
         "Music preview",
         "Artwork, audio and a beat-synced MP4",
@@ -192,6 +193,7 @@ export const STUDIOS = [
         "/audio?tab=captions",
         "text",
       ),
+      item("Lyric Studio", "Your song, editable lyrics and an MP4", "/lyrics/", "text", "NEW"),
       item(
         "Music preview",
         "Make a release teaser with your own track",

@@ -32,7 +32,7 @@ test('preset recipes stay aligned with actual studio links and media',async()=>{
 test('workflow handoffs preserve ordered working studio URLs',async()=>{
   const flow=(await req('workflows/release-teaser').json()).item;
   assert.deepEqual(flow.steps.map(s=>new URL(s.studioUrl).pathname),['/image','/music','/music']);
-  const list=await req('workflows').json();assert.equal(list.count,15);
+  const list=await req('workflows').json();assert.equal(list.count,16);assert.ok(list.items.some(item=>item.id==='song-lyrics'));
   for(const item of list.items){assert.ok(item.steps.length);assert.equal(item.remoteExecution,false);}
 });
 

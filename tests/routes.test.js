@@ -29,6 +29,7 @@ test("new studio routes serve real pages and pin their scripts and styles", asyn
       "/projects",
       "/projects/",
       "/explore", "/explore/", "/library", "/edit", "/cut", "/build", "/games", "/games/", "/website", "/website/", "/scene",
+      "/lyrics", "/lyrics/", "/lyrics/index.html",
       "/music",
       "/music/",
       "/music/index.html",

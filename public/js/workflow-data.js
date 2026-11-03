@@ -3,6 +3,7 @@ import { COLLECTION_TEMPLATES } from './website/collection-list.js';
 import { PRESETS, presetURL } from './presets/catalog.js';
 
 export const WORKFLOWS = [
+  {id:'song-lyrics',name:'Your song becomes a lyric video',tag:'AUDIO + TYPE + MOTION',image:'/media/lyrics/lyric-studio.svg',description:'Upload a song, transcribe and correct the words, choose a visual style and export with your original audio.',output:'MP4 + SRT / LRC',steps:[['Upload and transcribe your song','/lyrics/'],['Edit phrases, timing and chorus emphasis','/lyrics/'],['Choose a look and export your video','/lyrics/']]},
   {id:'image-workroom',name:'Image to campaign frame',tag:'IMAGE + DESIGN',image:'/media/website/ceramics.jpg',description:'Reframe an image, adjust its finish and add a headline. Save a new take, ready for motion.',output:'PNG + saved take',steps:[['Choose or create an image','/image'],['Compose a new take','/edit/'],['Use the saved take in your next tool','/library/']]},
   {id:'scene-stage',name:'Objects to a 3D scene',tag:'3D + IMAGE',image:'/media/art/observatory.jpg',description:'Stage real objects and lights, orbit the camera, and export a complete editable scene.',output:'GLB + PNG frame',steps:[['Stage your objects','/scene/'],['Set lighting and camera','/scene/'],['Export GLB or save a frame','/scene/']]},
   {id:'website-template',name:'A studio website of your own',tag:'IMAGE + WEBSITE',image:'/media/website/pavilion.jpg',description:'Describe a site, edit every word in place, add your own images and export a fast static site you can host free.',output:'Static HTML website',steps:[['Create your featured image','/image'],['Describe and edit your website','/website/'],['Preview and export HTML','/website/']]},
@@ -285,6 +286,7 @@ export const GALLERY = [
   ...SITE_CARDS,
   ...GAME_CARDS,
   card("film-launch", "film", "Launch film", "A brief becomes a scored, beat-cut film", "/film", "16/9"),
+  card("film-lyrics", "film", "Lyric Studio", "Your song, editable lyrics and six visual worlds", "/lyrics/", "16/9"),
   card("film-music", "film", "Music visualizer", "Artwork and your track, cut to the beat", "/music", "16/9"),
   card("film-captions", "film", "Captions", "Edit by text and burn in styled captions", "/cut/", "16/9"),
   card("film-voice", "film", "Voiceover", "Turn a script into a voice", "/audio?tab=voice", "16/9"),

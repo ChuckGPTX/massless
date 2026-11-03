@@ -75,7 +75,7 @@ export function initNavigation() {
     (s) =>
       s.href === path ||
       path === `/studios/${s.id}` ||
-      (["/film", "/music"].includes(path) && s.id === "video"),
+      (["/film", "/music", "/lyrics"].includes(path) && s.id === "video"),
   );
   const home = node("a", "studio-explore", "Home");
   home.href = "/";

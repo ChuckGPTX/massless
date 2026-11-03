@@ -51,13 +51,17 @@ export async function exportMusic({
   });
   let failure;
   const venc = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    output: (chunk, meta) => {
+      try { muxer.addVideoChunk(chunk, meta); } catch (e) { failure = e; }
+    },
     error: (e) => {
       failure = e;
     },
   });
   const aenc = new AudioEncoder({
-    output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+    output: (chunk, meta) => {
+      try { muxer.addAudioChunk(chunk, meta); } catch (e) { failure = e; }
+    },
     error: (e) => {
       failure = e;
     },
@@ -90,7 +94,12 @@ export async function exportMusic({
       } finally {
         frame.close();
       }
-      if (aenc.encodeQueueSize > 20) await aenc.flush();
+      // Keep one continuous AAC stream. Mid-track flushes can insert encoder
+      // padding at every batch boundary and produce duplicate audio timestamps.
+      while (aenc.encodeQueueSize > 20) {
+        check();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
     }
     for (let i = 0, total = Math.ceil(duration * fps); i < total; i++) {
       check();
