@@ -11,7 +11,7 @@
     "directory": "./public",
     "binding": "ASSETS",
     "html_handling": "drop-trailing-slash",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*", "/mcp", "/console/*"]
   },
   "ai": { "binding": "AI" },
   "kv_namespaces": [
@@ -61,7 +61,7 @@
   ],
   // Daily sweep of expired Sign envelopes (see scheduled() in src/index.js).
   "triggers": { "crons": ["17 4 * * *"] },
-  "durable_objects": { "bindings": [{ "name": "GENERATION_LEDGER", "class_name": "GenerationLedger" }] },
-  "migrations": [{ "tag": "massless-generations-v1", "new_sqlite_classes": ["GenerationLedger"] }],
+  "durable_objects": { "bindings": [{ "name": "WEBSITE_AI_LIMITS", "class_name": "WebsiteAiLimits" }, { "name": "GENERATION_LEDGER", "class_name": "GenerationLedger" }] },
+  "migrations": [{ "tag": "massless-generations-v1", "new_sqlite_classes": ["GenerationLedger"] }, { "tag": "chucksi-website-ai-v1", "new_sqlite_classes": ["WebsiteAiLimits"] }],
   "observability": { "enabled": true }
 }

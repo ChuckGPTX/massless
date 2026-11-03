@@ -58,6 +58,7 @@
   },
   "durable_objects": {
     "bindings": [
+      { "name": "WEBSITE_AI_LIMITS", "class_name": "WebsiteAiLimits" },
       {
         "name": "GENERATION_LEDGER",
         "class_name": "GenerationLedger"
@@ -70,7 +71,8 @@
       "new_sqlite_classes": [
         "GenerationLedger"
       ]
-    }
+    },
+    { "tag": "chucksi-website-ai-v1", "new_sqlite_classes": ["WebsiteAiLimits"] }
   ],
   "observability": {
     "enabled": true
@@ -78,6 +80,7 @@
   "workers_dev": true,
   "preview_urls": false,
   "routes": [
+    { "pattern": "console.chucksi.com", "custom_domain": true },
     {
       "pattern": "chucksi.com",
       "custom_domain": true

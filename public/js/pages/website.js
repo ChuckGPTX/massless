@@ -16,6 +16,7 @@ import { initPublish } from '../website/publish.js';
 import { shareUrl, decodeSite } from '../website/share.js';
 import { ICON_NAMES, icon } from '../website/icons.js';
 import { shoot } from '../engines.js';
+import { initAssistant } from '../website/assistant-ui.js';
 import * as store from '../store.js';
 import { bindDialogs, toast, el, download } from '../ui.js';
 
@@ -1469,6 +1470,11 @@ function wire() {
     switchTab(n.id.slice(2));
   });
   $('#prompt').addEventListener('input', syncCreate);
+  $('#ask-assistant').addEventListener('click', () => {
+    switchTab('create');
+    $('#ai-title').scrollIntoView({ block: 'start', behavior: 'auto' });
+    $('#ai-instruction').focus({ preventScroll: true });
+  });
   $('#all-templates').addEventListener('click', () => $('#tpl-dialog').showModal());
   $('#step-design').addEventListener('click', () => $('#tpl-dialog').showModal());
   $('#tpl-search').addEventListener('input', renderTemplateResults);
@@ -1491,6 +1497,12 @@ function wire() {
   $('#launch-phone').addEventListener('click', () => { $('#launch-dialog').close(); setBreakpoint('phone'); $('#canvas').scrollIntoView({ block: 'center' }); });
   $('#launch-publish').addEventListener('click', () => { $('#launch-dialog').close(); window.mzSite.publish?.open(); });
   $('#generate').addEventListener('click', generate);
+  initAssistant({
+    current: () => ({ site: state.site, pageId: state.pageId, id: state.id }),
+    commit: commitEdit,
+    apply: draft => mutate(site => Object.assign(site, draft)),
+    create: async draft => { if (state.id && !state.demo) await save(); newProject(draft); scheduleSave(); },
+  });
   $('#fill-images').addEventListener('click', fillImages);
   $('#status-cancel').addEventListener('click', () => state.fillCtl?.abort());
   $('#undo').addEventListener('click', undo);
