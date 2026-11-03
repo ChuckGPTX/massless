@@ -1,21 +1,29 @@
 // Talking product ad: a digital presenter (a made-up person, labelled as such) reads the script with a voiceover,
 // cut like a social ad: medium and close shots, a product cutaway, bold word-by-word captions and an end card.
-// The mouth moves with the voice's loudness; precise lip-sync is not offered yet.
+// The presenter is drawn as an illustration. Its mouth follows the words: the script is lined up with the voice
+// (lipsync.js), each word becomes mouth shapes, and the voice's loudness sets how far the jaw opens.
 import { loadImage, canvas, cover, clamp, ease, span, setFont, fitText, FONT, meanColor, rgbCss, luma, mix } from '../common.js';
 import { PRESENTERS } from '../catalog.js';
 import { apiFetch } from '../../human.js';
+import { align, fallbackTimings, track, mouthAt, envelope } from '../lipsync.js';
+import { illustrate, drawMouth, drawBlink } from '../presenter.js';
 
 export const kind = 'video';
 export const heavy = ['presenter'];
-// lips: centre of the mouth, mouth width (fractions of the presenter photo)
-const FACE = { ava: { mouth: [0.508, 0.507], mw: 0.13, eyes: 0.43 }, leo: { mouth: [0.504, 0.522], mw: 0.15, eyes: 0.42 }, mei: { mouth: [0.479, 0.534], mw: 0.15, eyes: 0.44 } };
+// mouth: centre of the lips, mw: mouth width, eye: centre of each eye, ew: eye width (fractions of the picture)
+const FACE = {
+  ava: { mouth: [0.508, 0.507], mw: 0.13, eyes: 0.43, eye: [[0.468, 0.408], [0.597, 0.417]], ew: 0.05 },
+  leo: { mouth: [0.504, 0.522], mw: 0.15, eyes: 0.42, eye: [[0.442, 0.42], [0.571, 0.421]], ew: 0.043 },
+  mei: { mouth: [0.479, 0.534], mw: 0.15, eyes: 0.44, eye: [[0.412, 0.432], [0.546, 0.432]], ew: 0.052 },
+};
 const FPS = 30, END = 1.6;
 
 export async function prepare(spec, io, params) {
   const pr = PRESENTERS.find((p) => p.id === params.presenter) || PRESENTERS[0];
-  const [face, cut] = await Promise.all([loadImage(pr.src), io.cutout('product')]);
+  const [photo, cut] = await Promise.all([loadImage(pr.src), io.cutout('product')]);
   const tone = meanColor(cut.cut);
-  return { pr, face, faceMeta: FACE[pr.id], cut: cut.cut, tone, env: null, voice: null, voiceLen: 0, script: '', words: [] };
+  const look = illustrate(photo, FACE[pr.id], pr.id);
+  return { pr, face: look.base, look, faceMeta: FACE[pr.id], cut: cut.cut, tone, env: null, voice: null, voiceLen: 0, script: '', words: [] };
 }
 
 function words(script) { return String(script || '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).slice(0, 80); }
@@ -25,22 +33,40 @@ function speechLength(ctx, params) {
 }
 export function duration(ctx, params) { return Math.min(20, speechLength(ctx, params) + END + 0.3); }
 
-/** Word timings spread over the speech by length. */
+const voiced = (ctx, params) => !!(ctx.env && ctx.script === params.script);
+/** Word timings: lined up with the voice when there is one, otherwise spread by length with rests at punctuation. */
 function timings(ctx, params) {
-  const ws = words(params.script), L = speechLength(ctx, params);
-  const weight = ws.map((w) => w.replace(/[^\w]/g, '').length + 2 + (/[.,!?]$/.test(w) ? 3 : 0));
-  const total = weight.reduce((a, b) => a + b, 0) || 1;
-  let t = 0.15;
-  return ws.map((w, i) => { const d = (weight[i] / total) * (L - 0.25); const r = { w, t0: t, t1: t + d }; t += d; return r; });
+  const v = voiced(ctx, params), k = `${v ? 'v' : 'n'}|${params.script}`;
+  if (ctx._tk !== k) {
+    const ws = words(params.script);
+    ctx._tw = v ? align(ws, ctx.env, FPS) : fallbackTimings(ws, speechLength(ctx, params));
+    ctx._keys = track(ctx._tw);
+    ctx._tk = k;
+  }
+  return ctx._tw;
 }
-/** Mouth opening 0..1 at time t: from the voice when there is one, otherwise from the words. */
-function mouth(ctx, params, t, tw) {
-  if (ctx.env && ctx.script === params.script) { const i = Math.floor(t * FPS); return clamp((ctx.env[i] || 0) * 1.1); }
-  const cur = tw.find((x) => t >= x.t0 && t < x.t1);
-  if (!cur) return 0;
-  const k = (t - cur.t0) / (cur.t1 - cur.t0);
-  const syl = Math.max(1, Math.round(cur.w.length / 3));
-  return 0.35 + 0.45 * Math.abs(Math.sin(k * Math.PI * syl));
+/** Loudness at t (0..1), smoothed over a few frames. */
+function loudness(ctx, t) {
+  const e = ctx.env, f = t * FPS, i = Math.floor(f), at = (j) => e[Math.max(0, Math.min(e.length - 1, j))] || 0;
+  const v = at(i) + (at(i + 1) - at(i)) * (f - i);
+  return (at(i - 2) + 2 * at(i - 1) + 3 * v + 2 * at(i + 2) + at(i + 3)) / 9;
+}
+/** The mouth at t: the blended shape of the words, its jaw opening scaled by the voice's loudness. */
+function mouth(ctx, params, t) {
+  timings(ctx, params);
+  const m = mouthAt(ctx._keys, t);
+  m.open *= voiced(ctx, params) ? clamp(0.2 + 1.1 * loudness(ctx, t), 0.2, 1.15) : 0.9;
+  return m;
+}
+/** Eyelids: a quick blink every few seconds (0 open .. 1 shut), the same on every run. */
+function blink(t) {
+  let at = 0.9;
+  for (let i = 1; at < t + 1; i++) {
+    const d = t - at;
+    if (d >= 0 && d < 0.2) return d < 0.07 ? d / 0.07 : 1 - (d - 0.07) / 0.13;
+    at += 2.3 + 2.4 * ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1;
+  }
+  return 0;
 }
 
 export async function audio(ctx, params) {
@@ -57,12 +83,8 @@ export async function audio(ctx, params) {
     const off = new OfflineAudioContext(1, n, 48000);
     const src = off.createBufferSource(); src.buffer = dec; src.connect(off.destination); src.start();
     const mono = (await off.startRendering()).getChannelData(0);
-    // loudness per frame drives the mouth
-    const per = 48000 / FPS, env = new Float32Array(Math.ceil(mono.length / per));
-    let peak = 1e-4;
-    for (let i = 0; i < env.length; i++) { let s = 0; for (let j = 0; j < per; j++) { const v = mono[i * per + j] || 0; s += v * v; } env[i] = Math.sqrt(s / per); peak = Math.max(peak, env[i]); }
-    for (let i = 0; i < env.length; i++) env[i] = clamp((env[i] / peak - 0.08) * 1.4);
-    ctx.env = env; ctx.voiceLen = dec.duration; ctx.script = params.script;
+    // loudness per frame: the words are lined up with it, and it sets how far the jaw opens
+    ctx.env = envelope(mono, 48000, FPS); ctx.voiceLen = dec.duration; ctx.script = params.script;
     ctx.voice = { channels: [mono], sampleRate: 48000 };
     return ctx.voice;
   } catch (e) {
@@ -86,7 +108,7 @@ export function render(ctx, c, { w, h, t, duration: D0, params }) {
   const end = T >= L + 0.3;
   if (end) endCard(ctx, g, w, h, T - L - 0.3, params, brandRGB);
   else if (T >= cut0 && T < cut1) productShot(ctx, g, w, h, (T - cut0) / (cut1 - cut0), params, brandRGB);
-  else presenter(ctx, g, w, h, T, Math.floor(T / 2.4) % 2 === 1, mouth(ctx, params, T, tw), params);
+  else presenter(ctx, g, w, h, T, Math.floor(T / 2.4) % 2 === 1, mouth(ctx, params, T), params);
   if (!end) captions(g, w, h, T, tw, u);
   // disclosure, always on
   g.save();
@@ -98,21 +120,18 @@ export function render(ctx, c, { w, h, t, duration: D0, params }) {
   g.restore();
 }
 
-function presenter(ctx, g, w, h, T, close, open, params) {
+function presenter(ctx, g, w, h, T, close, mo, params) {
   const f = ctx.face, m = ctx.faceMeta;
-  // draw the face into its own canvas with the jaw moved, then frame it
+  // draw the illustrated face into its own canvas with the jaw moved, the mouth and the eyelids, then frame it
   const pc = ctx._pc || (ctx._pc = canvas(f.width, f.height));
   const pg = pc.getContext('2d');
   pg.setTransform(1, 0, 0, 1, 0, 0);
   pg.drawImage(f, 0, 0);
   const mw = m.mw * f.width, mx = m.mouth[0] * f.width, my = m.mouth[1] * f.height;
-  const gap = open * mw * 0.16;
-  if (gap > 0.6) {
-    // the dark of the open mouth between the lips
-    pg.fillStyle = 'rgba(48,18,20,0.92)';
-    pg.beginPath(); pg.ellipse(mx, my + gap * 0.35, mw * 0.36, gap * 0.55 + 0.5, 0, 0, Math.PI * 2); pg.fill();
-    // move the lower lip and chin down with a soft-edged slice
-    const sw = mw * 1.9, sh = mw * 1.25, sx = mx - sw / 2, sy = my + mw * 0.02;
+  const drop = clamp(mo.open, 0, 1.15) * mw * 0.3 * 0.84 * 0.8;
+  if (drop > 0.6) {
+    // the chin follows the jaw: a soft-edged slice of the face below the mouth moves down
+    const sw = mw * 1.9, sh = mw * 1.25, sx = mx - sw / 2, sy = my + mw * 0.06;
     const slice = ctx._slice || (ctx._slice = canvas(Math.ceil(sw), Math.ceil(sh)));
     const sg = slice.getContext('2d');
     sg.globalCompositeOperation = 'source-over';
@@ -122,11 +141,17 @@ function presenter(ctx, g, w, h, T, close, open, params) {
     const gx = sg.createRadialGradient(sw / 2, sh * 0.3, sw * 0.18, sw / 2, sh * 0.3, sw * 0.5);
     gx.addColorStop(0, 'rgba(0,0,0,1)'); gx.addColorStop(1, 'rgba(0,0,0,0)');
     sg.fillStyle = gx; sg.fillRect(0, 0, sw, sh);
-    pg.drawImage(slice, sx, sy + gap);
+    const top = sg.createLinearGradient(0, 0, 0, sh * 0.3);
+    top.addColorStop(0, 'rgba(0,0,0,0)'); top.addColorStop(1, 'rgba(0,0,0,1)');
+    sg.fillStyle = top; sg.fillRect(0, 0, sw, sh);
+    pg.drawImage(slice, sx, sy + drop);
   }
+  drawMouth(pg, mx, my, mw, mo, ctx.look);
+  drawBlink(pg, m.eye.map(([x, y]) => [x * f.width, y * f.height]), m.ew * f.width, blink(T), ctx.look);
   g.fillStyle = '#ddd'; g.fillRect(0, 0, w, h);
   const zoom = close ? 1.32 : 1.04;
-  const bob = Math.sin(T * 1.7) * 0.004, sway = Math.sin(T * 1.1) * 0.006;
+  const nod = voiced(ctx, params) ? loudness(ctx, T - 0.1) * 0.006 : 0;
+  const bob = Math.sin(T * 1.7) * 0.004 + nod, sway = Math.sin(T * 1.1) * 0.006 + Math.sin(T * 0.43) * 0.004;
   g.save();
   g.translate(w / 2, h / 2); g.rotate(sway * 0.8); g.translate(-w / 2, -h / 2);
   cover(g, pc, -w * 0.02, -h * 0.02 + bob * h, w * 1.04, h * 1.04, { zoom, fx: m.mouth[0], fy: close ? m.eyes + 0.05 : 0.42 });

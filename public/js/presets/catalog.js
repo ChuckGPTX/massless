@@ -257,7 +257,7 @@ const talkingSpec = spec({
   category: 'ads', tags: ['ugc', 'ad', 'voiceover'], engine: 'talking',
   cost: { tier: 'daily-free', estimateUSD: 0.001 },
   safety: { ...SAFE, disclosure: 'Digital presenter. Not a real person.' },
-  note: 'Precise lip-sync is coming soon. For now the mouth follows the voice.',
+  note: 'Mouth follows the words. The presenter is drawn, not filmed.',
   steps: [{ op: 'script' }, { op: 'voice' }, { op: 'presenter' }, { op: 'captions' }, { op: 'layout' }],
   inputs: [
     { key: 'presenter', type: 'choice', label: 'Presenter', default: 'ava', options: PRESENTERS.map((p) => ({ id: p.id, label: p.label })) },

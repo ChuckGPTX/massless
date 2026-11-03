@@ -7,6 +7,7 @@ import { defaults, outputList } from './spec.js';
 import { canvas, loadImage, fileToImage, hasTransparency, quickCutout, applyMatte, trim, toBlob, encodeMP4, canExportVideo, clamp } from './common.js';
 import { bump } from './popular.js';
 import { saveAsset, downloadBlob } from '../assets.js';
+import { pickFromLibrary, libraryChoices, savedItem } from './library-pick.js';
 import { toast } from '../ui.js';
 import { loadFonts, zipStore, slug } from '../make/kit.js';
 
@@ -42,6 +43,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
   let current = 0; // selected output tab
   let ctx = null, token = 0, results = [], playing = !reduceMotion(), raf = 0, t0 = performance.now();
   const cache = new Map(); // image + cut-out work, by source
+  const fromLibrary = {}; // input key -> (saved item) => use it like an upload
 
   // ---------- inputs ----------
   const sourceOf = (key) => {
@@ -155,7 +157,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
         h('div', { class: 'pz-under' }, engine.kind === 'video' || outputs.some((o) => o.type === 'video') ? playBtn : null, spec.safety.disclosure ? h('small', { class: 'pz-disclosure' }, spec.safety.disclosure) : null, spec.note ? h('small', { class: 'pz-note' }, spec.note) : null),
         resultsBox,
         h('div', { class: 'maker-actions' }, h('button', { class: 'btn-accent pz-make-here', type: 'button', onclick: () => makeAll() }, 'Make it ↗'), zipBtn, saveBtn, shareBtn, h('a', { class: 'btn-ghost', href: '/library/' }, 'Open My library ↗')))),
-    spec.engine === 'scene' ? sceneStrip() : related(),
+    (spec.engine === 'scene' ? sceneStrip() : related()) || '',
   );
   root.hidden = false;
   function sceneStrip() {
@@ -237,7 +239,8 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
     const upload = h('label', { class: 'pz-sample pz-upload', title: 'Add your own' }, file, h('span', { 'aria-hidden': 'true' }, '+'), h('small', {}, 'Yours'));
     const draw = () => {
       for (const b of strip.querySelectorAll('.pz-sample[data-i]')) b.setAttribute('aria-checked', String(picks[input.key]?.kind === 'sample' && picks[input.key].index === Number(b.dataset.i)));
-      upload.classList.toggle('is-on', picks[input.key]?.kind === 'file');
+      upload.classList.toggle('is-on', picks[input.key]?.kind === 'file' && !picks[input.key].lib);
+      lib.classList.toggle('is-on', !!picks[input.key]?.lib);
       none?.setAttribute('aria-checked', String(!picks[input.key]));
     };
     let none = null;
@@ -250,16 +253,24 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
       if (s.params) for (const [k, v] of Object.entries(s.params)) if (!edited.has(k)) params[k] = v;
       draw(); syncFields(); changed(input, true);
     } }, h('img', { src: s.src, alt: '', loading: 'lazy' }), h('small', {}, s.label))));
-    strip.append(upload);
+    // My library: the visitor's saved pictures, used exactly like an upload
+    const lib = h('button', { type: 'button', class: 'pz-sample pz-upload pz-lib-open', title: 'Choose from My library', 'data-key': input.key, onclick: async () => {
+      const it = await pickFromLibrary(input);
+      if (it) await fromLibrary[input.key](it);
+    } }, h('span', { 'aria-hidden': 'true' }, '▤'), h('small', {}, 'My library'));
+    strip.append(upload, lib);
+    const use = async (blob, name, libId = null, render = true) => {
+      try {
+        const image = await fileToImage(blob);
+        picks[input.key] = { kind: 'file', name, image, stamp: Date.now(), lib: libId };
+        draw(); if (render) changed(input, true);
+      } catch (e) { toast(e.message, 'error'); }
+    };
+    fromLibrary[input.key] = (it, render) => use(it.blob, it.name || 'My library', it.id, render);
     file.addEventListener('change', async () => {
       const f = file.files[0];
       file.value = '';
-      if (!f) return;
-      try {
-        const image = await fileToImage(f);
-        picks[input.key] = { kind: 'file', name: f.name, image, stamp: Date.now() };
-        draw(); changed(input, true);
-      } catch (e) { toast(e.message, 'error'); }
+      if (f) await use(f, f.name);
     });
     const precise = h('div', { class: 'pz-rough', hidden: true },
       h('small', {}, 'The background looks busy, so the edges may be rough.'),
@@ -440,7 +451,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
   // Share to Explore: the first result, and a Remix link that reopens this preset with the same words and choices.
   async function shareExplore() {
     const r = results.find((x) => x.type === 'video' && x.blob.size <= 8 * 1048576) || results.find((x) => x.type === 'image');
-    if (!r) { toast('Press Make it first, then share it.'); return; }
+    if (!r) { toast(results.length ? 'This clip is too big to share to Explore (8 MB at most). Download it instead.' : 'Press Make it first, then share it.'); return; }
     const q = new URLSearchParams({ preset: spec.id });
     for (const i of spec.inputs) {
       const v = params[i.key];
@@ -523,6 +534,10 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
     };
   }
 
+  // ?asset=<id>: open with a saved item from My library already chosen
+  const asset = await savedItem(q.get('asset'));
+  const takes = asset && spec.inputs.find((i) => fromLibrary[i.key] && libraryChoices([asset], i).length);
+  if (takes) await fromLibrary[takes.key](asset, false);
   // the first tab is the most useful: for social, the post; otherwise the first size
   await prepare();
   return true;
