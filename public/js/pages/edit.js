@@ -484,7 +484,7 @@ const toCanvas = (img) => {
   c.getContext("2d").drawImage(img, 0, 0);
   return c;
 };
-const remember = () => W.steps.push({ base: T.base, result: T.result });
+const remember = () => W.steps.push({ base: T.base, result: T.result, meta: T.meta });
 
 function renderRefs() {
   const row = $("#we-refs");
@@ -567,6 +567,7 @@ function undoWords() {
   if (!prev || T.busy) return;
   T.base = prev.base;
   T.result = prev.result;
+  T.meta = prev.meta;
   T.baseData = null;
   T.strokes = makeCanvas(T.base.width, T.base.height);
   refresh();
