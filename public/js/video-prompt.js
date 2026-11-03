@@ -43,10 +43,12 @@ async function mount(el) {
   const uploadText = h('span',{},h('b',{text:'+ Add a first frame'}),h('small',{text:'Optional · start with your own image'}));
   const upload = h('label',{class:'vp-upload',for:'vp-frame'},image,uploadText,file);
   const remove = h('button',{type:'button',class:'vp-idea',text:'Remove image',hidden:true});
+  const rightsBox = h('input',{type:'checkbox',id:'vp-rights'});
+  const rights = h('label',{class:'vp-rights',for:'vp-rights',hidden:true},rightsBox,' I own this image or have permission, and anyone in it has agreed.');
   const hint = h('p',{class:'vp-hint'});
   const form = h('form',{id:'video-create-form',class:'vp-form'},
     h('div',{class:'vp-cover'},h('img',{src:'/media/showcase/glass-tide.jpg',alt:''}),h('span',{},h('small',{text:'YOUR VISION, IN MOTION'}),h('strong',{text:'Create a scene.'}))),
-    upload,remove,h('label',{class:'vp-field'},h('span',{text:'Prompt'}),prompt),idea,
+    upload,remove,rights,h('label',{class:'vp-field'},h('span',{text:'Describe your video'}),prompt),idea,
     h('div',{class:'vp-options'},h('label',{class:'vp-field'},h('span',{text:'Mode'}),engine),h('label',{class:'vp-field'},h('span',{text:'Resolution'}),resolution)),
     h('label',{class:'vp-field',id:'vp-shape-field'},h('span',{text:'Frame'}),shape),h('div',{class:'vp-duration'},h('span',{text:'Duration'}),h('strong',{text:'5 seconds'})),hint);
   el.replaceChildren(form,h('div',{class:'vp-footer'},status,allowance,go,stop,retry));
@@ -79,14 +81,15 @@ async function mount(el) {
   document.querySelectorAll('[data-video-idea]').forEach(b=>b.addEventListener('click',()=>{document.querySelector('#t-create').click();useIdea(b.dataset.videoIdea);}));
   prompt.addEventListener('input',()=>store.set(prompt.value));
   engine.addEventListener('change',refresh);
-  file.addEventListener('change',async()=>{const v=++frameVersion; if(!file.files[0])return;try{const data=await frameData(file.files[0]);if(v!==frameVersion)return;frame=data;image.src=data;image.hidden=false;uploadText.hidden=true;remove.hidden=false;setStatus('');}catch(e){if(v===frameVersion)setStatus(e.message,true);}});
-  remove.addEventListener('click',()=>{frameVersion++;frame=null;file.value='';image.removeAttribute('src');image.hidden=true;uploadText.hidden=false;remove.hidden=true;});
+  file.addEventListener('change',async()=>{const v=++frameVersion; if(!file.files[0])return;try{const data=await frameData(file.files[0]);if(v!==frameVersion)return;frame=data;image.src=data;image.hidden=false;uploadText.hidden=true;remove.hidden=false;rights.hidden=false;rightsBox.checked=false;setStatus('');}catch(e){if(v===frameVersion)setStatus(e.message,true);}});
+  remove.addEventListener('click',()=>{frameVersion++;frame=null;file.value='';image.removeAttribute('src');image.hidden=true;uploadText.hidden=false;remove.hidden=true;rights.hidden=true;rightsBox.checked=false;});
   form.addEventListener('submit',async e=>{
     e.preventDefault();if(busy)return;
     const text=prompt.value.trim();if(text.length<3){setStatus('Describe your video first.',true);prompt.focus();return;}
     store.set(text);
     if(!session()){try{sessionStorage.setItem('chucksi.after-signin','/video');}catch{}location.href='/projects/#account';return;}
     const selected=engine.value,selectedShape=selected==='free'?'16:9':shape.value,selectedResolution=resolution.value,startFrame=frame;
+    if(startFrame&&!rightsBox.checked){setStatus('Please confirm you have permission to use this image.',true);rightsBox.focus();return;}
     busy=true;retry.hidden=true;ctl=new AbortController();go.disabled=true;stop.hidden=false;
     for(const control of form.elements)control.disabled=true;
     out.hidden=false;out.replaceChildren(h('div',{class:'vp-progress'},h('span',{class:'vp-spinner','aria-hidden':true}),h('h2',{text:'Your idea is becoming a film.'}),h('p',{text:'You can explore the effects while this finishes. Keep this page open.'})));
@@ -94,7 +97,7 @@ async function mount(el) {
     try{
       await accessToken();progress('Starting your video…');
       // The hosted profile accepts a size hint; its output follows the source frame.
-      const result=selected==='free'?await promoVideoJob({prompt:text,duration:5,resolution:selectedResolution,image:startFrame||undefined,signal:ctl.signal,onProgress:progress}):await gpuJob({job:'animate',engine:selected==='managed-wan'?selected:undefined,input:{prompt:text,mode:'quick',resolution:selected==='managed-wan'?'720p':selectedResolution,aspect:selected==='managed-wan'?'16:9':selectedShape,...(startFrame?{image:startFrame.split(',')[1]}:{})},signal:ctl.signal,onProgress:p=>progress(p.message)});
+      const result=selected==='free'?await promoVideoJob({prompt:text,duration:5,resolution:selectedResolution,image:startFrame||undefined,signal:ctl.signal,onProgress:progress}):await gpuJob({job:'animate',engine:selected==='managed-wan'?selected:undefined,input:{prompt:text,mode:'quick',resolution:selected==='managed-wan'?'720p':selectedResolution,aspect:selected==='managed-wan'?'16:9':selectedShape,...(startFrame?{image:startFrame.split(',')[1]}:{})},rights:!!startFrame&&rightsBox.checked,signal:ctl.signal,onProgress:p=>progress(p.message)});
       if(!result.blob?.size)throw new Error('The video was empty. Please try again.');
       if(outputUrl)URL.revokeObjectURL(outputUrl);outputUrl=URL.createObjectURL(result.blob);
       out.replaceChildren(h('div',{class:'vp-result-heading'},h('div',{},h('p',{class:'video-eyebrow',text:'READY FOR YOUR NEXT CHAPTER'}),h('h2',{text:'Your film is ready.'})),h('a',{href:outputUrl,download:'chucksi-video.mp4',class:'btn-accent',text:'Download MP4 ↓'})),h('video',{src:outputUrl,controls:true,autoplay:true,muted:true,loop:true,playsinline:true,'aria-label':'Generated video'}),h('p',{class:'vp-result-prompt',text}),h('div',{class:'vp-result-actions'},h('a',{href:'/cut/',class:'pill',text:'Caption & trim ↗'}),h('a',{href:'/library/',class:'pill',text:'My library ↗'})));

@@ -337,7 +337,7 @@ export class GenerationLedger {
   async settle(tx, job, result, centsPerHour) {
     if (!job.day || job.costCents !== undefined) return;
     const actual = job.provider === "managed-wan" ? managedVideoCost(result, job.firstFrameCents || 0) : actualCents(result, centsPerHour);
-    job.costCents = actual === null ? job.reservedCents : actual;
+    job.costCents = actual === null ? job.reservedCents : Math.min(actual, job.reservedCents);
     const dayKey = "day:" + job.day;
     const used = (await tx.get(dayKey)) || 0;
     await tx.put(dayKey, Math.max(0, used - (job.reservedCents - job.costCents)));
@@ -380,6 +380,9 @@ export class GenerationLedger {
     if (lab && !g.lab) return reply({ error: "This isn't available on this site." }, 403);
     if (lab && body.lab !== true)
       return reply({ error: "This is a Lab model: a research preview for non-commercial use. Turn on Lab mode to run it.", lab: true }, 403);
+    // Bringing a photo to life: the uploader confirms rights and consent of anyone shown.
+    if (["animate", "motion", "lipsync"].includes(body.job) && body.input && typeof body.input === "object" && body.input.image && body.rights !== true)
+      return reply({ error: "Confirm you have the rights to this image and the consent of anyone in it.", rights: true }, 400);
     let v;
     try {
       v = validateGpuJob(body.job, body.input);
