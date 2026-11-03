@@ -80,14 +80,14 @@ const sceneSpecs = SCENES.map((s) => spec({
 // ---------- 2. Product spin ----------
 const spinSpec = spec({
   id: 'product-spin', title: 'Product spin', summary: 'Your product turning on a glossy turntable', badge: 'trending',
-  description: 'Your product cut out and turned in 3D on a reflective turntable, with a moving light sweep. Loops cleanly.',
+  description: 'Your product cut out, given real thickness and turned on a reflective turntable, with a slow push-in and a moving light sweep. Loops cleanly.',
   category: 'ads', tags: ['product', 'video', 'turntable'], engine: 'spin',
   steps: [{ op: 'cutout' }, { op: 'depth' }, { op: 'turntable' }, { op: 'floor' }, { op: 'lightSweep' }, { op: 'text' }],
   inputs: [
     productInput('sneaker'),
     { key: 'backdrop', type: 'choice', label: 'Backdrop', default: 'cream', options: [{ id: 'cream', label: 'Cream' }, { id: 'midnight', label: 'Midnight' }, { id: 'blush', label: 'Blush' }, { id: 'sage', label: 'Sage' }, { id: 'cobalt', label: 'Cobalt' }] },
     { key: 'brand', type: 'text', label: 'Brand or product name', max: 28, default: 'Stride One' },
-    { key: 'motion', type: 'choice', label: 'Motion', default: 'turn', options: [{ id: 'turn', label: 'Full turn' }, { id: 'sway', label: 'Gentle sway' }] },
+    { key: 'motion', type: 'choice', label: 'Motion', default: 'showcase', options: [{ id: 'showcase', label: 'Showcase turn' }, { id: 'sway', label: 'Gentle sway' }] },
   ],
   outputs: [{ type: 'video', sizes: [FEED, STORY, SQUARE], duration: 5, fps: 30, label: 'Looping clip' }],
   preview: { ar: '4/5' },

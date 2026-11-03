@@ -1,10 +1,10 @@
 // A very small WebGL2 kit for the preset engines: one offscreen canvas per engine, shader programs,
 // textures from canvases or images, a full-screen quad and dynamic triangle meshes.
 
-export function createGL(w = 16, h = 16) {
+export function createGL(w = 16, h = 16, { antialias = true } = {}) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
-  const gl = c.getContext('webgl2', { premultipliedAlpha: true, preserveDrawingBuffer: true, antialias: true, alpha: true });
+  const gl = c.getContext('webgl2', { premultipliedAlpha: true, preserveDrawingBuffer: true, antialias, alpha: true });
   if (!gl) throw new Error('This effect needs WebGL 2. Try a recent Chrome, Edge, Firefox or Safari.');
   const quad = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, quad);
