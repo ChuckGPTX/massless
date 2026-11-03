@@ -2119,16 +2119,16 @@
   },
   {
    "path": "media/presets/product-spin.mp4",
-   "bytes": 48191,
-   "sha256": "bc01fe47f872ec59500fd4c01197e4b04a709b93274128c0b0831c8d917de586",
+   "bytes": 49559,
+   "sha256": "6b7b0527b206e290bcb706fcf80e64f7be1b184609c5c7d480f4d06625199c02",
    "card": "preset-product-spin",
    "source": "preset-factory",
    "recorded_from": "/workflows?preset=product-spin"
   },
   {
    "path": "media/presets/product-spin.webp",
-   "bytes": 5670,
-   "sha256": "ec14fb563cbaedeeabba181dab4d510e4cdcb6b29c4b65d236f265a53d451ae5",
+   "bytes": 5986,
+   "sha256": "f457616613dd6510d1e4e0b5f3a4c6f3636d4bd9ce6e2d87d70ae14e9706578b",
    "card": "preset-product-spin",
    "source": "preset-factory",
    "recorded_from": "/workflows?preset=product-spin"
