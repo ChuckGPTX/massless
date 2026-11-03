@@ -79,7 +79,7 @@ export async function start(id, root) {
       h('aside', { class: 'maker-side', 'aria-label': 'Workflow settings' }, form),
       h('section', { class: 'maker-stage', 'aria-label': 'Result' },
         status, player, boards,
-        h('div', { class: 'maker-actions' }, zipBtn, saveBtn, h('a', { class: 'btn-ghost', href: '/library/' }, 'Open My library ↗')))),
+        h('div', { class: 'maker-actions' }, zipBtn, saveBtn, h('button', { class: 'btn-ghost', type: 'button', onclick: shareExplore }, 'Share to Explore'), h('a', { class: 'btn-ghost', href: '/library/' }, 'Open My library ↗')))),
     h('section', { class: 'maker-showcase', 'aria-label': 'Made with Chucksi' },
       h('div', { class: 'maker-showcase-head' }, h('p', { class: 'eyebrow' }, 'MADE WITH CHUCKSI'), h('h2', {}, 'Start from an example'), h('p', {}, 'Each one opens with its own words and frames, ready to remix.')),
       showcase),
@@ -317,6 +317,23 @@ export async function start(id, root) {
   }
 
   // ---------- downloads and library ----------
+  // Share to Explore: the first artboard, and a Remix link that reopens this workflow with the same fields.
+  async function shareExplore() {
+    const board = result?.boards?.find((b) => !b.hidden && b.canvas);
+    if (!board) { toast('Make something first, then share it.'); return; }
+    const q = new URLSearchParams({ make: id });
+    for (const f of mod.fields) {
+      const v = state[f.key];
+      if (v === undefined || v === null || v === '' || typeof v === 'object') continue;
+      q.set(f.key, f.type === 'check' ? (v ? '1' : '') : String(v));
+    }
+    let remixUrl = `/workflows?${q}`;
+    if (remixUrl.length > 6000) remixUrl = `/workflows?make=${encodeURIComponent(id)}${exampleId ? `&example=${encodeURIComponent(exampleId)}` : ''}`;
+    try {
+      const m = await import('../explore-share.js');
+      await m.shareToExplore({ blob: board.canvas, title: result.name || meta.name, tool: 'design', remixUrl, width: board.canvas.width, height: board.canvas.height });
+    } catch (e) { toast(e.message, 'error'); }
+  }
   async function downloadAll() {
     if (!result) return;
     zipBtn.disabled = true;

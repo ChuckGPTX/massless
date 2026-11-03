@@ -387,13 +387,24 @@ function timecode(sec, fps) {
   const p = (n) => String(n).padStart(2, '0');
   return `00:${p(s)}:${p(f)}`;
 }
+// The Remix link for a clip: the same move or effect (and the same sample still, when it was one) on /video.
+function clipRemix() {
+  const q = new URLSearchParams();
+  if (state.effect) { q.set('effect', state.effect); if (state.effectLook) q.set('look', state.effectLook); }
+  else q.set('move', state.move);
+  const ref = state.current?.ref || '';
+  if (ref.startsWith('sample:')) q.set('sample', ref.slice(7));
+  return `/video?${q}`;
+}
 function addClip(blob, ext, label) {
   import('../assets.js').then(({saveAsset}) => saveAsset(blob, {name:label+'.'+ext, engine:'camera-effects', sourceId:state.current?.ref, settings:{move:state.move, effect:state.effect, effectLook:state.effectLook, intensity:state.intensity, look:{...state.look}, fps:state.fps, duration:state.duration}})).catch(() => toast('Clip ready, but it couldn\'t be saved. Download it before leaving.', 'error'));
   $('#clips-wrap').hidden = false;
   const url = URL.createObjectURL(blob);
   const v = el('video', { src: url, muted: true, loop: true, playsinline: true, autoplay: true });
   v.muted = true;
-  $('#clips').prepend(el('div', { class: 'clip fresh' }, v, el('div', { class: 'meta' }, el('span', {}, label), el('a', { class: 'dl', href: url, download: `chucksi-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now() % 1e6}.${ext}` }, 'Download'))));
+  const remix = clipRemix();
+  const share = el('button', { type: 'button', class: 'share', onclick: () => import('../explore-share.js').then((m) => m.shareToExplore({ blob, title: label.replace(/, \d+s$/, ''), tool: 'video', remixUrl: remix })).catch((e) => toast(e.message, 'error')) }, 'Share to Explore');
+  $('#clips').prepend(el('div', { class: 'clip fresh' }, v, el('div', { class: 'meta' }, el('span', {}, label), el('span', { class: 'acts' }, share, el('a', { class: 'dl', href: url, download: `chucksi-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now() % 1e6}.${ext}` }, 'Download')))));
   $('#clips-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
