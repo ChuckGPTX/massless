@@ -7,3 +7,4 @@ tests/out/
 # Local worker caches
 __pycache__/
 *.pyc
+tools/presets/plates/out/*.png
