@@ -1,12 +1,12 @@
 // Deterministic lyric timing and rendering. No network, hidden generation or third-party artwork.
 import {phraseCues,holdLines} from './lyric-align.js';
 export const LOOKS = [
-  {id:'kinetic',name:'Big feelings',detail:'Oversized words. Sharp entrances. Electric pink.',color:'#ff5b9c'},
-  {id:'paper',name:'After hours',detail:'An intimate, ink-on-paper lyric journal.',color:'#df7c4d'},
-  {id:'orbit',name:'In your orbit',detail:'Type floats inside a moving constellation.',color:'#b7a2ff'},
-  {id:'matter',name:'Sound becomes matter',detail:'Bass, mids and treble sculpt a living landscape.',color:'#b9f66b'},
-  {id:'architecture',name:'Type architecture',detail:'Dimensional lettering above a moving skyline.',color:'#78d9ff'},
-  {id:'echo',name:'Future echo',detail:'A tunnel of lyric afterimages and liquid light.',color:'#ffb55b'},
+  {id:'kinetic',name:'Big feelings',detail:'Letters slam in as they’re sung, then blow apart.',color:'#ff5b9c'},
+  {id:'paper',name:'After hours',detail:'Polaroids skid in. Words written in ink.',color:'#df7c4d'},
+  {id:'orbit',name:'In your orbit',detail:'Words ride a turning 3D carousel through the stars.',color:'#b7a2ff'},
+  {id:'matter',name:'Sound becomes matter',detail:'Letters fly together from dust and burst on the bass.',color:'#b9f66b'},
+  {id:'architecture',name:'Type architecture',detail:'3D letters flip up like a split-flap board.',color:'#78d9ff'},
+  {id:'echo',name:'Future echo',detail:'Words rush at you out of a tunnel of light.',color:'#ffb55b'},
 ];
 export const MAX_SONG_SECONDS=360;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));

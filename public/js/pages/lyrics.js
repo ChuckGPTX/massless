@@ -1,10 +1,12 @@
-import { LOOKS, MAX_SONG_SECONDS, cleanCues, fromTranscript, parseLyrics, cueAt, cropScore, toLrc, toSrt, analyzeBands, drawLyrics, estimateBeat } from '../lyrics-engine.js';
+import { LOOKS, MAX_SONG_SECONDS, cleanCues, fromTranscript, parseLyrics, cueAt, cropScore, toLrc, toSrt, analyzeBands, estimateBeat } from '../lyrics-engine.js';
 import { encodeWav } from '../audio-engine.js';
 import { apiFetch } from '../human.js';
 import { ASR_LANGS, shiftResult } from '../transcribe.js';
 import { exportMusic } from '../music-export.js';
 import { generateLyricVideo, directLyrics } from '../lyric-generation.js';
 import { wordsFrom, alignLyrics, promptFrom } from '../lyric-align.js';
+import { drawMotion, planScenes, autoPictureCount } from '../lyric-motion.js';
+import { writePrompts, paintScenes } from '../lyric-scenes.js';
 
 const $ = s => document.querySelector(s);
 const canvas = $('#lyric-canvas'), audio = $('#song-audio');
@@ -19,10 +21,16 @@ let look = 'kinetic', busy = false, cancel, demo = true, trackURL, resultURL, ar
 let playhead = 4.7, context, pendingFile, view = 'welcome';
 // Every word Whisper heard, with times. Pasted lyrics borrow these times instead of being spaced evenly.
 let heard = [];
+// Scenes and their pictures. A picture entry is { image, url, prompt } or null (built-in art is used).
+let scenes = [], pictures = [], paintSeed = Math.floor(Math.random() * 1e6);
+// A line whose words are spread evenly from `from`, so previews animate word by word.
+function timedLine(text,start,end,step){const words=text.split(' ').map((w,i)=>({text:w,start:start+.2+i*step,end:start+.2+(i+1)*step}));return {text,start,end,words};}
+const welcomeLine=timedLine('We are made of little moments',0,4.2,.32);
 const message = text => { $('#status').textContent = text; };
 const format = n => `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2,'0')}`;
 const duration = () => score?.duration || 16;
-const config = () => ({cues,look,title:$('#song-title').value || 'Little moments',artist:$('#artist').value,analysis,art,motion:$('#motion').value==='on'});
+const config = () => ({cues,look,title:$('#song-title').value || 'Little moments',artist:$('#artist').value,analysis,art,motion:$('#motion').value==='on',scenes:scenes.length?scenes:planScenes(cues,duration(),1),images:pictures.map(p=>p?.image||null),duration:duration()});
+const pictureCount = () => { const v=$('#pictures').value; return v==='auto'?autoPictureCount(duration()):Number(v)||0; };
 function invalidate() {
   if(resultURL) URL.revokeObjectURL(resultURL);
   resultURL = null; $('#download-video').hidden = true; $('#back-to-result').disabled = true;
@@ -43,7 +51,7 @@ function setBusy(on, cancellable = false) {
   }
 }
 function render(t = playhead) {
-  drawLyrics(canvas,t,config());
+  drawMotion(canvas,t,config());
   $('#scrub').value = t;
   $('#time-display').textContent = `${format(t)} / ${format(duration())}`;
   const index = cueAt(cues,t);
@@ -77,7 +85,8 @@ function styleThumbs() {
     const button=document.createElement('button'); button.type='button';button.className='look';button.dataset.look=item.id;
     button.setAttribute('aria-pressed',String(look===item.id));
     const thumb=document.createElement('canvas');thumb.width=480;thumb.height=270;thumb.setAttribute('aria-hidden','true');
-    drawLyrics(thumb,2,{cues:[{start:0,end:5,text:item.id==='paper'?'stay a little longer':item.id==='matter'?'feel the frequency':item.id==='architecture'?'words have weight':item.id==='orbit'?'in your orbit':item.id==='echo'?'meet your future':'make me feel'}],look:item.id,title:'',motion:true});
+    const sample=item.id==='paper'?'stay a little longer':item.id==='matter'?'feel the frequency':item.id==='architecture'?'words have weight':item.id==='orbit'?'in your orbit':item.id==='echo'?'meet your future':'make me feel';
+    drawMotion(thumb,1.6,{cues:[timedLine(sample,0,5,.15)],look:item.id,title:'',motion:true,images:[pictures.find(Boolean)?.image||null],scenes:[{start:0,end:5,index:0,seed:LOOKS.indexOf(item)+2,move:'push',transition:'zoom'}],duration:5});
     const title=document.createElement('strong');title.textContent=item.name;
     const detail=document.createElement('span');detail.textContent=item.detail;
     button.append(thumb,title,detail);button.addEventListener('click',()=>{look=item.id;invalidate();$('#look-name').textContent=item.name.toUpperCase();$('#looks').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();});
@@ -132,7 +141,7 @@ async function openSong(file, signal) {
   const decoded=await context.decodeAudioData(await file.arrayBuffer());
   ensureActive(signal);
   if(decoded.duration<.5 || decoded.duration>MAX_SONG_SECONDS) throw new Error('Choose audio between half a second and 6 minutes.');
-  buffer=decoded; originalFile=file;demo=false;cues=[];heard=[];
+  buffer=decoded; originalFile=file;demo=false;cues=[];heard=[];clearPictures();pictureNote='';
   if(trackURL)URL.revokeObjectURL(trackURL);trackURL=URL.createObjectURL(file);audio.src=trackURL;
   $('#song-title').value=file.name.replace(/\.[^.]+$/,'').slice(0,60);$('#artist').value='';
   $('#clip-length').value='full';
@@ -171,8 +180,44 @@ async function transcribeSong(signal) {
   cues=next;buildCueList();invalidate();seek(0);
   $('#timing-note').textContent=matched&&matched.matched>=.3?`Your lyrics, timed to the vocal. ${Math.round(matched.matched*100)}% of your words were heard clearly; the rest sit between them.`:'Automatic lyrics, timed word by word. Fix any word below, or paste your lyrics to keep the timing and swap in your exact words.';
 }
+function clearPictures(){for(const p of pictures)if(p?.url)URL.revokeObjectURL(p.url);pictures=[];scenes=[];}
+// Plan the scenes and paint any that don't have a picture yet. Existing pictures are kept when the
+// number of scenes is unchanged, so editing words or timing never repaints the video.
+async function paintPictures(signal){
+  const count=pictureCount(),next=planScenes(cues,duration(),Math.max(1,count||1));
+  const keep=next.length===scenes.length&&pictures.length===next.length?pictures:(clearPictures(),new Array(next.length).fill(null));
+  scenes=next;pictures=keep;
+  if(!count||demo){buildSceneStrip();return;}
+  const missing=pictures.map((p,i)=>p?-1:i).filter(i=>i>=0);
+  if(missing.length){
+    const {prompts}=await writePrompts({scenes,cues,title:$('#song-title').value,apiFetch,signal});
+    scenePrompts=prompts;
+    const bar=$('#generation-progress');
+    const {pictures:painted,limitHit}=await paintScenes({prompts:missing.map(i=>prompts[i]),apiFetch,signal,seed:paintSeed,onProgress:(d,total)=>{$('#generation-status').textContent=`Painting scene ${d} of ${total}…`;bar.value=Math.round(d/total*100);}});
+    missing.forEach((i,k)=>{pictures[i]=painted[k];});
+    pictureNote=limitHit||'';
+  }
+  buildSceneStrip();styleThumbs();
+}
+let scenePrompts=[],pictureNote='';
+function buildSceneStrip(){
+  const strip=$('#scene-strip');if(!strip)return;strip.replaceChildren();
+  $('#scene-note').textContent=pictureNote||(pictures.some(Boolean)?'Each scene has its own picture and camera move. Swap any of them.':'Built-in art is used. Choose a number of pictures in Video settings, or add your own here.');
+  scenes.forEach((sc,i)=>{
+    const card=document.createElement('div');card.className='scene-card';
+    const thumb=document.createElement('div');thumb.className='scene-thumb';if(pictures[i]?.url)thumb.style.backgroundImage=`url(${pictures[i].url})`;
+    const label=document.createElement('span');label.textContent=`Scene ${i+1} · ${format(sc.start)} · ${({push:'push in',pull:'pull back',spin:'360 spin',pan:'pan',orbit:'orbit',tilt:'tilt'})[sc.move]}`;
+    const again=document.createElement('button');again.type='button';again.className='text-button';again.textContent='New picture';
+    again.onclick=async()=>{if(busy)return;setBusy(true);message(`Painting scene ${i+1}…`);try{const prompt=scenePrompts[i]||(await writePrompts({scenes,cues,title:$('#song-title').value,apiFetch})).prompts[i];const r=await paintScenes({prompts:[prompt],apiFetch,seed:Math.floor(Math.random()*1e6)});if(r.pictures[0]){if(pictures[i]?.url)URL.revokeObjectURL(pictures[i].url);pictures[i]=r.pictures[0];invalidate();buildSceneStrip();styleThumbs();render();message(`New picture for scene ${i+1}. Save changes to update your video.`);}else message(r.limitHit||'Couldn’t paint that one. Try again.');}finally{setBusy(false);}};
+    const own=document.createElement('label');own.className='file-button';own.textContent='Use my image';const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp';
+    input.onchange=async()=>{const f=input.files[0];if(!f)return;if(f.size>15*1024*1024){message('Use an image smaller than 15 MB.');return;}try{const image=await createImageBitmap(f);if(pictures[i]?.url)URL.revokeObjectURL(pictures[i].url);pictures[i]={image,url:URL.createObjectURL(f),prompt:'your image'};invalidate();buildSceneStrip();render();}catch{message('Could not read that image. Try JPG, PNG or WebP.');}};
+    own.append(input);
+    const row=document.createElement('div');row.className='lyric-row';row.append(again,own);
+    card.append(thumb,label,row);strip.append(card);
+  });
+}
 function generationStage(stage, progress) {
-  const text={prepare:'Opening your song…',transcribe:'Listening for every word…',compose:'Bringing the words and motion together…',render:'Making your video…'};
+  const text={prepare:'Opening your song…',transcribe:'Listening for every word…',compose:'Bringing the words and motion together…',paint:'Painting a picture for every scene…',render:'Making your video…'};
   $('#generation-status').textContent=stage==='render' && Number.isFinite(progress)?`Making your video · ${Math.round(progress*100)}%`:text[stage];
   const bar=$('#generation-progress');
   if(stage==='render'&&Number.isFinite(progress))bar.value=Math.round(progress*100);else bar.removeAttribute('value');
@@ -188,10 +233,11 @@ async function runGeneration({file, demoMode=false, reuseLyrics=false}={}) {
       prepare:file?()=>openSong(file,signal):demoMode?()=>prepareDemo(signal):null,
       transcribe:!demoMode&&!reuseLyrics?()=>transcribeSong(signal):null,
       compose:()=>{if(!score||!cues.some(c=>c.text.trim()))throw new Error('Add lyrics before making this video.');if(!reuseLyrics)cues=directLyrics(cues);buildCueList();},
+      paint:()=>paintPictures(signal),
       render:renderVideo,
     });
     $('#finished-song').textContent=$('#song-title').value;
-    $('#finished-details').textContent=`${format(duration())} song · ${LOOKS.find(l=>l.id===look).name} · Original audio`;
+    $('#finished-details').textContent=`${format(duration())} song · ${LOOKS.find(l=>l.id===look).name} · ${pictures.filter(Boolean).length?pictures.filter(Boolean).length+' AI pictures':'built-in art'} · Original audio`;
     $('#finished-note').textContent=demo?'Original instrumental with sample words, not sung vocals. Upload your song to make your own.':'Give it a listen before sharing. You can correct any words or timing in Edit video.';
     showView('finished');
   } catch(e) {
@@ -224,7 +270,7 @@ async function renderVideo(signal, onProgress) {
   invalidate();await document.fonts.ready;ensureActive(signal);
   const target=document.createElement('canvas');target.width=canvas.width;target.height=canvas.height;
   const settings={...config(),cues:cleanCues(cues,duration())};
-  const blob=await exportMusic({canvas:target,draw:(el,t)=>drawLyrics(el,start+t,settings),score:cropScore(score,start,length),duration:length,signal,onProgress});
+  const blob=await exportMusic({canvas:target,draw:(el,t)=>drawMotion(el,start+t,settings),score:cropScore(score,start,length),duration:length,signal,onProgress});
   ensureActive(signal);
   resultURL=URL.createObjectURL(blob);
   for(const id of ['download-video','download-result']){const link=$('#'+id);link.href=resultURL;link.download=fileName('mp4');link.hidden=false;}
@@ -255,7 +301,7 @@ $('#load-demo').onclick=loadDemo;$('#play').onclick=play;$('#transcribe').onclic
 $('#cancel-task').onclick=()=>{cancel?.abort();message('Cancelling…');};$('#export-video').onclick=exportVideo;
 $('#scrub').oninput=e=>seek(Number(e.target.value));audio.onended=()=>{pause();playhead=duration();render();};
 $('#shape').onchange=setShape;
-for(const id of ['song-title','artist','motion','clip-start','clip-length']) $('#'+id).addEventListener('input',()=>{invalidate();render();});
+for(const id of ['song-title','artist','motion','clip-start','clip-length','pictures']) $('#'+id).addEventListener('input',()=>{invalidate();render();});
 $('#apply-lyrics').onclick=()=>applyLyrics($('#paste-lyrics').value);
 $('#lyrics-file').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.size>500000){message('Use a subtitle file smaller than 500 KB.');return;}try{const text=await f.text();$('#paste-lyrics').value=text;applyLyrics(text);}catch{message('Could not read that subtitle file.');}};
 $('#add-line').onclick=()=>{
@@ -293,7 +339,7 @@ await document.fonts.ready;
 styleThumbs();buildCueList();setBusy(false);waveform();render();
 let welcomeFrame=0;
 function tick(now){
-  if(view==='welcome'&&now-welcomeFrame>80){welcomeFrame=now;drawLyrics($('#welcome-art'),matchMedia('(prefers-reduced-motion: reduce)').matches?1.5:1.5+(now/1000)%2,{cues:[{start:0,end:5,text:'WE ARE MADE OF LITTLE MOMENTS'}],look:'kinetic',title:'YOUR SONG. YOUR STORY.'});}
+  if(view==='welcome'&&now-welcomeFrame>40){welcomeFrame=now;const still=matchMedia('(prefers-reduced-motion: reduce)').matches;drawMotion($('#welcome-art'),still?3:(now/1000)%4.6,{cues:[welcomeLine],look:'kinetic',title:'',motion:!still,scenes:[{start:0,end:4.6,index:0,seed:3,move:'spin',transition:'zoom'}],duration:4.6});}
   if(view==='editor'&&!audio.paused&&!busy){playhead=audio.currentTime;render();}
   requestAnimationFrame(tick);
 }requestAnimationFrame(tick);

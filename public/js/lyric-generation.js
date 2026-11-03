@@ -1,8 +1,8 @@
 // One generation transaction. Each stage must finish before the next can start.
 // A retry can reuse corrected lyrics without sending the song for transcription again.
-export async function generateLyricVideo({prepare, transcribe, compose, render, signal, onStage = () => {}}) {
+export async function generateLyricVideo({prepare, transcribe, compose, paint, render, signal, onStage = () => {}}) {
   const check = () => { if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError'); };
-  for (const [name, task] of [['prepare', prepare], ['transcribe', transcribe], ['compose', compose]]) {
+  for (const [name, task] of [['prepare', prepare], ['transcribe', transcribe], ['compose', compose], ['paint', paint]]) {
     check();
     if (task) { onStage(name); await task(signal); }
   }

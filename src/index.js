@@ -48,7 +48,7 @@ const ai = (env, model, input) => (env.AI_GATEWAY ? env.AI.run(model, input, { g
 // Endpoints that spend the free allowance ask for a pass cookie. Without one they answer 401
 // { human: true, sitekey }; the page runs Turnstile, posts the token to /api/human and gets a signed
 // cookie for PASS_HOURS. The check is off unless TURNSTILE_SITEKEY, TURNSTILE_SECRET and PASS_KEY are set.
-const GATED = new Set(['/api/shot', '/api/edit', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe']);
+const GATED = new Set(['/api/shot', '/api/edit', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe', '/api/lyric-scenes']);
 // Massless Sign POSTs (create, events, verify) also need a pass; see signGated() in src/sign.js.
 const PASS_COOKIE = 'ml_pass';
 const PASS_HOURS = 6;
@@ -135,15 +135,17 @@ async function shot(request, env) {
   const prompt = String(body.prompt || '').trim().slice(0, MAX_PROMPT);
   if (!prompt) return json({ error: 'The prompt is empty.' }, 400);
 
-  const dailyCap = Number(env.DAILY_CAP || 120);
-  const perVisitor = Number(env.PER_VISITOR_CAP || 12);
+  // Lyric Studio pictures have their own allowance (several per video), so they don't use up Image studio's.
+  const lyrics = body.purpose === 'lyrics';
+  const dailyCap = Number(lyrics ? env.LYRIC_IMG_CAP || 600 : env.DAILY_CAP || 120);
+  const perVisitor = Number(lyrics ? env.PER_VISITOR_LYRIC_IMG || 40 : env.PER_VISITOR_CAP || 12);
   const day = today();
   const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-  const visitorKey = `v:${day}:${await hashIp(ip)}`;
-  const totalKey = `t:${day}`;
+  const visitorKey = `${lyrics ? 'lv' : 'v'}:${day}:${await hashIp(ip)}`;
+  const totalKey = `${lyrics ? 'l' : 't'}:${day}`;
   const [total, mine] = await Promise.all([counter(env.MASSLESS_KV, totalKey), counter(env.MASSLESS_KV, visitorKey)]);
   if (total >= dailyCap) return json({ error: "Today's free images are used up. Try the Backup style, or come back tomorrow." }, 429);
-  if (mine >= perVisitor) return json({ error: `You've used your ${perVisitor} free images for today. Try the Backup style, or come back tomorrow.` }, 429);
+  if (mine >= perVisitor) return json({ error: lyrics ? `You've used today's ${perVisitor} free lyric video pictures. Your video still works with built-in art.` : `You've used your ${perVisitor} free images for today. Try the Backup style, or come back tomorrow.` }, 429);
 
   const pick = IMAGE_MODELS[body.model] || IMAGE_MODELS['flux-1-schnell'];
   const opts = { width: dim(body.width, 1024), height: dim(body.height, 1024), negative: body.negative ? String(body.negative).slice(0, 400) : undefined, seed: Number.isFinite(Number(body.seed)) ? Math.abs(Math.floor(Number(body.seed))) % 4294967295 : undefined };
@@ -228,6 +230,45 @@ async function beats(request, env) {
   }
   if (!spec || !Array.isArray(spec.blocks)) return json({ error: "The script writer couldn't finish. Try again, or use the built-in template." }, 502);
   return json({ spec, model: LLM });
+}
+
+// POST /api/lyric-scenes writes one picture prompt per scene of a lyric video with Llama 3.3 70B.
+// Body: { title, scenes: [ ["lyric line", ...], ... ] }. Reply: { prompts: [string, ...] } in scene order.
+const SCENE_RULES = `You are a music video director. For each numbered scene you get the lyrics sung during it.
+Write one image prompt per scene for a striking, cinematic, photorealistic still that shows what those lyrics feel like.
+Each prompt: max 45 words, a concrete subject, setting, light, colour palette and camera angle. Vary the shots across scenes (wide, close-up, aerial, detail, silhouette) but keep one visual world and palette for the whole song.
+Never include written words, letters, captions, signs or screens with text. No real people, celebrities, brands or logos.
+Reply with JSON only: {"prompts": ["...", "..."]} with exactly one prompt per scene, in order.`;
+async function lyricScenes(request, env) {
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  const origin = request.headers.get('origin');
+  if (origin && new URL(origin).host !== new URL(request.url).host) return json({ error: 'Cross-site requests are not allowed.' }, 403);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Send JSON: { "scenes": [["line", ...], ...] }' }, 400); }
+  const scenes = (Array.isArray(body.scenes) ? body.scenes : []).slice(0, 12).map((lines) => (Array.isArray(lines) ? lines : []).map((l) => String(l).slice(0, 160)).join(' / ').slice(0, 500));
+  if (!scenes.length) return json({ error: 'No scenes to picture.' }, 400);
+  const title = String(body.title || '').slice(0, 80);
+  const gate = await allow(request, env, 'lscene', Number(env.LYRIC_SCENE_CAP || 300), Number(env.PER_VISITOR_LYRIC_SCENE || 12));
+  if (gate) return gate;
+  let result;
+  try {
+    result = await ai(env, LLM, {
+      messages: [
+        { role: 'system', content: SCENE_RULES },
+        { role: 'user', content: `Song: ${title || 'untitled'}\n` + scenes.map((l, i) => `Scene ${i + 1}: ${l || '(instrumental)'}`).join('\n') },
+      ],
+      max_tokens: 1400,
+      temperature: 0.7,
+    });
+  } catch (e) {
+    console.error('lyric scenes failed:', e?.message || e);
+    return json({ error: 'The scene writer is busy. Built-in scenes are used instead.' }, 502);
+  }
+  let spec = result && result.response;
+  if (typeof spec === 'string') { try { spec = JSON.parse(spec.slice(spec.indexOf('{'), spec.lastIndexOf('}') + 1)); } catch { spec = null; } }
+  const prompts = Array.isArray(spec?.prompts) ? spec.prompts.map((p) => String(p).trim().slice(0, 600)).filter(Boolean) : [];
+  if (prompts.length < scenes.length) return json({ error: 'The scene writer is busy. Built-in scenes are used instead.' }, 502);
+  return json({ prompts: prompts.slice(0, scenes.length), model: LLM });
 }
 
 // POST /api/ask answers a question about a document's text with Llama 3.3 70B (Office > Ask). Only the text
@@ -543,6 +584,7 @@ export default {
     if (url.pathname === '/api/edit') return edit(request, env);
     if (url.pathname === '/api/beats') return beats(request, env);
     if (url.pathname === '/api/ask') return ask(request, env);
+    if (url.pathname === '/api/lyric-scenes') return lyricScenes(request, env);
     if (url.pathname === '/api/tts') return tts(request, env);
     if (url.pathname === '/api/transcribe') return transcribe(request, env);
     if (url.pathname === '/api/health') return health(env);
