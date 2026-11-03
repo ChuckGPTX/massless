@@ -443,14 +443,14 @@ export const canExportVideo = () => typeof VideoEncoder !== 'undefined';
 
 /**
  * Render `draw(canvas, t)` for t in [0, duration) into an MP4. audio: { channels: [Float32Array], sampleRate }.
- * Returns a Blob (video/mp4).
+ * bitrate: bits per second (default 0.16 bits per pixel per frame). Returns a Blob (video/mp4).
  */
-export async function encodeMP4(c, { duration, fps = 30, draw, audio = null, onProgress = () => {}, signal } = {}) {
+export async function encodeMP4(c, { duration, fps = 30, draw, audio = null, onProgress = () => {}, signal, bitrate = 0 } = {}) {
   if (typeof VideoEncoder === 'undefined') throw new Error('Video export needs a recent Chrome, Edge or Safari. You can still download the stills.');
   const W = c.width, H = c.height;
   let vcfg = null;
   for (const codec of AVC) {
-    const cfg = { codec, width: W, height: H, bitrate: Math.round(W * H * fps * 0.16), framerate: fps, avc: { format: 'avc' } };
+    const cfg = { codec, width: W, height: H, bitrate: bitrate > 0 ? Math.round(bitrate) : Math.round(W * H * fps * 0.16), framerate: fps, avc: { format: 'avc' } };
     try { if ((await VideoEncoder.isConfigSupported(cfg)).supported) { vcfg = cfg; break; } } catch { /* next */ }
   }
   if (!vcfg) throw new Error('This browser cannot export MP4 at this size. Try desktop Chrome.');

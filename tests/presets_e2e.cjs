@@ -1,6 +1,6 @@
 // End-to-end check of every one-tap preset in a real browser, at desktop and phone widths:
-// open it, see the instant preview, add your own photo (desktop), Make it, check every file, download a file and
-// the ZIP, and save to My library. Fails on any console error or failed request.
+// open it, see the instant preview, save a picture to My library and pick it inside the preset (and via ?asset=),
+// add your own photo (desktop), Make it, check every file, download a file and the ZIP, and save to My library. Fails on any console error or failed request.
 //   node tools/workflow-loops/serve.mjs public 8790 &
 //   node tests/presets_e2e.cjs [--widths 1440,390] [--out dir] [preset ids...]
 // Uses Playwright's Chromium (require('playwright')); it is not a project dependency.
@@ -45,14 +45,8 @@ function drawTestTile([z, x, y]) {
   return c.convertToBlob({ type: 'image/jpeg', quality: 0.85 }).then((bl) => bl.arrayBuffer()).then((ab) => { let s = ''; const u = new Uint8Array(ab); for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); });
 }
 
-// a short spoken-sounding WAV for the voice request (the real one is made by the site)
-function wav(seconds = 6, rate = 24000) {
-  const n = seconds * rate, b = Buffer.alloc(44 + n * 2);
-  b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVEfmt ', 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
-  b.writeUInt32LE(rate, 24); b.writeUInt32LE(rate * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(n * 2, 40);
-  for (let i = 0; i < n; i++) { const t = i / rate, env = Math.max(0, Math.sin(t * Math.PI * 3.1)) * (t < seconds - 0.4 ? 1 : 0); b.writeInt16LE(Math.round(Math.sin(t * 2 * Math.PI * (140 + 40 * Math.sin(t * 7))) * env * 12000), 44 + i * 2); }
-  return b;
-}
+// the voice request (the real one is made by the site): a speech-like WAV built from the script
+const { speechWav } = require('./fixtures/voice-stub.cjs');
 
 (async () => {
   const { PRESETS } = await import(path.join(__dirname, '..', 'public/js/presets/catalog.js'));
@@ -78,7 +72,7 @@ function wav(seconds = 6, rate = 24000) {
     // a media element dropping its own range request for a result it is about to replace is not a failure
     page.on('requestfailed', (r) => { if (!(r.url().startsWith('blob:') && /ABORTED/.test(r.failure()?.errorText || ''))) note(`requestfailed: ${r.url()} ${r.failure()?.errorText}`); });
     page.on('response', (r) => { if (r.status() >= 400 && !r.url().includes('/api/tts')) note(`${r.status()}: ${r.url()}`); });
-    await page.route('**/api/tts', (r) => r.fulfill({ status: 200, contentType: 'audio/wav', body: wav() }));
+    await page.route('**/api/tts', (r) => r.fulfill({ status: 200, contentType: 'audio/wav', body: speechWav(JSON.parse(r.request().postData() || '{}').text).wav }));
     const placeAsks = [];
     let tilesDown = false;
     await page.route('**/api/place?*', (r) => {
@@ -106,6 +100,40 @@ function wav(seconds = 6, rate = 24000) {
         if (!box || box.width < 120 || box.x < 0 || box.x + box.width > width + 1) throw new Error('the preview does not fit the screen');
         const scroll = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
         if (scroll > 1) throw new Error(`the page scrolls sideways by ${scroll}px`);
+      });
+      await step('pick from My library', async () => {
+        const input = spec.inputs.find((i) => i.type === 'image' && !i.optional) || spec.inputs.find((i) => i.type === 'image');
+        if (!input) return;
+        const open = page.locator(`.pz-lib-open[data-key="${input.key}"]`);
+        // a new visitor sees a friendly empty sheet
+        await open.click();
+        await page.locator('dialog.pz-lib[open] .pz-lib-empty').waitFor({ timeout: 10000 });
+        await page.screenshot({ path: path.join(out, `${id}-${width}-library-empty.jpg`), quality: 75, type: 'jpeg' });
+        await page.locator('dialog.pz-lib .x').click();
+        // save a picture to My library on its own page, then come back and pick it
+        await page.goto(`${BASE}/library/`);
+        await page.locator('#files').setInputFiles(input.prep?.includes('removeBackground') ? PRODUCT : PHOTO);
+        await page.waitForFunction(() => /^1 saved item/.test(document.querySelector('#status')?.textContent || ''), null, { timeout: 20000 });
+        const href = await page.locator('.asset-card a', { hasText: 'Use in a preset' }).first().getAttribute('href');
+        const assetId = new URL(href, BASE).searchParams.get('asset');
+        if (!assetId) throw new Error('no "Use in a preset" link on the saved picture');
+        await page.goto(`${BASE}/workflows?preset=${id}`); await ready();
+        const before = await stageHash();
+        await open.click();
+        await page.locator('dialog.pz-lib[open] .pz-lib-item').first().waitFor({ timeout: 10000 });
+        await page.screenshot({ path: path.join(out, `${id}-${width}-library-sheet.jpg`), quality: 75, type: 'jpeg' });
+        const n = await page.locator('dialog.pz-lib .pz-lib-item').count();
+        if (n !== 1) throw new Error(`the sheet lists ${n} items, expected 1`);
+        await page.locator('dialog.pz-lib .pz-lib-item').first().click();
+        await page.waitForTimeout(400); await ready(); await page.waitForTimeout(500);
+        if (!(await open.evaluate((b) => b.classList.contains('is-on')))) throw new Error('My library is not marked as chosen');
+        if ((await stageHash()).h === before.h) throw new Error('the preview did not change after picking from My library');
+        // ?asset=<id> opens the preset with the saved picture already chosen
+        await page.goto(`${BASE}/workflows?preset=${id}&asset=${assetId}`); await ready();
+        if (!(await open.evaluate((b) => b.classList.contains('is-on')))) throw new Error('?asset did not choose the saved picture');
+        await page.waitForTimeout(300);
+        await page.screenshot({ path: path.join(out, `${id}-${width}-library-picked.jpg`), quality: 75, type: 'jpeg' });
+        await page.goto(`${BASE}/workflows?preset=${id}`); await ready();
       });
       if (width > 600) await step('your own photo', async () => {
         const input = spec.inputs.find((i) => i.type === 'image');
@@ -177,6 +205,11 @@ function wav(seconds = 6, rate = 24000) {
       });
       if (width > 600) await step('share to Explore', async () => {
         await page.locator('.maker-actions button', { hasText: 'Share to Explore' }).click();
+        // Explore takes clips up to 8 MB; a longer talking ad says so instead of opening the share sheet
+        if (!r.files.some((f) => f.endsWith('.png') || fs.statSync(f).size <= 8 * 1048576)) {
+          await page.waitForFunction(() => /too big to share/.test(document.getElementById('toast')?.textContent || ''), null, { timeout: 10000 });
+          return;
+        }
         await page.locator('dialog.xs-dialog[open]').waitFor({ timeout: 30000 });
         await page.waitForFunction(() => { const b = document.querySelector('dialog.xs-dialog .xs-go'); return b && !b.disabled; }, null, { timeout: 30000 });
         const remix = await page.evaluate(() => document.querySelector('dialog.xs-dialog .xs-note')?.textContent || '');
@@ -190,6 +223,7 @@ function wav(seconds = 6, rate = 24000) {
       if (id === 'talking-ad') {
         const mp4 = r.files.find((f) => f.endsWith('.mp4'));
         if (mp4 && !fs.readFileSync(mp4).includes('soun')) throw new Error('the talking ad has no sound track');
+        if (mp4 && fs.statSync(mp4).size > 8 * 1048576) throw new Error(`the talking ad is ${(fs.statSync(mp4).size / 1048576).toFixed(1)} MB, over Explore's 8 MB`);
       }
       const real = errors.filter((e) => !/GPU stall|GL Driver/.test(e));
       if (real.length) throw new Error(real.slice(0, 4).join(' | '));

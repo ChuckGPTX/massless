@@ -246,10 +246,12 @@ const socialSpecs = SOCIAL.map(([id, title, summary, badge, d]) => spec({
 }));
 
 // ---------- 9. Talking product ad ----------
+// Drawn in code (presets/presenter.js). The earlier photo presenters stay in presets/samples with their provenance
+// but are no longer loaded.
 export const PRESENTERS = [
-  { id: 'ava', label: 'Ava', src: '/presets/samples/presenter-ava.webp', voice: 'en' },
-  { id: 'leo', label: 'Leo', src: '/presets/samples/presenter-leo.webp', voice: 'en' },
-  { id: 'mei', label: 'Mei', src: '/presets/samples/presenter-mei.webp', voice: 'en' },
+  { id: 'ava', label: 'Ava', voice: 'en' },
+  { id: 'leo', label: 'Leo', voice: 'en' },
+  { id: 'mei', label: 'Mei', voice: 'en' },
 ];
 const talkingSpec = spec({
   id: 'talking-ad', title: 'Talking product ad', summary: 'A presenter reads your script beside your product', badge: 'new',
@@ -257,10 +259,11 @@ const talkingSpec = spec({
   category: 'ads', tags: ['ugc', 'ad', 'voiceover'], engine: 'talking',
   cost: { tier: 'daily-free', estimateUSD: 0.001 },
   safety: { ...SAFE, disclosure: 'Digital presenter. Not a real person.' },
-  note: 'Precise lip-sync is coming soon. For now the mouth follows the voice.',
+  note: 'Mouth follows the words. The presenter is drawn, not filmed.',
   steps: [{ op: 'script' }, { op: 'voice' }, { op: 'presenter' }, { op: 'captions' }, { op: 'layout' }],
   inputs: [
     { key: 'presenter', type: 'choice', label: 'Presenter', default: 'ava', options: PRESENTERS.map((p) => ({ id: p.id, label: p.label })) },
+    { key: 'backdrop', type: 'choice', label: 'Backdrop', default: 'soft', options: [{ id: 'soft', label: 'Soft gradient' }, { id: 'brand', label: 'Product colour' }] },
     productInput('serum'),
     { key: 'script', type: 'textarea', label: 'Script', max: 320, default: 'Okay, my skin has never looked this good. This is Glow Serum. Three drops every morning, and it just sinks right in. Light, fast, no sticky feel. Tap the link and try it.' },
     { key: 'brand', type: 'text', label: 'Brand or product name', max: 28, default: 'Glow Serum' },

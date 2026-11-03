@@ -86,6 +86,9 @@ function render() {
       link("Music preview", "/music");
       link("3D", "/3d");
       link("Launch film", "/film");
+      const preset = node("a", "Use in a preset", "btn-ghost");
+      preset.href = "/workflows?asset=" + encodeURIComponent(item.id) + "#ads";
+      actions.append(preset);
     }
     if (kind === "video") link("Caption & trim", "/cut/");
     if (kind === "audio") link("Edit by text", "/cut/");

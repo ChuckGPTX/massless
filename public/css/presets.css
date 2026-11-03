@@ -72,3 +72,18 @@
 .pz-under { flex-wrap: wrap; }
 .pz-make-here { display: none; }
 @media (max-width: 900px) { .pz-make-here { display: inline-flex; } }
+
+/* My library inside a preset: the picker tile and its sheet */
+.pz-lib-open > span { font-size: 22px; }
+.pz-lib { width: min(680px, calc(100vw - 32px)); max-height: min(80vh, 760px); }
+.pz-lib-note { color: #a9a9b0; font-size: 13px; margin: 0 0 12px; }
+.pz-lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+.pz-lib-item { all: unset; box-sizing: border-box; cursor: pointer; display: grid; gap: 6px; padding: 6px; min-width: 0; border-radius: 10px; border: 1px solid #2c2c31; background: #1d1d21; transition: border-color 0.18s; }
+.pz-lib-item:hover, .pz-lib-item:focus-visible { border-color: #ffc127; }
+.pz-lib-item:focus-visible { outline: 2px solid #ffc127; outline-offset: 2px; }
+.pz-lib-item img, .pz-lib-item video { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: 6px; background: #2a2a2f; }
+.pz-lib-item small { font-size: 11px; color: #a9a9b0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pz-lib-empty { display: grid; gap: 8px; justify-items: start; padding: 8px 0 4px; }
+.pz-lib-empty p { margin: 0; color: #c9c9cf; }
+.pz-lib-empty p + p { color: #85858c; font-size: 13px; }
+@media (max-width: 650px) { .pz-lib { padding: 18px 16px 20px; } .pz-lib-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } }
