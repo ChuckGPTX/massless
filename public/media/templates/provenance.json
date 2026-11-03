@@ -19,7 +19,8 @@
   "website-studio-screenshots": "Actual complete template pages captured in Chrome through CUA with reduced motion, then cropped into a six-second forward/back scroll using ffmpeg. Original generated photography and original template code. No external footage.",
   "website-motion-recording": "Real Chrome screen recordings captured through CUA from Chucksi's rendered Aural, Current, and Nightjar template pages. Ordered JPEG frames use their original times.json elapsed timestamps in ffmpeg concat durations, sampled at 24 fps without motion interpolation, panning, zooming, reversing, or speed changes. Recordings shorter than six seconds hold the last actual captured frame; per-file timing records show the hold. Static top-aligned crop to 854x480, square pixels, silent H.264 and faststart. Packaged by tools/package_motion_starter_previews.py.",
   "website-motion-screenshot": "Actual desktop Chrome screenshots of Chucksi's own Aural, Current, and Nightjar template pages, captured through CUA. Static top-aligned crops and Lanczos resizing only: 640x400 template thumbnails and 768x432 workflow posters. Packaged by tools/package_motion_starter_previews.py; screenshot hashes are recorded per file.",
-  "preset-factory": "Preset gallery loops rendered on device by each preset's own engine through /workflows?preset=<id>&capture=1 (tools/presets/render-previews.cjs), from the bundled sample inputs (public/presets/provenance.json). Encoded with ffmpeg; no external footage."
+  "preset-factory": "Preset gallery loops rendered on device by each preset's own engine through /workflows?preset=<id>&capture=1 (tools/presets/render-previews.cjs), from the bundled sample inputs (public/presets/provenance.json). Encoded with ffmpeg; no external footage.",
+  "lyric-studio": "Original lyric typography exported by Chucksi Lyric Studio in Chrome through CUA, using the built-in original instrumental and original example words (not sung). Exported MP4 excerpted to five seconds, resized to 768x432 and muted for the gallery with ffmpeg. No external footage."
  },
  "files": [
   {
@@ -3044,6 +3045,18 @@
    "card": "preset-scene-bokeh-night",
    "source": "preset-factory",
    "recorded_from": "/workflows?preset=scene-bokeh-night"
+  },
+  {
+   "path": "media/templates/film-lyrics.mp4",
+   "bytes": 50139,
+   "sha256": "243b6020d6a6fd9e5f4008f7ec521d7cf59ed1d880abcf83ee67ad1fb33b2d29",
+   "source": "lyric-studio"
+  },
+  {
+   "path": "media/templates/film-lyrics.webp",
+   "bytes": 9174,
+   "sha256": "ee6286b42494c7f429ddfacb32d117a4d9e065eece699d55ec7084a0a498ad36",
+   "source": "lyric-studio"
   }
  ]
 }
