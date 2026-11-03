@@ -1,29 +1,21 @@
 // Talking product ad: a digital presenter (a made-up person, labelled as such) reads the script with a voiceover,
 // cut like a social ad: medium and close shots, a product cutaway, bold word-by-word captions and an end card.
-// The presenter is drawn as an illustration. Its mouth follows the words: the script is lined up with the voice
-// (lipsync.js), each word becomes mouth shapes, and the voice's loudness sets how far the jaw opens.
-import { loadImage, canvas, cover, clamp, ease, span, setFont, fitText, FONT, meanColor, rgbCss, luma, mix } from '../common.js';
-import { PRESENTERS } from '../catalog.js';
+// The presenter is a flat illustration drawn in code (presenter.js). Its mouth follows the words: the script is
+// lined up with the voice (lipsync.js), each word becomes mouth shapes, and the voice's loudness sets the jaw.
+import { clamp, ease, span, setFont, fitText, FONT, meanColor, rgbCss, luma, mix } from '../common.js';
 import { apiFetch } from '../../human.js';
 import { align, fallbackTimings, track, mouthAt, envelope } from '../lipsync.js';
-import { illustrate, drawMouth, drawBlink } from '../presenter.js';
+import { CAST, frame, backdrop as drawBackdrop, drawPresenter } from '../presenter.js';
 
 export const kind = 'video';
-export const heavy = ['presenter'];
-// mouth: centre of the lips, mw: mouth width, eye: centre of each eye, ew: eye width (fractions of the picture)
-const FACE = {
-  ava: { mouth: [0.508, 0.507], mw: 0.13, eyes: 0.43, eye: [[0.468, 0.408], [0.597, 0.417]], ew: 0.05 },
-  leo: { mouth: [0.504, 0.522], mw: 0.15, eyes: 0.42, eye: [[0.442, 0.42], [0.571, 0.421]], ew: 0.043 },
-  mei: { mouth: [0.479, 0.534], mw: 0.15, eyes: 0.44, eye: [[0.412, 0.432], [0.546, 0.432]], ew: 0.052 },
-};
+export const heavy = [];
+// flat colours compress well: about 3 Mbps keeps a 15 s 1080x1920 ad well under Explore's 8 MB
+export const bitrate = 3e6;
 const FPS = 30, END = 1.6;
 
 export async function prepare(spec, io, params) {
-  const pr = PRESENTERS.find((p) => p.id === params.presenter) || PRESENTERS[0];
-  const [photo, cut] = await Promise.all([loadImage(pr.src), io.cutout('product')]);
-  const tone = meanColor(cut.cut);
-  const look = illustrate(photo, FACE[pr.id], pr.id);
-  return { pr, face: look.base, look, faceMeta: FACE[pr.id], cut: cut.cut, tone, env: null, voice: null, voiceLen: 0, script: '', words: [] };
+  const cut = await io.cutout('product');
+  return { cut: cut.cut, tone: meanColor(cut.cut), env: null, voice: null, voiceLen: 0, script: '', words: [] };
 }
 
 function words(script) { return String(script || '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).slice(0, 80); }
@@ -67,6 +59,19 @@ function blink(t) {
     at += 2.3 + 2.4 * ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1;
   }
   return 0;
+}
+
+/** Brows lift a little at the start of each sentence and on long words (0..1). */
+function brow(ctx, params, t) {
+  const tw = timings(ctx, params);
+  let b = 0;
+  tw.forEach((x, i) => {
+    const lead = i === 0 || /[.!?]$/.test(tw[i - 1].w), long = x.w.replace(/[^a-z]/gi, '').length >= 6;
+    if (!lead && !long) return;
+    const z = (t - x.t0 - 0.08) / 0.32;
+    b = Math.max(b, (lead ? 1 : 0.7) * Math.exp(-z * z));
+  });
+  return b;
 }
 
 export async function audio(ctx, params) {
@@ -113,7 +118,7 @@ export function render(ctx, c, { w, h, t, duration: D0, params }) {
   // disclosure, always on
   g.save();
   setFont(g, FONT.grotesk, u * 0.026, { tracking: 0.04 });
-  const label = 'DIGITAL PRESENTER · NOT A REAL PERSON';
+  const label = 'DIGITAL PRESENTER';
   const lw = g.measureText(label).width + u * 0.04, lh = u * 0.05;
   g.fillStyle = 'rgba(0,0,0,0.45)'; g.beginPath(); g.roundRect(u * 0.04, u * 0.05, lw, lh, lh / 2); g.fill();
   g.fillStyle = '#fff'; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillText(label, u * 0.06, u * 0.05 + lh / 2);
@@ -121,45 +126,20 @@ export function render(ctx, c, { w, h, t, duration: D0, params }) {
 }
 
 function presenter(ctx, g, w, h, T, close, mo, params) {
-  const f = ctx.face, m = ctx.faceMeta;
-  // draw the illustrated face into its own canvas with the jaw moved, the mouth and the eyelids, then frame it
-  const pc = ctx._pc || (ctx._pc = canvas(f.width, f.height));
-  const pg = pc.getContext('2d');
-  pg.setTransform(1, 0, 0, 1, 0, 0);
-  pg.drawImage(f, 0, 0);
-  const mw = m.mw * f.width, mx = m.mouth[0] * f.width, my = m.mouth[1] * f.height;
-  const drop = clamp(mo.open, 0, 1.15) * mw * 0.3 * 0.84 * 0.8;
-  if (drop > 0.6) {
-    // the chin follows the jaw: a soft-edged slice of the face below the mouth moves down
-    const sw = mw * 1.9, sh = mw * 1.25, sx = mx - sw / 2, sy = my + mw * 0.06;
-    const slice = ctx._slice || (ctx._slice = canvas(Math.ceil(sw), Math.ceil(sh)));
-    const sg = slice.getContext('2d');
-    sg.globalCompositeOperation = 'source-over';
-    sg.clearRect(0, 0, slice.width, slice.height);
-    sg.drawImage(f, sx, sy, sw, sh, 0, 0, sw, sh);
-    sg.globalCompositeOperation = 'destination-in';
-    const gx = sg.createRadialGradient(sw / 2, sh * 0.3, sw * 0.18, sw / 2, sh * 0.3, sw * 0.5);
-    gx.addColorStop(0, 'rgba(0,0,0,1)'); gx.addColorStop(1, 'rgba(0,0,0,0)');
-    sg.fillStyle = gx; sg.fillRect(0, 0, sw, sh);
-    const top = sg.createLinearGradient(0, 0, 0, sh * 0.3);
-    top.addColorStop(0, 'rgba(0,0,0,0)'); top.addColorStop(1, 'rgba(0,0,0,1)');
-    sg.fillStyle = top; sg.fillRect(0, 0, sw, sh);
-    pg.drawImage(slice, sx, sy + drop);
-  }
-  drawMouth(pg, mx, my, mw, mo, ctx.look);
-  drawBlink(pg, m.eye.map(([x, y]) => [x * f.width, y * f.height]), m.ew * f.width, blink(T), ctx.look);
-  g.fillStyle = '#ddd'; g.fillRect(0, 0, w, h);
-  const zoom = close ? 1.32 : 1.04;
-  const nod = voiced(ctx, params) ? loudness(ctx, T - 0.1) * 0.006 : 0;
-  const bob = Math.sin(T * 1.7) * 0.004 + nod, sway = Math.sin(T * 1.1) * 0.006 + Math.sin(T * 0.43) * 0.004;
+  const look = CAST[params.presenter] || CAST.ava;
+  drawBackdrop(g, w, h, look, params.backdrop === 'brand' ? ctx.tone : null);
+  // nod with the voice, a slow sway and a gentle bob
+  const nod = voiced(ctx, params) ? loudness(ctx, T - 0.1) * 7 : 0;
+  const bob = Math.sin(T * 1.7) * 5, tilt = Math.sin(T * 1.1) * 0.02 + Math.sin(T * 0.43) * 0.012;
+  const f = frame(w, h, close ? { zoom: 1.2, fy: 0.42 } : { zoom: 1, fy: 0.45 });
   g.save();
-  g.translate(w / 2, h / 2); g.rotate(sway * 0.8); g.translate(-w / 2, -h / 2);
-  cover(g, pc, -w * 0.02, -h * 0.02 + bob * h, w * 1.04, h * 1.04, { zoom, fx: m.mouth[0], fy: close ? m.eyes + 0.05 : 0.42 });
+  g.translate(f.ox, f.oy + bob * f.k); g.scale(f.k, f.k);
+  drawPresenter(g, look, { mouth: mo, blink: blink(T), brow: brow(ctx, params, T), tilt, nod: -nod });
   g.restore();
   // the product rides along in a card
   const pIn = ease.back(span(T, 0.9, 1.4));
   if (pIn > 0) {
-    const cw = w * 0.3, ch = cw * 1.15, x = w - cw - w * 0.05, y = h * 0.47 + Math.sin(T * 2) * h * 0.004;
+    const cw = w * 0.3, ch = cw * 1.15, x = w - cw - w * 0.05, y = h * 0.53 + Math.sin(T * 2) * h * 0.004;
     g.save();
     g.translate(x + cw / 2, y + ch / 2); g.scale(pIn, pIn); g.rotate(0.04); g.translate(-(x + cw / 2), -(y + ch / 2));
     g.shadowColor = 'rgba(0,0,0,0.3)'; g.shadowBlur = cw * 0.1; g.shadowOffsetY = cw * 0.04;

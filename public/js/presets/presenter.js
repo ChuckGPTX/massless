@@ -1,179 +1,202 @@
-// The talking ad's presenter, drawn as an illustration: the made-up presenter's picture becomes flat colour bands
-// with ink lines (so it never reads as a real person), its own closed mouth is painted out, and a drawn mouth,
-// blinks and eyelids go on top every frame.
-import { canvas, clamp } from './common.js';
+// The talking ad's presenters: three made-up people drawn in code as flat editorial illustrations (a few solid
+// fills and one soft shade tone). No photos. Eyes, brows and mouth are shapes, so they can blink, lift and speak.
+// Everything is drawn in a 1000 x 1250 design space; frame() maps it onto the video like a camera.
+import { clamp } from './common.js';
 
-const INK = [41, 26, 23];
-const cache = new Map();
+/** The cast: colours and hair style for each presenter, and the soft backdrop that goes with them. */
+export const CAST = {
+  ava: { skin: '#9b6646', shade: '#82533a', hair: '#231610', hairShade: '#3b261a', brow: '#231610', style: 'curls', outfit: '#e2a33b', outfitShade: '#c98c2a', collar: '#fbf3e6', lip: '#87473a', lipShade: '#6b3529', blush: '#c0503f', blushAlpha: 0.14, backdrop: ['#fff1d9', '#f7cf98'] },
+  leo: { skin: '#f0c4a1', shade: '#dba582', hair: '#5b3b25', hairShade: '#7a5236', brow: '#4a2f1d', style: 'short', outfit: '#26406a', outfitShade: '#1c3156', collar: '#2f5185', lip: '#c47767', lipShade: '#a85f51', blush: '#f08e7c', backdrop: ['#e6effa', '#b9cde8'] },
+  mei: { skin: '#e2ab80', shade: '#c88f65', hair: '#17151b', hairShade: '#2d2934', brow: '#17151b', style: 'bob', outfit: '#f3e9da', outfitShade: '#dfcfb8', collar: '#ffffff', lip: '#c4655c', lipShade: '#a44f47', blush: '#ee8a77', backdrop: ['#e3f5ec', '#b2dfc8'] },
+};
+const INNER = '#3b1c22', TEETH = '#fbf7f1', TONGUE = '#d9757c', EYE = '#1d1719';
+// head centre and size in design units
+const HX = 500, HY = 500, RX = 148, RY = 178;
+export const MOUTH = { x: HX, y: HY + 120, w: 112 };
 
-/** Box blur of a planar channel (radius r), edges clamped. */
-function box(src, w, h, r) {
-  const tmp = new Float32Array(w * h), out = new Float32Array(w * h), n = 2 * r + 1;
-  for (let y = 0; y < h; y++) {
-    let s = 0;
-    for (let k = -r; k <= r; k++) s += src[y * w + clamp(k, 0, w - 1)];
-    for (let x = 0; x < w; x++) { tmp[y * w + x] = s / n; s += src[y * w + Math.min(w - 1, x + r + 1)] - src[y * w + Math.max(0, x - r)]; }
-  }
-  for (let x = 0; x < w; x++) {
-    let s = 0;
-    for (let k = -r; k <= r; k++) s += tmp[clamp(k, 0, h - 1) * w + x];
-    for (let y = 0; y < h; y++) { out[y * w + x] = s / n; s += tmp[Math.min(h - 1, y + r + 1) * w + x] - tmp[Math.max(0, y - r) * w + x]; }
-  }
-  return out;
+/** Map the 1000 x 1250 design space onto a w x h frame like cover(): returns the scale and offset. */
+export function frame(w, h, { zoom = 1, fx = 0.5, fy = 0.5 } = {}) {
+  const k = Math.max(w / 1000, h / 1250) * zoom, dw = 1000 * k, dh = 1250 * k;
+  return { k, ox: clamp(w / 2 - fx * dw, w - dw, 0), oy: clamp(h / 2 - fy * dh, h - dh, 0) };
 }
 
-/** The illustrated presenter, cached per picture: { base, lip }. meta: { mouth: [x, y], mw, eye: [[x, y], …], ew }. */
-export function illustrate(img, meta, key = img.src || '') {
-  if (key && cache.has(key)) return cache.get(key);
-  const W = img.width, H = img.height, w = W >> 1, h = H >> 1, N = w * h;
-  const sc = canvas(w, h), sg = sc.getContext('2d', { willReadFrequently: true });
-  sg.imageSmoothingQuality = 'high';
-  sg.drawImage(img, 0, 0, w, h);
-  const id = sg.getImageData(0, 0, w, h), px = id.data;
-  const ch = [0, 1, 2].map((c) => { const a = new Float32Array(N); for (let i = 0; i < N; i++) a[i] = px[i * 4 + c] / 255; return a; });
-  const cx = meta.mouth[0] * w, cy = meta.mouth[1] * h, MW = meta.mw * w;
-  const mean = (x0, y0, x1, y1) => { const s = [0, 0, 0]; let n = 0; for (let y = Math.max(0, y0 | 0); y < Math.min(h, y1); y++) for (let x = Math.max(0, x0 | 0); x < Math.min(w, x1); x++) { for (let c = 0; c < 3; c++) s[c] += ch[c][y * w + x]; n++; } return s.map((v) => v / Math.max(1, n)); };
-  // the lips' own colour, a little richer, before they are painted out
-  const lip0 = mean(cx - MW * 0.22, cy - MW * 0.03, cx + MW * 0.22, cy + MW * 0.07);
-  const lg = (lip0[0] + lip0[1] + lip0[2]) / 3;
-  const lip = lip0.map((v, i) => clamp((lg + (v - lg) * 1.3) * (i === 0 ? 0.98 : 0.88)) * 255);
-  // paint the closed mouth out: fill an ellipse from its edge inwards (a smooth patch of skin)
-  const rx = MW * 0.62, ry = MW * 0.27;
-  const x0 = Math.max(1, Math.floor(cx - rx - 2)), x1 = Math.min(w - 1, Math.ceil(cx + rx + 3)), y0 = Math.max(1, Math.floor(cy - ry - 2)), y1 = Math.min(h - 1, Math.ceil(cy + ry + 3));
-  const inside = [];
-  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 < 1) inside.push(y * w + x);
-  const ring = mean(x0, y0, x1, y0 + 2);
-  for (const i of inside) for (let c = 0; c < 3; c++) ch[c][i] = ring[c];
-  for (let it = 0; it < 400; it++) for (const i of inside) for (let c = 0; c < 3; c++) { const a = ch[c]; a[i] = (a[i - 1] + a[i + 1] + a[i - w] + a[i + w]) / 4; }
-  // smooth while keeping edges (a small bilateral filter, twice)
-  const LUT = new Float32Array(512);
-  for (let i = 0; i < 512; i++) LUT[i] = Math.exp(-(i / 4000) / (2 * 0.07 * 0.07));
-  for (let pass = 0; pass < 2; pass++) {
-    const [R, G, B] = ch, oR = new Float32Array(N), oG = new Float32Array(N), oB = new Float32Array(N);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const i = y * w + x, r0 = R[i], g0 = G[i], b0 = B[i];
-      let sr = 0, sgc = 0, sb = 0, sw = 0;
-      for (let dy = -2; dy <= 2; dy++) {
-        const yy = clamp(y + dy, 0, h - 1) * w;
-        for (let dx = -2; dx <= 2; dx++) {
-          const j = yy + clamp(x + dx, 0, w - 1), dr = R[j] - r0, dg = G[j] - g0, db = B[j] - b0;
-          const k = ((dr * dr + dg * dg + db * db) * 4000) | 0;
-          if (k >= 512) continue;
-          const wt = LUT[k] * (dx * dx + dy * dy <= 2 ? 1 : dx * dx + dy * dy <= 5 ? 0.6 : 0.3);
-          sr += R[j] * wt; sgc += G[j] * wt; sb += B[j] * wt; sw += wt;
-        }
-      }
-      oR[i] = sr / sw; oG[i] = sgc / sw; oB[i] = sb / sw;
-    }
-    ch[0] = oR; ch[1] = oG; ch[2] = oB;
-  }
-  for (let i = 0; i < N; i++) for (let c = 0; c < 3; c++) px[i * 4 + c] = ch[c][i] * 255;
-  sg.putImageData(id, 0, 0);
-  // ink lines where the brightness changes (difference of two blurs)
-  const L = new Float32Array(N);
-  for (let i = 0; i < N; i++) L[i] = 0.299 * ch[0][i] + 0.587 * ch[1][i] + 0.114 * ch[2][i];
-  const g1 = box(box(L, w, h, 1), w, h, 1), g2 = box(box(L, w, h, 2), w, h, 2);
-  const lc = canvas(w, h), lgx = lc.getContext('2d'), ld = lgx.createImageData(w, h);
-  for (let i = 0; i < N; i++) { const v = clamp((g2[i] - g1[i] - 0.006) / 0.02); ld.data[i * 4] = INK[0]; ld.data[i * 4 + 1] = INK[1]; ld.data[i * 4 + 2] = INK[2]; ld.data[i * 4 + 3] = v * 0.85 * 255; }
-  lgx.putImageData(ld, 0, 0);
-  // flat colour bands at full size: soft steps of brightness, the colour kept and a touch richer
-  const base = canvas(W, H), bg = base.getContext('2d', { willReadFrequently: true });
-  bg.imageSmoothingQuality = 'high';
-  bg.drawImage(sc, 0, 0, W, H);
-  const fd = bg.getImageData(0, 0, W, H), f = fd.data, BANDS = 4;
-  for (let i = 0; i < f.length; i += 4) {
-    const r = f[i] / 255, g = f[i + 1] / 255, b = f[i + 2] / 255, l = 0.299 * r + 0.587 * g + 0.114 * b + 1e-3;
-    const q = l * BANDS, fl = Math.floor(q), step = clamp((q - fl - 0.5) / 0.08 + 0.5);
-    const k = Math.min((0.2 + 0.74 * ((fl + step) / BANDS)) / l, 1.3);
-    const R = r * k, G = g * k, B = b * k, m = 0.299 * R + 0.587 * G + 0.114 * B;
-    f[i] = clamp(m + (R - m) * 1.18) * 255; f[i + 1] = clamp(m + (G - m) * 1.18) * 255; f[i + 2] = clamp(m + (B - m) * 1.18) * 255;
-  }
-  bg.putImageData(fd, 0, 0);
-  bg.drawImage(lc, 0, 0, W, H);
-  const out = { base, lip };
-  if (key) cache.set(key, out);
-  return out;
+/** The backdrop: the presenter's soft gradient, or one built from a brand colour [r, g, b]. */
+export function backdrop(g, w, h, look, brand = null) {
+  const mixW = (c, t) => `rgb(${c.map((v) => Math.round(v + (255 - v) * t)).join(',')})`;
+  const [top, bottom] = brand ? [mixW(brand, 0.82), mixW(brand, 0.5)] : look.backdrop;
+  const gr = g.createLinearGradient(0, 0, w * 0.3, h);
+  gr.addColorStop(0, top); gr.addColorStop(1, bottom);
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  // one big soft disc behind the head, editorial style
+  g.fillStyle = 'rgba(255,255,255,0.28)';
+  g.beginPath(); g.arc(w * 0.5, h * 0.36, Math.min(w, h) * 0.46, 0, Math.PI * 2); g.fill();
 }
 
-const css = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
-const lerp = (a, b, t) => a + (b - a) * t;
-/** A curve from L to R whose middle sits at y = mid; round 0 is a gentle arc, 1 a full half-ellipse. */
-function arc(g, L, R, mid, round, move = true) {
-  const t = 0.25 * (1 - round), cy1 = L[1] + (4 / 3) * (mid - L[1]), cy2 = R[1] + (4 / 3) * (mid - R[1]);
-  if (move) g.moveTo(L[0], L[1]);
-  g.bezierCurveTo(lerp(L[0], R[0], t), cy1, lerp(R[0], L[0], t), cy2, R[0], R[1]);
+const ellipse = (g, x, y, rx, ry, fill, rot = 0) => { g.fillStyle = fill; g.beginPath(); g.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); g.fill(); };
+const circles = (g, list, fill) => { g.fillStyle = fill; g.beginPath(); for (const [x, y, r] of list) { g.moveTo(x + r, y); g.arc(x, y, r, 0, Math.PI * 2); } g.fill(); };
+
+function facePath(g, jaw) {
+  g.beginPath();
+  g.moveTo(HX - RX, HY - 10);
+  g.bezierCurveTo(HX - RX, HY - 10 - RY * 1.3, HX + RX, HY - 10 - RY * 1.3, HX + RX, HY - 10);
+  g.bezierCurveTo(HX + RX, HY + RY * 0.55, HX + RX * 0.5, HY + RY + jaw, HX, HY + RY + jaw);
+  g.bezierCurveTo(HX - RX * 0.5, HY + RY + jaw, HX - RX, HY + RY * 0.55, HX - RX, HY - 10);
+  g.closePath();
 }
 
-/**
- * Draw the mouth at (x, y) in the presenter picture, mw wide. m: { open, wide, round, teeth, tuck, press } with
- * open already scaled by the voice's loudness.
- */
+// ---------- hair: a back layer (behind the head) and a front layer (over the forehead) ----------
+const CURL_BACK = [];
+for (let i = 0; i <= 14; i++) { const a = Math.PI * (0.92 + (1.16 * i) / 14); CURL_BACK.push([HX + Math.cos(a) * (RX + 58), HY - 40 + Math.sin(a) * (RY + 30), 62 + (i % 3) * 8]); }
+for (const s of [-1, 1]) for (let j = 0; j < 4; j++) CURL_BACK.push([HX + s * (RX + 40 + (j % 2) * 18), HY + 20 + j * 52, 56 - j * 4]);
+const CURL_FRONT = [[HX - 92, HY - 128, 44], [HX - 40, HY - 150, 46], [HX + 18, HY - 154, 46], [HX + 74, HY - 140, 44], [HX + 118, HY - 108, 38], [HX - 128, HY - 92, 34]];
+function hairBack(g, look) {
+  if (look.style === 'curls') { circles(g, CURL_BACK.map(([x, y, r]) => [x + 8, y + 10, r]), look.hairShade); circles(g, CURL_BACK, look.hair); }
+  else if (look.style === 'bob') {
+    g.fillStyle = look.hair; g.beginPath();
+    g.moveTo(HX - RX - 40, HY + RY * 0.72);
+    g.lineTo(HX - RX - 42, HY - 40);
+    g.bezierCurveTo(HX - RX - 42, HY - RY * 1.55, HX + RX + 42, HY - RY * 1.55, HX + RX + 42, HY - 40);
+    g.lineTo(HX + RX + 40, HY + RY * 0.72);
+    g.quadraticCurveTo(HX, HY + RY * 0.8, HX - RX - 40, HY + RY * 0.72);
+    g.fill();
+  }
+}
+function hairFront(g, look) {
+  if (look.style === 'curls') { circles(g, CURL_FRONT.map(([x, y, r]) => [x + 6, y + 8, r]), look.hairShade); circles(g, CURL_FRONT, look.hair); return; }
+  if (look.style === 'short') {
+    g.fillStyle = look.hair; g.beginPath();
+    g.moveTo(HX - RX - 6, HY - 18);
+    g.bezierCurveTo(HX - RX - 14, HY - RY * 1.42, HX + RX + 14, HY - RY * 1.42, HX + RX + 6, HY - 18);
+    g.lineTo(HX + RX - 6, HY - 40);
+    g.quadraticCurveTo(HX + RX - 30, HY - RY * 0.62, HX + 30, HY - RY * 0.74);
+    g.quadraticCurveTo(HX - 60, HY - RY * 0.6, HX - RX + 10, HY - 50);
+    g.lineTo(HX - RX + 4, HY - 14);
+    g.closePath(); g.fill();
+    // a lighter sweep along the side part
+    g.fillStyle = look.hairShade; g.beginPath();
+    g.moveTo(HX - 46, HY - RY * 0.98); g.quadraticCurveTo(HX + 40, HY - RY * 1.08, HX + 110, HY - RY * 0.85);
+    g.quadraticCurveTo(HX + 40, HY - RY * 0.95, HX - 46, HY - RY * 0.98); g.fill();
+    return;
+  }
+  // bob: a centre part and two curtains down the sides of the face
+  g.fillStyle = look.hair; g.beginPath();
+  g.moveTo(HX + 6, HY - RY * 0.76);
+  g.bezierCurveTo(HX + RX * 0.7, HY - RY * 0.72, HX + RX * 0.95, HY - RY * 0.2, HX + RX * 0.88, HY + RY * 0.7);
+  g.lineTo(HX + RX + 41, HY + RY * 0.72);
+  g.lineTo(HX + RX + 42, HY - 40);
+  g.bezierCurveTo(HX + RX + 42, HY - RY * 1.55, HX - RX - 42, HY - RY * 1.55, HX - RX - 42, HY - 40);
+  g.lineTo(HX - RX - 41, HY + RY * 0.72);
+  g.lineTo(HX - RX * 0.88, HY + RY * 0.7);
+  g.bezierCurveTo(HX - RX * 0.95, HY - RY * 0.2, HX - RX * 0.7, HY - RY * 0.72, HX + 6, HY - RY * 0.76);
+  g.fill();
+  g.fillStyle = look.hairShade; g.beginPath();
+  g.moveTo(HX + 6, HY - RY * 0.76); g.quadraticCurveTo(HX + 70, HY - RY * 1.1, HX + 120, HY - RY * 1.02); g.quadraticCurveTo(HX + 60, HY - RY * 0.98, HX + 6, HY - RY * 0.76); g.fill();
+}
+
+function body(g, look) {
+  // torso and shoulders
+  g.fillStyle = look.outfit; g.beginPath();
+  g.moveTo(HX - 62, 780);
+  g.bezierCurveTo(HX - 160, 792, HX - 300, 820, HX - 345, 900);
+  g.bezierCurveTo(HX - 395, 975, HX - 420, 1120, HX - 430, 1320);
+  g.lineTo(HX + 430, 1320);
+  g.bezierCurveTo(HX + 420, 1120, HX + 395, 975, HX + 345, 900);
+  g.bezierCurveTo(HX + 300, 820, HX + 160, 792, HX + 62, 780);
+  g.closePath(); g.fill();
+  // the one shade: the side away from the light, and a fold under each arm
+  g.save(); g.clip();
+  g.fillStyle = look.outfitShade;
+  g.beginPath(); g.ellipse(HX + 470, 1150, 170, 420, -0.12, 0, Math.PI * 2); g.fill();
+  g.restore();
+  // neck, with the chin's shadow
+  g.fillStyle = look.skin; g.beginPath(); g.roundRect(HX - 56, HY + RY * 0.5, 112, 820 - HY - RY * 0.5, 30); g.fill();
+  g.beginPath(); g.moveTo(HX - 56, 784); g.lineTo(HX + 56, 784); g.lineTo(HX, 890); g.closePath(); g.fill();
+  g.save(); g.beginPath(); g.rect(HX - 56, HY, 112, 300); g.clip();
+  ellipse(g, HX, HY + RY + 14, 70, 46, look.shade);
+  g.restore();
+  // collar
+  g.fillStyle = look.collar;
+  for (const s of [-1, 1]) {
+    g.beginPath();
+    g.moveTo(HX + s * 54, 770); g.lineTo(HX + s * 128, 818); g.lineTo(HX + s * 14, 912); g.lineTo(HX + s * 4, 880); g.lineTo(HX + s * 40, 800);
+    g.closePath(); g.fill();
+  }
+}
+
+/** Draw the mouth at (x, y), mw wide: lips as one simple shape, the inside dark, teeth one light shape. */
 export function drawMouth(g, x, y, mw, m, look) {
   const r = clamp(m.round), press = clamp(m.press), tuck = clamp(m.tuck);
-  const hw = mw * 0.4 * clamp(m.wide, 0.5, 1.3);
-  const gap = mw * 0.3 * clamp(m.open, 0, 1.15);
-  const up = gap * 0.16, dn = gap - up;
-  const tu = mw * 0.06 * (1 + 0.35 * r) * (1 - 0.4 * press);
-  const tl = mw * 0.085 * (1 + 0.3 * r) * (1 - 0.35 * press) * (1 + 0.3 * tuck);
-  const cyC = y - mw * 0.025 * (1 - r) + gap * 0.12;
-  const L = [x - hw, cyC], R = [x + hw, cyC];
-  const iw = hw * (1 - 0.1 * (1 + r)), IL = [x - iw, cyC], IR = [x + iw, cyC];
-  const ro = 0.2 + 0.7 * r;
-  const lipTop = (move = true) => {
-    const py = y - up - tu, dip = y - up - tu * 0.7;
-    if (move) g.moveTo(L[0], L[1]);
-    g.quadraticCurveTo(lerp(L[0], x, 0.35), py - tu * 0.1 * (1 - r), x - hw * 0.3, py);
-    g.quadraticCurveTo(x - hw * 0.12, py, x, dip);
-    g.quadraticCurveTo(x + hw * 0.12, py, x + hw * 0.3, py);
-    g.quadraticCurveTo(lerp(R[0], x, 0.35), py - tu * 0.1 * (1 - r), R[0], R[1]);
-  };
-  const lipBottomBack = () => arc(g, R, L, y + dn + tl, Math.min(1, ro + 0.25), false);
+  const hw = mw * 0.5 * clamp(m.wide, 0.5, 1.3);
+  const gap = mw * 0.32 * clamp(m.open, 0, 1.15);
+  const up = gap * 0.18, dn = gap - up;
+  const tu = mw * 0.085 * (1 + 0.3 * r) * (1 - 0.45 * press), tl = mw * 0.11 * (1 + 0.3 * r) * (1 - 0.35 * press) * (1 + 0.3 * tuck);
+  const cy = y - mw * 0.05 * (1 - r) * (1 - 0.6 * clamp(m.open)) + gap * 0.1;
+  const L = [x - hw, cy], R = [x + hw, cy], iw = hw * (1 - 0.12 * (1 + r));
+  const ro = 0.25 + 0.65 * r;
+  const arc = (A, B, mid, round) => { const t = 0.25 * (1 - round); g.bezierCurveTo(A[0] + (B[0] - A[0]) * t, A[1] + (4 / 3) * (mid - A[1]), B[0] + (A[0] - B[0]) * t, B[1] + (4 / 3) * (mid - B[1]), B[0], B[1]); };
+  const IL = [x - iw, cy], IR = [x + iw, cy];
   g.save();
-  g.lineJoin = g.lineCap = 'round';
-  // lips: the lower lip, then the upper lip over it
-  g.beginPath(); lipTop(); lipBottomBack(); g.closePath();
-  g.fillStyle = css(look.lip); g.fill();
-  // the opening
-  const opening = () => { g.beginPath(); g.moveTo(L[0], L[1]); g.lineTo(IL[0], IL[1]); arc(g, IL, IR, y - up, ro, false); g.lineTo(R[0], R[1]); g.lineTo(IR[0], IR[1]); arc(g, IR, IL, y + dn, ro, false); g.closePath(); };
-  if (gap > mw * 0.012) {
-    opening(); g.fillStyle = 'rgb(58,20,24)'; g.fill();
+  // lower and upper lip together as one soft shape
+  g.beginPath(); g.moveTo(L[0], L[1]); arc(L, R, y - up - tu, ro + 0.1); arc(R, L, y + dn + tl, Math.min(1, ro + 0.3)); g.closePath();
+  g.fillStyle = look.lip; g.fill();
+  const opening = () => { g.beginPath(); g.moveTo(IL[0], IL[1]); arc(IL, IR, y - up, ro); arc(IR, IL, y + dn, ro); g.closePath(); };
+  if (gap > mw * 0.02) {
+    opening(); g.fillStyle = INNER; g.fill();
     g.save(); opening(); g.clip();
-    const th = Math.min(gap * (0.42 + 0.4 * tuck), mw * 0.075) * clamp(m.teeth);
-    if (th > 0.5) { g.fillStyle = '#f1ebe1'; g.beginPath(); g.roundRect(x - iw * 0.78, y - up - mw * 0.05, iw * 1.56, mw * 0.05 + th, [0, 0, th * 0.4, th * 0.4]); g.fill(); }
-    if (gap > mw * 0.11) { g.fillStyle = 'rgb(176,84,92)'; g.beginPath(); g.ellipse(x, y + dn + gap * 0.12, iw * 0.55, gap * 0.38, 0, 0, Math.PI * 2); g.fill(); }
+    const th = Math.min(gap * (0.5 + 0.35 * tuck), mw * 0.11) * clamp(m.teeth);
+    if (th > 0.5) { g.fillStyle = TEETH; g.beginPath(); g.roundRect(x - iw * 0.72, y - up - mw * 0.06, iw * 1.44, mw * 0.06 + th, th * 0.45); g.fill(); }
+    if (gap > mw * 0.14) ellipse(g, x, y + dn + gap * 0.08, iw * 0.5, gap * 0.34, TONGUE);
     g.restore();
+  } else {
+    // closed: one clean line where the lips meet
+    g.strokeStyle = look.lipShade; g.lineWidth = mw * (0.035 + 0.02 * press); g.lineCap = 'round';
+    g.beginPath(); g.moveTo(IL[0], IL[1]); arc(IL, IR, y + mw * 0.012, ro); g.stroke();
   }
-  // upper lip on top, a shade darker
-  g.beginPath(); lipTop(); g.lineTo(IR[0], IR[1]); arc(g, IR, IL, y - up, ro, false); g.closePath();
-  g.fillStyle = css(look.lip.map((v) => v * 0.8)); g.fill();
-  // a soft shine on the lower lip
-  g.fillStyle = 'rgba(255,240,235,0.22)';
-  g.beginPath(); g.ellipse(x - hw * 0.08, y + dn + tl * 0.45, hw * 0.32, tl * 0.18, -0.05, 0, Math.PI * 2); g.fill();
-  // ink: the line between the lips, or round the opening
-  g.strokeStyle = css(INK, 0.9); g.lineWidth = mw * (0.022 + 0.008 * press);
-  g.beginPath(); g.moveTo(L[0], L[1]); g.lineTo(IL[0], IL[1]); arc(g, IL, IR, y - up, ro, false); g.lineTo(R[0], R[1]); g.stroke();
-  if (gap > mw * 0.012) { g.beginPath(); g.moveTo(IL[0], IL[1]); arc(g, IL, IR, y + dn, ro, false); g.stroke(); }
+  // the upper lip a shade darker
+  g.beginPath(); g.moveTo(L[0], L[1]); arc(L, R, y - up - tu, ro + 0.1); g.lineTo(IR[0], IR[1]); arc(IR, IL, y - up, ro); g.closePath();
+  g.fillStyle = look.lipShade; g.fill();
   g.restore();
 }
 
-/** Close the eyes by c (0 open .. 1 shut): the skin above each eye slides down over it. eyes: [[x, y]] px, ew px. */
-export function drawBlink(g, eyes, ew, c, look) {
-  if (c <= 0.02) return;
-  const src = look.base;
-  for (const [x, y] of eyes) {
-    const rx = ew * 0.6, ry = ew * 0.3, top = y - ry, lidY = top + 2 * ry * c, sag = ry * (0.2 + 0.4 * c);
-    const edge = (move) => { if (move) g.moveTo(x - rx * 1.05, lidY - sag * 0.5); g.quadraticCurveTo(x, lidY + sag, x + rx * 1.05, lidY - sag * 0.5); };
-    g.save();
-    g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); g.clip();
-    g.beginPath(); g.moveTo(x - rx * 1.1, top - ry); g.lineTo(x - rx * 1.05, lidY - sag * 0.5); edge(false); g.lineTo(x + rx * 1.1, top - ry); g.closePath(); g.clip();
-    // a thin strip of the skin just above the lid, stretched down: one smooth lid colour
-    const sh = ry * 0.35;
-    g.drawImage(src, x - rx * 1.1, top - ry * 0.55, rx * 2.2, sh, x - rx * 1.1, top - ry * 0.5, rx * 2.2, lidY + sag - top + ry * 0.5);
-    g.restore();
-    g.save();
-    g.strokeStyle = css(INK, 0.85); g.lineWidth = ew * 0.07; g.lineCap = 'round';
-    g.beginPath(); g.ellipse(x, y, rx * 1.02, ry * 1.4, 0, 0, Math.PI * 2); g.clip();
-    g.beginPath(); edge(true); g.stroke();
-    g.restore();
+/**
+ * Draw the presenter into g (already in design space). pose: { mouth, blink 0..1, brow 0..1, tilt (rad), nod (units) }.
+ */
+export function drawPresenter(g, look, pose) {
+  const m = pose.mouth, jaw = clamp(m.open, 0, 1.15) * MOUTH.w * 0.32 * 0.7;
+  body(g, look);
+  g.save();
+  // the head turns and nods around the top of the neck
+  g.translate(HX, HY + RY * 0.8); g.rotate(pose.tilt || 0); g.translate(-HX, -(HY + RY * 0.8) - (pose.nod || 0));
+  hairBack(g, look);
+  for (const s of [-1, 1]) { ellipse(g, HX + s * RX * 0.98, HY + 18, 24, 40, look.skin); ellipse(g, HX + s * RX * 0.98, HY + 20, 11, 22, look.shade); }
+  facePath(g, jaw); g.fillStyle = look.skin; g.fill();
+  // the one soft shade down the far side of the face
+  // (the face again, nudged left, leaves a crescent of shade down the right side and under the chin)
+  g.save(); facePath(g, jaw); g.clip();
+  g.fillStyle = look.shade; g.fillRect(HX - RX - 10, HY - RY * 1.4, RX * 2 + 20, RY * 2.6);
+  g.translate(-24, -10); facePath(g, jaw); g.fillStyle = look.skin; g.fill();
+  g.restore();
+  // cheeks, nose
+  g.globalAlpha = look.blushAlpha || 0.22; ellipse(g, HX - 88, HY + 78, 30, 20, look.blush); ellipse(g, HX + 88, HY + 78, 30, 20, look.blush); g.globalAlpha = 1;
+  g.strokeStyle = look.shade; g.lineWidth = 8; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath(); g.moveTo(HX + 6, HY + 22); g.quadraticCurveTo(HX + 20, HY + 62, HX + 12, HY + 74); g.quadraticCurveTo(HX + 2, HY + 80, HX - 10, HY + 74); g.stroke();
+  // eyes: dark ovals that close to a soft arc
+  const c = clamp(pose.blink || 0);
+  for (const s of [-1, 1]) {
+    const ex = HX + s * 60, ey = HY + 12;
+    if (c < 0.75) {
+      ellipse(g, ex, ey, 12.5, 16 * (1 - c) + 1.5, EYE);
+      if (c < 0.4) ellipse(g, ex + 4, ey - 6 * (1 - c), 3.6, 3.6, 'rgba(255,255,255,0.9)');
+    } else {
+      g.strokeStyle = EYE; g.lineWidth = 5.5;
+      g.beginPath(); g.moveTo(ex - 14, ey + 1); g.quadraticCurveTo(ex, ey + 9, ex + 14, ey + 1); g.stroke();
+    }
+    // brows lift for emphasis and dip a touch with a blink
+    const by = HY - 42 - 12 * clamp(pose.brow || 0) + 3 * c;
+    g.strokeStyle = look.brow; g.lineWidth = 10;
+    g.beginPath(); g.moveTo(ex - s * 26, by + 6); g.quadraticCurveTo(ex - s * 2, by - 9, ex + s * 26, by + 2); g.stroke();
   }
+  drawMouth(g, MOUTH.x, MOUTH.y + jaw * 0.25, MOUTH.w, m, look);
+  hairFront(g, look);
+  g.restore();
 }

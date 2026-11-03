@@ -12,6 +12,7 @@ import { GALLERY, CATEGORIES, PRESET_CARDS, CAMERA_MOVES, FEATURED } from "../pu
 
 const pub = (p) => new URL("../public" + p, import.meta.url);
 const exists = (p) => access(pub(p)).then(() => true, () => false);
+const OLD_PRESENTERS = ["ava", "leo", "mei"].map((n) => `/presets/samples/presenter-${n}.webp`);
 
 test("every preset spec is valid, unique and uses a real engine", async () => {
   assert.deepEqual(catalogProblems(), []);
@@ -75,13 +76,15 @@ test("every sample, plate and preview file exists and is small", async () => {
   }
   for (const m of MOCKUPS) assert.ok((await stat(pub(`/presets/plates/${m.plate}.webp`))).size <= 200 * 1024, m.plate);
   for (let i = 1; i <= 5; i++) assert.ok((await stat(pub(`/presets/plates/earth-${i}.webp`))).size <= 200 * 1024);
-  for (const pr of PRESENTERS) assert.ok(await exists(pr.src), pr.src);
+  // the presenters are drawn in code; the old photo presenters are kept (with provenance) but not loaded
+  assert.ok(PRESENTERS.every((pr) => !pr.src));
+  for (const f of OLD_PRESENTERS) assert.ok(await exists(f), f);
 });
 
 test("generated plates and samples are recorded with their source and hash", async () => {
   const prov = JSON.parse(await readFile(pub("/presets/provenance.json"), "utf8"));
   const files = new Map(prov.files.map((f) => [f.path, f]));
-  const want = [...SCENES.flatMap((s) => [`presets/plates/${s.id}-p.webp`, `presets/plates/${s.id}-l.webp`]), ...MOCKUPS.map((m) => `presets/plates/${m.plate}.webp`), ...[1, 2, 3, 4, 5].map((i) => `presets/plates/earth-${i}.webp`), ...PRESENTERS.map((p) => p.src.slice(1))];
+  const want = [...SCENES.flatMap((s) => [`presets/plates/${s.id}-p.webp`, `presets/plates/${s.id}-l.webp`]), ...MOCKUPS.map((m) => `presets/plates/${m.plate}.webp`), ...[1, 2, 3, 4, 5].map((i) => `presets/plates/earth-${i}.webp`), ...OLD_PRESENTERS.map((f) => f.slice(1))];
   for (const path of want) {
     const f = files.get(path);
     assert.ok(f, `${path} is in provenance.json`);

@@ -394,7 +394,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
     }
     const audio = engine.audio ? await engine.audio(ctx, params) : null;
     const duration = engine.duration ? engine.duration(ctx, params, o) : o.duration;
-    return encodeMP4(c, { duration, fps: o.fps, audio, onProgress, draw: (cv, t) => engine.render(ctx, cv, { w: o.w, h: o.h, t, duration, params, preview: false }) });
+    return encodeMP4(c, { duration, fps: o.fps, audio, onProgress, bitrate: engine.bitrate || 0, draw: (cv, t) => engine.render(ctx, cv, { w: o.w, h: o.h, t, duration, params, preview: false }) });
   }
   async function makeAll() {
     // Make it also submits words typed into a field with a button but not sent yet.

@@ -223,6 +223,7 @@ const { speechWav } = require('./fixtures/voice-stub.cjs');
       if (id === 'talking-ad') {
         const mp4 = r.files.find((f) => f.endsWith('.mp4'));
         if (mp4 && !fs.readFileSync(mp4).includes('soun')) throw new Error('the talking ad has no sound track');
+        if (mp4 && fs.statSync(mp4).size > 8 * 1048576) throw new Error(`the talking ad is ${(fs.statSync(mp4).size / 1048576).toFixed(1)} MB, over Explore's 8 MB`);
       }
       const real = errors.filter((e) => !/GPU stall|GL Driver/.test(e));
       if (real.length) throw new Error(real.slice(0, 4).join(' | '));

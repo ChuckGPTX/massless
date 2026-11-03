@@ -84,3 +84,26 @@ test("the talking ad's visible copy stays plain", () => {
   for (const w of [...DENY, "viseme", "lip-sync", "indexeddb", "prompt", "inference"]) assert.ok(!new RegExp(`(^|[^a-z])${w}([^a-z]|$)`).test(copy), w);
   assert.match(talk.note, /mouth follows the words/i);
 });
+
+test("every presenter is drawn in code with its own look and backdrop", async () => {
+  const { CAST, frame } = await import("../public/js/presets/presenter.js");
+  const { PRESENTERS } = await import("../public/js/presets/catalog.js");
+  const talk = presetById("talking-ad");
+  for (const p of PRESENTERS) {
+    assert.ok(!p.src, `${p.id} loads no photo`);
+    const c = CAST[p.id];
+    assert.ok(c && /^#[0-9a-f]{6}$/i.test(c.skin) && c.backdrop.length === 2 && ["curls", "short", "bob"].includes(c.style), p.id);
+  }
+  assert.equal(new Set(PRESENTERS.map((p) => CAST[p.id].skin)).size, PRESENTERS.length, "varied skin tones");
+  assert.deepEqual(talk.inputs.find((i) => i.key === "backdrop").options.map((o) => o.id), ["soft", "brand"]);
+  const f = frame(1080, 1920);
+  assert.ok(f.k * 1250 >= 1920 - 1e-6 && f.k * 1000 >= 1080 - 1e-6, "the drawing fills a story frame");
+});
+
+test("the talking ad asks for a low bitrate so a long story still fits Explore", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const src = await readFile(new URL("../public/js/presets/engines/talking.js", import.meta.url), "utf8");
+  const rate = Number(/export const bitrate = ([\d.e]+)/.exec(src)?.[1]);
+  // the longest ad is 20 s; video plus 128 kbps sound must stay under 8 MB
+  assert.ok(rate >= 1e6 && ((rate + 128000) * 20) / 8 < 8 * 1048576, `bitrate ${rate}`);
+});
