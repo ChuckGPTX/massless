@@ -1,5 +1,6 @@
 import { OPTICAL_EFFECTS } from './effect-presets.js';
 import { COLLECTION_TEMPLATES } from './website/collection-list.js';
+import { PRESETS, presetURL } from './presets/catalog.js';
 
 export const WORKFLOWS = [
   {id:'image-workroom',name:'Image to campaign frame',tag:'IMAGE + DESIGN',image:'/media/website/ceramics.jpg',description:'Reframe an image, adjust its finish and add a headline. Save a new take, ready for motion.',output:'PNG + saved take',steps:[['Choose or create an image','/image'],['Compose a new take','/edit/'],['Use the saved take in your next tool','/library/']]},
@@ -149,8 +150,9 @@ export function stepURL(href, shotId, brief = "") {
 // Every card is a real, working entry point: it opens a Chucksi tool already set up with the same example the
 // loop shows. Each loop and poster in /media/templates was recorded from that tool (see provenance.json there).
 export const CATEGORIES = [
-  { id: "effects", name: "Video effects" },
-  { id: "moves", name: "Camera moves" },
+  { id: "ads", name: "Ads & products" },
+  { id: "effects", name: "Effects" },
+  { id: "social", name: "Social" },
   { id: "image", name: "Image edits" },
   { id: "design", name: "Design & print" },
   { id: "websites", name: "Websites" },
@@ -174,7 +176,8 @@ const EFFECT_CARDS = [
 ].map(([effect, look, sample, name, line]) =>
   card(`fx-${effect}${look ? "-" + look : ""}`, "effects", name, line, `/video?effect=${effect}${look ? "&look=" + look : ""}&sample=${sample}`, PORTRAIT.has(sample) ? "3/4" : "16/9"));
 // [move id, sample still, name, one line]
-const MOVE_CARDS = [
+// The 28 camera moves stay available to the Video studio and the public preset API; the gallery shows them as one card.
+export const CAMERA_MOVES = [
   ["dolly-in", "rider", "Dolly in", "Push toward the subject"],
   ["arc-right", "fisherman", "Arc right", "Swing around the subject"],
   ["crane-up", "bmx", "Crane up", "Rise and look down"],
@@ -204,6 +207,12 @@ const MOVE_CARDS = [
   ["zoom-out", "neon", "Zoom out", "The lens widens, the camera stays put"],
   ["dolly-zoom-in", "summit", "Vertigo", "The subject holds, the world falls away"],
 ].map(([move, sample, name, line]) => card(`move-${move}`, "moves", name, line, `/video?move=${move}&sample=${sample}`, PORTRAIT.has(sample) ? "3/4" : "16/9"));
+const MOVES_CARD = { ...CAMERA_MOVES.find((c) => c.id === "move-arc-right"), id: "camera-moves", cat: "effects", name: "Camera moves", line: "28 moves: push, orbit, crane, pan, bullet time and more" };
+// One-tap presets (public/js/presets): each opens /workflows?preset=<id>. New ones lead their category.
+export const PRESET_CARDS = PRESETS.map((p) => ({
+  id: `preset-${p.id}`, cat: p.category, name: p.title, line: p.summary, href: presetURL(p.id), ar: p.preview.ar,
+  video: p.preview.video, poster: p.preview.poster, badge: p.badge || null,
+}));
 const SHOWCASE_CARDS = [
   ["map", "map-saltmere", "Island map", "Name a place, get an illustrated map poster", "4/5"],
   ["map", "map-larkspur", "Valley map", "A painted map with labels, legend and compass", "4/5"],
@@ -262,9 +271,10 @@ const OPTICAL_CARDS = OPTICAL_EFFECTS.flatMap((effect) => effect.looks.slice(0, 
     PORTRAIT.has(effect.sample) ? "9/16" : "16/9")));
 
 export const GALLERY = [
+  ...PRESET_CARDS,
   ...OPTICAL_CARDS,
   ...EFFECT_CARDS,
-  ...MOVE_CARDS,
+  MOVES_CARD,
   card("image-compose", "image", "Reframe & grade", "Recompose a photo on a new backdrop", "/edit/", "16/9"),
   card("image-remove-bg", "image", "Remove background", "Cut out any subject", "/edit/?tool=remove-bg", "16/9"),
   card("image-upscale", "image", "Upscale", "Sharper, bigger images without the blur", "/edit/?tool=upscale", "16/9"),
@@ -284,4 +294,4 @@ export const GALLERY = [
   card("office-templates", "office", "Contract templates", "Pick a contract, fill it in, send it", "/office?tab=sign", "16/9"),
 ];
 // The loops in the moving strip at the top of the page.
-export const FEATURED = ["fx-hologram-ion", "fx-shatter-spectrum", "fx-shockwave-water", "fx-portal-cosmic", "fx-lidar-cyan", "site-manifesto", "move-arc-right", "design-fest-harbourlight", "fx-vanish-embers", "game-sky-tower", "move-fpv", "design-id-northwind", "fx-clones-rainbow", "site-restaurant", "film-launch", "move-bullet-time", "design-film-tide", "game-star-hornets"];
+export const FEATURED = ["preset-earth-zoom-out", "preset-scene-marble-podium", "preset-product-spin", "preset-money-rain", "fx-hologram-ion", "preset-squish", "preset-mockup-billboard", "preset-social-thumbnail", "fx-shatter-spectrum", "preset-talking-ad", "preset-whip-pan", "site-manifesto", "preset-scene-neon-shelf", "preset-inflate", "design-fest-harbourlight", "fx-portal-cosmic", "preset-fireworks", "game-sky-tower"];

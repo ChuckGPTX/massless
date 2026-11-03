@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { readFile, stat, access } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { GALLERY, CATEGORIES, FEATURED, DESIGN_WORKFLOWS } from "../public/js/workflow-data.js";
+import { presetById } from "../public/js/presets/catalog.js";
 import { TEMPLATES_LIST } from "../public/js/website/templates-list.js";
 import { createLoopPlayer, MAX_PLAYING } from "../public/js/workflow-gallery.js";
 
@@ -64,6 +65,7 @@ test("every card opens a real page with parameters that page understands", async
         assert.ok(!q.tool || k.tools.includes(q.tool), where);
         break;
       case "/workflows": {
+        if (q.preset) { assert.equal(keys, "preset", where); assert.ok(presetById(q.preset), where); break; }
         assert.ok(DESIGN_WORKFLOWS.some((w) => w.id === q.make), where);
         assert.ok(k.showcase.some((x) => x.id === q.example && x.workflow === q.make), where);
         break;

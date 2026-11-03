@@ -1,21 +1,20 @@
-// The preset factory's spec format. One JSON file per preset (public/presets/specs/<id>.json) describes what the
-// visitor adds, which engine renders it, what comes out and what it costs. validateSpec() is used by the page
-// (a bad spec never renders) and by tests/presets.test.js (a bad spec never merges). Pure: no DOM, runs in Node.
+// The preset factory's spec format. Every preset is one spec (see catalog.js) that says what the visitor adds,
+// which engine renders it, what comes out and what it costs. validateSpec() is used by the page (a bad spec never
+// renders) and by tests/presets.test.js (a bad spec never merges). Pure: no DOM, runs in Node.
 
 export const ENGINES = {
-  composite: { ops: ['plate', 'place', 'shadow', 'reflect', 'colorMatch', 'text', 'warp', 'grade', 'grain'], kind: 'image' },
-  'flux.generate': { ops: ['generate'], kind: 'image', userTriggeredOnly: true },
-  'ib.camera': { ops: ['depthFromMatte', 'orbit', 'turntable', 'floor', 'text', 'grade'], kind: 'video' },
-  'ib.earth': { ops: ['pullBack', 'globe', 'clouds', 'label', 'grade'], kind: 'video' },
-  'ib.warp': { ops: ['layers', 'meshWarp', 'shadow', 'grade'], kind: 'video' },
-  'ib.particles': { ops: ['layers', 'emit', 'occlude', 'grade'], kind: 'video' },
-  'ib.vanish': { ops: ['layers', 'shatter', 'emit', 'smoke', 'flash', 'grade'], kind: 'video' },
-  'ib.transition': { ops: ['hold', 'transition', 'grade'], kind: 'video' },
-  'layout.kinetic': { ops: ['layout', 'text', 'animate'], kind: 'image' },
-  'ib.presenter': { ops: ['script', 'voice', 'presenter', 'captions', 'layout'], kind: 'video' },
+  scene: { ops: ['cutout', 'plate', 'place', 'shadow', 'colorMatch', 'text'], kind: 'image' },
+  spin: { ops: ['cutout', 'depth', 'turntable', 'floor', 'lightSweep', 'text'], kind: 'video' },
+  mockup: { ops: ['plate', 'warp', 'light', 'grain'], kind: 'image' },
+  earth: { ops: ['pullBack', 'layers', 'clouds', 'globe', 'label'], kind: 'video' },
+  warp: { ops: ['cutout', 'cleanPlate', 'meshWarp', 'shadow'], kind: 'video' },
+  rain: { ops: ['layers', 'emit', 'occlude', 'grade'], kind: 'video' },
+  transition: { ops: ['hold', 'transition'], kind: 'video' },
+  social: { ops: ['layout', 'text', 'animate'], kind: 'image' },
+  talking: { ops: ['script', 'voice', 'presenter', 'captions', 'layout'], kind: 'video' },
 };
 export const CATEGORIES = { ads: 'Ads & products', effects: 'Effects', social: 'Social' };
-export const INPUT_TYPES = ['image', 'media', 'text', 'textarea', 'choice', 'color', 'toggle'];
+export const INPUT_TYPES = ['image', 'media', 'text', 'textarea', 'choice', 'color', 'toggle', 'range'];
 export const PREPS = ['removeBackground', 'trim', 'layers'];
 export const COST_TIERS = ['free', 'daily-free'];
 export const OUTPUT_TYPES = ['image', 'video'];
@@ -96,6 +95,7 @@ export function validateSpec(spec) {
     if (i.type === 'text' || i.type === 'textarea') need(Number.isInteger(i.max) && i.max > 0 && i.max <= 2000 && (i.default ?? '').length <= i.max, `input ${i.key}: max length and a default that fits`);
     if (i.type === 'color') need(/^#[0-9a-f]{6}$/i.test(i.default || ''), `input ${i.key}: default colour #rrggbb`);
     if (i.type === 'toggle') need(typeof i.default === 'boolean', `input ${i.key}: default true or false`);
+    if (i.type === 'range') need(i.min < i.max && i.default >= i.min && i.default <= i.max && i.step > 0, `input ${i.key}: min < max, a default between them and a step`);
   }
   // steps
   need(Array.isArray(spec.steps) && spec.steps.length > 0, 'steps: at least one');
@@ -110,9 +110,9 @@ export function validateSpec(spec) {
   if (spec.animate) need(typeof spec.animate.move === 'string' && spec.animate.duration > 0 && spec.animate.duration <= 10, 'animate: { move, duration up to 10 s }');
   // cost and safety
   need(spec.cost && COST_TIERS.includes(spec.cost.tier) && typeof spec.cost.estimateUSD === 'number' && spec.cost.estimateUSD >= 0 && spec.cost.estimateUSD < 0.05, 'cost: { tier, estimateUSD under $0.05 }');
-  if (spec.engine === 'flux.generate' || (spec.steps || []).some((s) => s.op === 'generate')) need(spec.cost?.tier === 'daily-free', 'generation steps must be on the daily-free tier');
   const sf = spec.safety || {};
   need(['none', 'self-or-permission'].includes(sf.faces), 'safety.faces: none or self-or-permission');
+  if (spec.engine === 'talking') need(sf.disclosure.length > 0, 'a presenter preset must disclose that the presenter is digital');
   need(sf.realPeopleInSamples === false, 'safety.realPeopleInSamples must be false');
   need(['block'].includes(sf.minors), 'safety.minors must be block');
   need(sf.ipCheck === true, 'safety.ipCheck must be true');

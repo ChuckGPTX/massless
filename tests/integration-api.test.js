@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { integrationAPI } from '../src/integration-api.js';
 import { consoleTarget } from '../src/console-routing.js';
-import { GALLERY } from '../public/js/workflow-data.js';
+import { GALLERY, CAMERA_MOVES } from '../public/js/workflow-data.js';
 const req=(path,method='GET')=>integrationAPI(new Request('https://console.chucksi.com/api/v1/'+path,{method}));
 
 test('tools cover the site and never claim remote execution',async()=>{
@@ -14,10 +14,10 @@ test('tools cover the site and never claim remote execution',async()=>{
 });
 
 test('preset recipes stay aligned with actual studio links and media',async()=>{
-  const data=await req('presets').json();assert.equal(data.count,53);
+  const data=await req('presets').json();assert.equal(data.count,111);
   assert.equal(new Set(data.items.map(p=>p.id)).size,data.count);
   for(const preset of data.items){
-    const card=GALLERY.find(c=>c.id===preset.id);assert.ok(card);
+    const card=[...GALLERY,...CAMERA_MOVES].find(c=>c.id===preset.id);assert.ok(card,preset.id);
     assert.equal(preset.studioUrl,new URL(card.href,'https://chucksi.com').href);
     assert.deepEqual(preset.settings,Object.fromEntries(new URL(preset.studioUrl).searchParams));
     for(const value of Object.values(preset.preview))assert.ok(existsSync(new URL('../public'+new URL(value).pathname,import.meta.url)),value);

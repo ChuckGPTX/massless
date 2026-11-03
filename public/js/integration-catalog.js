@@ -1,6 +1,7 @@
 // The integration directory describes real studio features. A studio link is a
 // handoff for a person, not a claim that an API has rendered or saved a result.
-import { GALLERY, WORKFLOWS, DESIGN_WORKFLOWS } from './workflow-data.js';
+import { GALLERY, WORKFLOWS, DESIGN_WORKFLOWS, CAMERA_MOVES, PRESET_CARDS } from './workflow-data.js';
+import { presetById } from './presets/catalog.js';
 
 export const STUDIO_BASE = 'https://chucksi.com';
 const absolute = path => new URL(path, STUDIO_BASE).href;
@@ -22,13 +23,16 @@ export const CHUCKSI_TOOLS = [
 }));
 
 // Reuse the exact recipes shown by the studio, so links, names and looks stay in sync.
-export const CHUCKSI_PRESETS = GALLERY.filter(item => ['effects', 'moves'].includes(item.cat)).map(item => {
+const VIDEO_EFFECTS = GALLERY.filter(item => item.cat === 'effects' && item.href.startsWith('/video?effect='));
+export const CHUCKSI_PRESETS = [...PRESET_CARDS, ...VIDEO_EFFECTS, ...CAMERA_MOVES].map(item => {
   const url = new URL(item.href, STUDIO_BASE);
+  const spec = item.id.startsWith('preset-') ? presetById(item.id.slice(7)) : null;
   return {
     id: item.id, name: item.name, category: item.cat, description: item.line,
     studioUrl: url.href, settings: Object.fromEntries(url.searchParams),
     preview: { image: absolute(item.poster), video: absolute(item.video) },
-    inputs: ['image'], execution: 'studio', remoteExecution: false,
+    inputs: spec ? [...new Set(spec.inputs.filter(i => !i.optional).map(i => (i.type === 'image' ? 'image' : i.type === 'textarea' || i.type === 'text' ? 'text' : 'option')))] : ['image'],
+    execution: 'studio', remoteExecution: false,
   };
 });
 
