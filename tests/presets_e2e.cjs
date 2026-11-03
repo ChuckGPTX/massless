@@ -96,6 +96,14 @@ function wav(seconds = 6, rate = 24000) {
         if (fs.readFileSync(z).subarray(0, 2).toString() !== 'PK') throw new Error('the ZIP is not a ZIP');
         fs.unlinkSync(z);
       });
+      if (width > 600) await step('share to Explore', async () => {
+        await page.locator('.maker-actions button', { hasText: 'Share to Explore' }).click();
+        await page.locator('dialog.xs-dialog[open]').waitFor({ timeout: 30000 });
+        await page.waitForFunction(() => { const b = document.querySelector('dialog.xs-dialog .xs-go'); return b && !b.disabled; }, null, { timeout: 30000 });
+        const remix = await page.evaluate(() => document.querySelector('dialog.xs-dialog .xs-note')?.textContent || '');
+        if (!/Design/.test(remix)) throw new Error('the share sheet does not name the tool');
+        await page.locator('dialog.xs-dialog .xs-x').click();
+      });
       await step('save to My library', async () => {
         await page.locator('.maker-actions button', { hasText: 'Save to My library' }).click();
         await page.waitForFunction(() => /Saved \d+ file/.test(document.body.textContent), null, { timeout: 30000 });

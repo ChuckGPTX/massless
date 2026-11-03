@@ -34,7 +34,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
   document.title = `${spec.title} | Chucksi workflows`;
   const params = { ...defaults(spec), dx: 0, dy: 0 };
   const q = new URLSearchParams(location.search);
-  for (const i of spec.inputs) if (q.has(i.key) && i.type !== 'image') params[i.key] = i.type === 'range' ? clamp(Number(q.get(i.key)) || i.default, i.min, i.max) : i.type === 'toggle' ? q.get(i.key) === '1' : String(q.get(i.key)).slice(0, i.max || 80);
+  for (const i of spec.inputs) if (q.has(i.key) && i.type !== 'image' && (i.type !== 'choice' || i.options.some((o) => o.id === q.get(i.key))) && (i.type !== 'color' || /^#[0-9a-f]{6}$/i.test(q.get(i.key)))) params[i.key] = i.type === 'range' ? clamp(Number(q.get(i.key)) || i.default, i.min, i.max) : i.type === 'toggle' ? q.get(i.key) === '1' : String(q.get(i.key)).slice(0, i.max || 80);
   // image inputs: { kind: 'sample', index } or { kind: 'file', name, image } ; optional inputs start empty
   const picks = {};
   for (const i of spec.inputs) if (i.type === 'image') picks[i.key] = i.optional ? null : { kind: 'sample', index: 0 };
@@ -134,6 +134,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
   const makeBtn = h('button', { class: 'btn-accent', type: 'button', onclick: makeAll }, 'Make it ↗');
   const zipBtn = h('button', { class: 'btn-ghost', type: 'button', onclick: downloadZip, disabled: true }, 'Download all (.zip)');
   const saveBtn = h('button', { class: 'btn-ghost', type: 'button', onclick: saveAll, disabled: true }, 'Save to My library');
+  const shareBtn = h('button', { class: 'btn-ghost', type: 'button', onclick: shareExplore, disabled: true }, 'Share to Explore');
   const resultsBox = h('div', { class: 'pz-results', 'aria-live': 'polite' });
   const form = h('form', { class: 'maker-form', onsubmit: (e) => { e.preventDefault(); makeAll(); } });
   const costNote = h('p', { class: 'maker-budget' }, spec.cost.tier === 'free' ? 'Free. Made on your device; your photos are not uploaded.' : 'Free, a few a day. The voice is made by Chucksi; your photos stay on your device.');
@@ -153,7 +154,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
         status, tabs, frame,
         h('div', { class: 'pz-under' }, engine.kind === 'video' || outputs.some((o) => o.type === 'video') ? playBtn : null, spec.safety.disclosure ? h('small', { class: 'pz-disclosure' }, spec.safety.disclosure) : null, spec.note ? h('small', { class: 'pz-note' }, spec.note) : null),
         resultsBox,
-        h('div', { class: 'maker-actions' }, h('button', { class: 'btn-accent pz-make-here', type: 'button', onclick: () => makeAll() }, 'Make it ↗'), zipBtn, saveBtn, h('a', { class: 'btn-ghost', href: '/library/' }, 'Open My library ↗')))),
+        h('div', { class: 'maker-actions' }, h('button', { class: 'btn-accent pz-make-here', type: 'button', onclick: () => makeAll() }, 'Make it ↗'), zipBtn, saveBtn, shareBtn, h('a', { class: 'btn-ghost', href: '/library/' }, 'Open My library ↗')))),
     spec.engine === 'scene' ? sceneStrip() : related(),
   );
   root.hidden = false;
@@ -281,7 +282,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
   // ---------- render ----------
   let prepTimer = 0;
   function changed(input, heavy = false) {
-    results = []; resultsBox.replaceChildren(); zipBtn.disabled = saveBtn.disabled = true;
+    results = []; resultsBox.replaceChildren(); zipBtn.disabled = saveBtn.disabled = shareBtn.disabled = true;
     if (heavy || input?.heavy || engine.heavy?.includes(input?.key)) { clearTimeout(prepTimer); prepTimer = setTimeout(prepare, 30); }
     else drawNow();
   }
@@ -395,7 +396,7 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
         resultsBox.append(resultCard(r));
       }
       bump(spec.id, 2);
-      zipBtn.disabled = saveBtn.disabled = !results.length;
+      zipBtn.disabled = saveBtn.disabled = shareBtn.disabled = !results.length;
       status.textContent = `Done: ${results.length} file${results.length === 1 ? '' : 's'}. Download them one by one, as a ZIP, or save them to My library.`;
       if (spec.engine === 'talking' && ctx?.voiceNote) status.textContent += ` ${ctx.voiceNote}`;
     } catch (e) {
@@ -420,6 +421,23 @@ export async function start(id, root, { capture = new URLSearchParams(location.s
     for (const r of results) files.push({ name: r.file, bytes: new Uint8Array(await r.blob.arrayBuffer()) });
     files.push({ name: 'recipe.json', bytes: new TextEncoder().encode(JSON.stringify({ preset: spec.id, version: 1, settings: params, made: new Date().toISOString() }, null, 2)) });
     downloadBlob(new Blob([zipStore(files)], { type: 'application/zip' }), `${slug(params.brand || spec.title)}-${spec.id}.zip`);
+  }
+  // Share to Explore: the first result, and a Remix link that reopens this preset with the same words and choices.
+  async function shareExplore() {
+    const r = results.find((x) => x.type === 'video' && x.blob.size <= 8 * 1048576) || results.find((x) => x.type === 'image');
+    if (!r) { toast('Press Make it first, then share it.'); return; }
+    const q = new URLSearchParams({ preset: spec.id });
+    for (const i of spec.inputs) {
+      const v = params[i.key];
+      if (i.type === 'image' || v === undefined || v === null || v === '') continue;
+      q.set(i.key, i.type === 'toggle' ? (v ? '1' : '0') : String(v));
+    }
+    let remixUrl = `/workflows?${q}`;
+    if (remixUrl.length > 6000) remixUrl = presetURL(spec.id);
+    try {
+      const m = await import('../explore-share.js');
+      await m.shareToExplore({ blob: r.blob, title: params.brand || spec.title, tool: 'design', remixUrl, width: r.w, height: r.h, tags: spec.tags.slice(0, 3) });
+    } catch (e) { toast(e.message, 'error'); }
   }
   async function saveAll() {
     if (!results.length) return;
