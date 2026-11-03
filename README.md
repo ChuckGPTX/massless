@@ -2,6 +2,24 @@
 
 Formerly Massless; now at https://chucksi.com.
 
+## Open Source Higgsfield challenge entry: Chuck S.I.
+
+**Chuck S.I. (Marketing Super Intelligence)** is a free, MIT-licensed creative suite that rebuilds the kind of one-tap marketing apps people pay for, in the open. One product photo in; ads, motion clips, mockups and social posts out. Live at **https://chucksi.com** (no account needed for the browser tools).
+
+What it rebuilds in the open:
+
+- **One-tap presets** (`/workflows`): 58 presets: 20 product scenes, product spin, five mockups (billboard, box truck, phone in hand, street poster, storefront), five object effects (squish, inflate, levitate, poke, melt), five rains, eight transitions, twelve social templates, Earth zoom out over a real place and a talking product ad. They render on the visitor's device with WebGL2 and WebCodecs; the product cut-out runs in the browser, so photos are not uploaded.
+- **Camera moves on any still** (`/video`): 28 moves (dolly zoom, crash zoom, arcs, crane, rack focus, bullet time) plus LiDAR scan, Vanish and Clones.
+- **Cinema Studio** (`/image`): camera body, lens, focal length, aperture and film stock compile into a prompt for FLUX.1 [schnell].
+
+How ComfyUI fits:
+
+- **Comfy API:** in the Image studio pick the model **Your own workflow** and point it at your ComfyUI (`--enable-cors-header`). The app posts [`public/comfy/massless_shot_flux_schnell.api.json`](public/comfy/massless_shot_flux_schnell.api.json) (core nodes only, FLUX.1 [schnell], no partner nodes) to `/prompt` and reads the result back (`public/js/engines.js`).
+- **Comfy SDK:** [`comfy/run_shot.py`](comfy/run_shot.py) renders the same shot from the command line through `comfy-sdk`, using the same `rig.json` the web app uses.
+- **Workflows to download:** five VFX4All ComfyUI workflows (Disintegrate, LiDAR scan, Liquid chrome, Walk of fire, Zero gravity) and the official FLUX 3 Klein template, in [`public/comfy/`](public/comfy/).
+
+Quick start: `npm install && npx wrangler dev` (http://localhost:8787). ComfyUI path: see [Open weights only, on your GPU](#open-weights-only-on-your-gpu-comfyui). The launch spot's actors are AI-generated; Chucksi contains no code, prompts, assets or branding from Higgsfield.
+
 **A free cinema camera for AI shots.** Design a shot with real camera, lens and film choices, render it with a free open-weight model, then fly a camera through it: dolly zoom, crash zoom, arcs, crane, rack focus, bullet time. Export MP4.
 
 Live: **https://chucksi.com**
