@@ -1,4 +1,5 @@
 // Deterministic lyric timing and rendering. No network, hidden generation or third-party artwork.
+import {phraseCues,holdLines} from './lyric-align.js';
 export const LOOKS = [
   {id:'kinetic',name:'Big feelings',detail:'Oversized words. Sharp entrances. Electric pink.',color:'#ff5b9c'},
   {id:'paper',name:'After hours',detail:'An intimate, ink-on-paper lyric journal.',color:'#df7c4d'},
@@ -19,14 +20,8 @@ export function cleanCues(input,duration){
       return {start,end,text:s.text,emphasis:s.emphasis,...(words.length?{words}:{} )};
     }).filter(s=>s.end>s.start).slice(0,500);
 }
-export function fromTranscript(segments,duration){
-  const chunks=[];
-  for(const s of cleanCues(segments,duration)){
-    const tokens=s.text.split(/\s+/); const timed=s.words?.length===tokens.length;
-    for(let i=0;i<tokens.length;i+=7){const n=Math.min(tokens.length,i+7);chunks.push({text:tokens.slice(i,n).join(' '),start:timed?s.words[i].start:s.start+(s.end-s.start)*i/tokens.length,end:timed?s.words[n-1].end:s.start+(s.end-s.start)*n/tokens.length,...(timed?{words:s.words.slice(i,n)}:{})});}
-  }
-  return cleanCues(chunks,duration);
-}
+// Whisper segments become lyric lines: invented phrases dropped, long phrases split evenly, word times kept.
+export function fromTranscript(segments,duration){return cleanCues(holdLines(phraseCues(segments),duration),duration);}
 export function parseLyrics(text,duration){
   const source=String(text).replace(/\r/g,'').trim();
   const time=s=>s.replace(',','.').split(':').reduce((a,n)=>a*60+Number(n),0);
@@ -54,6 +49,23 @@ export function analyzeBands(channels,rate,fps=50){
   for(const band of bands){let peak=0;for(let k=0;k<count;k++){band[k]=Math.sqrt(band[k]/hop);peak=Math.max(peak,band[k]);}if(peak>.00001)for(let k=0;k<count;k++)band[k]/=peak;}
   return {bands,fps};
 }
+// Tempo and beat phase from the bands above: onset strength, then autocorrelation over 70–180 BPM.
+// Good enough to pulse the words on the beat; it is not a full beat tracker (see Beat This!, CPJKU, for that).
+export function estimateBeat(analysis){
+  if(!analysis?.bands?.length)return null;
+  const fps=analysis.fps,[lo,mid]=analysis.bands,n=lo.length;if(n<fps*4)return null;
+  const onset=new Float32Array(n);for(let k=1;k<n;k++)onset[k]=Math.max(0,lo[k]-lo[k-1])+.5*Math.max(0,mid[k]-mid[k-1]);
+  const ac=L=>{let sum=0;for(let k=L;k<n;k++)sum+=onset[k]*onset[k-L];return sum/(n-L);};
+  let best=0,lag=0;const lo2=Math.round(fps*60/180),hi=Math.round(fps*60/70);
+  for(let L=lo2;L<=hi;L++){const bpm=60*fps/L,score=ac(L)*(1+.15*Math.exp(-(((bpm-120)/30)**2)));if(score>best){best=score;lag=L;}}
+  if(!lag||best<=0)return null;
+  // Sub-frame tempo: refine the period over the whole song so the pulse doesn't drift.
+  let period=lag,top=-1;
+  for(let L=lag-1;L<=lag+1;L+=.02){let sum=0;for(let p=0;p<L;p+=1){let s2=0;for(let k=p;k<n;k+=L)s2+=onset[Math.round(k)]||0;sum=Math.max(sum,s2);}if(sum>top){top=sum;period=L;}}
+  let phase=0;top=-1;for(let p=0;p<period;p+=.5){let sum=0;for(let k=p;k<n;k+=period)sum+=onset[Math.round(k)]||0;if(sum>top){top=sum;phase=p;}}
+  return {bpm:60*fps/period,offset:phase/fps,period:period/fps};
+}
+const pulseAt=(beat,t)=>{if(!beat||t<beat.offset)return 0;return Math.exp(-((t-beat.offset)%beat.period)/.11);};
 function linesFor(ctx,text,max){const out=[];let line='';for(const w of text.split(/\s+/)){const next=line?line+' '+w:w;if(line&&ctx.measureText(next).width>max){out.push(line);line=w;}else line=next;}if(line)out.push(line);return out;}
 function fitted(ctx,text,width,height,font,max){let size=max,lines;do{ctx.font=`${font} ${size}px ${font==='italic'?'Georgia':'"Instrument Sans", sans-serif'}`;lines=linesFor(ctx,text,width);if(lines.length*size*1.15<=height&&lines.every(l=>ctx.measureText(l).width<=width))break;size-=2;}while(size>2);return{lines,size};}
 export function drawLyrics(canvas,t,{cues=[],look='kinetic',title='Your song. Your world.',artist='',analysis,art,motion=true}={}){
@@ -77,12 +89,21 @@ export function drawLyrics(canvas,t,{cues=[],look='kinetic',title='Your song. Yo
   ctx.textAlign='right';ctx.fillText(`${String(Math.floor(t/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`,w*.9,h*.08);
   const text=cue?.text||(!cues.length||t<cues[0].start?title:''),style=look==='paper'?'italic':'700';const fit=fitted(ctx,look==='paper'?text:text.toUpperCase(),w*.8,h*.44,style,unit*(look==='kinetic'?.125:.095)*(cue?.emphasis?1.18:1));
   const p=cue?clamp((t-cue.start)/.32,0,1):1,shift=motion?(1-(1-(1-p)**3))*unit*.06:0;
-  ctx.save();ctx.translate(w*.5,h*.47+shift);if(look==='kinetic'&&motion)ctx.rotate(-.025+Math.sin(index)*.018);
+  // On the beat the words give a small kick (off when Movement is set to still type).
+  const kick=motion&&analysis?.beat?pulseAt(analysis.beat,t)*(look==='paper'?.012:.03):0;
+  ctx.save();ctx.translate(w*.5,h*.47+shift);if(kick)ctx.scale(1+kick,1+kick);if(look==='kinetic'&&motion)ctx.rotate(-.025+Math.sin(index)*.018);
+  // Word start times for the highlight, only when the line has real per-word timing.
+  const tokenCount=text.split(/\s+/).filter(Boolean).length,sungAt=cue?.words?.length===tokenCount&&cue.words.every(x=>Number.isFinite(x.start))?cue.words.map(x=>x.start):null;let wordIndex=0;
   const lh=fit.size*1.17;ctx.textAlign=look==='paper'?'left':'center';
   fit.lines.forEach((line,i)=>{const y=(i-(fit.lines.length-1)/2)*lh,x=look==='paper'?-w*.39:0;
     if(look==='echo'){for(let z=5;z>=1;z--){ctx.strokeStyle=accent;ctx.globalAlpha=.035*(6-z);ctx.lineWidth=1;ctx.strokeText(line,x,y+z*unit*(.026+a*.009));}ctx.globalAlpha=1;}
     if(look==='architecture'){ctx.fillStyle='#193746';for(let z=12;z>0;z-=2)ctx.fillText(line,x+z,y+z);}
-    ctx.fillStyle=look==='kinetic'&&i%2===1?accent:fg;ctx.fillText(line,x,y);
+    ctx.fillStyle=look==='kinetic'&&i%2===1?accent:fg;
+    if(!sungAt){ctx.fillText(line,x,y);return;}
+    // Karaoke: words light up as they are sung, upcoming words wait at low opacity.
+    const tokens=line.split(' '),width=ctx.measureText(line).width,align=ctx.textAlign;let px=align==='center'?x-width/2:x;ctx.textAlign='left';
+    for(const token of tokens){const sung=t>=sungAt[wordIndex++];ctx.globalAlpha=sung?1:.34;ctx.fillText(token,px,y);px+=ctx.measureText(token+' ').width;}
+    ctx.globalAlpha=1;ctx.textAlign=align;
   });ctx.restore();
   if(cue){ctx.fillStyle=look==='paper'?'#d9cbbb':'#ffffff22';ctx.fillRect(w*.1,h*.8,w*.8,3);ctx.fillStyle=accent;ctx.fillRect(w*.1,h*.8,w*.8*clamp((t-cue.start)/(cue.end-cue.start),0,1),3);}
   ctx.textAlign='left';ctx.fillStyle=look==='paper'?'#796b59':'#aca4b0';ctx.font=`500 ${unit*.019}px "Instrument Sans", sans-serif`;ctx.fillText(title.slice(0,50),w*.1,h*.91);

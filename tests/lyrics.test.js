@@ -25,7 +25,8 @@ test('bad timings are discarded, overlaps clipped, and boundaries stay in the so
 test('transcript phrase breaks use provided word times when present',()=>{
   const words=Array.from({length:8},(_,i)=>({word:'word'+i,start:i,end:i+.5}));
   const r=fromTranscript([{start:0,end:8,text:words.map(w=>w.word).join(' '),words}],9);
-  assert.equal(r.length,2);assert.equal(r[0].end,6.5);assert.equal(r[1].start,7);
+  // 48 characters is too long for one line: split into balanced halves, never 7 + an orphan.
+  assert.equal(r.length,2);assert.equal(r[0].words.length,4);assert.equal(r[1].start,4);assert.equal(r[0].end,4);
 });
 test('audio crop preserves exact stereo samples for the selected excerpt',()=>{
   const r=cropScore({sampleRate:10,channels:[Float32Array.from({length:50},(_,i)=>i),Float32Array.from({length:50},(_,i)=>-i)]},1.2,2);

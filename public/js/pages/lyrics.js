@@ -1,9 +1,10 @@
-import { LOOKS, MAX_SONG_SECONDS, cleanCues, fromTranscript, parseLyrics, cueAt, cropScore, toLrc, toSrt, analyzeBands, drawLyrics } from '../lyrics-engine.js';
+import { LOOKS, MAX_SONG_SECONDS, cleanCues, fromTranscript, parseLyrics, cueAt, cropScore, toLrc, toSrt, analyzeBands, drawLyrics, estimateBeat } from '../lyrics-engine.js';
 import { encodeWav } from '../audio-engine.js';
 import { apiFetch } from '../human.js';
 import { ASR_LANGS, shiftResult } from '../transcribe.js';
 import { exportMusic } from '../music-export.js';
 import { generateLyricVideo, directLyrics } from '../lyric-generation.js';
+import { wordsFrom, alignLyrics, promptFrom } from '../lyric-align.js';
 
 const $ = s => document.querySelector(s);
 const canvas = $('#lyric-canvas'), audio = $('#song-audio');
@@ -16,6 +17,8 @@ const demoCues = [
 let cues = structuredClone(demoCues), score, buffer, analysis, art, originalFile;
 let look = 'kinetic', busy = false, cancel, demo = true, trackURL, resultURL, artURL;
 let playhead = 4.7, context, pendingFile, view = 'welcome';
+// Every word Whisper heard, with times. Pasted lyrics borrow these times instead of being spaced evenly.
+let heard = [];
 const message = text => { $('#status').textContent = text; };
 const format = n => `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2,'0')}`;
 const duration = () => score?.duration || 16;
@@ -104,14 +107,14 @@ function buildCueList() {
       const tap=document.createElement('button');tap.type='button';tap.textContent=key==='start'?'Start here':'End here';tap.setAttribute('aria-label',`${key==='start'?'Start':'End'} line ${i+1} at playhead`);tap.onclick=()=>{input.value=playhead.toFixed(2);update();};label.append(tap);
     }
     const words=document.createElement('div'), text=document.createElement('textarea');text.rows=2;text.maxLength=500;text.value=cue.text;text.setAttribute('aria-label',`Lyric line ${i+1}`);
-    text.oninput=()=>{cue.text=text.value;delete cue.words;changedCues();};
+    text.oninput=()=>{cue.text=text.value;if(cue.words?.length!==text.value.trim().split(/\s+/).filter(Boolean).length)delete cue.words;else cue.words=cue.words.map((w,j)=>({...w,text:text.value.trim().split(/\s+/)[j]}));changedCues();};
     const emphasis=document.createElement('label');emphasis.className='cue-emphasis';const check=document.createElement('input');check.type='checkbox';check.checked=!!cue.emphasis;check.onchange=()=>{cue.emphasis=check.checked;changedCues();};emphasis.append(check,document.createTextNode('Chorus emphasis'));words.append(text,emphasis);
     const remove=document.createElement('button');remove.type='button';remove.className='cue-delete';remove.textContent='×';remove.setAttribute('aria-label',`Delete line ${i+1}`);remove.onclick=()=>{cues.splice(i,1);buildCueList();changedCues();};
     row.append(number,times,words,remove);list.append(row);
   });
 }
 function adoptScore(value) {
-  score=value;analysis=analyzeBands(score.channels,score.sampleRate);playhead=0;
+  score=value;analysis=analyzeBands(score.channels,score.sampleRate);analysis.beat=estimateBeat(analysis);playhead=0;
   $('#scrub').max=duration();$('#clip-start').max=Math.max(0,duration()-.1);$('#clip-start').value=0;
   waveform();invalidate();render();
 }
@@ -129,7 +132,7 @@ async function openSong(file, signal) {
   const decoded=await context.decodeAudioData(await file.arrayBuffer());
   ensureActive(signal);
   if(decoded.duration<.5 || decoded.duration>MAX_SONG_SECONDS) throw new Error('Choose audio between half a second and 6 minutes.');
-  buffer=decoded; originalFile=file;demo=false;cues=[];
+  buffer=decoded; originalFile=file;demo=false;cues=[];heard=[];
   if(trackURL)URL.revokeObjectURL(trackURL);trackURL=URL.createObjectURL(file);audio.src=trackURL;
   $('#song-title').value=file.name.replace(/\.[^.]+$/,'').slice(0,60);$('#artist').value='';
   $('#clip-length').value='full';
@@ -156,14 +159,17 @@ async function transcribeSong(signal) {
   if(!buffer || !originalFile) throw new Error('Choose a song to start.');
   const offline=new OfflineAudioContext(1,Math.ceil(buffer.duration*16000),16000), source=offline.createBufferSource();source.buffer=buffer;source.connect(offline.destination);source.start();
   const mono=await offline.startRendering();ensureActive(signal);
-  const q=new URLSearchParams({mode:'lyrics'});if($('#language').value)q.set('lang',$('#language').value);
+  const typed=$('#welcome-lyrics').value.trim();
+  const q=new URLSearchParams({mode:'lyrics'});if($('#language').value)q.set('lang',$('#language').value);if(typed)q.set('prompt',promptFrom(typed));
   const response=await apiFetch('/api/transcribe?'+q,{method:'POST',headers:{'content-type':'audio/wav'},body:encodeWav([mono.getChannelData(0)],16000),signal});
   const data=await response.json();ensureActive(signal);if(!response.ok)throw new Error(data.error||'We couldn’t hear the words clearly. Try again, or add your lyrics below.');
   const result=shiftResult({...data,duration:duration()},0);
-  const next=fromTranscript(result.segments,duration());
+  heard=wordsFrom(result.segments);
+  const matched=typed&&heard.length?alignLyrics(typed,heard,duration()):null;
+  const next=matched&&matched.matched>=.3?cleanCues(matched.cues,duration()):fromTranscript(result.segments,duration());
   if(!next.length)throw new Error('We couldn’t find lyrics in this track. Try a version with clearer vocals, or add your lyrics below.');
   cues=next;buildCueList();invalidate();seek(0);
-  $('#timing-note').textContent='Automatic lyrics. Longer phrases use estimated timing. You can correct any words or adjust the IN / OUT times here.';
+  $('#timing-note').textContent=matched&&matched.matched>=.3?`Your lyrics, timed to the vocal. ${Math.round(matched.matched*100)}% of your words were heard clearly; the rest sit between them.`:'Automatic lyrics, timed word by word. Fix any word below, or paste your lyrics to keep the timing and swap in your exact words.';
 }
 function generationStage(stage, progress) {
   const text={prepare:'Opening your song…',transcribe:'Listening for every word…',compose:'Bringing the words and motion together…',render:'Making your video…'};
@@ -200,10 +206,12 @@ async function runGeneration({file, demoMode=false, reuseLyrics=false}={}) {
 async function transcribe() { if(!busy)await runGeneration(); }
 function applyLyrics(text) {
   if(!score){message('Add your song or try the demo first.');return;}
-  const result=parseLyrics(text,duration());
+  let result=parseLyrics(text,duration()),aligned=null;
+  // Plain lyrics after a transcription: keep the heard timing, use the typed words.
+  if(result.estimated&&heard.length){aligned=alignLyrics(text,heard,duration());if(aligned.matched>=.3)result={cues:cleanCues(aligned.cues,duration()),estimated:false};else aligned=null;}
   if(!result.cues.length){message('No lyrics found. Add a phrase on each line.');return;}
   cues=result.cues;buildCueList();changedCues();
-  $('#timing-note').textContent=result.estimated?'Timing is evenly spaced as a starting point. Adjust each phrase to the vocal before export.':'Imported timestamps. Listen through to check the phrasing and timing.';
+  $('#timing-note').textContent=aligned?`Your words, timed to the vocal. ${Math.round(aligned.matched*100)}% matched what we heard; the rest sit between them.`:result.estimated?'Timing is evenly spaced as a starting point. Adjust each phrase to the vocal before export.':'Imported timestamps. Listen through to check the phrasing and timing.';
   message(`${cues.length} lines added. Your lyrics are editable below.`);
 }
 function download(blob,name) {const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}

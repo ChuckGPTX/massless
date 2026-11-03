@@ -15,37 +15,33 @@ export async function exportMusic({
       "MP4 export needs a browser with WebCodecs audio and video support. Try desktop Chrome.",
     );
   const fps = 24;
-  const video = {
-    codec: "avc1.42001f",
-    width: canvas.width,
-    height: canvas.height,
-    framerate: fps,
-    bitrate: 4000000,
-    avc: { format: "avc" },
-  };
-  const audio = {
-    codec: "mp4a.40.2",
-    numberOfChannels: 2,
-    sampleRate: score.sampleRate,
-    bitrate: 192000,
-  };
-  if (
-    !(await VideoEncoder.isConfigSupported(video)).supported ||
-    !(await AudioEncoder.isConfigSupported(audio)).supported
-  )
+  // H.264 + AAC plays everywhere. Browsers without an H.264 encoder (Chromium on Linux, for one)
+  // fall back to VP9 + Opus in the same MP4 container instead of failing.
+  const videos = [
+    { mux: "avc", config: { codec: "avc1.42001f", avc: { format: "avc" } } },
+    { mux: "vp9", config: { codec: "vp09.00.31.08" } },
+  ].map((v) => ({ ...v, config: { ...v.config, width: canvas.width, height: canvas.height, framerate: fps, bitrate: 4000000 } }));
+  const audios = [
+    { mux: "aac", config: { codec: "mp4a.40.2" } },
+    { mux: "opus", config: { codec: "opus" } },
+  ].map((a) => ({ ...a, config: { ...a.config, numberOfChannels: 2, sampleRate: score.sampleRate, bitrate: 192000 } }));
+  const pick = async (list, Encoder) => { for (const item of list) if ((await Encoder.isConfigSupported(item.config)).supported) return item; return null; };
+  const chosenVideo = await pick(videos, VideoEncoder), chosenAudio = await pick(audios, AudioEncoder);
+  if (!chosenVideo || !chosenAudio)
     throw new Error(
-      "H.264/AAC export is unavailable in this browser. Try desktop Chrome.",
+      "Video export is unavailable in this browser. Try desktop Chrome.",
     );
+  const video = chosenVideo.config, audio = chosenAudio.config;
   const { Muxer, ArrayBufferTarget } = await import("./vendor/mp4-muxer.mjs");
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),
     video: {
-      codec: "avc",
+      codec: chosenVideo.mux,
       width: canvas.width,
       height: canvas.height,
       frameRate: fps,
     },
-    audio: { codec: "aac", sampleRate: score.sampleRate, numberOfChannels: 2 },
+    audio: { codec: chosenAudio.mux, sampleRate: score.sampleRate, numberOfChannels: 2 },
     fastStart: "in-memory",
     firstTimestampBehavior: "offset",
   });
