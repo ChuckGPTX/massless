@@ -116,6 +116,7 @@ export const STUDIOS = [
         "grid",
       ),
       item("Lyric Studio", "Upload a song. We make the video.", "/lyrics/", "text", "NEW"),
+      item("Motion Loops", "Bouncy shape loops in your colours", "/loops/", "spark", "NEW"),
       item(
         "Music preview",
         "Artwork, audio and a beat-synced MP4",

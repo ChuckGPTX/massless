@@ -1,3 +1,4 @@
+import { audioSink } from '../aac.js';
 // Shared drawing helpers for the preset engines: images, cut-outs, shadows, colour, type and MP4 export.
 // Everything runs on the visitor's device; nothing here calls a server.
 
@@ -475,7 +476,7 @@ export async function encodeMP4(c, { duration, fps = 30, draw, audio = null, onP
   let aenc = null;
   try {
     if (acfg) {
-      aenc = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failure = e) });
+      aenc = new AudioEncoder({ output: audioSink(muxer, acfg), error: (e) => (failure = e) });
       aenc.configure(acfg);
       const src = audio.channels[0], sr = audio.sampleRate, len = Math.min(src.length, Math.floor(duration * sr));
       for (let i = 0; i < len; i += 4800) {

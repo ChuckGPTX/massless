@@ -35,7 +35,7 @@ export const TONES = { base: 'Page', alt: 'Soft', inv: 'Inverse', acc: 'Brand co
 export const SECTIONS = {
   hero: {
     name: 'Hero', group: 'Intro', hint: 'Headline, intro and the main button',
-    variants: { split: 'Split', centered: 'Centered', cover: 'Full photo', editorial: 'Editorial', banner: 'Page header', portrait: 'Portrait', ambient: 'Ambient', runway: 'Runway', minimal: 'Name card', mosaic: 'Image mosaic', object: 'Object campaign', kinetic: 'Kinetic type', stack: 'Layered cards', reel: 'Film strip' },
+    variants: { split: 'Split', centered: 'Centered', cover: 'Full photo', editorial: 'Editorial', banner: 'Page header', portrait: 'Portrait', ambient: 'Ambient', runway: 'Runway', minimal: 'Name card', mosaic: 'Image mosaic', object: 'Object campaign', kinetic: 'Kinetic type', stack: 'Layered cards', reel: 'Film strip', loopripple: 'Motion loop · Ripple', loopblob: 'Motion loop · Blob', looporbit: 'Motion loop · Orbit', loopgrid: 'Motion loop · Dot wave', loopburst: 'Motion loop · Burst', loopflow: 'Motion loop · Flow' },
     fields: { eyebrow: 'text', title: 'text', subtitle: 'para', cta: 'link', cta2: 'link', note: 'text', image: IMG, images: { max: 6, item: { image: IMG } } },
     labels: { cta: 'Main button', cta2: 'Second button', note: 'Small print', images: 'Mosaic images' },
   },
@@ -228,7 +228,7 @@ Section types (variants): fields
 - chapters (stack|split): eyebrow, title, items [{title, text, motif: orbit|wave|horizon|bloom|grid|stairs|none}]
 - cases (rail|list): eyebrow, title, items [{year, title, role, client, text, image, credits (one name per line), link}]
 - annotated (portrait|wide): eyebrow, title, subtitle, status, image, items [{label}] (2 to 6 short labels)
-- hero also has portrait (centered copy over a tall portrait), ambient (a moving line field), runway (a tall editorial photo) and minimal (name card)
+- hero also has portrait (centered copy over a tall portrait), ambient (a moving line field), runway (a tall editorial photo) and minimal (name card), plus loopripple, loopblob, looporbit, loopgrid, loopburst and loopflow (centered copy over an animated shape loop in the theme colours; good for launches, events, music and playful brands)
 - footer (columns|simple): tagline
 Icons: leaf sprout sun droplet scissors shield clock calendar pin phone mail heart check sparkle bolt home key users chat camera music mic ticket book cap code chart globe truck wrench brush coffee utensils wine gift smile layers compass rocket pen paw car hammer tooth scale dumbbell lotus bed bath area.
 Collection items: posts {title, date, excerpt, body, image}; listings {title, status, price, address, beds, baths, sqft, text, image}; tracks {title, length}; menu {title, category, text, price}. Include a collection only when a section lists it.

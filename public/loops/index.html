@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion Loops | Chucksi</title>
+<meta name="description" content="Bouncy shape animations for your brand: morphs, bounces, bursts and line draws. Each one a seamless loop. Recolour it, then download an MP4, a still or one HTML file. Free and open source.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Chucksi"><meta property="og:url" content="https://chucksi.com/loops">
+<meta property="og:title" content="Motion Loops | Chucksi"><meta property="og:description" content="Seamless shape loops in your brand colours. MP4, PNG or one HTML file. Free.">
+<meta property="og:image" content="https://chucksi.com/og.jpg?v=4"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:alt" content="Chucksi. Your marketing super intelligence: video, images, websites, brand kits, games and sign.">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Motion Loops | Chucksi"><meta name="twitter:description" content="Seamless shape loops in your brand colours. MP4, PNG or one HTML file. Free."><meta name="twitter:image" content="https://chucksi.com/og.jpg?v=4">
+<link rel="canonical" href="https://chucksi.com/loops"><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="/css/site.css"><link rel="stylesheet" href="/css/navigation.css"><link rel="stylesheet" href="/css/loops.css">
+<script type="module" src="/js/navigation.js"></script>
+</head>
+<body>
+<header class="nav"><a class="nav-logo" href="/" aria-label="Chucksi home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 1.5v6M16 24.5v6M1.5 16h6M24.5 16h6" stroke="currentColor" stroke-width="3"/></svg></a><nav class="nav-links" aria-label="Main"><a href="/">Explore</a><a href="/studios/image/">Image</a><a href="/studios/video/">Video</a><a href="/website/">Website</a></nav><div class="nav-right"><a class="btn-ghost" href="/lyrics/">Lyric Studio ↗</a></div></header>
+<main class="loops-page">
+  <section class="loops-hero" aria-labelledby="loops-title">
+    <div>
+      <p class="eyebrow">NEW / MOTION LOOPS</p>
+      <h1 id="loops-title">Shapes that<br><em>never stop.</em></h1>
+    </div>
+    <p class="loops-lede">Eighteen bouncy shape animations: morphs, bounces, bursts and line draws. Every one is a seamless loop. Put it in your brand colours, then take it anywhere as an MP4, a still or one HTML file.</p>
+  </section>
+
+  <section class="loop-editor" aria-label="Loop editor">
+    <div class="loop-stage">
+      <canvas id="loop-preview" width="1080" height="1080" aria-label="Selected loop preview"></canvas>
+      <div class="loop-progress" aria-hidden="true"><i id="loop-progress"></i></div>
+    </div>
+    <div class="loop-controls">
+      <p class="eyebrow" id="loop-kind">BOUNCES</p>
+      <h2 id="loop-name">Bounce</h2>
+      <fieldset><legend>Colours</legend>
+        <div id="palettes" class="palettes" role="radiogroup" aria-label="Colour sets"></div>
+        <div class="swatches">
+          <label>Colour 1<input type="color" id="c0"></label>
+          <label>Colour 2<input type="color" id="c1"></label>
+          <label>Colour 3<input type="color" id="c2"></label>
+          <label>Background<input type="color" id="bg"></label>
+        </div>
+      </fieldset>
+      <div class="loop-pair">
+        <label>Format<select id="format"></select></label>
+        <label>Loop length<select id="period"><option value="6">6 seconds · lively</option><option value="8">8 seconds</option><option value="12" selected>12 seconds · calm</option></select></label>
+      </div>
+      <label>Video length<select id="repeats"><option value="1" selected>One loop</option><option value="2">Two loops</option><option value="3">Three loops</option></select></label>
+      <div class="loop-actions">
+        <button id="download-mp4" class="btn-accent" type="button">Download MP4 ↓</button>
+        <button id="download-png" class="btn-ghost" type="button">Still image (PNG)</button>
+        <button id="download-html" class="btn-ghost" type="button">One HTML file</button>
+        <button id="copy-html" class="text-button" type="button">Copy the code</button>
+      </div>
+      <p id="loop-status" class="loop-status" role="status" aria-live="polite">Pick a loop below, or change the colours.</p>
+      <p class="loop-note">Use them in your own projects; the code is MIT licensed. Lyric Studio already moves to them on the beat, and the Website builder can put one behind your hero.</p>
+    </div>
+  </section>
+
+  <section class="loop-gallery" aria-labelledby="gallery-title">
+    <div class="gallery-head"><h2 id="gallery-title">The collection.</h2><div id="kinds" class="kinds" role="tablist" aria-label="Filter loops"></div></div>
+    <div id="loop-grid" class="loop-grid"></div>
+  </section>
+</main>
+<script type="module" src="/js/pages/loops.js"></script>
+</body></html>

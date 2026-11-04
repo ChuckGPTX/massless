@@ -1,3 +1,4 @@
+import { audioSink } from './aac.js';
 // Offline MP4 encoding with the same local muxer used by Launch Film.
 export async function exportMusic({
   canvas,
@@ -46,6 +47,7 @@ export async function exportMusic({
     firstTimestampBehavior: "offset",
   });
   let failure;
+  const addAudio = audioSink(muxer, audio);
   const venc = new VideoEncoder({
     output: (chunk, meta) => {
       try { muxer.addVideoChunk(chunk, meta); } catch (e) { failure = e; }
@@ -56,7 +58,7 @@ export async function exportMusic({
   });
   const aenc = new AudioEncoder({
     output: (chunk, meta) => {
-      try { muxer.addAudioChunk(chunk, meta); } catch (e) { failure = e; }
+      try { addAudio(chunk, meta); } catch (e) { failure = e; }
     },
     error: (e) => {
       failure = e;

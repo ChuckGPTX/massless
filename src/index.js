@@ -189,6 +189,7 @@ Block types and fields:
 - {"type":"image","beats":4,"words":[2 words shown over a still]}
 - {"type":"graph","beats":4,"to":integer,"label":"what is growing"}
 - {"type":"logo","beats":6,"text":"product name","sub":"tagline, max 60 chars"}
+Tell it as a story, the way the best short-form videos do: the first block is the hook (a surprising claim or question that stops the scroll), the tension blocks name the viewer's problem, the drop is the turn where the product changes it, the blocks after the drop are proof (numbers, images or words from the brief), and the logo block pays it off with a clear next step in its sub.
 Rules: one word per beat in words blocks. Open with 3 tension blocks (words, strike, prompt), then exactly one block with "drop": true (the hero right after the prompt). Use concrete words from the brief, all caps in words blocks, no emoji or hashtags, no invented statistics presented as facts (counters and graphs should use numbers from the brief or obviously playful ones). End with a logo block.`;
 
 async function beats(request, env) {
@@ -236,7 +237,9 @@ async function beats(request, env) {
 // Body: { title, scenes: [ ["lyric line", ...], ... ] }. Reply: { prompts: [string, ...] } in scene order.
 const SCENE_RULES = `You are a music video director. For each numbered scene you get the lyrics sung during it.
 Write one image prompt per scene for a striking, cinematic, photorealistic still that shows what those lyrics feel like.
-Each prompt: max 45 words, a concrete subject, setting, light, colour palette and camera angle. Vary the shots across scenes (wide, close-up, aerial, detail, silhouette) but keep one visual world and palette for the whole song.
+Tell one story across the whole video, like a short film: scene 1 is the hook (a bold, curious image that makes people stay), the middle scenes build and raise the stakes, one scene is the turn (something changes), and the last scene pays it off.
+Keep the same main character or object and the same world and palette in every scene, described the same way each time, so the pictures feel like one film. The main character is an invented person or a non-human subject; never a real or famous person.
+Each prompt: max 45 words, a concrete subject, action, setting, light, colour palette and camera angle. Vary the shot sizes across scenes (wide establishing, medium, close-up, detail, aerial, silhouette).
 Never include written words, letters, captions, signs or screens with text. No real people, celebrities, brands or logos.
 Reply with JSON only: {"prompts": ["...", "..."]} with exactly one prompt per scene, in order.`;
 async function lyricScenes(request, env) {
@@ -483,7 +486,7 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/console': '/console/index.html', '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/lyrics': '/lyrics/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/games': '/games/index.html', '/website': '/website/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
+const PAGES = { '/console': '/console/index.html', '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/lyrics': '/lyrics/index.html', '/loops': '/loops/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/games': '/games/index.html', '/website': '/website/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
 for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studios/${studio}`] = `/studios/${studio}/index.html`;
 PAGES['/sign'] = '/sign/index.html';
 PAGES['/report'] = '/report/index.html';
@@ -532,7 +535,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|lyrics|demo-site|workflows|projects|library|edit|build|games|website|cut|scene|sign|report|console|explore)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|lyrics|loops|demo-site|workflows|projects|library|edit|build|games|website|cut|scene|sign|report|console|explore)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();

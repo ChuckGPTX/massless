@@ -7,6 +7,7 @@ import * as X from '../extract.js';
 import * as E from '../textedit.js';
 import { warmHuman } from '../human.js';
 import { retainExport, downloadBlob } from '../assets.js';
+import { audioSink } from '../aac.js';
 
 const PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.5v11l9-5.5z"/></svg>';
 const PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg>';
@@ -660,7 +661,7 @@ export function createTextEdit(page) {
       // sound first: the edit, resampled for Opus when the browser has no AAC encoder
       if (acodec) {
         page.message('Encoding the sound…');
-        aenc = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: (e) => (fail = e) });
+        aenc = new AudioEncoder({ output: audioSink(muxer, acodec.cfg), error: (e) => (fail = e) });
         aenc.configure(acodec.cfg);
         const src = editedSource(pcm);
         let chs = src.read(0, src.frames);

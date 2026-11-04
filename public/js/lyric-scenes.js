@@ -22,14 +22,27 @@ export function sceneLines(scenes, cues) {
   return scenes.map(s => cues.filter(c => c.start < s.end && c.end > s.start).map(c => c.text));
 }
 
-// Built-in prompts: a visual world per scene, flavoured by the strongest words in its lyrics.
+// Built-in prompts tell one small story: the same subject in the same world for the whole song, with the
+// shot moving from a hook, through the build and the turn, to a payoff (the storytelling arc short-form
+// creators use), flavoured by the strongest words in each scene's lyrics.
+const SUBJECTS = ['a lone figure in a red coat', 'a red balloon on a long string', 'a small white paper boat', 'a glowing jellyfish', 'a vintage bicycle with a basket of flowers', 'a lost astronaut', 'a dancer in a flowing yellow dress', 'a fox with a lantern'];
+const ARC = [
+  ['hook', 'bold low-angle opening shot of {s}, something unexpected about to happen'],
+  ['build', 'wide shot, {s} moving through the scene'],
+  ['build', 'close-up detail of {s}, tension in the air'],
+  ['turn', 'dramatic moment, {s} as everything changes, light shifting'],
+  ['peak', 'aerial shot, {s} at the height of the moment'],
+  ['payoff', 'final silhouette of {s} as the light settles, a quiet afterglow'],
+];
+const arcStep = (i, n) => (n <= 1 ? ARC[0] : i === 0 ? ARC[0] : i === n - 1 ? ARC[ARC.length - 1] : ARC[1 + Math.min(ARC.length - 3, Math.floor((i - 1) / Math.max(1, n - 2) * (ARC.length - 2)))]);
 export function fallbackPrompts(scenes, cues, title = '') {
   const offset = [...title].reduce((n, ch) => n + ch.charCodeAt(0), 0);
-  return sceneLines(scenes, cues).map((lines, i) => {
+  const world = WORLDS[offset % WORLDS.length], subject = SUBJECTS[offset % SUBJECTS.length];
+  return sceneLines(scenes, cues).map((lines, i, all) => {
     const words = lines.join(' ').toLowerCase().replace(/[^\p{L}\s']/gu, ' ').split(/\s+/).filter(w => w.length > 3 && !STOP.has(w) && !TEXTY.test(w));
     const motif = [...new Set(words)].slice(0, 3).join(', ');
-    const world = WORLDS[(offset + i * 3) % WORLDS.length];
-    return `Cinematic music video still, ${world}${motif ? `, evoking ${motif}` : ''}, dramatic lighting, rich colour, shallow depth of field, 35mm film look. No text, no letters, no words, no logos.`;
+    const shot = arcStep(i, all.length)[1].replace('{s}', subject);
+    return `Cinematic music video still, ${shot}, ${world}${motif ? `, evoking ${motif}` : ''}, dramatic lighting, rich colour, shallow depth of field, 35mm film look. No text, no letters, no words, no logos.`;
   });
 }
 

@@ -2,6 +2,7 @@ import { FilmRenderer, PALETTES, BLOCKS, layout, check, templateSpec, sanitizeSp
 import * as store from '../store.js';
 import { bindDialogs, toast, el } from '../ui.js';
 import { apiFetch } from '../human.js';
+import { audioSink } from '../aac.js';
 
 const $ = (s) => document.querySelector(s);
 const FALLBACK_STYLES = [
@@ -289,7 +290,7 @@ async function exportFilm() {
     venc.configure(vcfg);
     let aenc = null;
     if (acfg) {
-      aenc = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: (e) => (err = e) });
+      aenc = new AudioEncoder({ output: audioSink(muxer, acfg.cfg), error: (e) => (err = e) });
       aenc.configure(acfg.cfg);
       const [L, Rch] = state.score.channels;
       const sr = state.score.sampleRate;

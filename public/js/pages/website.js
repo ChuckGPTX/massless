@@ -8,7 +8,8 @@ import { TEMPLATES, TEMPLATES_LIST, buildTemplate } from '../website/templates.j
 import { TEMPLATE_CATEGORIES, templateCategory, filterTemplates, personalizeSite, launchReview } from '../website/studio-tools.js';
 import { MOTIFS } from '../website/art.js';
 import { renderParts, renderSingle, makeContext, usedCollection, GEN_JS } from '../website/render.js';
-import { HERO_JS } from '../website/runtime.js';
+
+import { HERO_JS, LOOP_JS } from '../website/runtime.js';
 import { renderSection, inline, paras } from '../website/sections.js';
 import { BASE_CSS, EDIT_CSS } from '../website/css.js';
 import { exportZip, exportSingle, faviconSvg, ogImage } from '../website/export.js';
@@ -297,10 +298,11 @@ function stopMotion(doc) {
 /** Use the same campaign and ambient motion as exports; ordinary edit mode stays still. */
 function startMotion(doc) {
   const canvas = doc.querySelector('canvas[data-gen]:not([data-live])');
+  const loop = doc.querySelector('canvas[data-loop]:not([data-live])');
   const campaign = doc.querySelector('[data-hero-motion]');
-  if (!canvas && !campaign) { doc._heroStop?.(); return; }
+  if (!canvas && !campaign && !loop) { doc._heroStop?.(); return; }
   const sc = doc.createElement('script');
-  sc.textContent = (canvas ? GEN_JS : '') + (campaign ? HERO_JS : '');
+  sc.textContent = (canvas ? GEN_JS : '') + (loop ? LOOP_JS : '') + (campaign ? HERO_JS : '');
   doc.body.appendChild(sc);
   sc.remove();
 }

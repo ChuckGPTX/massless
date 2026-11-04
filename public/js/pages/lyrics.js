@@ -3,6 +3,7 @@ import { encodeWav } from '../audio-engine.js';
 import { apiFetch } from '../human.js';
 import { ASR_LANGS, shiftResult } from '../transcribe.js';
 import { exportMusic } from '../music-export.js';
+import { soundCheck, hasSound } from '../aac.js';
 import { generateLyricVideo, directLyrics } from '../lyric-generation.js';
 import { wordsFrom, alignLyrics, promptFrom } from '../lyric-align.js';
 import { drawMotion, planScenes, autoPictureCount } from '../lyric-motion.js';
@@ -17,7 +18,7 @@ const demoCues = [
   {start:12,end:16,text:'And carry it home'},
 ];
 let cues = structuredClone(demoCues), score, buffer, analysis, art, originalFile;
-let look = 'kinetic', busy = false, cancel, demo = true, trackURL, resultURL, artURL;
+let soundOK = 'unknown', look = 'kinetic', busy = false, cancel, demo = true, trackURL, resultURL, artURL;
 let playhead = 4.7, context, pendingFile, view = 'welcome';
 // Every word Whisper heard, with times. Pasted lyrics borrow these times instead of being spaced evenly.
 let heard = [];
@@ -29,7 +30,7 @@ const welcomeLine=timedLine('We are made of little moments',0,4.2,.32);
 const message = text => { $('#status').textContent = text; };
 const format = n => `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2,'0')}`;
 const duration = () => score?.duration || 16;
-const config = () => ({cues,look,title:$('#song-title').value || 'Little moments',artist:$('#artist').value,analysis,art,motion:$('#motion').value==='on',scenes:scenes.length?scenes:planScenes(cues,duration(),1),images:pictures.map(p=>p?.image||null),duration:duration()});
+const config = () => ({cues,look,title:$('#song-title').value || 'Little moments',artist:$('#artist').value,analysis,art,motion:$('#motion').value==='on',shapes:$('#shapes').value!=='off',scenes:scenes.length?scenes:planScenes(cues,duration(),1),images:pictures.map(p=>p?.image||null),duration:duration()});
 const pictureCount = () => { const v=$('#pictures').value; return v==='auto'?autoPictureCount(duration()):Number(v)||0; };
 function invalidate() {
   if(resultURL) URL.revokeObjectURL(resultURL);
@@ -184,7 +185,7 @@ function clearPictures(){for(const p of pictures)if(p?.url)URL.revokeObjectURL(p
 // Plan the scenes and paint any that don't have a picture yet. Existing pictures are kept when the
 // number of scenes is unchanged, so editing words or timing never repaints the video.
 async function paintPictures(signal){
-  const count=pictureCount(),next=planScenes(cues,duration(),Math.max(1,count||1));
+  const count=pictureCount(),next=planScenes(cues,duration(),Math.max(1,count||1),analysis?.beat);
   const keep=next.length===scenes.length&&pictures.length===next.length?pictures:(clearPictures(),new Array(next.length).fill(null));
   scenes=next;pictures=keep;
   if(!count||demo){buildSceneStrip();return;}
@@ -237,8 +238,8 @@ async function runGeneration({file, demoMode=false, reuseLyrics=false}={}) {
       render:renderVideo,
     });
     $('#finished-song').textContent=$('#song-title').value;
-    $('#finished-details').textContent=`${format(duration())} song · ${LOOKS.find(l=>l.id===look).name} · ${pictures.filter(Boolean).length?pictures.filter(Boolean).length+' AI pictures':'built-in art'} · Original audio`;
-    $('#finished-note').textContent=demo?'Original instrumental with sample words, not sung vocals. Upload your song to make your own.':'Give it a listen before sharing. You can correct any words or timing in Edit video.';
+    $('#finished-details').textContent=`${format(duration())} song · ${LOOKS.find(l=>l.id===look).name} · ${pictures.filter(Boolean).length?pictures.filter(Boolean).length+' AI pictures':'built-in art'} · ${soundOK==='silent'?'No sound in this browser':soundOK==='ok'?'Original audio · sound checked':'Original audio'}`;
+    $('#finished-note').textContent=soundOK==='silent'?'This browser saved the video without sound. Open chucksi.com/lyrics in Chrome or Edge to export it with your song.':demo?'Original instrumental with sample words, not sung vocals. Upload your song to make your own.':'Give it a listen before sharing. You can correct any words or timing in Edit video.';
     showView('finished');
   } catch(e) {
     const stopped=signal.aborted;
@@ -272,10 +273,12 @@ async function renderVideo(signal, onProgress) {
   const settings={...config(),cues:cleanCues(cues,duration())};
   const blob=await exportMusic({canvas:target,draw:(el,t)=>drawMotion(el,start+t,settings),score:cropScore(score,start,length),duration:length,signal,onProgress});
   ensureActive(signal);
+  const clip=cropScore(score,start,length);
+  soundOK=length<=240&&hasSound(clip.channels)?await soundCheck(blob):'unknown'; // a full decode of long songs costs too much memory on phones
   resultURL=URL.createObjectURL(blob);
   for(const id of ['download-video','download-result']){const link=$('#'+id);link.href=resultURL;link.download=fileName('mp4');link.hidden=false;}
   $('#finished-video').src=resultURL;
-  message(`Your ${length.toFixed(1)}-second video is ready. Original audio included.`);
+  message(soundOK==='silent'?'Your video is ready, but this browser saved it without sound. Open chucksi.com/lyrics in Chrome or Edge to export it with your song.':`Your ${length.toFixed(1)}-second video is ready. Original audio included.`);
   render();return blob;
 }
 async function exportVideo() { await runGeneration({reuseLyrics:true}); }
@@ -301,7 +304,7 @@ $('#load-demo').onclick=loadDemo;$('#play').onclick=play;$('#transcribe').onclic
 $('#cancel-task').onclick=()=>{cancel?.abort();message('Cancelling…');};$('#export-video').onclick=exportVideo;
 $('#scrub').oninput=e=>seek(Number(e.target.value));audio.onended=()=>{pause();playhead=duration();render();};
 $('#shape').onchange=setShape;
-for(const id of ['song-title','artist','motion','clip-start','clip-length','pictures']) $('#'+id).addEventListener('input',()=>{invalidate();render();});
+for(const id of ['song-title','artist','motion','shapes','clip-start','clip-length','pictures']) $('#'+id).addEventListener('input',()=>{invalidate();render();});
 $('#apply-lyrics').onclick=()=>applyLyrics($('#paste-lyrics').value);
 $('#lyrics-file').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.size>500000){message('Use a subtitle file smaller than 500 KB.');return;}try{const text=await f.text();$('#paste-lyrics').value=text;applyLyrics(text);}catch{message('Could not read that subtitle file.');}};
 $('#add-line').onclick=()=>{

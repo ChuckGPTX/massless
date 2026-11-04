@@ -626,6 +626,16 @@ figcaption{font-size:.9rem;color:var(--muted);margin-top:.7em}
 .v-ambient .lead{margin-inline:auto}
 .v-ambient .actions{justify-content:center}
 .gen{position:absolute;inset:0;z-index:-1;overflow:hidden;color:var(--text);pointer-events:none}
+/* hero: Motion loops, a seamless shape loop in the theme colours behind centered copy */
+[class*=" v-loop"]{position:relative;isolation:isolate;min-height:min(92svh,980px);display:grid;align-items:center;padding-block:clamp(110px,16vh,190px);overflow:hidden}
+[class*=" v-loop"] .hero-in{max-width:1000px;position:relative}
+[class*=" v-loop"] .h1{font-size:clamp(2.6rem,1.1rem + 5.4vw,7rem)}
+[class*=" v-loop"] .lead{margin-inline:auto}
+[class*=" v-loop"] .actions{justify-content:center}
+.loop-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;color:var(--text);pointer-events:none}
+.loop-bg canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 1.2s}
+.loop-bg.live canvas{opacity:.5}
+.loop-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,var(--bg) 0%,color-mix(in srgb,var(--bg) 55%,transparent) 45%,transparent 80%)}
 .gen svg,.gen canvas{position:absolute;inset:0;width:100%;height:100%}
 .amb-photo{position:absolute;inset:0;overflow:hidden}
 .amb-photo .media{height:100%;border-radius:0;border:0;background:none}

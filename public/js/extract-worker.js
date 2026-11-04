@@ -20,6 +20,7 @@ const MAX_GAIN_DB = 30; // never lift a near-silent file by more than this
 
 // The loudness meter (ITU-R BS.1770, gated) and the look-ahead limiter live in loudness.js, shared with Master.
 import { kWeights, LoudnessMeter, Limiter } from './loudness.js';
+import { audioSink } from './aac.js';
 export { kWeights, LoudnessMeter, Limiter };
 
 // ---------------------------------------------------------------------------------------------
@@ -261,7 +262,7 @@ class M4aWriter {
     const { Muxer, ArrayBufferTarget } = await import('./vendor/mp4-muxer.mjs');
     this.muxer = new Muxer({ target: new ArrayBufferTarget(), audio: { codec: opus ? 'opus' : 'aac', numberOfChannels: outChannels, sampleRate: rate }, fastStart: 'in-memory', firstTimestampBehavior: 'offset' });
     this.err = null;
-    this.enc = new AudioEncoder({ output: (chunk, meta) => this.muxer.addAudioChunk(chunk, meta), error: (e) => (this.err = e) });
+    this.enc = new AudioEncoder({ output: audioSink(this.muxer, cfg), error: (e) => (this.err = e) });
     this.enc.configure(cfg);
     this.rate = rate;
     this.ch = outChannels;

@@ -84,6 +84,8 @@ function phAttr(c, it) { return it.ph ? ` data-ph-item=""` : ''; }
 const R = {};
 
 // ---------------------------------------------------------------------------------------------
+/** Motion Loop hero variants and the loop each one plays (see /js/loops-core.js). */
+export const LOOP_HEROES = { loopripple: 'ripple', loopblob: 'blob', looporbit: 'orbit', loopgrid: 'grid', loopburst: 'burst', loopflow: 'flow' };
 R.hero = (s, c) => {
   const v = s.variant;
   const eb = T(c, s, 'eyebrow', P(s, 'eyebrow'), 'p', 'eyebrow');
@@ -129,6 +131,9 @@ R.hero = (s, c) => {
   }
   if (v === 'portrait') {
     return `<div class="wrap hero-in center">${copy}</div><div class="portrait-stage"${par}>${media(c, s.image, P(s, 'image'), { ar: '4/5', eager: true, sizes: '(max-width: 700px) 100vw, 680px', cls: 'portrait-media' })}</div>`;
+  }
+  if (LOOP_HEROES[v]) {
+    return `<div class="loop-bg" aria-hidden="true"><canvas data-loop="${LOOP_HEROES[v]}"></canvas></div><div class="wrap hero-in center">${copy}</div>`;
   }
   if (v === 'ambient') {
     const photo = s.image?.src ? `<div class="amb-photo"${par}>${media(c, s.image, P(s, 'image'), { ratio: 16 / 9, eager: true, sizes: '100vw', cls: 'amb-media' })}</div>` : '';
