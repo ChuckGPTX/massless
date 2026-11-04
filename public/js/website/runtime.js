@@ -5,6 +5,24 @@
 /** Written into every exported page as <meta name="generator">; hosting only accepts pages that carry it. */
 export const GENERATOR = 'Chucksi Website';
 
+/** Motion Loop heroes: a seamless shape loop behind the headline, coloured from the site's theme.
+ * A compact copy of six loops from /js/loops-core.js (ripple, blob, orbit, dot wave, burst, flow), small enough for every
+ * exported page. Skips canvases already live; one still frame when motion is off or reduced. */
+export const LOOP_JS = `(function(d){var cs=d.querySelectorAll('canvas[data-loop]:not([data-live])');if(!cs.length)return;var T=6.2832,run=d.documentElement.getAttribute('data-motion')!=='none'&&!!window.matchMedia&&matchMedia('(prefers-reduced-motion: no-preference)').matches;
+function e(k){return 1-Math.pow(1-k,3)}function dot(g,x,y,r){g.beginPath();g.arc(x,y,Math.max(0,r),0,T);g.fill()}
+function draw(g,id,p,W,H,a,b){var u=Math.min(W,H),x=W/2,y=H/2,i,j,k,r;g.clearRect(0,0,W,H);g.lineCap='round';g.globalAlpha=1;
+if(id==='ripple'){r=Math.hypot(W,H)*.55;for(i=0;i<7;i++){k=(p*2+i/7)%1;g.strokeStyle=i%2?b:a;g.globalAlpha=1-k;g.lineWidth=u*.02*(1-k*.6);g.beginPath();g.arc(x,y,k*r,0,T);g.stroke()}}
+else if(id==='blob'){for(j=2;j>=0;j--){g.globalAlpha=j?.55:1;g.fillStyle=j%2?b:a;g.beginPath();for(i=0;i<=120;i++){k=i/120*T;r=u*(.2+j*.06)*(1+.12*Math.sin(3*k+T*p*(j+1))+.08*Math.sin(5*k-T*p*2));var q=k+T*p*(j%2?-1:1);g[i?'lineTo':'moveTo'](x+Math.cos(q)*r,y+Math.sin(q)*r)}g.fill()}}
+else if(id==='orbit'){g.fillStyle=b;dot(g,x,y,u*.08);for(i=0;i<3;i++){var rx=u*(.18+i*.1),sp=(i+1)*(i%2?-1:1);g.save();g.translate(x,y);g.rotate(-.35+i*.35);g.strokeStyle=a;g.globalAlpha=.35;g.lineWidth=u*.006;g.beginPath();g.ellipse(0,0,rx,rx*.42,0,0,T);g.stroke();g.globalAlpha=1;g.fillStyle=i%2?a:b;k=T*p*sp;dot(g,Math.cos(k)*rx,Math.sin(k)*rx*.42,u*.035);g.restore()}}
+else if(id==='grid'){r=u/9;for(j=r/2;j<H;j+=r)for(i=r/2;i<W;i+=r){k=.5-.5*Math.cos(T*(p-(i+j)/(r*36)));g.fillStyle=k>.5?a:b;dot(g,i,j,r*(.1+.3*k))}}
+else if(id==='burst'){var n=Math.floor(p*3),l=p*3%1,o=e(l),t=e(Math.min(1,Math.max(0,(l-.25)/.75)));g.lineWidth=u*.018*(1-t*.8)*Math.min(1,l*12);for(i=0;i<12;i++){k=i/12*T+n*.4;var r0=u*(.08+t*.34),r1=u*(.1+o*.36);g.strokeStyle=(i+n)%2?b:a;if(r1>r0){g.beginPath();g.moveTo(x+Math.cos(k)*r0,y+Math.sin(k)*r0);g.lineTo(x+Math.cos(k)*r1,y+Math.sin(k)*r1);g.stroke()}}g.fillStyle=a;dot(g,x,y,u*.06*Math.sin(Math.PI*Math.min(1,l/.4)))}
+else{r=H/9;for(i=0;i<9;i++){g.fillStyle=i%2?b:a;g.globalAlpha=.9;g.beginPath();g.moveTo(0,H);for(j=0;j<=W;j+=8)g.lineTo(j,i*r+Math.sin(j/(u*.25)+T*p*2+i*.7)*r*.45);g.lineTo(W,H);g.fill()}}}
+cs.forEach(function(cv){var g=cv.getContext&&cv.getContext('2d');if(!g)return;cv.setAttribute('data-live','');var box=cv.parentNode,st=getComputedStyle(box),a=(st.getPropertyValue('--accent')||'').trim()||st.color,b=st.color,id=cv.getAttribute('data-loop'),vis=1,t0=performance.now(),dpr=Math.min(2,window.devicePixelRatio||1);
+function size(){if(!cv.isConnected){removeEventListener('resize',size);return}cv.width=Math.round(cv.clientWidth*dpr);cv.height=Math.round(cv.clientHeight*dpr);if(!run)draw(g,id,.2,cv.width,cv.height,a,b)}
+size();box.classList.add('live');addEventListener('resize',size);if(!run)return;
+if('IntersectionObserver'in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting}).observe(cv);
+(function loop(now){if(!cv.isConnected)return;if(vis&&!d.hidden)draw(g,id,((now-t0)/12000)%1,cv.width,cv.height,a,b);requestAnimationFrame(loop)})(t0)})})(document);`;
+
 /** The ambient canvas (manifesto hero). Standalone so the editor preview can run it too; skips canvases already live. */
 export const GEN_JS = `(function(d){var de=d.documentElement,run=de.getAttribute('data-motion')!=='none'&&!!window.matchMedia&&matchMedia('(prefers-reduced-motion: no-preference)').matches;
 d.querySelectorAll('canvas[data-gen]:not([data-live])').forEach(function(cv){var g=cv.getContext&&cv.getContext('2d');if(!g)return;cv.setAttribute('data-live','');var box=cv.parentNode,col=getComputedStyle(box).color,W,H,t=Math.random()*90,vis=1,dpr=Math.min(2,window.devicePixelRatio||1);
@@ -41,6 +59,7 @@ scr.forEach(function(e){var b=e.getBoundingClientRect(),p=e.classList.contains('
 if(rv&&(rails.length||scr.length)){addEventListener('scroll',function(){if(!busy){busy=1;requestAnimationFrame(tick)}},{passive:true});addEventListener('resize',lay);if(wide.addEventListener)wide.addEventListener('change',lay);addEventListener('load',lay);lay()}
 ${HERO_JS}
 ${GEN_JS}
+${LOOP_JS}
 if(location.protocol==='file:')d.querySelectorAll('a[href]').forEach(function(a){var h=a.getAttribute('href');if(!/^[a-z][\\w+.-]*:|^#|^\\/\\//i.test(h)&&/\\/(#.*)?$/.test(h))a.setAttribute('href',h.replace(/\\/(#.*)?$/,'/index.html$1'))});
 })();`;
 

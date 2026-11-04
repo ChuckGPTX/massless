@@ -4,6 +4,7 @@
 // with an optional ambience bed from the Audio tools, or as WebM through MediaRecorder where WebCodecs is missing.
 
 import { canvas, font, measure, text, wrap, cover, grain, greyscale, hashStr, clamp } from './kit.js';
+import { audioSink } from '../aac.js';
 
 const FORMATS = { vertical: [1080, 1920], landscape: [1920, 1080] };
 const PAPER = { ground: '#d6d9d1', ink: '#1d211e', soft: '#6b726b', rule: 'rgba(29,33,30,0.16)' };
@@ -284,7 +285,7 @@ export default {
         const venc = new VideoEncoder({ output: (ch, m) => muxer.addVideoChunk(ch, m), error: (e) => (err = e) });
         venc.configure(vcfg);
         if (acfg) {
-          const aenc = new AudioEncoder({ output: (ch, m) => muxer.addAudioChunk(ch, m), error: (e) => (err = e) });
+          const aenc = new AudioEncoder({ output: audioSink(muxer, acfg.cfg), error: (e) => (err = e) });
           aenc.configure(acfg.cfg);
           const [L, R] = a.channels, step = 4800;
           for (let i = 0; i < L.length; i += step) {

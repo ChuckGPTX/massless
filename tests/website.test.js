@@ -176,7 +176,9 @@ test("template sections render with edit hooks and generated art, motion is opti
   still.theme.motion = "none";
   assert.doesNotMatch(renderPage(still, sitePages(still)[0], { mode: "zip" }), /data-scrub|data-rail|data-rv/);
   // the runtime is small, valid and respects reduced motion
-  assert.ok(SITE_JS.length < 7500, `site.js is ${SITE_JS.length} bytes`);
+  // 7.5 KB for the core runtime plus the compact Motion Loop heroes.
+  assert.ok(SITE_JS.length < 10500, `site.js is ${SITE_JS.length} bytes`);
+  assert.ok(SITE_JS.includes(LOOP_JS), "the export runs the same loop code as the editor");
   new Function(SITE_JS);
   assert.match(SITE_JS, /prefers-reduced-motion: no-preference/);
 });
@@ -232,6 +234,7 @@ import { PHOTOS } from "../public/js/website/photos.js";
 import { usedPhotos } from "../public/js/website/export.js";
 import { BASE_CSS } from "../public/js/website/css.js";
 import { GEN_JS } from "../public/js/website/render.js";
+import { LOOP_JS } from "../public/js/website/runtime.js";
 
 test("template examples use bundled photos that exist, are small and are recorded", () => {
   const prov = JSON.parse(readFileSync(new URL("../public/media/website/provenance.json", import.meta.url), "utf8"));
@@ -282,6 +285,22 @@ test("motion hooks are there when motion is on and gone when it is off or reduce
   for (const k of ["mz-kb", "mz-mask", "mz-clip"]) assert.ok(BASE_CSS.slice(guard, end).includes(k), k);
   assert.match(GEN_JS, /prefers-reduced-motion: no-preference/);
   assert.match(GEN_JS, /data-motion'\)!=='none'/);
-  assert.ok(SITE_JS.length < 7500, `site.js is ${SITE_JS.length} bytes`);
+  // 7.5 KB for the core runtime plus the compact Motion Loop heroes.
+  assert.ok(SITE_JS.length < 10500, `site.js is ${SITE_JS.length} bytes`);
+  assert.ok(SITE_JS.includes(LOOP_JS), "the export runs the same loop code as the editor");
   assert.ok(SITE_JS.includes(GEN_JS), "the export runs the same canvas code as the editor");
+});
+
+test("Motion Loop heroes render a loop canvas and the runtime draws every variant", async () => {
+  const { LOOP_HEROES } = await import("../public/js/website/sections.js");
+  const site = buildTemplate("editorial-shop");
+  const hero = site.pages[0].sections.find((s) => s.type === "hero");
+  for (const [variant, loop] of Object.entries(LOOP_HEROES)) {
+    assert.ok(SECTIONS.hero.variants[variant], `${variant} is a hero layout`);
+    hero.variant = variant;
+    const html = renderPage(site, sitePages(site)[0], { mode: "zip" });
+    assert.match(html, new RegExp(`<canvas data-loop="${loop}">`), variant);
+    assert.ok(LOOP_JS.includes(`id==='${loop}'`) || loop === "flow", `${loop} is drawn by the site runtime`);
+  }
+  assert.match(LOOP_JS, /prefers-reduced-motion: no-preference/);
 });

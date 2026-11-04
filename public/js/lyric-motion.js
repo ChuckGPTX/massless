@@ -1,10 +1,14 @@
 // Lyric Studio motion engine. Draws one frame of a lyric video at time t on a 2D canvas.
+// Shape loops from Motion Loops (loops-core.js) dance behind the words, in time with the beat.
 // Everything is a pure function of t, so the live preview and the frame-by-frame MP4 export match exactly.
 //
 // Per frame: a scene picture under a moving camera (push, pull, pan, tilt, orbit, full 360 spin),
 // a transition into each new scene, a colour grade, particles that follow the music, and the lyric
 // itself animated letter by letter as each word is sung, with a beat-driven camera punch on top.
 
+import { installLoops } from './loops-core.js';
+
+const { drawLoop } = installLoops();
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const lerp = (a, b, k) => a + (b - a) * k;
 const easeOut = k => 1 - (1 - k) ** 3;
@@ -24,10 +28,27 @@ export const MOTION_LOOKS = {
   echo: { font: '700 {s}px "Space Grotesk", "Instrument Sans", sans-serif', upper: true, size: .12, accent: '#ffb55b', grade: ['#ff7a1a', '#1c0700'], stagger: .02 },
 };
 const MOVES = ['push', 'spin', 'pan', 'pull', 'orbit', 'tilt'];
+// Which Motion Loops play behind each look; each scene takes the next one.
+export const LOOK_LOOPS = {
+  kinetic: ['burst', 'zigzag', 'sunburst', 'pills'],
+  paper: ['petals', 'scribble', 'confetti', 'blob'],
+  orbit: ['orbit', 'spiral', 'ripple', 'loader'],
+  matter: ['grid', 'tiles', 'jelly', 'bounce'],
+  architecture: ['ripple', 'tiles', 'spiral', 'grid'],
+  echo: ['ripple', 'burst', 'spiral', 'scribble'],
+};
 const TRANSITIONS = ['zoom', 'spin', 'flash', 'whip'];
 
 // Split the song into `count` scenes of roughly equal length, cutting only between lyric lines.
-export function planScenes(cues, duration, count) {
+// With a beat grid, each cut moves onto the nearest bar line (or beat) so pictures change on the music.
+export function snapToBeat(at, beat, duration) {
+  if (!beat || !(beat.period > 0.2 && beat.period < 2)) return at;
+  const bar = beat.period * 4, nearest = (step) => beat.offset + Math.round((at - beat.offset) / step) * step;
+  const onBar = nearest(bar), onBeat = nearest(beat.period);
+  const pick = Math.abs(onBar - at) <= beat.period * 1.5 ? onBar : onBeat;
+  return pick > 0.5 && pick < duration - 0.5 ? pick : at;
+}
+export function planScenes(cues, duration, count, beat) {
   const n = clamp(Math.round(count) || 1, 1, 24);
   if (!cues.length || n === 1) return [{ start: 0, end: duration, move: MOVES[0], transition: 'zoom', seed: 1, index: 0 }];
   const cuts = [0];
@@ -36,7 +57,7 @@ export function planScenes(cues, duration, count) {
     // Cut at the line starting nearest the target; in a long instrumental, cut at the target itself.
     const cue = cues.reduce((best, c) => (Math.abs(c.start - target) < Math.abs(best.start - target) ? c : best), cues[0]);
     const inLine = cues.some(c => target > c.start && target < c.end);
-    const at = Math.abs(cue.start - target) < duration / n / 2 || inLine ? cue.start : target;
+    const at = snapToBeat(Math.abs(cue.start - target) < duration / n / 2 || inLine ? cue.start : target, beat, duration);
     if (at > cuts[cuts.length - 1] + 1.5 && at < duration - 1.5) cuts.push(at);
   }
   cuts.push(duration);
@@ -147,6 +168,32 @@ function grade(ctx, w, h, look, energy, emphasis) {
     const v = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .15, w / 2, h / 2, Math.hypot(w, h) * .62);
     v.addColorStop(0, `rgba(0,0,0,${.28 + (emphasis ? .05 : 0)})`); v.addColorStop(1, 'rgba(0,0,0,.72)');
     ctx.globalAlpha = 1; ctx.fillStyle = v; ctx.fillRect(0, 0, w, h);
+  }
+  ctx.restore();
+}
+
+// ---------- shapes ----------
+
+const FULL_FRAME = new Set(['sunburst', 'stripes', 'pills', 'tiles', 'grid']);
+
+// A Motion Loop behind the words: one loop per scene, four bars per cycle so it grooves with the song,
+// brighter with the bass and on the beat, fading through scene changes. A burst pops as each chorus line lands.
+function shapes(ctx, o, id, look, t, w, h, en, beatPulse, emphasis, cue) {
+  const scenes = o.scenes?.length ? o.scenes : null, i = scenes ? sceneAt(scenes, t) : 0, scene = scenes?.[i];
+  const list = LOOK_LOOPS[id] || LOOK_LOOPS.kinetic, loop = list[(scene?.index ?? 0) % list.length];
+  const beat = o.analysis?.beat, cycle = beat && beat.period > 0.2 ? beat.period * 16 : 8;
+  const p = ((t - (beat?.offset || 0)) / cycle % 1 + 1) % 1;
+  const fadeIn = scene ? clamp((t - scene.start) / .6, 0, 1) : 1, fadeOut = scene ? clamp((scene.end - t) / .4, 0, 1) : 1;
+  const full = FULL_FRAME.has(loop) ? .5 : 1; // loops that fill the frame stay quieter
+  const alpha = (.2 + en[0] * .22 + beatPulse * .14 + (emphasis ? .1 : 0)) * Math.min(fadeIn, fadeOut) * full;
+  const colors = [look.accent, look.grade[0], look.accent];
+  ctx.save();
+  ctx.globalCompositeOperation = id === 'paper' ? 'overlay' : 'screen';
+  ctx.globalAlpha = clamp(alpha, 0, .6);
+  drawLoop(ctx, loop, p, w, h, { colors, bg: null, scale: 1.3 + beatPulse * .04 });
+  if (emphasis && cue) {
+    const k = (t - cue.start) / 2.4; // one burst, about 0.8 s long
+    if (k >= 0 && k < 1 / 3) { ctx.globalAlpha = .85; drawLoop(ctx, 'burst', k, w, h, { colors, bg: null, scale: 1.7 }); }
   }
   ctx.restore();
 }
@@ -341,6 +388,8 @@ export function drawMotion(canvas, t, o = {}) {
   }
   const bg = background(ctx, { ...o, motion }, t, w, h, look, punch);
   if (id === 'paper') { ctx.fillStyle = 'rgba(40,22,10,.35)'; ctx.fillRect(0, 0, w, h); }
+  // Shapes sit under the grade, so its darker centre keeps the words readable.
+  if (motion && o.shapes !== false) shapes(ctx, o, id, look, t, w, h, en, beatPulse, emphasis, cue);
   grade(ctx, w, h, look, en, emphasis);
   particles(ctx, id, w, h, t, look, en, motion);
   ctx.restore();
