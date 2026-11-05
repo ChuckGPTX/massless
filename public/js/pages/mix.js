@@ -44,7 +44,7 @@ async function take(files) {
   const only = files.length === 1 ? files[0] : null;
   if (only && !state.stems.length && AUDIO_EXT.test(only.name) && !(only.webkitRelativePath || only.relativePath) && !roleFromName(only.name)) {
     setMode('song'); await takeSong(only);
-    if (state.song) note('One file, so it’s treated as the whole song: we split it into stems first. Was it a single stem? Switch to “I have stems”.');
+    if (state.song) note(`One file, so it’s treated as the whole song${fits ? ': we split it into stems first' : ''}. Was it a single stem? Switch to “I have stems”.`);
     return;
   }
   note('Opening your session…');
