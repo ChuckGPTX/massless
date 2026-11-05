@@ -1,9 +1,10 @@
-import { gather, fetchLink } from '../mix/intake.js';
+import { gather, fetchLink, AUDIO_EXT } from '../mix/intake.js';
+import { openSong, splitSong, stemsFromSplit, gpuReady, prefetch } from '../mix/split.js';
 import { runMix } from '../mix/engine.js';
 import { GENRES, TIPS } from '../mix/rules.js';
 import { ROLES, ROLE_IDS, roleFromName } from '../mix/roles.js';
 import { looksLikeRough } from '../mix/rough.js';
-import { TrickPanel, heroConsole, drawPeaks, drawEqThumb } from '../mix/visuals.js';
+import { TrickPanel, heroConsole, drawPeaks, drawEqThumb, splitArt, SPLIT_PARTS } from '../mix/visuals.js';
 import { fmtHz } from '../mix/plan.js';
 import { apiFetch, warmHuman } from '../human.js';
 import * as X from '../extract.js';
@@ -17,7 +18,7 @@ const GENRE_NOTES = {
   country: 'Natural, clear vocal', latin: 'Dembow forward, big low end',
 };
 const params = new URLSearchParams(location.search);
-const state = { roughFile: null, stems: [], sessions: [], roles: [], genre: GENRES[params.get('genre')] ? params.get('genre') : 'hiphop', refFile: null, result: null, ctrl: null, macros: null };
+const state = { mode: params.get('mode') === 'song' ? 'song' : 'stems', song: null, method: 'split', split: null, roughFile: null, stems: [], sessions: [], roles: [], genre: GENRES[params.get('genre')] ? params.get('genre') : 'hiphop', refFile: null, result: null, ctrl: null, macros: null };
 
 // ---------- intake ----------
 const stopHero = heroConsole($('#hero-console'));
@@ -39,6 +40,13 @@ function note(text, warn = false) { const n = $('#intake-note'); n.textContent =
 
 async function take(files) {
   if (!files?.length) return;
+  // One audio file that isn't named like a part, with nothing else here yet: that's a whole song.
+  const only = files.length === 1 ? files[0] : null;
+  if (only && !state.stems.length && AUDIO_EXT.test(only.name) && !(only.webkitRelativePath || only.relativePath) && !roleFromName(only.name)) {
+    setMode('song'); await takeSong(only);
+    if (state.song) note('One file, so it’s treated as the whole song: we split it into stems first. Was it a single stem? Switch to “I have stems”.');
+    return;
+  }
   note('Opening your session…');
   try {
     const zipFile = [...files].find((f) => /\.zip$/i.test(f.name));
@@ -59,12 +67,12 @@ async function take(files) {
     note(`${state.stems.length} track${state.stems.length === 1 ? '' : 's'} ready.${g.skipped.length ? ` Skipped ${g.skipped.length} file${g.skipped.length === 1 ? '' : 's'} that aren't audio.` : ''}${sess}`, !!sess);
     warmHuman();
   } catch (e) { note(e.message || 'Couldn’t open those files.', true); }
-  $('#start').disabled = !state.stems.length;
+  updateStart();
 }
 
 function renderStems() {
   const list = $('#stem-list');
-  list.hidden = !state.stems.length;
+  list.hidden = !state.stems.length || state.mode !== 'stems';
   list.replaceChildren(...state.stems.map((s, i) => {
     const li = document.createElement('li');
     const guess = roleFromName(s.path);
@@ -82,7 +90,7 @@ function renderStems() {
       state.roles[i] = sel.value; renderStems(); roughStatus();
     };
     const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'text-button'; rm.textContent = '✕'; rm.setAttribute('aria-label', `Remove ${s.name}`);
-    rm.onclick = () => { state.stems.splice(i, 1); state.roles.splice(i, 1); renderStems(); $('#start').disabled = !state.stems.length; note(`${state.stems.length} tracks ready.`); };
+    rm.onclick = () => { state.stems.splice(i, 1); state.roles.splice(i, 1); renderStems(); updateStart(); note(`${state.stems.length} tracks ready.`); };
     li.append(sw, nm, sel, rm);
     return li;
   }));
@@ -133,6 +141,74 @@ $('#rough-file').onchange = (e) => { state.roughFile = e.target.files[0] || null
 $('#ref-file').onchange = (e) => { state.refFile = e.target.files[0] || null; $('#ref-file-name').textContent = state.refFile ? state.refFile.name : 'Add a reference file'; };
 $('#mix-form').onsubmit = (e) => { e.preventDefault(); start(); };
 
+// ---------- one song file ----------
+let stopArt = null, gpuP = null, fetching = null;
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function updateStart() {
+  const song = state.mode === 'song', b = $('#start');
+  b.disabled = song ? !state.song : !state.stems.length;
+  b.textContent = song ? (state.method === 'split' ? 'Split & mix my song ↗' : 'Polish my song ↗') : 'Mix my song ↗';
+}
+function setMode(m) {
+  state.mode = m;
+  $('#mode-stems').setAttribute('aria-selected', String(m === 'stems')); $('#mode-song').setAttribute('aria-selected', String(m === 'song'));
+  $('#stems-pane').hidden = m !== 'stems'; $('#song-pane').hidden = m !== 'song';
+  $('#step1-sub').textContent = m === 'stems' ? 'Stems (WAV, AIFF, MP3, FLAC), a .zip, a DAW session folder, or a link.' : 'One finished song, unmixed or rough. We split it into parts, mix each one and master it.';
+  if (m === 'song') stopArt ||= splitArt($('#split-art'));
+  renderStems(); note(''); updateStart();
+}
+$('#mode-stems').onclick = () => setMode('stems');
+$('#mode-song').onclick = () => setMode('song');
+for (const b of document.querySelectorAll('[data-method]')) b.onclick = () => {
+  state.method = b.dataset.method;
+  document.querySelectorAll('[data-method]').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+  if (state.method === 'split' && state.song) getSplitter();
+  updateStart();
+};
+
+async function takeSong(file) {
+  if (!file) return;
+  if (!AUDIO_EXT.test(file.name) && !/^audio\//.test(file.type)) { note('That isn’t an audio file. Drop an MP3, WAV, M4A or FLAC.', true); return; }
+  note('Opening your song…');
+  try {
+    const s = await openSong(file);
+    state.song = { file, ...s }; state.split = null;
+    $('#song-drop').hidden = true; $('#song-card').hidden = false;
+    $('#song-name').textContent = file.name.replace(/\.[^.]+$/, '');
+    $('#song-meta').textContent = `${fmt(s.duration)} · ${(file.size / 1048576).toFixed(1)} MB · ${(file.name.split('.').pop() || 'audio').toUpperCase()}`;
+    drawSongWave(); note(''); warmHuman();
+    speedHint().then(() => { if (state.method === 'split') getSplitter(); });
+  } catch (e) { note(e.message || 'Couldn’t open that file. Try an MP3 or WAV.', true); }
+  updateStart();
+}
+function drawSongWave() {
+  const cv = $('#song-wave'), g = cv.getContext('2d'), w = cv.width, h = cv.height, p = state.song.peaks, top = Math.max(1e-6, ...p);
+  const grad = g.createLinearGradient(0, 0, w, 0); grad.addColorStop(0, '#ffbf2f'); grad.addColorStop(0.55, '#a98bff'); grad.addColorStop(1, '#46d6ff');
+  g.clearRect(0, 0, w, h); g.fillStyle = grad;
+  for (let x = 0; x < w; x += 3) { const v = p[Math.floor((x / w) * p.length)] / top, bar = Math.max(2, v * (h - 8)); g.fillRect(x, (h - bar) / 2, 2, bar); }
+}
+async function speedHint() {
+  const gpu = await (gpuP ||= gpuReady()), el = $('#split-speed'), mins = (state.song?.duration || 180) / 60;
+  el.classList.toggle('slow', !gpu);
+  el.textContent = gpu ? `Runs on your graphics chip, usually ${mins < 4 ? 'a minute or two' : 'a few minutes'}. One-time 181 MB download.`
+    : `This browser can’t use your graphics chip, so splitting takes about ${Math.max(3, Math.round(mins * 3))} minutes. One-time 181 MB download.`;
+  return gpu;
+}
+/** Download the splitter in the background while the genre gets picked. */
+function getSplitter() {
+  fetching ||= prefetch((d) => { if (state.method === 'split') $('#split-speed').textContent = d.stage === 'download' ? `${d.label}…` : 'Downloaded. Warming up the splitter…'; })
+    .then((ok) => { if (ok && state.method === 'split') speedHint().then((gpu) => { $('#split-speed').textContent = `Splitter ready${gpu ? ' on your graphics chip' : ''}. ` + $('#split-speed').textContent.replace(/ One-time 181 MB download\./, ''); }); if (!ok) fetching = null; return ok; });
+  return fetching;
+}
+$('#song-file').onchange = (e) => { takeSong(e.target.files[0]); e.target.value = ''; };
+$('#song-change').onclick = () => { state.song = null; state.split = null; $('#song-card').hidden = true; $('#song-drop').hidden = false; updateStart(); };
+{
+  const sd = $('#song-drop');
+  for (const ev of ['dragenter', 'dragover']) sd.addEventListener(ev, (e) => { e.preventDefault(); sd.classList.add('over'); });
+  for (const ev of ['dragleave', 'drop']) sd.addEventListener(ev, () => sd.classList.remove('over'));
+  sd.addEventListener('drop', (e) => { e.preventDefault(); const f = [...(e.dataTransfer.files || [])].find((x) => AUDIO_EXT.test(x.name) || /^audio\//.test(x.type)); if (f) takeSong(f); else note('Drop one audio file: MP3, WAV, M4A or FLAC.', true); });
+}
+
 // ---------- the session ----------
 let panel, tipTimer, lanes = [];
 function show(id) { for (const s of ['intake', 'session', 'result', 'failed']) $('#' + s).hidden = s !== id; scrollTo({ top: 0, behavior: still ? 'auto' : 'smooth' }); }
@@ -164,28 +240,91 @@ function alignText(r) {
 }
 const TRICK_TITLE = { align: 'Lining up', eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
 
-async function start() {
-  if (!state.stems.length) return;
+function setBar(v) { const p = Math.round(v * 100); $('#bar-fill').style.width = p + '%'; $('#bar-pct').textContent = p + '%'; $('.bar').setAttribute('aria-valuenow', p); }
+
+/** Split the song on this device, drawing the four parts as they come out. Progress 0 → 45%. */
+async function runSplit(signal) {
+  const S = state.song, bins = Math.ceil(S.duration * 10);
+  const song = document.createElement('div'); song.className = 'lane song-lane';
+  song.innerHTML = '<div class="ln"><span class="sw"></span><div><b></b><small>Your song</small></div></div><canvas width="900" height="76"></canvas><div class="chips"></div>';
+  song.querySelector('.sw').style.background = '#e8e4f2'; song.querySelector('b').textContent = $('#song-name').textContent;
+  $('#lanes').append(song); drawPeaks(song.querySelector('canvas'), S.peaks, '#e8e4f2', 1);
+  const parts = SPLIT_PARTS.map((p, k) => {
+    const el = document.createElement('div'); el.className = 'lane split-lane';
+    el.innerHTML = '<div class="ln"><span class="sw"></span><div><b></b><small>Splitting…</small></div></div><canvas width="900" height="76"></canvas><div class="chips"></div>';
+    el.style.animationDelay = `${(k + 1) * 60}ms`; el.querySelector('.sw').style.background = p.color;
+    el.querySelector('b').textContent = { vocals: 'Vocals', drums: 'Drums', bass: 'Bass', other: 'Music' }[p.id];
+    $('#lanes').append(el);
+    return { ...p, el, peaks: new Array(bins).fill(0), cv: el.querySelector('canvas') };
+  });
+  $('#fx-kicker').textContent = 'SPLITTING'; $('#fx-title').textContent = 'Pulling your song apart';
+  $('#fx-detail').textContent = 'Getting the splitter ready…'; $('#stage-label').textContent = 'Getting the splitter ready';
+  panel.show('split', { levels: {}, found: 0 });
+  const r = await splitSong(S.channels, { signal, onEvent: (d) => {
+    if (d.type === 'progress') { if (d.stage === 'download') setBar(0.06 * d.value); $('#stage-label').textContent = d.label; $('#fx-detail').textContent = d.label + '.'; return; }
+    if (d.type !== 'segment') return;
+    const levels = {};
+    for (const p of parts) {
+      const lv = d.levels[p.id] || [], at = Math.round(d.start * 10);
+      lv.forEach((v, j) => { if (at + j < bins) p.peaks[at + j] = v; });
+      drawPeaks(p.cv, p.peaks, p.color, Math.min(1, (at + lv.length) / bins));
+      levels[p.id] = lv.length ? Math.min(1, (lv.reduce((a, b) => a + b, 0) / lv.length) * 2.5) : 0;
+    }
+    panel.data = { levels, found: d.value };
+    setBar(0.06 + 0.39 * d.value);
+    $('#stage-label').textContent = `Splitting your song: section ${d.index + 1} of ${d.total}`;
+    const eta = d.eta > 90 ? `about ${Math.round(d.eta / 60)} min left` : d.eta > 5 ? `about ${Math.max(5, Math.round(d.eta / 5) * 5)} s left` : 'almost there';
+    $('#fx-detail').textContent = `Finding the vocals, drums, bass and the rest of the music, ${d.backend === 'webgpu' ? 'on your graphics chip' : 'on your processor'}. ${d.value < 1 ? eta[0].toUpperCase() + eta.slice(1) + '.' : ''}`;
+  } });
+  for (const p of parts) { p.el.querySelector('small').textContent = 'Split'; p.el.classList.add('done'); }
+  $('#fx-detail').textContent = `Split in ${Math.round(r.seconds)} s. Now every part goes on the console.`;
+  return r;
+}
+
+function openSession() {
   const G = GENRES[state.genre];
   stopHero?.();
   $('#lanes').replaceChildren(); lanes = [];
   $('#session-genre').textContent = G.name.toUpperCase(); $('#session-bpm').textContent = '— BPM';
-  $('#bar-fill').style.width = '0%'; $('#bar-pct').textContent = '0%';
+  setBar(0);
+  $('#session-title').textContent = state.mode === 'song' && state.method === 'split' && state.split?.file !== state.song?.file ? 'Splitting your song' : 'Mixing your song';
   show('session');
   panel ||= new TrickPanel($('#fx-canvas'));
   panel.pans = []; panel.show('listen');
   let tip = 0;
   const nextTip = () => { const el = $('#tip'); el.style.opacity = 0; setTimeout(() => { el.textContent = TIPS[tip++ % TIPS.length]; el.style.opacity = 1; }, 250); };
   nextTip(); clearInterval(tipTimer); tipTimer = setInterval(nextTip, 4800);
+}
+
+async function start() {
+  const songMode = state.mode === 'song';
+  if (songMode ? !state.song : !state.stems.length) return;
+  const G = GENRES[state.genre];
+  openSession();
   state.ctrl = new AbortController();
-  const names = state.stems.map((s) => s.name);
-  const mixing = state.stems.map((s, i) => i).filter((i) => !['rough', 'skip'].includes(state.roles[i]));
+  let stems = state.stems, roles = state.roles, roughFile = state.roughFile, base = 0;
   try {
-    const res = await runMix(state.stems, {
-      roughFile: state.roughFile, genre: state.genre, referenceUrl: $('#ref-link').value.trim(), referenceFile: state.refFile, roles: state.roles, macros: state.macros || undefined,
+    if (songMode) {
+      if (state.method === 'split') {
+        if (state.split?.file !== state.song.file) { state.split = { file: state.song.file, ...(await runSplit(state.ctrl.signal)) }; base = 0.45; }
+        ({ stems, roles } = stemsFromSplit(state.split.stems, state.genre));
+        roughFile = state.song.file; // the song itself is the reference: timing, balance, before/after
+        await new Promise((r) => setTimeout(r, still ? 0 : 900));
+      } else {
+        stems = [{ name: $('#song-name').textContent, path: state.song.file.name, size: state.song.file.size, channels: state.song.channels }];
+        roles = ['beat']; roughFile = null;
+      }
+      $('#lanes').replaceChildren(); lanes = [];
+      $('#session-title').textContent = 'Mixing your song';
+    }
+    state.mixStems = stems;
+    const names = stems.map((s) => s.name);
+    const mixing = stems.map((s, i) => i).filter((i) => !['rough', 'skip'].includes(roles[i]));
+    const res = await runMix(stems, {
+      roughFile, genre: state.genre, referenceUrl: $('#ref-link').value.trim(), referenceFile: state.refFile, roles, macros: state.macros || undefined,
       apiFetch, signal: state.ctrl.signal,
       onEvent: (e) => {
-        if (e.type === 'progress') { const p = Math.round(e.value * 100); $('#bar-fill').style.width = p + '%'; $('#bar-pct').textContent = p + '%'; $('.bar').setAttribute('aria-valuenow', p); }
+        if (e.type === 'progress') setBar(base + (1 - base) * e.value);
         else if (e.type === 'stage') {
           $('#stage-label').textContent = e.label;
           if (e.id === 'think') { $('#fx-kicker').textContent = 'THINKING'; $('#fx-title').textContent = 'Planning the mix'; $('#fx-detail').textContent = `Reading every track and choosing the ${G.name} moves.`; panel.show('listen'); }
@@ -194,18 +333,20 @@ async function start() {
         else if (e.type === 'relabel') { const l = lanes[e.index]; if (l) { l.el.querySelector('.sw').style.background = e.color; l.el.querySelector('small').textContent = ROLES[e.role].name; l.color = e.color; drawPeaks(l.el.querySelector('canvas'), l.peaks, e.color, 1); } }
         else if (e.type === 'rough') {
           const el = document.createElement('div'); el.className = 'lane rough-lane';
-          el.innerHTML = '<div class="ln"><span class="sw"></span><div><b></b><small>Rough mix · reference</small></div></div><canvas width="900" height="76"></canvas><div class="chips"></div>';
+          el.innerHTML = '<div class="ln"><span class="sw"></span><div><b></b><small></small></div></div><canvas width="900" height="76"></canvas><div class="chips"></div>';
+          el.querySelector('small').textContent = songMode ? 'Your song · reference' : 'Rough mix · reference';
           el.querySelector('.sw').style.background = '#e8e4f2'; el.querySelector('b').textContent = e.name;
           $('#lanes').prepend(el); drawPeaks(el.querySelector('canvas'), e.peaks, '#e8e4f2', 1);
-          $('#fx-kicker').textContent = 'YOUR ROUGH MIX'; $('#fx-title').textContent = e.name; $('#fx-detail').textContent = `${Math.round(e.duration)} seconds of song: the map every stem gets lined up against.`;
-        } else if (e.type === 'leftout') { const l = lanes[e.index]; if (l) { l.el.classList.add('out'); l.el.querySelector('.chips').replaceChildren(chip('Not in your rough')); } }
+          $('#fx-kicker').textContent = songMode ? 'YOUR SONG' : 'YOUR ROUGH MIX'; $('#fx-title').textContent = e.name;
+          $('#fx-detail').textContent = songMode ? 'The original keeps your balance in view while every part gets mixed.' : `${Math.round(e.duration)} seconds of song: the map every stem gets lined up against.`;
+        } else if (e.type === 'leftout') { const l = lanes[e.index]; if (l) { l.el.classList.add('out'); l.el.querySelector('.chips').replaceChildren(chip(songMode ? 'Nothing here' : 'Not in your rough')); } }
         else if (e.type === 'tempo') $('#session-bpm').textContent = e.bpm ? `${Math.round(e.bpm)} BPM` : 'free time';
         else if (e.type === 'notes') { $('#fx-detail').textContent = e.text; }
         else if (e.type === 'trick') {
           const n = Number.isInteger(e.index) ? names[e.index] : '';
           $('#fx-kicker').textContent = (TRICK_TITLE[e.kind] || 'MIXING').toUpperCase();
-          $('#fx-title').textContent = n || { verb: 'Reverb and delay', loud: 'The master', align: 'Matching your rough mix' }[e.kind] || TRICK_TITLE[e.kind];
-          $('#fx-detail').textContent = e.kind === 'align' ? alignText(e.data) : TRICK_TEXT[e.kind] && n ? TRICK_TEXT[e.kind](n, e.data) : e.kind === 'verb' ? `Building a ${e.data.decay.toFixed(1)} s plate for the vocals and a short room for the beat, both filtered so they never get muddy.` : e.kind === 'loud' ? `Matching the tone of finished ${G.name} records, then raising it to ${e.data.lufs} LUFS with true peaks under −1 dB.` : '';
+          $('#fx-title').textContent = n || { verb: 'Reverb and delay', loud: 'The master', align: songMode ? 'Following your song' : 'Matching your rough mix' }[e.kind] || TRICK_TITLE[e.kind];
+          $('#fx-detail').textContent = e.kind === 'align' ? (songMode ? songAlignText(e.data) : alignText(e.data)) : TRICK_TEXT[e.kind] && n ? TRICK_TEXT[e.kind](n, e.data) : e.kind === 'verb' ? `Building a ${e.data.decay.toFixed(1)} s plate for the vocals and a short room for the beat, both filtered so they never get muddy.` : e.kind === 'loud' ? `Matching the tone of finished ${G.name} records, then raising it to ${e.data.lufs} LUFS with true peaks under −1 dB.` : '';
           panel.show(e.kind, e.data, { spectrum: lanes[e.index]?.feats?.spectrum });
         } else if (e.type === 'strip') {
           const l = lanes[e.index]; if (!l) return;
@@ -218,9 +359,14 @@ async function start() {
     state.result = res;
     showResult(res);
   } catch (e) {
-    if (state.ctrl?.signal.aborted) { show('intake'); note('Stopped. Your tracks are still here.'); }
+    if (state.ctrl?.signal.aborted || e?.name === 'AbortError') { show('intake'); note(songMode ? 'Stopped. Your song is still here.' : 'Stopped. Your tracks are still here.'); }
     else { $('#fail-message').textContent = e.message || 'Something went wrong while mixing.'; show('failed'); }
   } finally { clearInterval(tipTimer); }
+}
+function songAlignText(r) {
+  const bits = [r.adjust?.length ? `Keeping your song's balance in view on ${r.adjust.length} part${r.adjust.length === 1 ? '' : 's'}, within the ${GENRES[state.genre].name} targets.` : 'Your song’s balance already sits on the genre targets.'];
+  if (r.leftOut?.length) bits.push(`${r.leftOut.join(', ')}: nothing there, so it's left out.`);
+  return bits.join(' ');
 }
 $('#cancel').onclick = () => state.ctrl?.abort();
 $('#retry').onclick = () => start();
@@ -243,7 +389,6 @@ function chipList(p) {
 
 // ---------- result ----------
 let ctx, buffers = {}, playing = null, startedAt = 0, offset = 0, ab = 'after', gains = {}, raf;
-const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
 function showResult(res) {
   const r = res.report;
@@ -280,10 +425,25 @@ function buildMixer(strips) {
 }
 
 function showRough(r) {
-  const rr = $('#rough-report');
-  document.querySelector('[data-ab="before"]').textContent = r.rough ? 'Your rough' : 'Before';
-  $('#ab-note').textContent = r.rough ? 'Your rough is your own bounce, lined up and turned to the same loudness, so you hear the mix, not just volume.' : 'Before is your stems added up and turned to the same loudness, so you hear the mix, not just volume.';
-  rr.hidden = !r.rough;
+  const rr = $('#rough-report'), songMode = state.mode === 'song';
+  const split = songMode && state.method === 'split' && !!state.split;
+  $('#stem-dl').hidden = !split;
+  document.querySelector('[data-ab="before"]').textContent = songMode ? 'Your song' : r.rough ? 'Your rough' : 'Before';
+  $('#ab-note').textContent = songMode ? 'Your song is the file you dropped, turned to the same loudness, so you hear the mix, not just volume.' : r.rough ? 'Your rough is your own bounce, lined up and turned to the same loudness, so you hear the mix, not just volume.' : 'Before is your stems added up and turned to the same loudness, so you hear the mix, not just volume.';
+  rr.hidden = !r.rough && !songMode;
+  if (songMode) {
+    const gaps = r.rough?.coverage?.gaps || [], items = [];
+    if (split) items.push(`Split into vocals, drums, bass and music in ${Math.round(state.split.seconds)} s ${state.split.backend === 'webgpu' ? 'on your graphics chip' : 'on this device'}, then each part was mixed on its own channel. The four stems add back up to your song exactly; download them below.`);
+    else items.push('Polished as one track: EQ, glue compression and a master for your genre. For a deeper mix, try Split & mix.');
+    if (r.rough?.adjust?.length) items.push(`Balance, starting from yours: ${r.rough.adjust.map((a) => `${a.name} ${a.db > 0 ? '+' : ''}${a.db} dB`).join(', ')}.`);
+    if (r.rough?.leftOut?.length) items.push(`${r.rough.leftOut.join(', ')}: nothing in that part, so it was left out.`);
+    items.push(gaps.length ? `These parts are much quieter in the mix than in your song: ${gaps.map((g) => g.label).join(', ')}.` : `Every section of your song plays in the mix${state.song?.duration ? ` (${fmt(state.song.duration)})` : ''}.`);
+    rr.classList.toggle('warn', !!gaps.length);
+    rr.innerHTML = '<h3></h3><ul></ul>';
+    rr.querySelector('h3').textContent = gaps.length ? '⚠ Checked against your song' : split ? '✓ Split, mixed and checked against your song' : '✓ Polished and checked against your song';
+    rr.querySelector('ul').replaceChildren(...items.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; }));
+    return;
+  }
   if (!r.rough) return;
   const gaps = r.rough.coverage?.gaps || [], items = [];
   items.push(gaps.length ? `These parts of your rough are much quieter or missing in the mix: ${gaps.map((g) => g.label).join(', ')}. Check those stems are in the session.` : `Every section of your rough mix plays in the finished song${r.rough.duration ? ` (${Math.round(r.rough.duration)} s)` : ''}.`);
@@ -314,7 +474,7 @@ $('#remix').onclick = () => {
   state.macros = Object.fromEntries([...document.querySelectorAll('#macros input')].map((i) => [i.dataset.k, Number(i.value)]));
   stopAudio(); start();
 };
-$('#again').onclick = () => { stopAudio(); state.stems = []; state.roles = []; state.roughFile = null; $('#rough-file').value = ''; roughStatus(); state.macros = null; state.result = null; renderStems(); $('#start').disabled = true; note(''); show('intake'); };
+$('#again').onclick = () => { stopAudio(); state.song = null; state.split = null; $('#song-card').hidden = true; $('#song-drop').hidden = false; state.stems = []; state.roles = []; state.roughFile = null; $('#rough-file').value = ''; roughStatus(); state.macros = null; state.result = null; renderStems(); updateStart(); note(''); show('intake'); };
 
 function toBuffer(chs) {
   ctx ||= new AudioContext();
@@ -376,12 +536,13 @@ $('#wave').onclick = (e) => {
 // downloads
 // Name downloads after the session: the folder or zip the stems came in, otherwise "My song".
 const title = () => {
+  if (state.mode === 'song' && state.song) return state.song.file.name.replace(/\.[^.]+$/, '').replace(/[^\p{L}\p{N} _-]+/gu, '').trim().slice(0, 60) || 'My song';
   const paths = state.stems.map((s) => s.path), top = paths[0]?.includes('/') ? paths[0].split('/')[0] : '';
   const name = top && paths.every((p) => p.startsWith(top + '/')) ? top : state.zipName || 'My song';
   return name.replace(/\.[^.]+$/, '').replace(/[^\p{L}\p{N} _-]+/gu, '').trim().slice(0, 60) || 'My song';
 };
 for (const b of document.querySelectorAll('[data-dl]')) b.onclick = async () => {
-  const [what, format] = b.dataset.dl.split(':'), chs0 = state.result?.audio[what];
+  const [what, format] = b.dataset.dl.split(':'), chs0 = what.startsWith('stem-') ? state.split?.stems[what.slice(5)] : state.result?.audio[what];
   if (!chs0) { $('#dl-note').textContent = what === 'acapella' ? 'There are no vocal tracks in this session.' : 'Nothing to download yet.'; return; }
   b.disabled = true; $('#dl-note').textContent = 'Preparing your file…';
   try {
@@ -389,7 +550,7 @@ for (const b of document.querySelectorAll('[data-dl]')) b.onclick = async () => 
     const chs = format === 'mp3' ? chs0.map((c) => { const o = new Float32Array(c.length); const g = 10 ** (-1 / 20); for (let i = 0; i < c.length; i++) o[i] = c[i] * g; return o; }) : chs0;
     const src = { rate: state.result.rate, channels: chs.length, frames: chs[0].length, read: (off, n) => chs.map((x) => x.slice(off, off + n)) };
     const out = await X.encode(src, format === 'wav' ? { format: 'wav', bits: 24 } : { format: 'mp3', kbps: 320 }, { onProgress: (f) => { $('#dl-note').textContent = `Encoding… ${Math.round((f || 0) * 100)}%`; } });
-    const label = { mix: 'Chucksi mix', instrumental: 'instrumental', acapella: 'a cappella', premaster: 'mix for mastering' }[what];
+    const label = { mix: 'Chucksi mix', instrumental: 'instrumental', acapella: 'a cappella', premaster: 'mix for mastering', 'stem-vocals': 'vocals stem', 'stem-drums': 'drums stem', 'stem-bass': 'bass stem', 'stem-other': 'music stem' }[what];
     const a = document.createElement('a'); a.href = URL.createObjectURL(out.blob); a.download = `${title()} (${label}).${format}`; document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 30000);
     $('#dl-note').textContent = 'Saved.';
@@ -398,4 +559,5 @@ for (const b of document.querySelectorAll('[data-dl]')) b.onclick = async () => 
 };
 
 buildGenres();
+setMode(state.mode);
 if (params.get('demo') === '1') $('#stem-link').focus();

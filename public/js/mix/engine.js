@@ -27,6 +27,11 @@ function call(type, payload = {}, transfer = []) {
 
 async function open(stem, signal) {
   if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+  // Stems that are already audio (split from one song on this device): a copy, since the worker takes it.
+  if (stem.channels) {
+    if (stem.channels[0].length / RATE > MAX_SECONDS) throw new Error(`${stem.name} is ${Math.round(stem.channels[0].length / RATE / 60)} minutes long. Mix songs up to ${MAX_SECONDS / 60} minutes.`);
+    return stem.channels.map((c) => c.slice());
+  }
   const blob = await stem.blob();
   const file = blob instanceof File ? blob : new File([blob], stem.path.split('/').pop());
   const pcm = await decode(file, RATE);

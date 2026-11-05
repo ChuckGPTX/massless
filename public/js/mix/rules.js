@@ -40,6 +40,9 @@ export const ROLE_RULES = {
   // synth leads −6 to −10 [E]; HPF 150–200 [E]; cut 2–5 kHz under the vocal [73]
   synth: { level: -9, hpf: 150, eq: [{ type: 'peaking', f: 350, q: 2, gain: -2 }, { type: 'peaking', f: 3000, q: 0.9, gain: -2 }], comp: { ratio: 2.5, attack: 0.015, release: 0.2, gr: 2 }, pan: 0, width: 1.15, verb: { bus: 'beat', send: -15 }, fix: 2 },
   fx: { level: -14, hpf: 150, eq: [], comp: { ratio: 2, attack: 0.03, release: 0.25, gr: 2 }, pan: 0, width: 1.25, verb: { bus: 'beat', send: -10 }, fix: 0 },
+  // every instrument but drums and bass, as a splitter leaves it: keep it whole and gentle. HPF only the rumble, carve a
+  // little 300 Hz and 2.5-4 kHz for the vocal [50][51][63], light 2:1 glue [38], a touch wider and some room [E]
+  music: { level: -5, hpf: 35, eq: [{ type: 'peaking', f: 300, q: 1.4, gain: -1.5 }, { type: 'peaking', f: 3200, q: 0.8, gain: -1.5 }, { type: 'highshelf', f: 12000, gain: 1 }], comp: { ratio: 2, attack: 0.02, release: 0.2, gr: 1.5 }, pan: 0, width: 1.1, verb: { bus: 'beat', send: -20 }, fix: 1 },
   // 2-track beat: vocal ≈ beat [25]; check 200–300 Hz [50]; music bus 1.5:1 [38]; the vocal ducks its mids 2–3 dB [50][63]
   beat: { level: 0, hpf: 20, eq: [{ type: 'peaking', f: 250, q: 1.2, gain: -1 }], comp: { ratio: 1.5, attack: 0.03, release: 0.2, gr: 1.5 }, pan: 0, verb: null, fix: 1 },
 };

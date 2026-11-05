@@ -1,6 +1,6 @@
-# Third-party notices: image tools
+# Third-party notices: image and audio AI tools
 
-The Edit page's image tools (`/edit`) download these files into the visitor's browser. Each is pinned and checked against the SHA-256 in `public/js/image-models.js`. All are under permissive licenses; nothing here is GPL, AGPL or non-commercial.
+The Edit page's image tools (`/edit`) and AI Mix's one-song splitter (`/mix`) download these files into the visitor's browser. Each is pinned and checked against the SHA-256 in `public/js/image-models.js`. All are under permissive licenses; nothing here is GPL, AGPL or non-commercial.
 
 | File | Project and copyright | License | Where it is served from |
 | --- | --- | --- | --- |
@@ -9,6 +9,9 @@ The Edit page's image tools (`/edit`) download these files into the visitor's br
 | `studioludens/birefnet-lite-512` `onnx/model_fp16.onnx`, `onnx/model.onnx` @ `962e67969ec6acec9c19fab76acee4f5e22e990c` | BiRefNet, Copyright (c) 2024 ZhengPeng; 512 × 512 export Copyright (c) 2026 Studio Ludens V.O.F. | MIT | Hugging Face (not redistributed here) |
 | `Xenova/modnet` `onnx/model_quantized.onnx` @ `fa2fa546052fba4c08921230a26cc69a333fca12` | MODNet, ZHKKKe; ONNX conversion by Xenova | Apache-2.0 | Hugging Face (not redistributed here) |
 | `andraniksargsyan/migan` `migan_pipeline_v2.onnx` @ `406830d0fa60666da0071c342ad2fbc8f30c5c64` | MI-GAN, Copyright (c) 2024 Picsart AI Research (PAIR); code and weights (`LICENSE-WEIGHTS`) | MIT | Hugging Face (not redistributed here) |
+
+| `timcsy/demucs-web-onnx` `htdemucs_embedded.onnx` @ `92e33df61cfc9eb820272aaa62d2ef6dcf4d950d` (SHA-256 `e5e425c1…8077`, pinned in `public/js/mix/split-worker.js`) | HT-Demucs, Copyright (c) Meta Platforms, Inc. (facebookresearch/demucs, Alexandre Défossez); ONNX export by timcsy | MIT | Hugging Face (not redistributed here) |
+| `public/js/vendor/demucs-web/fft.js`, `demucs.js` | demucs-web 1.0.2, Copyright (c) 2024 timcsy: FFT, STFT/iSTFT and the model's input and output processing | MIT, full text in `public/js/vendor/demucs-web/LICENSE` | This repository (redistributed) |
 
 Not used: RMBG-2.0 (weights are non-commercial) and the 1024 × 1024 BiRefNet ONNX exports (they run out of memory in browsers).
 

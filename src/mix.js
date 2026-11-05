@@ -5,7 +5,7 @@
 //   GET  /api/mix-fetch  downloads a shared Dropbox or Google Drive link for the browser, which can't fetch those
 //                        itself (no CORS). Only those hosts, only files, size-capped, streamed straight through.
 
-const ROLES = ['kick', 'snare', 'hats', 'perc', 'drums', 'room', '808', 'bass', 'leadVox', 'backVox', 'adlib', 'keys', 'pad', 'guitar', 'synth', 'fx', 'beat'];
+const ROLES = ['kick', 'snare', 'hats', 'perc', 'drums', 'room', '808', 'bass', 'leadVox', 'backVox', 'adlib', 'keys', 'pad', 'guitar', 'synth', 'fx', 'beat', 'music'];
 const GENRES = ['hiphop', 'trap', 'drill', 'rnb', 'pop', 'rock', 'edm', 'afrobeats', 'lofi', 'country', 'latin'];
 const MACROS = ['vox', 'low', 'bright', 'space', 'width', 'loud'];
 const OEMBED = [

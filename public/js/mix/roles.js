@@ -20,6 +20,7 @@ export const ROLES = {
   synth: { name: 'Synth / melody', group: 'music', color: '#3fe0d0' },
   fx: { name: 'FX / risers', group: 'music', color: '#c0c6d0' },
   beat: { name: 'Beat (2-track)', group: 'music', color: '#f06bd3' },
+  music: { name: 'Music', group: 'music', color: '#4fd9a8' },
 };
 export const ROLE_IDS = Object.keys(ROLES);
 
