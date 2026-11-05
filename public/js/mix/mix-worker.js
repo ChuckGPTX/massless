@@ -5,6 +5,7 @@
 import { analyzeStem, sumEnvelopes, tempo, envelope, ENV_RATE } from './analyze.js';
 import { sketch, waveLag, fineShiftAt, relativeShifts, fitLevels, shiftEnv, gapsBetween, fittedEnvelope } from './rough.js';
 import { ROLE_RULES } from './rules.js';
+import { fineEnvelope, tightenOffsets, gateCurve, findSections, arrangementMoves, barActivity } from './timeline.js';
 import { planStrip, faderGain, busBalance, toneMatch, vocalDuck } from './plan.js';
 import { GENRES } from './rules.js';
 import { LoudnessMeter } from '../loudness.js';
@@ -50,9 +51,12 @@ function matchRough(roles, used) {
   const B = S.bounce, rate = S.rate;
   const idx = roles.map((_, i) => i).filter((i) => used[i] && S.feats[i]);
   const raw = idx.map((i) => S.align[i]?.raw ?? null);
+  // Stems placed by their session are already where they belong: they only tell us where the rough starts.
+  const placedKs = idx.map((i, k) => (S.placed[i] && Number.isFinite(raw[k]) ? k : -1)).filter((k) => k >= 0);
   const rel = relativeShifts(raw, Math.round(rate * 0.002)); // under 2 ms is measurement noise, not a misplaced stem
-  const anchor = idx.findIndex((i, k) => Number.isFinite(raw[k]));
-  S.common = anchor >= 0 ? raw[anchor] - rel[anchor] : 0; // where bar 1 of the stems lands in the rough
+  if (placedKs.length) { const sorted = placedKs.map((k) => raw[k]).sort((a, b) => a - b); const c = sorted[sorted.length >> 1]; idx.forEach((i, k) => { rel[k] = S.placed[i] ? 0 : (Number.isFinite(raw[k]) && Math.abs(raw[k] - c) > rate * 0.002 ? raw[k] - c : 0); }); }
+  const anchor = placedKs.length ? placedKs[0] : idx.findIndex((i, k) => Number.isFinite(raw[k]));
+  S.common = anchor >= 0 ? (placedKs.length ? placedKs.map((k) => raw[k]).sort((a, b) => a - b)[placedKs.length >> 1] : raw[anchor] - rel[anchor]) : 0; // where bar 1 of the stems lands in the rough
   const frames = Math.ceil(Math.max(S.length, B.mono.length) / rate * ENV_RATE) + ENV_RATE;
   const commonFrames = Math.round((S.common / rate) * ENV_RATE);
   const roughEnv = { env: shiftEnv(B.feats.env, -commonFrames, frames), low: shiftEnv(B.feats.bands.low, -commonFrames, frames), mid: shiftEnv(B.feats.bands.mid, -commonFrames, frames), high: shiftEnv(B.feats.bands.high, -commonFrames, frames) };
@@ -138,7 +142,7 @@ function probableRough(roles, used) {
 }
 
 const H = {
-  reset({ rate }) { Object.assign(S, { rate, feats: [], rough: null, length: 0, buses: null, bounce: null, align: [], shift: [], levelAdjust: [], common: 0 }); return {}; },
+  reset({ rate }) { Object.assign(S, { rate, feats: [], rough: null, length: 0, buses: null, bounce: null, align: [], shift: [], levelAdjust: [], common: 0, placed: [], fine: [], tighten: [], arrange: null, gates: [] }); return {}; },
 
   // The artist's rough mix (full bounce): kept to line stems up against, learn the balance from, and check the result.
   bounce({ channels }) {
@@ -151,9 +155,10 @@ const H = {
   },
 
   // Pass 1: listen to one stem and add it to the plain sum used for tempo and the "before" comparison.
-  analyze({ index, channels }) {
+  analyze({ index, channels, placed = false }) {
     const chs = channels.slice(0, 2), n = chs[0].length;
     S.length = Math.max(S.length, n);
+    S.placed[index] = placed;
     if (!S.bounce) {
       S.rough = S.rough || [new Float32Array(n), new Float32Array(n)];
       S.rough = S.rough.map((r) => grow(r, n));
@@ -161,9 +166,11 @@ const H = {
     }
     const f = analyzeStem(chs, S.rate);
     S.feats[index] = f;
+    const mono = chs.length > 1 ? Float32Array.from(chs[0], (v, i) => 0.5 * (v + chs[1][i])) : chs[0];
+    // A 1 kHz envelope for timing work (doubles against the lead); the worker drops it once the mix is planned.
+    S.fine[index] = f.activeRatio < 0.9 && f.activeRatio > 0.02 ? fineEnvelope(mono, S.rate) : null;
     if (S.bounce) {
       // Where does this stem sit in the rough? Onsets first (coarse), then the waveform itself (to the sample).
-      const mono = chs.length > 1 ? Float32Array.from(chs[0], (v, i) => 0.5 * (v + chs[1][i])) : chs[0];
       // Find it in the waveform (a 2.2 kHz sketch), then pin it to the sample. Loops stay at bar 1 when that fits as well.
       const bright = f.lowShare + f.midShare < 0.25;
       const w = waveLag(sketch(mono, S.rate, { bright }), bright ? S.bounce.sketch.bright : S.bounce.sketch.dark);
@@ -179,7 +186,8 @@ const H = {
   },
 
   // Tempo from the plain sum, and the envelopes the mix keys off (kick for sidechain, vocal for ducking).
-  prepare({ roles }) {
+  prepare({ roles, hookBars = [], genre }) {
+    S.arrangeOpts = (GENRES[genre] || GENRES.hiphop).arrange || {};
     const used = roles.map((r) => r !== 'rough' && r !== 'skip');
     const rough = S.bounce ? matchRough(roles, used) : { probable: probableRough(roles, used) };
     // Tempo from the drums when there are drum stems, otherwise from the plain sum.
@@ -190,18 +198,65 @@ const H = {
     const pick = (list) => roles.map((r, i) => (list.includes(r) && used[i] && !rough.leaveOut?.includes(i) && S.feats[i] ? S.feats[i] : null)).filter(Boolean);
     const kicks = pick(['kick']).length ? pick(['kick']) : pick(['drums']);
     S.kickLow = kicks.length ? sumEnvelopes(kicks.map((f) => f.low), frames) : null;
-    const vox = pick(['leadVox', 'backVox']);
+    const vox = pick(['leadVox', 'backVox', 'double']);
     S.voxPres = vox.length ? sumEnvelopes(vox.map((f) => f.pres), frames) : null;
     S.envLength = frames;
     S.roles = roles;
-    return { bpm: beat?.bpm || 0, beat, duration: S.length / S.rate, renderLength: S.length + TAIL(S.rate), hasKick: !!S.kickLow, hasVox: !!S.voxPres, rough };
+    const live = (i) => used[i] && S.feats[i] && !rough.leaveOut?.includes(i);
+    // Doubles follow the lead: each phrase measured against the lead (whichever lead sings there), to the ms.
+    const leadIdx = roles.map((r, i) => (r === 'leadVox' && live(i) && S.fine[i] ? i : -1)).filter((i) => i >= 0);
+    const tightened = [];
+    if (leadIdx.length) {
+      const L = Math.max(...leadIdx.map((i) => S.fine[i].length)), leadEnv = new Float32Array(L).fill(-120);
+      for (const i of leadIdx) { const e = S.fine[i]; for (let k = 0; k < e.length; k++) if (e[k] > leadEnv[k]) leadEnv[k] = e[k]; }
+      roles.forEach((r, i) => {
+        if (r !== 'double' || !live(i) || !S.fine[i]) return;
+        const moves = tightenOffsets(S.fine[i], leadEnv).filter((m) => m.ms);
+        if (moves.length) { S.tighten[i] = moves; tightened.push({ index: i, phrases: moves.length, maxMs: Math.max(...moves.map((m) => Math.abs(m.ms))), ms: moves.map((m) => m.ms) }); }
+      });
+    }
+    // The song's shape: who sings in each bar, how loud the music is, then the moves that build into every chorus.
+    const bpm = beat?.bpm || 0, bar = bpm > 50 ? (60 / bpm) * 4 : 0, bars = bar ? Math.ceil(S.length / S.rate / bar) : 0;
+    let arrange = null;
+    if (bars >= 8) {
+      const vocal = roles.map((r, i) => (['leadVox', 'backVox', 'double', 'adlib'].includes(r) && live(i) ? i : -1)).filter((i) => i >= 0);
+      const layers = new Uint8Array(bars), lead = new Uint8Array(bars), adlib = new Uint8Array(bars);
+      for (const i of vocal) { const a = barActivity(S.feats[i].active, bar, bars); for (let b = 0; b < bars; b++) if (a[b]) { layers[b]++; if (roles[i] === 'leadVox') lead[b] = 1; if (roles[i] === 'adlib') adlib[b] = 1; } }
+      const music = roles.map((r, i) => (!['leadVox', 'backVox', 'double', 'adlib', 'rough', 'skip'].includes(r) && live(i) ? S.feats[i].env : null)).filter(Boolean);
+      const musicEnv = music.length ? sumEnvelopes(music, frames) : S.roughEnv || null;
+      const energy = Array.from({ length: bars }, (_, b) => { if (!musicEnv) return NaN; let s = 0, n = 0; for (let k = Math.round(b * bar * ENV_RATE); k < Math.round((b + 1) * bar * ENV_RATE) && k < musicEnv.length; k++) { s += 10 ** (musicEnv[k] / 10); n++; } return n ? 10 * Math.log10(s / n + 1e-12) : NaN; });
+      const hook = new Uint8Array(bars); for (const [from, to] of hookBars) for (let b = Math.max(0, Math.floor(from / bar)); b < Math.min(bars, Math.ceil(to / bar)); b++) hook[b] = 1;
+      const sections = findSections({ layers: Array.from(layers), lead: Array.from(lead), energy, adlib: Array.from(adlib), hook: Array.from(hook) });
+      const A = arrangementMoves(sections, bar, frames, S.arrangeOpts || {});
+      S.arrange = { ...A, bar, sections };
+      arrange = { bar, bars, sections: sections.map((s) => ({ ...s, from: +(s.from * bar).toFixed(2), to: +(s.to * bar).toFixed(2), fromBar: s.from, toBar: s.to })), moves: A.moves, layers: Array.from(layers) };
+    }
+    return { bpm: beat?.bpm || 0, beat, duration: S.length / S.rate, renderLength: S.length + TAIL(S.rate), hasKick: !!S.kickLow, hasVox: !!S.voxPres, rough, tightened, arrange };
   },
 
-  plan({ index, role, pan, genre, macros, bpm }) {
+  /** The phrase moves for one double, so the engine can lift its phrases into place before rendering. */
+  tightening({ index }) { return { moves: S.tighten[index] || [] }; },
+
+  plan({ index, role, pan, genre, macros, bpm, ghost = false }) {
     const p = planStrip({ feats: S.feats[index], role, pan }, { genre, macros, bpm, kickLow: S.kickLow, length: S.envLength, has808: S.roles?.includes('808') });
     // The artist's balance from the rough nudges the rulebook level, and the stem moves to where it sits in the song.
     p.level += S.levelAdjust[index] || 0;
     p.shift = (S.shift[index] || 0) / S.rate;
+    const vocal = ['leadVox', 'backVox', 'double', 'adlib'].includes(role), f = S.feats[index], A = S.arrange;
+    // Clean-up between phrases: doubles and ad-libs close hard, the lead gently (its breaths are part of the take).
+    const gate = vocal && f?.env ? gateCurve(f.env, { depth: role === 'leadVox' ? 9 : 18 }) : null;
+    // The arrangement: lifts per section, the build-up moves, the reverb that's bigger in verses and thrown before a drop.
+    const n = S.envLength, auto = new Float32Array(n);
+    if (gate) for (let k = 0; k < n; k++) auto[k] += gate[k] ?? 0;
+    if (A) {
+      const lift = role === 'leadVox' ? A.lift.lead : role === 'double' || role === 'backVox' ? A.lift.double : role === 'adlib' ? A.lift.adlib : null;
+      if (lift) for (let k = 0; k < n; k++) auto[k] += lift[k];
+      if (!vocal && role !== 'fx') { p.hpfCurve = A.beatHpf; for (let k = 0; k < n; k++) auto[k] += A.beatMute[k]; }
+      if (vocal) { p.fxMute = A.fxMute; if (role === 'leadVox' && p.verb) p.verbCurve = A.leadVerb; }
+    }
+    if (ghost) { for (let k = 0; k < n; k++) auto[k] += A?.sections ? -60 : 0; if (A) for (const s of A.sections) if (s.kind === 'chorus') for (let k = Math.round(s.from * A.bar * ENV_RATE); k < Math.min(n, Math.round(s.to * A.bar * ENV_RATE)); k++) auto[k] += 60; }
+    p.auto = gate || A || ghost ? auto : null;
+    p.gated = !!gate;
     return { plan: p };
   },
 
@@ -215,9 +270,15 @@ const H = {
     for (let c = 0; c < 2; c++) { addInto(S.buses[bus][c], dry[c], g); if (wet) addInto(S.buses[bus][c], wet[c], g); }
     if (plan.verb && plan.verb.send > -50) {
       const target = plan.verb.bus === 'vox' ? 'voxVerb' : 'beatVerb', sg = g * dbToGain(plan.verb.send);
-      for (let c = 0; c < 2; c++) addInto(S.buses[target][c], dry[c], sg);
+      // Send automation: more room in the verses, a throw into each drop, and the dry punch right before the chorus.
+      const curve = plan.verbCurve || plan.fxMute ? Float32Array.from({ length: S.envLength }, (_, k) => (plan.verbCurve?.[k] || 0) + (plan.fxMute?.[k] || 0)) : null;
+      for (let c = 0; c < 2; c++) {
+        if (!curve) { addInto(S.buses[target][c], dry[c], sg); continue; }
+        const src = dry[c], dst = S.buses[target][c], per = S.rate / ENV_RATE;
+        for (let i = 0; i < src.length && i < dst.length; i++) { const k = Math.min(curve.length - 1, Math.floor(i / per)); dst[i] += src[i] * sg * dbToGain(curve[k]); }
+      }
     }
-    S.feats[index] = { ...S.feats[index], env: null, sib: null, pres: null }; // done with the big envelopes
+    S.feats[index] = { ...S.feats[index], env: null, sib: null, pres: null }; S.fine[index] = null; // done with the big envelopes
     return { fader, measured };
   },
 

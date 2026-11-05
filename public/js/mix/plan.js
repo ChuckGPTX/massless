@@ -190,8 +190,10 @@ function mergeShelves(eq) {
 }
 
 /** A plain sentence per strip for the mix notes. */
-export function describeStrip(name, p, fader) {
+export function describeStrip(name, p, fader, extra = {}) {
   const bits = [];
+  if (extra.tightened) bits.push(`tightened to the lead on ${extra.tightened} phrase${extra.tightened === 1 ? '' : 's'}`);
+  if (p.gated) bits.push('clean between phrases');
   if (p.hpf) bits.push(`high-pass ${Math.round(p.hpf)} Hz`);
   const cuts = p.eq.filter((e) => e.gain < -0.4), boosts = p.eq.filter((e) => e.gain > 0.4);
   if (cuts.length) bits.push(`cut ${cuts.map((e) => `${fmtHz(e.f)} ${e.gain.toFixed(1)} dB`).join(', ')}`);
@@ -201,6 +203,7 @@ export function describeStrip(name, p, fader) {
   if (p.sat) bits.push('saturate');
   if (p.rider) bits.push('ride the level');
   if (p.duck) bits.push('duck under the kick');
+  if (p.hpfCurve) bits.push('filter sweep into the chorus');
   if (Math.abs(p.pan) > 0.05) bits.push(`pan ${Math.round(Math.abs(p.pan) * 100)}% ${p.pan < 0 ? 'left' : 'right'}`);
   if (p.verb && p.verb.send > -40) bits.push(`${p.verb.bus === 'vox' ? 'plate' : 'room'} reverb`);
   if (p.delay) bits.push(`${Math.round(p.delay.time * 1000)} ms delay on the beat`);

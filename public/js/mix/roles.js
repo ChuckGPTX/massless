@@ -14,6 +14,7 @@ export const ROLES = {
   leadVox: { name: 'Lead vocal', group: 'vox', color: '#46d6ff' },
   backVox: { name: 'Backing vocals', group: 'vox', color: '#5ab8ff' },
   adlib: { name: 'Ad-libs', group: 'vox', color: '#7aa5ff' },
+  double: { name: 'Double (of the lead)', group: 'vox', color: '#3fb8e8' },
   keys: { name: 'Keys / piano', group: 'music', color: '#55e3a1' },
   pad: { name: 'Pad / strings', group: 'music', color: '#4cc7a0' },
   guitar: { name: 'Guitar', group: 'music', color: '#8fe06b' },
@@ -26,8 +27,9 @@ export const ROLE_IDS = Object.keys(ROLES);
 
 // Ordered: the first match wins, so "808 kick" is an 808, "vox reverb print" is skipped by the FX rule later.
 const RULES = [
+  ['double', /\b(dbl|dubs?|doubles?|dub [lr]|double [lr])\b/],
   ['adlib', /ad[\s_-]?libs?|adlb|\bad\b|hype|shouts?/],
-  ['backVox', /\b(bgv|bv|bvs|bg ?vox|backing|back ?vox|background|harm(ony|onies|s)?|dbl|double|dubs?|stack|choir|oohs?|aahs?|gang)\b/],
+  ['backVox', /\b(bgv|bv|bvs|bg ?vox|backing|back ?vox|background|harm(ony|onies|s)?|stack|choir|oohs?|aahs?|gang)\b/],
   ['leadVox', /\b(lead ?vox|lead ?vocal|ld ?vox|main ?vox|vox|vocals?|vocal|verse|hook|chorus|rap|sing(ing|er)?|acapella|a ?cappella|voice|lv)\b/],
   ['808', /\b808s?\b|\bsub ?bass\b|\bsub\b/],
   ['kick', /\b(kick|kik|kck|bd|bassdrum|bass ?drum)\b/],
@@ -48,6 +50,24 @@ const RULES = [
 /** Lower-case words of a stem path, with camelCase, numbers and punctuation split. */
 export function words(path) {
   return String(path).replace(/\.[a-z0-9]+$/i, '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_\-./()[\]{}+]+/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+/**
+ * The role a DAW track name gives a recording. Vocal sessions name tracks by job: "Vox 1 Main A" (a lead, A and B
+ * alternate lines), "Dub L" (a double, panned left), "Libbs" (ad-libs). Returns { role, pan } or null.
+ */
+export function roleFromTrack(track) {
+  const t = words(String(track).replace(/\.dup\d+$/i, ''));
+  if (!t) return null;
+  const side = /\b(l|left)\b/.test(t) ? -1 : /\b(r|right)\b/.test(t) ? 1 : 0;
+  if (/\b(libbs?|ad ?libs?|adlibs?|lib)\b/.test(t)) return { role: 'adlib', pan: side * 0.6 || null };
+  if (/\b(dubs?|dbl|doubles?)\b/.test(t)) return { role: 'double', pan: side * 0.85 || null };
+  if (/\b(bus|buss|sum|stem|subs?|master|print|aux|rvb|verb|delay|fx|mix)\b/.test(t)) return null; // a bus, an aux or a print: not a recording
+  if (/\b(main|lead|ld|vox|vocal|vocals|verse|hook|chorus|rap)\b/.test(t)) return { role: 'leadVox', pan: null };
+  if (/\b(bgv|bv|bvs|backing|background|harm(ony|onies|s)?|stack|gang|choir)\b/.test(t)) return { role: 'backVox', pan: side * 0.6 || null };
+  if (/\b(instrumental|inst|beat|2 ?track|music)\b/.test(t)) return { role: 'beat', pan: null };
+  const byName = roleFromName(t);
+  return byName ? { role: byName, pan: null } : null;
 }
 
 export function roleFromName(path) {

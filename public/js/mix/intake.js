@@ -77,14 +77,14 @@ export async function zipEntry(file, entry) {
 /**
  * Turn whatever was dropped into a list of stems.
  * items: File[] (files, a folder's files with webkitRelativePath, or one zip).
- * Returns { stems: [{ name, path, size, blob() }], sessions: ['Ableton Live', ...], skipped: [names] }.
+ * Returns { stems: [{ name, path, size, blob() }], sessions: ['Ableton Live', ...], sessionFiles: [{ name, path, daw, size, blob() }], skipped: [names] }.
  */
 export async function gather(files) {
-  const stems = [], sessions = new Set(), skipped = [];
+  const stems = [], sessions = new Set(), sessionFiles = [], skipped = [];
   const add = (path, size, blob) => {
     if (SKIP.test(path)) return;
     const s = sessionOf(path);
-    if (s) { sessions.add(s); return; }
+    if (s) { sessions.add(s); sessionFiles.push({ name: baseName(path), path, daw: s, size, blob }); return; }
     if (!AUDIO_EXT.test(path)) { if (!/\.(txt|pdf|png|jpe?g|asd|reapeaks|pkf|xml|json|mid|midi|nfo|ini)$/i.test(path)) skipped.push(baseName(path)); return; }
     stems.push({ name: baseName(path).replace(AUDIO_EXT, ''), path, size, blob });
   };
@@ -100,7 +100,9 @@ export async function gather(files) {
   for (const s of stems) { const k = `${s.name.toLowerCase()}|${s.size}`; if (!seen.has(k)) { seen.add(k); unique.push(s); } }
   unique.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }));
   if (unique.length > MAX_STEMS) throw new Error(`That’s ${unique.length} audio files. Mix up to ${MAX_STEMS} stems at a time: group similar parts (for example all background vocals) into one stem.`);
-  return { stems: unique, sessions: [...sessions], skipped };
+  // The session file itself: the newest one at the top of the folder (backups are skipped above).
+  sessionFiles.sort((a, b) => a.path.split('/').length - b.path.split('/').length || b.size - a.size);
+  return { stems: unique, sessions: [...sessions], sessionFiles, skipped };
 }
 
 // ---------- links ----------
