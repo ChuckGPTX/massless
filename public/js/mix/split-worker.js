@@ -92,7 +92,10 @@ async function open(prefer) {
     try {
       say('load', 1, backend === 'webgpu' ? 'Warming up your graphics chip' : 'Warming up the splitter');
       if (model) { try { await model.session.release(); } catch { /* gone */ } model = null; }
-      const session = await ort.InferenceSession.create(new Uint8Array(bytes), { executionProviders: [backend], graphOptimizationLevel: 'basic' });
+      // Low-memory settings: no pre-grown CPU arena, no planned memory pattern. They cost a little speed and save
+      // gigabytes, which is the difference between working and the tab being killed on a phone.
+      const session = await ort.InferenceSession.create(new Uint8Array(bytes), { executionProviders: [backend], graphOptimizationLevel: 'basic', enableCpuMemArena: false, enableMemPattern: false });
+      bytesP = null; // the runtime has its own copy now; let this one go
       model = { session, backend, ort };
       return model;
     } catch (e) { last = e; }
@@ -175,7 +178,12 @@ let job = 0;
 self.onmessage = async (e) => {
   const d = e.data;
   if (d.type === 'cancel') { job++; return; }
-  if (d.type === 'prefetch') { try { await load(); post({ type: 'ready', backend: model.backend }); } catch (err) { post({ type: 'error', message: err.message }); } return; }
+  // Prefetch only fills the cache: building the model takes gigabytes, so that waits for a real split.
+  if (d.type === 'prefetch') {
+    try { await fetchVerified(SPLIT_MODEL, (got, total) => say('download', got / total, `Getting the splitter ready: ${Math.round(got / 1e6)} of ${Math.round(total / 1e6)} MB, first time only`)); post({ type: 'ready' }); }
+    catch (err) { post({ type: 'error', message: err.message }); }
+    return;
+  }
   if (d.type !== 'split') return;
   const mine = ++job;
   try {

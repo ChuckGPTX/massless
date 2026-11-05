@@ -1,5 +1,5 @@
 import { gather, fetchLink, AUDIO_EXT } from '../mix/intake.js';
-import { openSong, splitSong, stemsFromSplit, gpuReady, prefetch } from '../mix/split.js';
+import { openSong, splitSong, stemsFromSplit, gpuReady, prefetch, deviceFitsSplit } from '../mix/split.js';
 import { runMix } from '../mix/engine.js';
 import { GENRES, TIPS } from '../mix/rules.js';
 import { ROLES, ROLE_IDS, roleFromName } from '../mix/roles.js';
@@ -159,11 +159,22 @@ function setMode(m) {
 }
 $('#mode-stems').onclick = () => setMode('stems');
 $('#mode-song').onclick = () => setMode('song');
-for (const b of document.querySelectorAll('[data-method]')) b.onclick = () => {
-  state.method = b.dataset.method;
-  document.querySelectorAll('[data-method]').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
-  if (state.method === 'split' && state.song) getSplitter();
+// Splitting needs about 3 GB of memory: phones and small devices polish instead of having the tab killed.
+let fits = deviceFitsSplit();
+function pickMethod(m) {
+  state.method = m;
+  document.querySelectorAll('[data-method]').forEach((x) => x.setAttribute('aria-checked', String(x.dataset.method === m)));
+  if (m === 'split' && state.song) getSplitter();
   updateStart();
+}
+function markSplit() {
+  const card = document.querySelector('[data-method="split"]');
+  card.classList.toggle('off', !fits); card.setAttribute('aria-disabled', String(!fits));
+  if (!fits && state.method === 'split') pickMethod('polish');
+}
+for (const b of document.querySelectorAll('[data-method]')) b.onclick = () => {
+  if (b.dataset.method === 'split' && !fits) { note('Split & mix needs about 3 GB of memory, more than this browser gives one page. Open chucksi.com/mix on a computer to split, or use Quick polish here.', true); return; }
+  pickMethod(b.dataset.method);
 };
 
 async function takeSong(file) {
@@ -176,8 +187,8 @@ async function takeSong(file) {
     $('#song-drop').hidden = true; $('#song-card').hidden = false;
     $('#song-name').textContent = file.name.replace(/\.[^.]+$/, '');
     $('#song-meta').textContent = `${fmt(s.duration)} · ${(file.size / 1048576).toFixed(1)} MB · ${(file.name.split('.').pop() || 'audio').toUpperCase()}`;
-    drawSongWave(); note(''); warmHuman();
-    speedHint().then(() => { if (state.method === 'split') getSplitter(); });
+    drawSongWave(); note(''); warmHuman(); markSplit();
+    speedHint().then(() => { if (fits && state.method === 'split') getSplitter(); });
   } catch (e) { note(e.message || 'Couldn’t open that file. Try an MP3 or WAV.', true); }
   updateStart();
 }
@@ -188,7 +199,9 @@ function drawSongWave() {
   for (let x = 0; x < w; x += 3) { const v = p[Math.floor((x / w) * p.length)] / top, bar = Math.max(2, v * (h - 8)); g.fillRect(x, (h - bar) / 2, 2, bar); }
 }
 async function speedHint() {
-  const gpu = await (gpuP ||= gpuReady()), el = $('#split-speed'), mins = (state.song?.duration || 180) / 60;
+  const el = $('#split-speed');
+  if (!fits) { el.classList.add('slow'); el.textContent = 'Needs a computer: splitting takes about 3 GB of memory, more than a phone browser allows.'; return false; }
+  const gpu = await (gpuP ||= gpuReady()), mins = (state.song?.duration || 180) / 60;
   el.classList.toggle('slow', !gpu);
   el.textContent = gpu ? `Runs on your graphics chip, usually ${mins < 4 ? 'a minute or two' : 'a few minutes'}. One-time 181 MB download.`
     : `This browser can’t use your graphics chip, so splitting takes about ${Math.max(3, Math.round(mins * 3))} minutes. One-time 181 MB download.`;
@@ -196,8 +209,8 @@ async function speedHint() {
 }
 /** Download the splitter in the background while the genre gets picked. */
 function getSplitter() {
-  fetching ||= prefetch((d) => { if (state.method === 'split') $('#split-speed').textContent = d.stage === 'download' ? `${d.label}…` : 'Downloaded. Warming up the splitter…'; })
-    .then((ok) => { if (ok && state.method === 'split') speedHint().then((gpu) => { $('#split-speed').textContent = `Splitter ready${gpu ? ' on your graphics chip' : ''}. ` + $('#split-speed').textContent.replace(/ One-time 181 MB download\./, ''); }); if (!ok) fetching = null; return ok; });
+  fetching ||= prefetch((d) => { if (state.method === 'split' && d.stage === 'download') $('#split-speed').textContent = `${d.label}…`; })
+    .then((ok) => { if (ok && state.method === 'split') speedHint().then((gpu) => { $('#split-speed').textContent = 'Splitter downloaded. ' + $('#split-speed').textContent.replace(/ One-time 181 MB download\./, ''); }); if (!ok) fetching = null; return ok; });
   return fetching;
 }
 $('#song-file').onchange = (e) => { takeSong(e.target.files[0]); e.target.value = ''; };
@@ -306,7 +319,13 @@ async function start() {
   try {
     if (songMode) {
       if (state.method === 'split') {
-        if (state.split?.file !== state.song.file) { state.split = { file: state.song.file, ...(await runSplit(state.ctrl.signal)) }; base = 0.45; }
+        if (state.split?.file !== state.song.file) {
+          // If this tab dies mid-split (out of memory), the next visit knows and polishes instead.
+          try { sessionStorage.setItem('mix-splitting', String(Date.now())); } catch { /* storage blocked */ }
+          try { state.split = { file: state.song.file, ...(await runSplit(state.ctrl.signal)) }; }
+          finally { try { sessionStorage.removeItem('mix-splitting'); } catch { /* storage blocked */ } }
+          base = 0.45;
+        }
         ({ stems, roles } = stemsFromSplit(state.split.stems, state.genre));
         roughFile = state.song.file; // the song itself is the reference: timing, balance, before/after
         await new Promise((r) => setTimeout(r, still ? 0 : 900));
@@ -560,4 +579,15 @@ for (const b of document.querySelectorAll('[data-dl]')) b.onclick = async () => 
 
 buildGenres();
 setMode(state.mode);
+try {
+  const was = Number(sessionStorage.getItem('mix-splitting'));
+  if (was) {
+    sessionStorage.removeItem('mix-splitting');
+    if (Date.now() - was < 60 * 60 * 1000) {
+      localStorage.setItem('mix-split-crashed', '1'); fits = false;
+      setMode('song');
+      note('Your last split stopped: this browser ran out of memory and reloaded the page. Quick polish works here; for Split & mix, open chucksi.com/mix on a computer.', true);
+    }
+  }
+} catch { /* storage blocked */ }
 if (params.get('demo') === '1') $('#stem-link').focus();
