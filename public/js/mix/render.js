@@ -102,7 +102,9 @@ export async function renderStrip(chs, p, rate, length) {
     dl.connect(dpan).connect(split3); split3.connect(merger, 0, 2); split3.connect(merger, 1, 3);
   }
   merger.connect(ctx.destination);
-  src.start();
+  // Where the stem sits in the song (from the rough mix): later is a delay, earlier skips into the file.
+  const shift = p.shift || 0;
+  if (shift >= 0) src.start(shift); else src.start(0, -shift);
   const out = await ctx.startRendering();
   const take = (c) => out.getChannelData(c).slice(lat, lat + length);
   const dry = [take(0), take(1)], wet = [take(2), take(3)];

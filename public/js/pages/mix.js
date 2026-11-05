@@ -2,6 +2,7 @@ import { gather, fetchLink } from '../mix/intake.js';
 import { runMix } from '../mix/engine.js';
 import { GENRES, TIPS } from '../mix/rules.js';
 import { ROLES, ROLE_IDS, roleFromName } from '../mix/roles.js';
+import { looksLikeRough } from '../mix/rough.js';
 import { TrickPanel, heroConsole, drawPeaks, drawEqThumb } from '../mix/visuals.js';
 import { fmtHz } from '../mix/plan.js';
 import { apiFetch, warmHuman } from '../human.js';
@@ -16,7 +17,7 @@ const GENRE_NOTES = {
   country: 'Natural, clear vocal', latin: 'Dembow forward, big low end',
 };
 const params = new URLSearchParams(location.search);
-const state = { stems: [], sessions: [], roles: [], genre: GENRES[params.get('genre')] ? params.get('genre') : 'hiphop', refFile: null, result: null, ctrl: null, macros: null };
+const state = { roughFile: null, stems: [], sessions: [], roles: [], genre: GENRES[params.get('genre')] ? params.get('genre') : 'hiphop', refFile: null, result: null, ctrl: null, macros: null };
 
 // ---------- intake ----------
 const stopHero = heroConsole($('#hero-console'));
@@ -48,7 +49,12 @@ async function take(files) {
     const keys = new Set(state.stems.map((s) => s.path + s.size));
     for (const s of g.stems) if (!keys.has(s.path + s.size)) state.stems.push(s);
     state.roles = state.stems.map((s, i) => state.roles[i] || '');
-    renderStems();
+    // The full bounce, if it came along: the best-named candidate becomes the rough mix.
+    if (!state.roughFile && !state.roles.includes('rough')) {
+      const paths = state.stems.map((x) => x.path), cands = state.stems.map((x, i) => i).filter((i) => looksLikeRough(paths[i], paths));
+      if (cands.length) { const best = cands.sort((a, b) => (/rough|bounce|mixdown|full/i.test(paths[b]) - /rough|bounce|mixdown|full/i.test(paths[a])) || state.stems[b].size - state.stems[a].size)[0]; state.roles[best] = 'rough'; }
+    }
+    renderStems(); roughStatus();
     const sess = g.sessions.length ? ` Found a ${g.sessions.join(' and ')} session: its clips are placed by that app, so we mix the audio files as they are. For the best result, export every track as a stem from bar 1.` : '';
     note(`${state.stems.length} track${state.stems.length === 1 ? '' : 's'} ready.${g.skipped.length ? ` Skipped ${g.skipped.length} file${g.skipped.length === 1 ? '' : 's'} that aren't audio.` : ''}${sess}`, !!sess);
     warmHuman();
@@ -66,9 +72,15 @@ function renderStems() {
     const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = s.name; nm.title = s.path;
     const sel = document.createElement('select'); sel.setAttribute('aria-label', `What is ${s.name}?`);
     sel.append(new Option(guess ? `${ROLES[guess].name}` : 'Auto-detect', ''));
+    sel.append(new Option('Rough mix (reference)', 'rough'), new Option('Leave out', 'skip'));
     for (const id of ROLE_IDS) if (id !== guess) sel.append(new Option(ROLES[id].name, id));
     sel.value = state.roles[i] && state.roles[i] !== guess ? state.roles[i] : '';
-    sel.onchange = () => { state.roles[i] = sel.value; sw.style.background = ROLES[sel.value || guess]?.color || '#555'; };
+    if (state.roles[i] === 'rough' || state.roles[i] === 'skip') li.classList.add(state.roles[i]);
+    if (state.roles[i] === 'rough') sw.style.background = '#e8e4f2';
+    sel.onchange = () => {
+      if (sel.value === 'rough') { state.roles = state.roles.map((r) => (r === 'rough' ? '' : r)); state.roughFile = null; $('#rough-file').value = ''; }
+      state.roles[i] = sel.value; renderStems(); roughStatus();
+    };
     const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'text-button'; rm.textContent = '✕'; rm.setAttribute('aria-label', `Remove ${s.name}`);
     rm.onclick = () => { state.stems.splice(i, 1); state.roles.splice(i, 1); renderStems(); $('#start').disabled = !state.stems.length; note(`${state.stems.length} tracks ready.`); };
     li.append(sw, nm, sel, rm);
@@ -110,6 +122,14 @@ $('#fetch-link').onclick = async () => {
   } catch (e) { note(e.message, true); }
   finally { $('#fetch-link').disabled = false; }
 };
+function roughStatus() {
+  const k = state.roles.indexOf('rough'), row = $('#rough-row');
+  const name = state.roughFile?.name || (k >= 0 ? state.stems[k].path.split('/').pop() : '');
+  row.classList.toggle('found', !!name);
+  $('#rough-file-name').textContent = name ? 'Use a different file' : 'Add your rough mix';
+  $('#rough-status').textContent = name ? `Using ${name} as your rough mix. Every stem gets lined up with it, your balance guides the mix, and the finished song is checked against it.` : 'The full song as you bounced it, before mixing. We line every stem up with it, follow your balance, leave out takes you didn\u2019t use, and check the finished song plays every part.';
+}
+$('#rough-file').onchange = (e) => { state.roughFile = e.target.files[0] || null; if (state.roughFile) state.roles = state.roles.map((r) => (r === 'rough' ? '' : r)); renderStems(); roughStatus(); };
 $('#ref-file').onchange = (e) => { state.refFile = e.target.files[0] || null; $('#ref-file-name').textContent = state.refFile ? state.refFile.name : 'Add a reference file'; };
 $('#mix-form').onsubmit = (e) => { e.preventDefault(); start(); };
 
@@ -134,7 +154,15 @@ const TRICK_TEXT = {
   deess: (n, p) => `${n}: the “s” sounds around ${fmtHz(p.deess?.f || 6800)} are turned down only when they jump out.`,
   pan: (n, p) => `${n} goes ${Math.abs(p.pan) < 0.05 ? 'to the centre' : `${Math.round(Math.abs(p.pan) * 100)}% ${p.pan < 0 ? 'left' : 'right'}`}${p.width > 1.05 ? `, ${Math.round((p.width - 1) * 100)}% wider` : ''}.`,
 };
-const TRICK_TITLE = { eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
+function alignText(r) {
+  const bits = [];
+  bits.push(r.moved?.length ? `Moved ${r.moved.map((m) => `${m.name} ${m.ms > 0 ? '+' : ''}${(m.ms / 1000).toFixed(2)} s`).join(', ')} into place.` : 'Every stem already starts in the right place.');
+  if (r.adjust?.length) bits.push(`Following your balance on ${r.adjust.length} track${r.adjust.length === 1 ? '' : 's'}.`);
+  if (r.leftOut?.length) bits.push(`Leaving out ${r.leftOut.join(', ')}: not in your rough.`);
+  if (r.missing?.length) bits.push(`Your rough has parts the stems don't at ${r.missing.join(', ')}.`);
+  return bits.join(' ');
+}
+const TRICK_TITLE = { align: 'Lining up', eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
 
 async function start() {
   if (!state.stems.length) return;
@@ -151,9 +179,10 @@ async function start() {
   nextTip(); clearInterval(tipTimer); tipTimer = setInterval(nextTip, 4800);
   state.ctrl = new AbortController();
   const names = state.stems.map((s) => s.name);
+  const mixing = state.stems.map((s, i) => i).filter((i) => !['rough', 'skip'].includes(state.roles[i]));
   try {
     const res = await runMix(state.stems, {
-      genre: state.genre, referenceUrl: $('#ref-link').value.trim(), referenceFile: state.refFile, roles: state.roles, macros: state.macros || undefined,
+      roughFile: state.roughFile, genre: state.genre, referenceUrl: $('#ref-link').value.trim(), referenceFile: state.refFile, roles: state.roles, macros: state.macros || undefined,
       apiFetch, signal: state.ctrl.signal,
       onEvent: (e) => {
         if (e.type === 'progress') { const p = Math.round(e.value * 100); $('#bar-fill').style.width = p + '%'; $('#bar-pct').textContent = p + '%'; $('.bar').setAttribute('aria-valuenow', p); }
@@ -161,15 +190,22 @@ async function start() {
           $('#stage-label').textContent = e.label;
           if (e.id === 'think') { $('#fx-kicker').textContent = 'THINKING'; $('#fx-title').textContent = 'Planning the mix'; $('#fx-detail').textContent = `Reading every track and choosing the ${G.name} moves.`; panel.show('listen'); }
           if (e.id === 'console' && Number.isInteger(e.index)) { lanes.forEach((l, k) => l?.el.classList.toggle('active', k === e.index)); lanes[e.index]?.el.scrollIntoView?.({ block: 'nearest', behavior: still ? 'auto' : 'smooth' }); }
-        } else if (e.type === 'track') { lane(e.index, e.name, e.role, e.color, e.peaks); $('#fx-kicker').textContent = 'LISTENING'; $('#fx-title').textContent = e.name; $('#fx-detail').textContent = `Track ${e.index + 1} of ${names.length} is on the console.`; lanes[e.index].feats = e.feats; }
+        } else if (e.type === 'track') { lane(e.index, e.name, e.role, e.color, e.peaks); $('#fx-kicker').textContent = 'LISTENING'; $('#fx-title').textContent = e.name; $('#fx-detail').textContent = `Track ${mixing.indexOf(e.index) + 1} of ${mixing.length} is on the console.`; lanes[e.index].feats = e.feats; }
         else if (e.type === 'relabel') { const l = lanes[e.index]; if (l) { l.el.querySelector('.sw').style.background = e.color; l.el.querySelector('small').textContent = ROLES[e.role].name; l.color = e.color; drawPeaks(l.el.querySelector('canvas'), l.peaks, e.color, 1); } }
+        else if (e.type === 'rough') {
+          const el = document.createElement('div'); el.className = 'lane rough-lane';
+          el.innerHTML = '<div class="ln"><span class="sw"></span><div><b></b><small>Rough mix · reference</small></div></div><canvas width="900" height="76"></canvas><div class="chips"></div>';
+          el.querySelector('.sw').style.background = '#e8e4f2'; el.querySelector('b').textContent = e.name;
+          $('#lanes').prepend(el); drawPeaks(el.querySelector('canvas'), e.peaks, '#e8e4f2', 1);
+          $('#fx-kicker').textContent = 'YOUR ROUGH MIX'; $('#fx-title').textContent = e.name; $('#fx-detail').textContent = `${Math.round(e.duration)} seconds of song: the map every stem gets lined up against.`;
+        } else if (e.type === 'leftout') { const l = lanes[e.index]; if (l) { l.el.classList.add('out'); l.el.querySelector('.chips').replaceChildren(chip('Not in your rough')); } }
         else if (e.type === 'tempo') $('#session-bpm').textContent = e.bpm ? `${Math.round(e.bpm)} BPM` : 'free time';
         else if (e.type === 'notes') { $('#fx-detail').textContent = e.text; }
         else if (e.type === 'trick') {
           const n = Number.isInteger(e.index) ? names[e.index] : '';
           $('#fx-kicker').textContent = (TRICK_TITLE[e.kind] || 'MIXING').toUpperCase();
-          $('#fx-title').textContent = n || { verb: 'Reverb and delay', loud: 'The master' }[e.kind] || TRICK_TITLE[e.kind];
-          $('#fx-detail').textContent = TRICK_TEXT[e.kind] && n ? TRICK_TEXT[e.kind](n, e.data) : e.kind === 'verb' ? `Building a ${e.data.decay.toFixed(1)} s plate for the vocals and a short room for the beat, both filtered so they never get muddy.` : e.kind === 'loud' ? `Matching the tone of finished ${G.name} records, then raising it to ${e.data.lufs} LUFS with true peaks under −1 dB.` : '';
+          $('#fx-title').textContent = n || { verb: 'Reverb and delay', loud: 'The master', align: 'Matching your rough mix' }[e.kind] || TRICK_TITLE[e.kind];
+          $('#fx-detail').textContent = e.kind === 'align' ? alignText(e.data) : TRICK_TEXT[e.kind] && n ? TRICK_TEXT[e.kind](n, e.data) : e.kind === 'verb' ? `Building a ${e.data.decay.toFixed(1)} s plate for the vocals and a short room for the beat, both filtered so they never get muddy.` : e.kind === 'loud' ? `Matching the tone of finished ${G.name} records, then raising it to ${e.data.lufs} LUFS with true peaks under −1 dB.` : '';
           panel.show(e.kind, e.data, { spectrum: lanes[e.index]?.feats?.spectrum });
         } else if (e.type === 'strip') {
           const l = lanes[e.index]; if (!l) return;
@@ -217,6 +253,7 @@ function showResult(res) {
   $('#ai-notes').textContent = r.notes ? `${r.notes}${r.reference?.title ? ` (Reference: ${r.reference.title}${r.reference.author ? `, ${r.reference.author}` : ''}.)` : ''}` : '';
   $('#strip-notes').replaceChildren(...r.strips.filter(Boolean).map((s) => { const li = document.createElement('li'); li.textContent = s.text; return li; }));
   buildMacros(r.macros);
+  showRough(r);
   stopAudio(); buffers = {}; offset = 0;
   show('result');
   drawWave(0);
@@ -242,6 +279,25 @@ function buildMixer(strips) {
   }));
 }
 
+function showRough(r) {
+  const rr = $('#rough-report');
+  document.querySelector('[data-ab="before"]').textContent = r.rough ? 'Your rough' : 'Before';
+  $('#ab-note').textContent = r.rough ? 'Your rough is your own bounce, lined up and turned to the same loudness, so you hear the mix, not just volume.' : 'Before is your stems added up and turned to the same loudness, so you hear the mix, not just volume.';
+  rr.hidden = !r.rough;
+  if (!r.rough) return;
+  const gaps = r.rough.coverage?.gaps || [], items = [];
+  items.push(gaps.length ? `These parts of your rough are much quieter or missing in the mix: ${gaps.map((g) => g.label).join(', ')}. Check those stems are in the session.` : `Every section of your rough mix plays in the finished song${r.rough.duration ? ` (${Math.round(r.rough.duration)} s)` : ''}.`);
+  if (r.rough.moved?.length) items.push(`Lined up: ${r.rough.moved.map((m) => `${m.name} (${m.ms > 0 ? '+' : ''}${(m.ms / 1000).toFixed(2)} s)`).join(', ')}.`);
+  if (r.rough.adjust?.length) items.push(`Followed your balance: ${r.rough.adjust.map((a) => `${a.name} ${a.db > 0 ? '+' : ''}${a.db} dB`).join(', ')}.`);
+  if (r.rough.leftOut?.length) items.push(`Left out (not in your rough): ${r.rough.leftOut.join(', ')}. Give them a role and remix if you want them in.`);
+  if (r.rough.missing?.length) items.push(`Your rough has parts no stem covers at ${r.rough.missing.join(', ')}. Add those stems for a complete song.`);
+  const warn = !!(gaps.length || r.rough.missing?.length);
+  rr.classList.toggle('warn', warn);
+  rr.innerHTML = '<h3></h3><ul></ul>';
+  rr.querySelector('h3').textContent = warn ? '⚠ Checked against your rough mix' : '✓ Matches your rough mix';
+  rr.querySelector('ul').replaceChildren(...items.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; }));
+}
+
 const MACRO_LABELS = { vox: 'Vocal level', low: 'Low end', bright: 'Brightness', space: 'Space', width: 'Width', loud: 'Loudness' };
 function buildMacros(m) {
   $('#macros').replaceChildren(...Object.entries(MACRO_LABELS).map(([k, label]) => {
@@ -258,7 +314,7 @@ $('#remix').onclick = () => {
   state.macros = Object.fromEntries([...document.querySelectorAll('#macros input')].map((i) => [i.dataset.k, Number(i.value)]));
   stopAudio(); start();
 };
-$('#again').onclick = () => { stopAudio(); state.stems = []; state.roles = []; state.macros = null; state.result = null; renderStems(); $('#start').disabled = true; note(''); show('intake'); };
+$('#again').onclick = () => { stopAudio(); state.stems = []; state.roles = []; state.roughFile = null; $('#rough-file').value = ''; roughStatus(); state.macros = null; state.result = null; renderStems(); $('#start').disabled = true; note(''); show('intake'); };
 
 function toBuffer(chs) {
   ctx ||= new AudioContext();

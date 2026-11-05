@@ -44,6 +44,11 @@
       </label>
       <input id="stem-folder" type="file" webkitdirectory multiple hidden>
       <div class="mix-link"><label for="stem-link">Or paste a link</label><div class="link-row"><input id="stem-link" type="url" inputmode="url" placeholder="Dropbox or Google Drive link to a .zip of stems"><button type="button" id="fetch-link" class="btn-ghost">Fetch</button></div></div>
+      <div class="rough-row" id="rough-row">
+        <span class="rough-icon" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <div class="rough-copy"><b>Your rough mix <span class="opt rec">recommended</span></b><span id="rough-status">The full song as you bounced it, before mixing. We line every stem up with it, follow your balance, leave out takes you didn't use, and check the finished song plays every part.</span></div>
+        <label class="file-chip" for="rough-file"><span id="rough-file-name">Add your rough mix</span><input id="rough-file" type="file" accept="audio/*,.wav,.aif,.aiff,.mp3,.m4a,.flac"></label>
+      </div>
       <p id="intake-note" class="mix-note" role="status" aria-live="polite"></p>
       <ol id="stem-list" class="stem-list" aria-label="Your tracks" hidden></ol>
     </div>
@@ -105,7 +110,8 @@
     <div class="wave-wrap"><canvas id="wave" width="1200" height="120" aria-label="Your mix. Click to jump."></canvas></div>
     <span id="time" class="time">0:00</span>
   </div>
-  <p class="ab-note">Before is your stems added up and turned to the same loudness, so you hear the mix, not just volume.</p>
+  <p class="ab-note" id="ab-note">Before is your stems added up and turned to the same loudness, so you hear the mix, not just volume.</p>
+  <div id="rough-report" class="rough-report" hidden></div>
 
   <div class="result-grid">
     <div class="result-main">

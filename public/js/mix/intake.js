@@ -5,7 +5,7 @@
 export const AUDIO_EXT = /\.(wav|wave|aif|aiff|aifc|mp3|m4a|aac|flac|ogg|oga|opus|caf|webm)$/i;
 export const SESSION_EXT = { als: 'Ableton Live', alp: 'Ableton Live pack', logicx: 'Logic Pro', flp: 'FL Studio', ptx: 'Pro Tools', ptf: 'Pro Tools', cpr: 'Cubase', rpp: 'REAPER', song: 'Studio One', band: 'GarageBand', bwproject: 'Bitwig', reason: 'Reason' };
 export const MAX_STEMS = 48;
-const SKIP = /(^|\/)(__MACOSX|\.DS_Store|\._|Backup|Freeze Files|Bounced Files\/.*\.(?:mp3|m4a)$|Samples\/Imported\/.*preview)/i;
+const SKIP = /(^|\/)(__MACOSX|\.DS_Store|\._|Backup|Freeze Files|Samples\/Imported\/.*preview)/i;
 
 const sessionOf = (name) => { const m = String(name).toLowerCase().match(/\.([a-z]+)$/); return m && SESSION_EXT[m[1]] ? SESSION_EXT[m[1]] : null; };
 const baseName = (p) => String(p).split('/').pop();
