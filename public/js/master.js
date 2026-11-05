@@ -378,7 +378,7 @@ function measure(chs, rate) {
   return m.integrated();
 }
 
-function limit(chs, rate, gain, ceilingDb, truePeak = true) {
+export function limit(chs, rate, gain, ceilingDb, truePeak = true) {
   const n = chs[0].length;
   const lim = new Limiter(chs.length, rate, 10 ** (ceilingDb / 20), gain, { truePeak });
   const out = chs.map(() => new Float32Array(n));
