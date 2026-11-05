@@ -241,3 +241,20 @@
 @media(prefers-reduced-motion:reduce){.method-art.split i,.song-card{animation:none}}
 .method.off{opacity:.55;cursor:not-allowed}
 .method.off:hover{border-color:var(--line-2)}
+
+/* the arrangement: sections as a strip, build-ups marked */
+.daw-tracks-wrap{min-width:0;display:grid;gap:8px;align-content:start}
+.arrangement{position:relative;display:flex;height:22px;border-radius:7px;overflow:hidden;background:rgba(255,255,255,.05);margin-left:160px}
+.arrangement i{position:relative;display:block;height:100%;border-right:1px solid rgba(0,0,0,.5);font-style:normal;overflow:hidden}
+.arrangement i b{position:absolute;left:6px;top:4px;font:700 10px/1.2 var(--ui);letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.75);white-space:nowrap}
+.arrangement i.verse{background:rgba(169,139,255,.28)}
+.arrangement i.chorus{background:linear-gradient(90deg,rgba(255,191,47,.55),rgba(255,140,60,.55))}
+.arrangement i.break{background:rgba(255,255,255,.06)}
+.arrangement u{position:absolute;top:0;height:100%;background:repeating-linear-gradient(90deg,rgba(70,214,255,.45) 0 3px,transparent 3px 6px);border-right:2px solid #46d6ff}
+.result-arr{margin:14px 0 0;margin-left:0;height:26px}
+.lane .ln small.trk,.stem-list .nm small.trk{display:block;color:var(--mx-violet);font-size:11px;font-weight:600;letter-spacing:.02em}
+.stem-list .nm small.trk.unused{color:#ffb36b}
+.stem-list .nm{display:grid;line-height:1.2}
+.lane.ghost-lane{border:1px dashed rgba(63,184,232,.35);background:rgba(63,184,232,.05)}
+.rough-report.moves{border-color:rgba(255,191,47,.35);background:linear-gradient(100deg,rgba(255,191,47,.07),rgba(169,139,255,.05))}
+@media(max-width:640px){.arrangement{margin-left:96px}.result-arr{margin-left:0}}

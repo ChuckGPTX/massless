@@ -22,7 +22,7 @@
     <div class="mix-hero-copy">
       <p class="mix-eyebrow"><span class="live-dot" aria-hidden="true"></span>NEW · AI MIX · FREE</p>
       <h1 id="mix-title">Drop your stems.<br><em>Get a record.</em></h1>
-      <p class="mix-lede">Chuck S.I. opens your session, lays out every track and mixes it the way top engineers do: gain staging, EQ, compression, de-essing, sidechain, space and a master for your genre. Only have the finished song? Drop one file and it gets split into vocals, drums, bass and music first. It runs in your browser and it's free.</p>
+      <p class="mix-lede">Chuck S.I. opens your session, lays out every track and mixes it the way top engineers do: gain staging, EQ, compression, de-essing, sidechain, space and a master for your genre. It reads the arrangement too: doubles tightened to the lead, choruses stacked and lifted, a build-up into every drop. Only have the finished song? Drop one file and it gets split into vocals, drums, bass and music first. It runs in your browser and it's free.</p>
       <ul class="mix-proof" aria-label="What you get">
         <li><b>Track by track</b>Every stem gets its own chain</li>
         <li><b>Your genre</b>Eleven sound targets</li>
@@ -43,7 +43,7 @@
       <label id="drop" class="mix-drop" for="stem-files">
         <span class="drop-icon" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
         <strong>Drop your stems here</strong>
-        <small>Up to 48 tracks and 7 minutes. Exported from bar 1, so they line up.</small>
+        <small>Up to 48 tracks and 7 minutes. Drop the whole Pro Tools session folder and every take goes where you have it.</small>
         <span class="drop-actions"><span class="btn-accent">Choose files</span><button type="button" id="pick-folder" class="btn-ghost">Choose a folder</button></span>
         <input id="stem-files" type="file" multiple accept=".wav,.wave,.aif,.aiff,.aifc,.mp3,.m4a,.aac,.flac,.ogg,.opus,.caf,.zip,audio/*,application/zip">
       </label>
@@ -105,7 +105,7 @@
     <button id="cancel" class="btn-ghost" type="button">Cancel</button>
   </div>
   <div class="daw">
-    <div class="daw-tracks" id="lanes" aria-label="Tracks"></div>
+    <div class="daw-tracks-wrap"><div class="arrangement" id="arrangement" aria-label="Sections" hidden></div><div class="daw-tracks" id="lanes" aria-label="Tracks"></div></div>
     <aside class="daw-fx" aria-live="polite">
       <p class="fx-kicker" id="fx-kicker">LISTENING</p>
       <h2 id="fx-title">Opening your session</h2>
@@ -137,6 +137,8 @@
   </div>
   <p class="ab-note" id="ab-note">Before is your stems added up and turned to the same loudness, so you hear the mix, not just volume.</p>
   <div id="rough-report" class="rough-report" hidden></div>
+  <div class="arrangement result-arr" id="result-arrangement" aria-label="Sections" hidden></div>
+  <div id="moves-report" class="rough-report moves" hidden></div>
 
   <div class="result-grid">
     <div class="result-main">

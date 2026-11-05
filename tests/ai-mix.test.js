@@ -17,7 +17,7 @@ function clicks(bpm, sec) {
 }
 
 test('stems are labelled from their names, folders and sound', () => {
-  const cases = { 'Kick.wav': 'kick', '808 Glide.wav': '808', 'Lead Vox.wav': 'leadVox', 'Hook DBL.wav': 'backVox', 'adlibs.wav': 'adlib', 'HiHat Open.wav': 'hats', 'Snare_Clap.wav': 'snare', 'Rhodes.wav': 'keys', 'Strings Pad.wav': 'pad', 'Gtr L.wav': 'guitar', 'Beat (instrumental).wav': 'beat', 'Riser FX.wav': 'fx', 'Drums/Audio 14.wav': 'drums' };
+  const cases = { 'Kick.wav': 'kick', '808 Glide.wav': '808', 'Lead Vox.wav': 'leadVox', 'Hook DBL.wav': 'double', 'BGV Stack.wav': 'backVox', 'adlibs.wav': 'adlib', 'HiHat Open.wav': 'hats', 'Snare_Clap.wav': 'snare', 'Rhodes.wav': 'keys', 'Strings Pad.wav': 'pad', 'Gtr L.wav': 'guitar', 'Beat (instrumental).wav': 'beat', 'Riser FX.wav': 'fx', 'Drums/Audio 14.wav': 'drums' };
   for (const [name, role] of Object.entries(cases)) assert.equal(roleFromName(name), role, name);
   assert.equal(roleFromName('Audio 14.wav'), null);
   const sub = analyzeStem([sine(45, 4)], RATE);

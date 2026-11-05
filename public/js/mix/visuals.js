@@ -177,6 +177,16 @@ export class TrickPanel {
     if (k >= 1) { g.strokeStyle = '#55e3a1'; g.lineWidth = 2; for (let i = 0; i < 8; i++) { const x = (i / 8) * w; g.beginPath(); g.moveTo(x, lanes[0]); g.lineTo(x, lanes[1]); g.stroke(); } g.fillStyle = '#55e3a1'; g.fillText('LOCKED TO THE SAMPLE', w - h * 0.62, h * 0.95); }
   }
   draw_split(g, w, h, t, abs) { drawSplit(g, w, h, abs, this.data.levels, this.data.found); }
+  draw_stack(g, w, h, t, abs) {
+    // the lead in the middle; two copies peel off to the sides, a hair detuned, and the chorus gets wide
+    const k = Math.min(1, t / 1.4), ease = 1 - (1 - k) ** 3, spread = ease * w * 0.3, mid = h / 2;
+    const wave = (x0, y0, color, cents, len) => { g.strokeStyle = color; g.lineWidth = 2.5; g.shadowColor = color; g.shadowBlur = 8; g.beginPath(); for (let i = 0; i <= len; i += 2) { const y = y0 + Math.sin(i * 0.11 * (1 + cents / 600) + abs * 5) * h * 0.09 * Math.sin((Math.PI * i) / len); i ? g.lineTo(x0 + i, y) : g.moveTo(x0 + i, y); } g.stroke(); g.shadowBlur = 0; };
+    const len = w * 0.36, x0 = (w - len) / 2;
+    wave(x0 - spread, mid, 'rgba(63,184,232,.9)', -6, len); wave(x0 + spread, mid, 'rgba(63,184,232,.9)', 6, len); wave(x0, mid, CYAN, 0, len);
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.font = `600 ${Math.round(h * 0.05)}px "Instrument Sans", sans-serif`;
+    g.fillText('L  −6 ¢ · 10 ms', 10, h * 0.1); g.fillText('R  +6 ¢ · 20 ms', w - h * 0.5, h * 0.1);
+    if (k >= 1) { g.fillStyle = AMBER; g.fillText('CHORUS STACKED', w / 2 - h * 0.25, h * 0.94); }
+  }
   draw_loud(g, w, h, t) {
     const target = this.data.lufs || -9, k = Math.min(1, t / 3), now = -30 + (target + 30) * (1 - (1 - k) ** 3) + (still ? 0 : Math.sin(t * 9) * 0.4 * k);
     const mx = w * 0.12, mw = w * 0.14, top = 20, bot = h - 20, toY = (v) => bot - ((v + 30) / 30) * (bot - top);

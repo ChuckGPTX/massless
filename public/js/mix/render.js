@@ -72,6 +72,10 @@ export async function renderStrip(chs, p, rate, length) {
   const chain = (n) => { node.connect(n); node = n; return n; };
   chain(ctx.createGain()).gain.value = dbToGain(p.trim);
   if (p.rider) curveAt(chain(ctx.createGain()).gain, p.rider, dur, true);
+  // Automation written by the arrangement: clean-up between phrases, section lifts, the drop before a chorus.
+  if (p.auto) curveAt(chain(ctx.createGain()).gain, p.auto, dur, true);
+  // The build-up sweep: a high-pass that climbs over the last bars before a chorus (10 Hz = out of the way).
+  if (p.hpfCurve) { const sw = chain(filter(ctx, { type: 'highpass', f: 10, q: 0.707 })); curveAt(sw.frequency, Float32Array.from(p.hpfCurve, (v) => Math.max(10, v)), dur, false); }
   if (p.hpf) { chain(filter(ctx, { type: 'highpass', f: p.hpf, q: 0.54 })); chain(filter(ctx, { type: 'highpass', f: p.hpf, q: 1.31 })); }
   if (p.lpf) chain(filter(ctx, { type: 'lowpass', f: p.lpf, q: 0.707 }));
   for (const f of p.eq || []) if (!/peaking|shelf/.test(f.type) || Math.abs(f.gain || 0) >= 0.1) chain(filter(ctx, f));
@@ -93,10 +97,13 @@ export async function renderStrip(chs, p, rate, length) {
   pan.connect(split2); split2.connect(merger, 0, 0); split2.connect(merger, 1, 1);
   if (p.delay && p.delay.send > -60) {
     const send = ctx.createGain(); send.gain.value = dbToGain(p.delay.send);
+
     const hp = filter(ctx, { type: 'highpass', f: p.delay.hp || 300, q: 0.707 }), lp = filter(ctx, { type: 'lowpass', f: p.delay.lp || 6000, q: 0.707 });
     const dl = ctx.createDelay(4); dl.delayTime.value = Math.min(3.9, p.delay.time);
     const fb = ctx.createGain(); fb.gain.value = Math.min(0.7, p.delay.feedback);
-    fader.connect(send).connect(hp).connect(lp).connect(dl); dl.connect(fb).connect(dl);
+    let into = fader.connect(send);
+    if (p.fxMute) { const m = ctx.createGain(); curveAt(m.gain, p.fxMute, dur, true); into = into.connect(m); } // the dry punch: delay off for the last beat
+    into.connect(hp).connect(lp).connect(dl); dl.connect(fb).connect(dl);
     const dpan = ctx.createStereoPanner(); dpan.pan.value = p.delay.pan ?? 0;
     const split3 = ctx.createChannelSplitter(2);
     dl.connect(dpan).connect(split3); split3.connect(merger, 0, 2); split3.connect(merger, 1, 3);

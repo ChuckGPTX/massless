@@ -4,6 +4,8 @@ import { runMix } from '../mix/engine.js';
 import { GENRES, TIPS } from '../mix/rules.js';
 import { ROLES, ROLE_IDS, roleFromName } from '../mix/roles.js';
 import { looksLikeRough } from '../mix/rough.js';
+import { readSession, applySession } from '../mix/sessions/index.js';
+import { sectionLabel, fmtTime } from '../mix/timeline.js';
 import { TrickPanel, heroConsole, drawPeaks, drawEqThumb, splitArt, SPLIT_PARTS } from '../mix/visuals.js';
 import { fmtHz } from '../mix/plan.js';
 import { apiFetch, warmHuman } from '../human.js';
@@ -18,7 +20,7 @@ const GENRE_NOTES = {
   country: 'Natural, clear vocal', latin: 'Dembow forward, big low end',
 };
 const params = new URLSearchParams(location.search);
-const state = { mode: params.get('mode') === 'song' ? 'song' : 'stems', song: null, method: 'split', split: null, roughFile: null, stems: [], sessions: [], roles: [], genre: GENRES[params.get('genre')] ? params.get('genre') : 'hiphop', refFile: null, result: null, ctrl: null, macros: null };
+const state = { session: null, mode: params.get('mode') === 'song' ? 'song' : 'stems', song: null, method: 'split', split: null, roughFile: null, stems: [], sessions: [], roles: [], genre: GENRES[params.get('genre')] ? params.get('genre') : 'hiphop', refFile: null, result: null, ctrl: null, macros: null };
 
 // ---------- intake ----------
 const stopHero = heroConsole($('#hero-console'));
@@ -44,7 +46,7 @@ async function take(files) {
   const only = files.length === 1 ? files[0] : null;
   if (only && !state.stems.length && AUDIO_EXT.test(only.name) && !(only.webkitRelativePath || only.relativePath) && !roleFromName(only.name)) {
     setMode('song'); await takeSong(only);
-    if (state.song) note('One file, so it’s treated as the whole song: we split it into stems first. Was it a single stem? Switch to “I have stems”.');
+    if (state.song) note(`One file, so it’s treated as the whole song${fits ? ': we split it into stems first' : ''}. Was it a single stem? Switch to “I have stems”.`);
     return;
   }
   note('Opening your session…');
@@ -57,14 +59,26 @@ async function take(files) {
     const keys = new Set(state.stems.map((s) => s.path + s.size));
     for (const s of g.stems) if (!keys.has(s.path + s.size)) state.stems.push(s);
     state.roles = state.stems.map((s, i) => state.roles[i] || '');
+    // A DAW session came along: it says where every recording sits, on which track, and which takes went unused.
+    let sessionNote = '';
+    const sf = g.sessionFiles.find((f) => /\.(ptx|ptf)$/i.test(f.name));
+    if (sf) {
+      try {
+        const { daw, layout } = await readSession(await sf.blob());
+        const r = applySession(state.stems, layout);
+        state.session = { daw, name: sf.name, ...r };
+        state.stems.forEach((s, i) => { if (s.unused) state.roles[i] = 'skip'; else if (s.role && !state.roles[i]) state.roles[i] = s.role; });
+        sessionNote = ` Opened your ${daw} session: ${r.placed} recording${r.placed === 1 ? '' : 's'} placed where you have them${r.unused ? `, ${r.unused} unused take${r.unused === 1 ? '' : 's'} left out` : ''}${r.missing ? `, ${r.missing} file${r.missing === 1 ? '' : 's'} the session names weren’t in the drop` : ''}.`;
+      } catch (e) { sessionNote = ` Couldn’t read ${sf.name} (${e.message}), so the stems are mixed as exported.`; }
+    }
     // The full bounce, if it came along: the best-named candidate becomes the rough mix.
     if (!state.roughFile && !state.roles.includes('rough')) {
       const paths = state.stems.map((x) => x.path), cands = state.stems.map((x, i) => i).filter((i) => looksLikeRough(paths[i], paths));
       if (cands.length) { const best = cands.sort((a, b) => (/rough|bounce|mixdown|full/i.test(paths[b]) - /rough|bounce|mixdown|full/i.test(paths[a])) || state.stems[b].size - state.stems[a].size)[0]; state.roles[best] = 'rough'; }
     }
     renderStems(); roughStatus();
-    const sess = g.sessions.length ? ` Found a ${g.sessions.join(' and ')} session: its clips are placed by that app, so we mix the audio files as they are. For the best result, export every track as a stem from bar 1.` : '';
-    note(`${state.stems.length} track${state.stems.length === 1 ? '' : 's'} ready.${g.skipped.length ? ` Skipped ${g.skipped.length} file${g.skipped.length === 1 ? '' : 's'} that aren't audio.` : ''}${sess}`, !!sess);
+    const sess = sessionNote || (g.sessions.length ? ` Found a ${g.sessions.join(' and ')} session: its clips are placed by that app, so we mix the audio files as they are. For the best result, export every track as a stem from bar 1.` : '');
+    note(`${state.stems.length} track${state.stems.length === 1 ? '' : 's'} ready.${g.skipped.length ? ` Skipped ${g.skipped.length} file${g.skipped.length === 1 ? '' : 's'} that aren't audio.` : ''}${sess}`, !!sess && !sessionNote.startsWith(' Opened'));
     warmHuman();
   } catch (e) { note(e.message || 'Couldn’t open those files.', true); }
   updateStart();
@@ -78,8 +92,10 @@ function renderStems() {
     const guess = roleFromName(s.path);
     const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = ROLES[state.roles[i] || guess]?.color || '#555';
     const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = s.name; nm.title = s.path;
+    if (s.track) { const tr = document.createElement('small'); tr.className = 'trk'; tr.textContent = s.track.replace(/\.dup\d+$/, ''); nm.append(tr); }
+    else if (s.unused) { const tr = document.createElement('small'); tr.className = 'trk unused'; tr.textContent = 'Unused take · on no track'; nm.append(tr); }
     const sel = document.createElement('select'); sel.setAttribute('aria-label', `What is ${s.name}?`);
-    sel.append(new Option(guess ? `${ROLES[guess].name}` : 'Auto-detect', ''));
+    sel.append(new Option(guess ? `${ROLES[guess].name}` : s.role && ROLES[s.role] ? ROLES[s.role].name : 'Auto-detect', ''));
     sel.append(new Option('Rough mix (reference)', 'rough'), new Option('Leave out', 'skip'));
     for (const id of ROLE_IDS) if (id !== guess) sel.append(new Option(ROLES[id].name, id));
     sel.value = state.roles[i] && state.roles[i] !== guess ? state.roles[i] : '';
@@ -226,10 +242,10 @@ $('#song-change').onclick = () => { state.song = null; state.split = null; $('#s
 let panel, tipTimer, lanes = [];
 function show(id) { for (const s of ['intake', 'session', 'result', 'failed']) $('#' + s).hidden = s !== id; scrollTo({ top: 0, behavior: still ? 'auto' : 'smooth' }); }
 
-function lane(i, name, role, color, peaks) {
+function lane(i, name, role, color, peaks, track = null) {
   const el = document.createElement('div'); el.className = 'lane';
   el.innerHTML = '<div class="ln"><span class="sw"></span><div><b></b><small></small></div></div><canvas width="900" height="76"></canvas><div class="chips"></div>';
-  el.querySelector('.sw').style.background = color; el.querySelector('b').textContent = name; el.querySelector('small').textContent = ROLES[role].name;
+  el.querySelector('.sw').style.background = color; el.querySelector('b').textContent = track ? track.replace(/\.dup\d+$/, '') : name; el.querySelector('small').textContent = track ? `${name} · ${ROLES[role].name}` : ROLES[role].name;
   el.style.animationDelay = `${Math.min(i, 8) * 40}ms`;
   $('#lanes').append(el);
   drawPeaks(el.querySelector('canvas'), peaks, color, 1);
@@ -242,7 +258,19 @@ const TRICK_TEXT = {
   sidechain: (n) => `${n} ducks a few dB every time the kick hits, so the low end stays tight and loud.`,
   deess: (n, p) => `${n}: the “s” sounds around ${fmtHz(p.deess?.f || 6800)} are turned down only when they jump out.`,
   pan: (n, p) => `${n} goes ${Math.abs(p.pan) < 0.05 ? 'to the centre' : `${Math.round(Math.abs(p.pan) * 100)}% ${p.pan < 0 ? 'left' : 'right'}`}${p.width > 1.05 ? `, ${Math.round((p.width - 1) * 100)}% wider` : ''}.`,
+  stack: (n, d) => `${n} has no doubles, so the chorus gets two made from it: ${d.cents > 0 ? '+' : ''}${d.cents} cents and ${d.delayMs} ms late, hard ${d.pan < 0 ? 'left' : 'right'}. Verses stay single, so the chorus opens up.`,
 };
+const m2 = (s) => (s >= 0.95 ? `${s.toFixed(1)} s` : `${Math.round(s * 1000)} ms`);
+function arrangeText(a) {
+  const ch = a.sections.filter((s) => s.kind === 'chorus');
+  return `${a.sections.map((s) => `${sectionLabel[s.kind]} ${fmtTime(s.from)}`).join(' · ')}.${a.moves.length ? ` Build-up into the chorus at ${a.moves.map((m) => fmtTime(m.at)).join(' and ')}: filter sweep, the beat drops for ${m2(a.moves[0].drop)}, effects off for a beat, last words thrown.` : ch.length ? ' The chorus lifts; the verses tuck the doubles.' : ''}`;
+}
+/** The song's sections as a strip: colour by kind, a marker where a build-up lands. */
+function drawArrangement(el, a) {
+  if (!el) return;
+  const total = a.sections[a.sections.length - 1]?.to || 1;
+  el.replaceChildren(...a.sections.map((s) => { const d = document.createElement('i'); d.className = `sec ${s.kind}`; d.style.width = `${((s.to - s.from) / total) * 100}%`; d.title = `${sectionLabel[s.kind]} ${fmtTime(s.from)}–${fmtTime(s.to)}`; const b = document.createElement('b'); b.textContent = sectionLabel[s.kind]; d.append(b); return d; }), ...a.moves.map((m) => { const d = document.createElement('u'); d.className = 'build'; d.style.left = `${(m.sweepFrom / total) * 100}%`; d.style.width = `${((m.at - m.sweepFrom) / total) * 100}%`; d.title = `Build-up into ${fmtTime(m.at)}`; return d; }));
+}
 function alignText(r) {
   const bits = [];
   bits.push(r.moved?.length ? `Moved ${r.moved.map((m) => `${m.name} ${m.ms > 0 ? '+' : ''}${(m.ms / 1000).toFixed(2)} s`).join(', ')} into place.` : 'Every stem already starts in the right place.');
@@ -251,7 +279,7 @@ function alignText(r) {
   if (r.missing?.length) bits.push(`Your rough has parts the stems don't at ${r.missing.join(', ')}.`);
   return bits.join(' ');
 }
-const TRICK_TITLE = { align: 'Lining up', eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
+const TRICK_TITLE = { stack: 'Stacking', align: 'Lining up', eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
 
 function setBar(v) { const p = Math.round(v * 100); $('#bar-fill').style.width = p + '%'; $('#bar-pct').textContent = p + '%'; $('.bar').setAttribute('aria-valuenow', p); }
 
@@ -340,7 +368,7 @@ async function start() {
     const names = stems.map((s) => s.name);
     const mixing = stems.map((s, i) => i).filter((i) => !['rough', 'skip'].includes(roles[i]));
     const res = await runMix(stems, {
-      roughFile, genre: state.genre, referenceUrl: $('#ref-link').value.trim(), referenceFile: state.refFile, roles, macros: state.macros || undefined,
+      roughFile, genre: state.genre, referenceUrl: $('#ref-link').value.trim(), referenceFile: state.refFile, roles, macros: state.macros || undefined, sessionName: state.session?.daw,
       apiFetch, signal: state.ctrl.signal,
       onEvent: (e) => {
         if (e.type === 'progress') setBar(base + (1 - base) * e.value);
@@ -348,8 +376,8 @@ async function start() {
           $('#stage-label').textContent = e.label;
           if (e.id === 'think') { $('#fx-kicker').textContent = 'THINKING'; $('#fx-title').textContent = 'Planning the mix'; $('#fx-detail').textContent = `Reading every track and choosing the ${G.name} moves.`; panel.show('listen'); }
           if (e.id === 'console' && Number.isInteger(e.index)) { lanes.forEach((l, k) => l?.el.classList.toggle('active', k === e.index)); lanes[e.index]?.el.scrollIntoView?.({ block: 'nearest', behavior: still ? 'auto' : 'smooth' }); }
-        } else if (e.type === 'track') { lane(e.index, e.name, e.role, e.color, e.peaks); $('#fx-kicker').textContent = 'LISTENING'; $('#fx-title').textContent = e.name; $('#fx-detail').textContent = `Track ${mixing.indexOf(e.index) + 1} of ${mixing.length} is on the console.`; lanes[e.index].feats = e.feats; }
-        else if (e.type === 'relabel') { const l = lanes[e.index]; if (l) { l.el.querySelector('.sw').style.background = e.color; l.el.querySelector('small').textContent = ROLES[e.role].name; l.color = e.color; drawPeaks(l.el.querySelector('canvas'), l.peaks, e.color, 1); } }
+        } else if (e.type === 'track') { lane(e.index, e.name, e.role, e.color, e.peaks, e.track); $('#fx-kicker').textContent = 'LISTENING'; $('#fx-title').textContent = e.name; $('#fx-detail').textContent = `Track ${mixing.indexOf(e.index) + 1} of ${mixing.length} is on the console.`; lanes[e.index].feats = e.feats; }
+        else if (e.type === 'relabel') { const l = lanes[e.index]; if (l) { l.el.querySelector('.sw').style.background = e.color; l.el.querySelector('small').textContent = (state.stems[e.index]?.track ? `${names[e.index]} · ` : '') + ROLES[e.role].name; l.color = e.color; drawPeaks(l.el.querySelector('canvas'), l.peaks, e.color, 1); } }
         else if (e.type === 'rough') {
           const el = document.createElement('div'); el.className = 'lane rough-lane';
           el.innerHTML = '<div class="ln"><span class="sw"></span><div><b></b><small></small></div></div><canvas width="900" height="76"></canvas><div class="chips"></div>';
@@ -360,6 +388,8 @@ async function start() {
           $('#fx-detail').textContent = songMode ? 'The original keeps your balance in view while every part gets mixed.' : `${Math.round(e.duration)} seconds of song: the map every stem gets lined up against.`;
         } else if (e.type === 'leftout') { const l = lanes[e.index]; if (l) { l.el.classList.add('out'); l.el.querySelector('.chips').replaceChildren(chip(songMode ? 'Nothing here' : 'Not in your rough')); } }
         else if (e.type === 'tempo') $('#session-bpm').textContent = e.bpm ? `${Math.round(e.bpm)} BPM` : 'free time';
+        else if (e.type === 'arrange') { drawArrangement($('#arrangement'), e); $('#arrangement').hidden = false; $('#fx-kicker').textContent = 'THE SONG'; $('#fx-title').textContent = 'Reading the arrangement'; $('#fx-detail').textContent = arrangeText(e); }
+        else if (e.type === 'tighten') { const l = lanes[e.index]; if (l) l.el.querySelector('.chips').replaceChildren(chip(`Tightened · ${e.phrases} phrase${e.phrases === 1 ? '' : 's'}`)); }
         else if (e.type === 'notes') { $('#fx-detail').textContent = e.text; }
         else if (e.type === 'trick') {
           const n = Number.isInteger(e.index) ? names[e.index] : '';
@@ -369,6 +399,7 @@ async function start() {
           panel.show(e.kind, e.data, { spectrum: lanes[e.index]?.feats?.spectrum });
         } else if (e.type === 'strip') {
           const l = lanes[e.index]; if (!l) return;
+          if (e.ghost) { const g = document.createElement('div'); g.className = 'lane ghost-lane done'; g.innerHTML = '<div class="ln"><span class="sw"></span><div><b></b><small>Made from the lead · choruses</small></div></div><canvas width="900" height="76"></canvas><div class="chips"></div>'; g.querySelector('.sw').style.background = ROLES.double.color; g.querySelector('b').textContent = e.strip.name; l.el.after(g); drawPeaks(g.querySelector('canvas'), l.peaks, ROLES.double.color, 1); g.querySelector('.chips').append(chip(e.strip.pan < 0 ? 'Hard left · −6 cents' : 'Hard right · +6 cents')); return; }
           l.el.classList.remove('active'); l.el.classList.add('done');
           const chips = l.el.querySelector('.chips'); chips.replaceChildren(...chipList(e.strip.plan).slice(0, 4).map(chip));
           panel.addPan(e.strip.pan, e.strip.color);
@@ -429,7 +460,7 @@ function buildMixer(strips) {
   box.replaceChildren(...strips.filter(Boolean).map((s) => {
     const el = document.createElement('div'); el.className = 'strip';
     el.innerHTML = '<span class="nm"></span><span class="rl"></span><canvas class="eqv" width="200" height="68"></canvas><div class="fx"></div><div class="knob"></div><div class="fader"><i></i></div><span class="db"></span>';
-    el.querySelector('.nm').textContent = s.name; el.querySelector('.nm').title = s.name; el.querySelector('.rl').textContent = ROLES[s.role].name;
+    el.querySelector('.nm').textContent = s.track || s.name; el.querySelector('.nm').title = s.track ? `${s.track} · ${s.name}` : s.name; el.querySelector('.rl').textContent = ROLES[s.role].name;
     el.querySelector('.rl').style.color = s.color;
     drawEqThumb(el.querySelector('.eqv'), s.plan, s.color);
     el.querySelector('.fx').replaceChildren(...chipList(s.plan).map(chip));
@@ -445,6 +476,15 @@ function buildMixer(strips) {
 
 function showRough(r) {
   const rr = $('#rough-report'), songMode = state.mode === 'song';
+  const ar = $('#result-arrangement');
+  if (r.arrange && r.arrange.sections.some((s) => s.kind !== 'break')) { drawArrangement(ar, r.arrange); ar.hidden = false; } else ar.hidden = true;
+  const moves = [];
+  if (r.session) moves.push(`Followed your ${r.session.daw} session: ${r.session.placed} recordings placed where you have them${r.session.unused ? `, ${r.session.unused} unused takes left out` : ''}.`);
+  if (r.tightened?.length) moves.push(`Tightened the doubles to the lead: ${r.tightened.map((t) => `${t.name} (${t.phrases} phrase${t.phrases === 1 ? '' : 's'}, up to ${t.maxMs} ms)`).join(', ')}.`);
+  if (r.arrange && r.arrange.sections.some((s) => s.kind !== 'break')) { const ch = r.arrange.sections.filter((s) => s.kind === 'chorus'); moves.push(`${r.arrange.sections.map((s) => `${sectionLabel[s.kind]} ${fmtTime(s.from)}`).join(' · ')}.${ch.length ? ' Choruses lifted (lead +1 dB, doubles +2 dB); verses given more room.' : ''}`); for (const m of r.arrange.moves) moves.push(`Build-up into ${m.time}: filter sweep from ${fmtTime(m.sweepFrom)}, the beat drops for ${m2(m.drop)}, vocal effects off for ${m2(m.punch)}, the last words thrown +${m.throwDb} dB into the gap.`); }
+  if (r.ghosts) moves.push(`${r.ghosts} had no doubles, so the choruses got two made from it (∓6 cents, 10 and 20 ms, hard left and right).`);
+  $('#moves-report').hidden = !moves.length;
+  if (moves.length) { $('#moves-report').innerHTML = '<h3>The arrangement</h3><ul></ul>'; $('#moves-report').querySelector('ul').replaceChildren(...moves.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; })); }
   const split = songMode && state.method === 'split' && !!state.split;
   $('#stem-dl').hidden = !split;
   document.querySelector('[data-ab="before"]').textContent = songMode ? 'Your song' : r.rough ? 'Your rough' : 'Before';
