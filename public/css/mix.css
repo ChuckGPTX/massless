@@ -162,3 +162,24 @@
 @media(max-width:640px){.mix-page{padding-top:16px}.mix-proof{grid-template-columns:1fr}.mix-drop{min-height:200px}.lane{grid-template-columns:96px minmax(0,1fr)}.lane .chips{display:none}.player{grid-template-columns:auto minmax(0,1fr);}.player .ab{grid-column:1/-1;justify-self:start}.player .time{display:none}.mix-start{width:100%}.genre-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.daw-top{flex-direction:column;align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){.live-dot,.drop-icon i,.bar i::after,.lane,.stem-list li,.strip{animation:none}.genre{transition:none}}
 .result-main,.result-side,.daw-tracks,.daw-fx,.mix-hero-copy,.mix-step{min-width:0}
+
+/* the rough mix */
+.rough-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:14px 16px;background:linear-gradient(100deg,rgba(255,255,255,.04),rgba(169,139,255,.05))}
+.rough-row.found{border-color:rgba(85,227,161,.55);background:linear-gradient(100deg,rgba(85,227,161,.10),rgba(85,227,161,.02))}
+.rough-icon{display:flex;align-items:center;gap:2px;height:30px}
+.rough-icon i{width:3px;border-radius:2px;background:#e8e4f2;opacity:.85}
+.rough-icon i:nth-child(odd){height:40%}.rough-icon i:nth-child(even){height:90%}.rough-icon i:nth-child(3n){height:65%}
+.rough-copy b{display:block;font-size:15px;margin-bottom:3px}
+.rough-copy span{color:var(--muted);font-size:13px;line-height:1.45}
+.opt.rec{color:#55e3a1;border-color:rgba(85,227,161,.4)}
+.lane.rough-lane{background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.lane.rough-lane small{color:#55e3a1}
+.lane.out{opacity:.38}
+.lane.out .chips .chip{border-color:rgba(255,196,107,.5);color:#ffc46b}
+.stem-list li.rough{border-color:rgba(85,227,161,.5)}
+.stem-list li.skip{opacity:.5}
+.rough-report{margin-top:14px;border:1px solid rgba(85,227,161,.35);border-radius:16px;padding:14px 16px;background:rgba(85,227,161,.05)}
+.rough-report.warn{border-color:rgba(255,196,107,.5);background:rgba(255,196,107,.06)}
+.rough-report h3{margin:0 0 6px;font-size:16px}
+.rough-report ul{margin:6px 0 0;padding-left:18px;color:#cfcadb;font-size:14px;line-height:1.6}
+@media(max-width:640px){.rough-row{grid-template-columns:auto minmax(0,1fr)}.rough-row .file-chip{grid-column:1/-1}}

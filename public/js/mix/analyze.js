@@ -10,7 +10,7 @@ export const ENV_RATE = 100; // envelope frames per second
 
 const dB = (p) => (p > 1e-12 ? 10 * Math.log10(p) : -120);
 
-function fft(re, im) {
+export function fft(re, im) {
   const n = re.length;
   for (let i = 1, j = 0; i < n; i++) {
     let bit = n >> 1;
@@ -103,6 +103,8 @@ export function analyzeStem(chs, rate) {
   const low = envelope(mono, rate, [biquad('lowpass', 150, rate), biquad('lowpass', 150, rate)]);
   const sib = envelope(mono, rate, [biquad('highpass', 5000, rate), biquad('highpass', 5000, rate), biquad('lowpass', 10000, rate)]);
   const pres = envelope(mono, rate, [biquad('highpass', 1000, rate), biquad('lowpass', 5000, rate)]);
+  // Three wide bands for matching against a rough mix: under 150 Hz, 150 Hz-2.5 kHz, above 2.5 kHz.
+  const bands = { low, mid: envelope(mono, rate, [biquad('highpass', 150, rate), biquad('lowpass', 2500, rate)]), high: envelope(mono, rate, [biquad('highpass', 2500, rate), biquad('highpass', 2500, rate)]) };
   const top = env.reduce((a, b) => Math.max(a, b), -120);
   const floor = Math.max(-62, top - 42);
   const active = new Uint8Array(env.length);
@@ -135,7 +137,7 @@ export function analyzeStem(chs, rate) {
     onsetsPerSec: activeSeconds > 0.5 ? onsets / activeSeconds : 0,
     spectrum, centroid,
     subShare: share(0, 60), lowShare: share(0, 160), mudShare: share(200, 500), midShare: share(500, 4000), highShare: share(4000, 20000), airShare: share(9000, 20000),
-    env, low, sib, pres, active,
+    env, low, sib, pres, active, bands,
   };
 }
 

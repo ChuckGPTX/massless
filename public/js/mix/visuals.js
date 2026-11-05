@@ -163,6 +163,19 @@ export class TrickPanel {
     }
     g.fillStyle = '#fff'; g.font = `700 ${Math.round(h * 0.07)}px "Instrument Sans", sans-serif`; g.fillText(`${decay.toFixed(1)} s plate`, 12, 28);
   }
+  draw_align(g, w, h, t, abs) {
+    // the rough on top, a stem below sliding into place until their hits line up
+    const k = Math.min(1, t / 1.6), off = (1 - (1 - k) ** 3) , slide = (1 - off) * w * 0.18, lanes = [h * 0.32, h * 0.7];
+    const hit = (x) => { const ph = ((x / w) * 8) % 1; return Math.exp(-ph * 9); };
+    for (let x = 0; x < w; x += 3) {
+      const a = 0.25 + 0.75 * hit(x), b = 0.25 + 0.75 * hit(x - slide);
+      g.fillStyle = 'rgba(232,228,242,.85)'; g.fillRect(x, lanes[0] - a * h * 0.13, 2, a * h * 0.26);
+      g.fillStyle = CYAN; g.fillRect(x, lanes[1] - b * h * 0.13, 2, b * h * 0.26);
+    }
+    g.fillStyle = 'rgba(255,255,255,.55)'; g.font = `600 ${Math.round(h * 0.05)}px "Instrument Sans", sans-serif`;
+    g.fillText('YOUR ROUGH MIX', 10, lanes[0] - h * 0.16); g.fillText('STEM', 10, lanes[1] - h * 0.16);
+    if (k >= 1) { g.strokeStyle = '#55e3a1'; g.lineWidth = 2; for (let i = 0; i < 8; i++) { const x = (i / 8) * w; g.beginPath(); g.moveTo(x, lanes[0]); g.lineTo(x, lanes[1]); g.stroke(); } g.fillStyle = '#55e3a1'; g.fillText('LOCKED TO THE SAMPLE', w - h * 0.62, h * 0.95); }
+  }
   draw_loud(g, w, h, t) {
     const target = this.data.lufs || -9, k = Math.min(1, t / 3), now = -30 + (target + 30) * (1 - (1 - k) ** 3) + (still ? 0 : Math.sin(t * 9) * 0.4 * k);
     const mx = w * 0.12, mw = w * 0.14, top = 20, bot = h - 20, toY = (v) => bot - ((v + 30) / 30) * (bot - top);
