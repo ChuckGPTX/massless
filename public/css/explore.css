@@ -981,3 +981,12 @@
 .drop-copy p{margin:0 0 12px;color:var(--muted);font-size:15px;line-height:1.5;max-width:620px}
 .drop-card:hover .feature-link{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:900px){.new-drop-grid{grid-template-columns:1fr}.drop-loops .drop-media{flex:none;aspect-ratio:16/10;min-height:0}}
+
+/* Just launched: lyric preview on the left, AI Mix and Motion Loops stacked on the right */
+.new-drop-grid{grid-template-rows:auto auto}
+.drop-lyrics{grid-row:span 2}
+.drop-lyrics .drop-media{aspect-ratio:auto;flex:1 1 auto;min-height:320px}
+.drop-mix .drop-media{flex:1 1 auto;min-height:190px;background:linear-gradient(160deg,#17131f,#0c0b10 60%)}
+.drop-mix .drop-media canvas{object-fit:cover}
+.drop-loops .drop-media{min-height:190px}
+@media(max-width:900px){.drop-lyrics{grid-row:auto}.drop-lyrics .drop-media{aspect-ratio:16/9;min-height:0;flex:none}.drop-mix .drop-media{flex:none;aspect-ratio:16/10;min-height:0}}

@@ -140,17 +140,24 @@
 
     <section class="stage" aria-label="Audio stage">
       <div class="stage-top">
-        <div class="pills" role="tablist" aria-label="Audio tools">
+        <div class="pills" role="group" aria-label="Audio tools">
           <button type="button" class="pill on" id="p-voice"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="6" y="1.5" width="4" height="8" rx="2"/><path d="M3.5 7.5a4.5 4.5 0 009 0M8 12v2.5"/></svg>Voiceover</button>
           <button type="button" class="pill" id="p-cap"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="2"/><path d="M4.5 9.5h3M9.5 9.5h2M4.5 7h7"/></svg>Captions</button>
           <button type="button" class="pill" id="p-bed"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8h2l1.5-4 2 8 2-10 2 9 1.5-3h2"/></svg>Sound beds</button>
           <button type="button" class="pill" id="p-ext"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="7" height="9" rx="1.5"/><path d="M8.5 6.5l-2-1.3v5.6l2-1.3M11 6.5v3M13 4.5v7M15 7v2"/></svg>Extract audio</button>
           <button type="button" class="pill" id="p-master"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5v11M8 2.5v11M13 2.5v11"/><rect x="1.5" y="8.5" width="3" height="2.5" rx="1"/><rect x="6.5" y="4.5" width="3" height="2.5" rx="1"/><rect x="11.5" y="9.5" width="3" height="2.5" rx="1"/></svg>Master</button>
+          <a class="pill pill-new" href="/mix/"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5v11M8 2.5v11M13 2.5v11"/><circle cx="3" cy="10" r="1.6"/><circle cx="8" cy="5.5" r="1.6"/><circle cx="13" cy="8.5" r="1.6"/></svg>AI Mix<span class="badge-new">NEW</span></a>
+          <a class="pill" href="/lyrics/"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 12V3l7-1.5v9"/><circle cx="4.5" cy="12" r="1.8"/><circle cx="11.5" cy="10.5" r="1.8"/></svg>Lyric video</a>
           <button type="button" class="pill" data-dialog="how"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M6.5 6.2a1.6 1.6 0 113 .8c-.6.5-1.5.8-1.5 1.8M8 11.3v.2"/></svg>Tips</button>
         </div>
         <span class="src" id="src-label">English voices</span>
       </div>
 
+      <a class="mix-promo" href="/mix/" aria-label="New: AI Mix. Drop your stems and get a finished, mastered mix. Free.">
+        <span class="mp-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="mp-copy"><b>New · AI Mix</b><span>Drop your stems. Get a finished, mastered record, track by track. Free.</span></span>
+        <span class="mp-go" aria-hidden="true">Mix my song ↗</span>
+      </a>
       <div class="stage-head">
         <div>
           <h1 class="display" id="stage-title">Turn text<br>into voiceover</h1>

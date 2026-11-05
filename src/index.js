@@ -10,6 +10,7 @@ import { sitesApi, sitesGated, siteHost, serveSite } from './sites.js';
 import { exploreApi, exploreGated, serveExploreMedia, isExploreMedia } from './explore.js';
 import { editImage } from './image-edit.js';
 import { placeApi, earthTile, isEarthTile } from './place.js';
+import { mixPlan, mixFetch } from './mix.js';
 export { PlaceGate } from './place.js';
 export { GenerationLedger } from './generations.js';
 // Massless Worker: serves the static app and the free-tier model APIs on Cloudflare Workers AI.
@@ -48,7 +49,7 @@ const ai = (env, model, input) => (env.AI_GATEWAY ? env.AI.run(model, input, { g
 // Endpoints that spend the free allowance ask for a pass cookie. Without one they answer 401
 // { human: true, sitekey }; the page runs Turnstile, posts the token to /api/human and gets a signed
 // cookie for PASS_HOURS. The check is off unless TURNSTILE_SITEKEY, TURNSTILE_SECRET and PASS_KEY are set.
-const GATED = new Set(['/api/shot', '/api/edit', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe', '/api/lyric-scenes']);
+const GATED = new Set(['/api/shot', '/api/edit', '/api/beats', '/api/ask', '/api/tts', '/api/transcribe', '/api/lyric-scenes', '/api/mix-plan']);
 // Massless Sign POSTs (create, events, verify) also need a pass; see signGated() in src/sign.js.
 const PASS_COOKIE = 'ml_pass';
 const PASS_HOURS = 6;
@@ -486,7 +487,7 @@ async function fetchFile(ref, path, ctx) {
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: securityHeaders(new Headers()) });
-const PAGES = { '/console': '/console/index.html', '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/lyrics': '/lyrics/index.html', '/loops': '/loops/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/games': '/games/index.html', '/website': '/website/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
+const PAGES = { '/console': '/console/index.html', '/': '/index.html', '/index.html': '/index.html', '/image': '/image/index.html', '/video': '/video/index.html', '/audio': '/audio/index.html', '/3d': '/3d/index.html', '/film': '/film/index.html', '/office': '/office/index.html', '/workflows': '/workflows/index.html', '/projects': '/projects/index.html', '/music': '/music/index.html', '/lyrics': '/lyrics/index.html', '/loops': '/loops/index.html', '/mix': '/mix/index.html', '/demo-site': '/demo-site/index.html', '/library': '/library/index.html', '/edit': '/edit/index.html', '/build': '/build/index.html', '/games': '/games/index.html', '/website': '/website/index.html', '/cut': '/cut/index.html', '/scene': '/scene/index.html' };
 for (const studio of ['image', 'video', 'audio', '3d', 'office']) PAGES[`/studios/${studio}`] = `/studios/${studio}/index.html`;
 PAGES['/sign'] = '/sign/index.html';
 PAGES['/report'] = '/report/index.html';
@@ -535,7 +536,7 @@ async function fromOrigin(request, env, ctx) {
 
   const ref = await resolveRef(env, ctx);
   const route = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
-  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|lyrics|loops|demo-site|workflows|projects|library|edit|build|games|website|cut|scene|sign|report|console|explore)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
+  if (PAGES[route] || /^\/studios\/(image|video|audio|3d|office)\/index\.html$/.test(path) || /^\/(image|video|audio|3d|film|office|music|lyrics|loops|mix|demo-site|workflows|projects|library|edit|build|games|website|cut|scene|sign|report|console|explore)\/index\.html$/.test(path)) return page(request, ref, PAGES[route] || path, ctx);
   if (path.startsWith('/_')) return notFound();
   const res = await fetchFile(ref, path, ctx);
   if (!res) return notFound();
@@ -579,7 +580,7 @@ export default {
     }
     if (url.pathname === '/api/config' || url.pathname.startsWith('/api/generations') || url.pathname.startsWith('/api/promo-video')) return generationAPI(request, env);
     if (url.pathname === '/api/human') return humanPass(request, env);
-    if (((GATED.has(url.pathname) || signGated(url.pathname)) && request.method === 'POST') || sitesGated(request.method, url.pathname) || exploreGated(request.method, url.pathname)) {
+    if (((GATED.has(url.pathname) || signGated(url.pathname)) && request.method === 'POST') || url.pathname === '/api/mix-fetch' || sitesGated(request.method, url.pathname) || exploreGated(request.method, url.pathname)) {
       const stop = await needsHuman(request, env);
       if (stop) return stop;
     }
@@ -588,6 +589,8 @@ export default {
     if (url.pathname === '/api/beats') return beats(request, env);
     if (url.pathname === '/api/ask') return ask(request, env);
     if (url.pathname === '/api/lyric-scenes') return lyricScenes(request, env);
+    if (url.pathname === '/api/mix-plan') return mixPlan(request, env, { ai, json, allow, LLM });
+    if (url.pathname === '/api/mix-fetch') return mixFetch(request, env, { json, allow });
     if (url.pathname === '/api/tts') return tts(request, env);
     if (url.pathname === '/api/transcribe') return transcribe(request, env);
     if (url.pathname === '/api/health') return health(env);

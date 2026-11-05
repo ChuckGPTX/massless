@@ -36,6 +36,7 @@ function showTab(which) {
     $(`#tab-${t}`).hidden = !on;
     $(`#foot-${t}`).hidden = !on;
     $(`#p-${t}`).classList.toggle('on', on);
+    $(`#p-${t}`).setAttribute('aria-pressed', String(on));
   }
   const files = which === 'cap' || which === 'ext' || which === 'master';
   if (which !== 'master') master.stop();

@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="/css/showcases.css" />
     <script type="module" src="/js/navigation.js"></script>
     <script type="module" src="/js/pages/showcases.js"></script>
+    <script type="module">import { heroConsole } from "/js/mix/visuals.js"; const c = document.getElementById("mix-band-console"); if (c) heroConsole(c);</script>
   </head>
   <body class="showcase showcase-audio">
     <header class="nav">
@@ -65,8 +66,9 @@
             hear in your head into something everyone can feel.
           </p>
           <div class="hero-actions">
-            <a class="btn-accent" href="/audio?tab=voice"
-              >Create a voiceover ↗</a
+            <a class="btn-accent" href="/mix/"
+              >Mix my song ↗</a
+            ><a class="btn-ghost" href="/audio?tab=voice">Create a voiceover</a
             ><button class="btn-ghost" id="listen-demo" aria-pressed="false">
               ▶ Listen to the demo
             </button>
@@ -148,6 +150,20 @@
           src="/media/music/demo-instrumental.mp3"
         ></audio>
       </section>
+      <section class="mix-band" aria-labelledby="mix-band-title">
+        <div class="mix-band-copy">
+          <p class="eyebrow"><span class="rec" aria-hidden="true"></span>NEW · AI MIX · FREE</p>
+          <h2 id="mix-band-title">Drop your stems.<br /><em>Get a record.</em></h2>
+          <p>Chuck S.I. opens your session, lays out every track and mixes it the way engineers do: gain staging, EQ, two-stage vocal compression, de-essing, the 808 ducking under the kick, tempo-synced delays, reverb and a master for your genre.</p>
+          <ol class="mix-steps">
+            <li><b>01</b><span><strong>Drop the session</strong>Stems, a zip, a DAW folder or a Dropbox link</span></li>
+            <li><b>02</b><span><strong>Pick the genre</strong>Eleven targets, from trap to country</span></li>
+            <li><b>03</b><span><strong>Get the record</strong>Mix, MP3, instrumental, a cappella, pre-master</span></li>
+          </ol>
+          <div class="hero-actions"><a class="btn-accent" href="/mix/">Mix my song ↗</a><a class="btn-ghost" href="/audio?tab=master">Master a finished mix</a></div>
+        </div>
+        <div class="mix-band-art" aria-hidden="true"><canvas id="mix-band-console" width="720" height="520"></canvas><span class="mix-band-tag">LIVE · TRACK BY TRACK</span></div>
+      </section>
       <section class="showcase-section">
         <div class="section-title">
           <div>
@@ -204,16 +220,19 @@
             </div></a
           >
         </div>
-        <div class="tool-strip">
-          <a href="/audio?tab=beds"
-            ><span>01</span><strong>Build an atmosphere</strong
+        <div class="tool-strip tool-strip-4">
+          <a href="/mix/"
+            ><span>01</span><strong>AI Mix</strong
+            ><small>Stems in, a finished record out.</small><b>↗</b></a
+          ><a href="/audio?tab=master"
+            ><span>02</span><strong>Master a mix</strong
+            ><small>Streaming, podcast or loud, measured.</small><b>↗</b></a
+          ><a href="/audio?tab=beds"
+            ><span>03</span><strong>Build an atmosphere</strong
             ><small>Rain, wind and city sound beds.</small><b>↗</b></a
           ><a href="/audio?tab=extract"
-            ><span>02</span><strong>Extract the audio</strong
+            ><span>04</span><strong>Extract the audio</strong
             ><small>Turn your media into MP3, M4A or WAV.</small><b>↗</b></a
-          ><a href="/audio?engine=kokoro"
-            ><span>03</span><strong>Natural voices</strong
-            ><small>Explore eight English voices.</small><b>↗</b></a
           >
         </div>
         <p class="studio-footnote">

@@ -2,6 +2,7 @@
 // Nothing loads until the cards are near the screen; they pause off screen and hold one frame for reduced motion.
 const lyricCanvas = document.querySelector('[data-home-lyrics]');
 const loopCanvas = document.querySelector('[data-home-loops]');
+const mixCanvas = document.querySelector('[data-home-mix]');
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const CUES = [
@@ -67,4 +68,9 @@ whenNear(loopCanvas, async () => {
   };
   if (still) { draw(0); return; }
   (function frame(now) { if (vis.on && !document.hidden) draw(now); requestAnimationFrame(frame); })(t0);
+});
+
+whenNear(mixCanvas, async () => {
+  const { heroConsole } = await import('./mix/visuals.js');
+  heroConsole(mixCanvas);
 });

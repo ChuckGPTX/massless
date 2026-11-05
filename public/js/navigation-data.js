@@ -179,6 +179,7 @@ export const STUDIOS = [
     engineTitle: "More tools",
     note: "Voice, captions and sound in one place.",
     features: [
+      item("AI Mix", "Drop your stems, get a finished, mastered mix", "/mix/", "sliders", "NEW"),
       item("Edit by text", "Cut speech by deleting words; remove ums and pauses", "/cut/", "text", "NEW"),
       item("Master a track", "Loudness, tone and true peak for streaming or podcasts", "/audio?tab=master", "sliders", "NEW"),
       item("Captioned video", "Burn subtitle files into your video", "/cut/", "text"),
