@@ -14,6 +14,7 @@ import { cleanMacros, spreadPans, describeStrip, NEUTRAL_MACROS } from './plan.j
 
 export const RATE = 44100;
 export const MAX_SECONDS = 7 * 60;
+export const PLAN_TIMEOUT_MS = 15000;
 
 let worker, seq = 0;
 const pending = new Map();
@@ -44,14 +45,20 @@ async function open(stem, signal) {
 /** Ask the server's AI for roles it's unsure of and the creative calls (bounded). Falls back silently. */
 async function aiPlan({ apiFetch, genre, referenceUrl, tracks, signal }) {
   if (!apiFetch) return null;
+  // The planner is a bonus: if it (or the human check in front of it) takes more than 15 s, mix without it.
+  const ctrl = new AbortController(), stop = () => ctrl.abort();
+  signal?.addEventListener('abort', stop, { once: true });
+  let timer;
+  const late = new Promise((resolve) => { timer = setTimeout(() => { ctrl.abort(); resolve(null); }, PLAN_TIMEOUT_MS); });
   try {
-    const r = await apiFetch('/api/mix-plan', { method: 'POST', headers: { 'content-type': 'application/json' }, signal, body: JSON.stringify({ genre, reference: referenceUrl || '', tracks }) });
-    if (!r.ok) return null;
-    return await r.json();
+    return await Promise.race([late, (async () => {
+      const r = await apiFetch('/api/mix-plan', { method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctrl.signal, body: JSON.stringify({ genre, reference: referenceUrl || '', tracks }) });
+      return r.ok ? await r.json() : null;
+    })()]);
   } catch (e) {
     if (signal?.aborted) throw e;
     return null;
-  }
+  } finally { clearTimeout(timer); signal?.removeEventListener('abort', stop); }
 }
 
 /**

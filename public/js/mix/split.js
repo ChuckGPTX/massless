@@ -11,15 +11,28 @@ export async function gpuReady() {
   try { return !!(navigator.gpu && (await navigator.gpu.requestAdapter())); } catch { return false; }
 }
 
-/** Start downloading the model while the person picks a genre. Resolves when it's on this device. */
+/**
+ * Can this device hold the splitter? Running HT-Demucs takes about 3 GB of memory (measured: 2.9-3.7 GB on the
+ * processor, more than 3 GB through WebGPU), far more than a phone browser lets one tab use; the tab is killed and
+ * reloads. Phones and tablets, devices that report under 8 GB, and any browser where a split already died, say no.
+ */
+export function deviceFitsSplit() {
+  if (typeof navigator === 'undefined') return true;
+  try { if (localStorage.getItem('mix-split-crashed')) return false; } catch { /* storage blocked */ }
+  const ua = navigator.userAgent || '';
+  const mobile = /Android|iPhone|iPad|iPod|Mobile|Silk|Kindle/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  if (mobile) return false;
+  if (navigator.deviceMemory && navigator.deviceMemory < 8) return false;
+  return true;
+}
+
+/** Download the model into this browser's cache while the person picks a genre. Nothing is built yet. */
 export function prefetch(onEvent) {
   return new Promise((resolve) => {
-    const w = spawn(), prev = w.onmessage;
-    w.onmessage = (e) => {
-      const d = e.data;
-      if (d.type === 'progress') onEvent?.(d);
-      if (d.type === 'ready' || d.type === 'error') { w.onmessage = prev; resolve(d.type === 'ready'); }
-    };
+    const w = new Worker(new URL('./split-worker.js', import.meta.url), { type: 'module' });
+    const done = (ok) => { w.terminate(); resolve(ok); };
+    w.onmessage = (e) => { const d = e.data; if (d.type === 'progress') onEvent?.(d); else if (d.type === 'ready') done(true); else if (d.type === 'error') done(false); };
+    w.onerror = () => done(false);
     w.postMessage({ type: 'prefetch' });
   });
 }
@@ -29,7 +42,9 @@ export async function openSong(file) {
   const pcm = await decode(file, RATE);
   if (pcm.duration > MAX_SECONDS) throw new Error(`That song is ${Math.round(pcm.duration / 60)} minutes long. Mix songs up to ${MAX_SECONDS / 60} minutes.`);
   if (pcm.duration < 3) throw new Error('That file is only a few seconds long. Drop the whole song.');
-  const L = Float32Array.from(pcm.getChannelData(0)), R = pcm.numberOfChannels > 1 ? Float32Array.from(pcm.getChannelData(1)) : L.slice();
+  // The decoder's own arrays, not copies: nothing writes to them (the splitter and the mixer take copies), and on a
+  // phone every 40 MB a minute of stereo song costs matters.
+  const L = pcm.getChannelData(0), R = pcm.numberOfChannels > 1 ? pcm.getChannelData(1) : L;
   return { channels: [L, R], duration: pcm.duration, peaks: peaksOf([L, R], 600) };
 }
 
@@ -51,16 +66,18 @@ export function peaksOf(chs, bins = 600) {
 export function splitSong(channels, { onEvent, signal } = {}) {
   const w = spawn();
   return new Promise((resolve, reject) => {
-    const stop = () => { w.postMessage({ type: 'cancel' }); reject(new DOMException('Cancelled', 'AbortError')); };
+    const stop = () => { w.terminate(); if (worker === w) worker = null; reject(new DOMException('Cancelled', 'AbortError')); };
     if (signal?.aborted) return stop();
     signal?.addEventListener('abort', stop, { once: true });
+    // The worker's memory (gigabytes of WebAssembly heap, which never shrinks) goes back as soon as it's done.
+    const end = () => { signal?.removeEventListener('abort', stop); w.terminate(); if (worker === w) worker = null; };
     w.onmessage = (e) => {
       const d = e.data;
-      if (d.type === 'done') { signal?.removeEventListener('abort', stop); resolve(d); }
-      else if (d.type === 'error') { signal?.removeEventListener('abort', stop); reject(d.message === 'Cancelled' ? new DOMException('Cancelled', 'AbortError') : new Error(d.message)); }
+      if (d.type === 'done') { end(); resolve(d); }
+      else if (d.type === 'error') { end(); reject(d.message === 'Cancelled' ? new DOMException('Cancelled', 'AbortError') : new Error(/memory|alloc|OOM|RangeError/i.test(d.message) ? 'This device ran out of memory splitting the song. Use Quick polish, or Split & mix on a computer.' : d.message)); }
       else onEvent?.(d);
     };
-    w.onerror = (e) => { worker = null; reject(new Error(e.message || 'The splitter stopped. Try again, or use Quick polish.')); };
+    w.onerror = (e) => { end(); reject(new Error(e.message || 'The splitter stopped. Try again, or use Quick polish.')); };
     // copies: the page keeps the song for the before/after and the rough
     const L = channels[0].slice(), R = channels[1].slice();
     w.postMessage({ type: 'split', left: L, right: R }, [L.buffer, R.buffer]);

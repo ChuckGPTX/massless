@@ -39,3 +39,23 @@ test('the music part is treated gently: whole range, light glue, small carve for
   assert.ok(m.comp.ratio <= 2 && m.comp.gr <= 2);
   assert.ok(m.eq.every((e) => Math.abs(e.gain || 0) <= 2));
 });
+
+test('phones, tablets and small-memory devices polish instead of splitting (the splitter needs about 3 GB)', async () => {
+  const { deviceFitsSplit } = await import('../public/js/mix/split.js');
+  const real = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  const as = (nav) => Object.defineProperty(globalThis, 'navigator', { value: nav, configurable: true });
+  try {
+    as({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1', maxTouchPoints: 5 });
+    assert.equal(deviceFitsSplit(), false, 'iPhone');
+    as({ userAgent: 'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/141.0 Mobile Safari/537.36', deviceMemory: 8 });
+    assert.equal(deviceFitsSplit(), false, 'Android');
+    as({ userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/26.0 Safari/605.1.15', maxTouchPoints: 5 });
+    assert.equal(deviceFitsSplit(), false, 'iPad asking for the desktop site');
+    as({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/141.0 Safari/537.36', deviceMemory: 4 });
+    assert.equal(deviceFitsSplit(), false, '4 GB laptop');
+    as({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/141.0 Safari/537.36', deviceMemory: 8 });
+    assert.equal(deviceFitsSplit(), true, '8 GB desktop');
+    as({ userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/26.0 Safari/605.1.15', maxTouchPoints: 0 });
+    assert.equal(deviceFitsSplit(), true, 'Mac Safari');
+  } finally { if (real) Object.defineProperty(globalThis, 'navigator', real); else delete globalThis.navigator; }
+});
