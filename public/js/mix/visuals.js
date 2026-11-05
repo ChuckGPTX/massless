@@ -176,6 +176,7 @@ export class TrickPanel {
     g.fillText('YOUR ROUGH MIX', 10, lanes[0] - h * 0.16); g.fillText('STEM', 10, lanes[1] - h * 0.16);
     if (k >= 1) { g.strokeStyle = '#55e3a1'; g.lineWidth = 2; for (let i = 0; i < 8; i++) { const x = (i / 8) * w; g.beginPath(); g.moveTo(x, lanes[0]); g.lineTo(x, lanes[1]); g.stroke(); } g.fillStyle = '#55e3a1'; g.fillText('LOCKED TO THE SAMPLE', w - h * 0.62, h * 0.95); }
   }
+  draw_split(g, w, h, t, abs) { drawSplit(g, w, h, abs, this.data.levels, this.data.found); }
   draw_loud(g, w, h, t) {
     const target = this.data.lufs || -9, k = Math.min(1, t / 3), now = -30 + (target + 30) * (1 - (1 - k) ** 3) + (still ? 0 : Math.sin(t * 9) * 0.4 * k);
     const mx = w * 0.12, mw = w * 0.14, top = 20, bot = h - 20, toY = (v) => bot - ((v + 30) / 30) * (bot - top);
@@ -188,6 +189,67 @@ export class TrickPanel {
     g.font = `600 ${Math.round(h * 0.06)}px "Instrument Sans", sans-serif`; g.fillStyle = 'rgba(255,255,255,.6)';
     g.fillText(`LUFS · target ${target}`, w * 0.38, h * 0.55 + h * 0.1); g.fillText('true peak ≤ −1 dB', w * 0.38, h * 0.55 + h * 0.19);
   }
+}
+
+// ---------- splitting one song into stems ----------
+
+export const SPLIT_PARTS = [
+  { id: 'vocals', name: 'VOCALS', color: '#46d6ff', speed: 5, freq: 0.035, shape: (p) => Math.sin(p) * (0.7 + 0.3 * Math.sin(p * 0.31)) },
+  { id: 'drums', name: 'DRUMS', color: '#ff7a59', speed: 9, freq: 0.05, shape: (p) => { const ph = ((p / TAU) % 1 + 1) % 1; return Math.exp(-ph * 7) * Math.sin(p * 9); } },
+  { id: 'bass', name: 'BASS', color: '#8f6bff', speed: 3, freq: 0.016, shape: (p) => Math.sin(p) },
+  { id: 'other', name: 'MUSIC', color: '#4fd9a8', speed: 4, freq: 0.06, shape: (p) => 0.6 * Math.sin(p) + 0.4 * Math.sin(p * 2.3 + 1) },
+];
+const smooth = (u) => u * u * (3 - 2 * u);
+
+/** One white waveform runs into a prism and leaves as four coloured strands, each as loud as its part. */
+export function drawSplit(g, w, h, abs, levels = {}, found = 1) {
+  const nx = w * 0.36, ny = h / 2, right = w - Math.max(56, w * 0.13), lanes = SPLIT_PARTS.map((_, k) => h * (0.17 + k * 0.22));
+  // the song going in
+  g.lineWidth = 2.5; g.strokeStyle = 'rgba(240,236,250,.9)'; g.beginPath();
+  for (let x = 0; x <= nx; x += 2) {
+    const fade = Math.min(1, x / (w * 0.08)), y = ny + fade * h * 0.13 * SPLIT_PARTS.reduce((a, p, k) => a + p.shape(abs * p.speed - x * p.freq + k) * 0.32 * (0.35 + (levels[p.id] ?? 0.7)), 0);
+    x ? g.lineTo(x, y) : g.moveTo(x, y);
+  }
+  g.stroke();
+  // four parts coming out, each growing in as it's found
+  SPLIT_PARTS.forEach((p, k) => {
+    const lv = 0.25 + 0.75 * Math.min(1, levels[p.id] ?? 0.7), reach = nx + (right - nx) * Math.min(1, Math.max(0, 0.35 + found * 6 - k * 0.12));
+    g.strokeStyle = p.color; g.lineWidth = 2.5; g.shadowColor = p.color; g.shadowBlur = 10; g.beginPath();
+    for (let x = nx; x <= reach; x += 2) {
+      const u = (x - nx) / (right - nx), spine = ny + (lanes[k] - ny) * smooth(Math.min(1, u * 1.7));
+      const y = spine + Math.min(1, u * 4) * h * 0.085 * lv * p.shape(abs * p.speed - x * p.freq);
+      x > nx ? g.lineTo(x, y) : g.moveTo(x, y);
+    }
+    g.stroke(); g.shadowBlur = 0;
+    if (reach >= right - 1) {
+      g.fillStyle = p.color; g.font = `700 ${Math.max(10, Math.round(h * 0.045))}px "Instrument Sans", sans-serif`;
+      g.fillText(p.name, right + 10, lanes[k] + h * 0.016);
+    }
+  });
+  // the prism
+  const r = h * 0.085, pulse = 1 + 0.08 * Math.sin(abs * 4);
+  const glow = g.createRadialGradient(nx, ny, 0, nx, ny, r * 2.6 * pulse);
+  glow.addColorStop(0, 'rgba(255,191,47,.55)'); glow.addColorStop(1, 'rgba(169,139,255,0)');
+  g.fillStyle = glow; g.beginPath(); g.arc(nx, ny, r * 2.6 * pulse, 0, TAU); g.fill();
+  g.save(); g.translate(nx, ny); g.rotate(abs * 0.6);
+  g.beginPath(); for (let i = 0; i < 3; i++) { const a = (i / 3) * TAU - Math.PI / 2; i ? g.lineTo(Math.cos(a) * r, Math.sin(a) * r) : g.moveTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath();
+  const fill = g.createLinearGradient(-r, -r, r, r); fill.addColorStop(0, AMBER); fill.addColorStop(1, VIOLET);
+  g.fillStyle = fill; g.fill(); g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 1.5; g.stroke(); g.restore();
+}
+
+/** The idle version for the one-song drop zone. Stops drawing while it's off screen. */
+export function splitArt(canvas) {
+  const g = canvas.getContext('2d');
+  let raf = 0, on = true;
+  const draw = (now) => {
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    drawSplit(g, canvas.width, canvas.height, still ? 2 : now / 1000, {}, 1);
+    if (!still && on) raf = requestAnimationFrame(draw);
+  };
+  const io = typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver(([e]) => { const was = on; on = e.isIntersecting && !canvas.closest('[hidden]'); if (on && !was) raf = requestAnimationFrame(draw); }) : null;
+  io?.observe(canvas);
+  raf = requestAnimationFrame(draw);
+  return () => { on = false; cancelAnimationFrame(raf); io?.disconnect(); };
 }
 
 // ---------- the hero console ----------
