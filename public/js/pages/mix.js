@@ -40,6 +40,8 @@ async function take(files) {
   if (!files?.length) return;
   note('Opening your session…');
   try {
+    const zipFile = [...files].find((f) => /\.zip$/i.test(f.name));
+    if (zipFile) state.zipName = zipFile.name;
     const g = await gather([...files]);
     if (!g.stems.length) { note(g.sessions.length ? `That ${g.sessions[0]} session has no audio files inside. Export or consolidate every track as a stem from bar 1, then drop the folder or a zip.` : 'No audio files found. Drop WAV, AIFF, MP3 or FLAC stems, or a zip of them.', true); return; }
     // add to what's already there (people drop the vocals, then the beat)
@@ -316,7 +318,12 @@ $('#wave').onclick = (e) => {
 };
 
 // downloads
-const title = () => (state.stems[0]?.path.split('/')[0].replace(/\.[^.]+$/, '') || 'song').replace(/[^\p{L}\p{N} _-]+/gu, '').trim().slice(0, 60) || 'song';
+// Name downloads after the session: the folder or zip the stems came in, otherwise "My song".
+const title = () => {
+  const paths = state.stems.map((s) => s.path), top = paths[0]?.includes('/') ? paths[0].split('/')[0] : '';
+  const name = top && paths.every((p) => p.startsWith(top + '/')) ? top : state.zipName || 'My song';
+  return name.replace(/\.[^.]+$/, '').replace(/[^\p{L}\p{N} _-]+/gu, '').trim().slice(0, 60) || 'My song';
+};
 for (const b of document.querySelectorAll('[data-dl]')) b.onclick = async () => {
   const [what, format] = b.dataset.dl.split(':'), chs0 = state.result?.audio[what];
   if (!chs0) { $('#dl-note').textContent = what === 'acapella' ? 'There are no vocal tracks in this session.' : 'Nothing to download yet.'; return; }
