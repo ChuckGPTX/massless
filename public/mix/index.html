@@ -34,7 +34,7 @@
 
   <form id="mix-form" class="mix-card" novalidate>
     <div class="mix-step">
-      <div class="step-head"><span class="step-n">1</span><div><h2>Your music</h2><p id="step1-sub">Stems (WAV, AIFF, MP3, FLAC), a .zip, a DAW session folder, or a link.</p></div></div>
+      <div class="step-head"><span class="step-n">1</span><div><h2>Your music</h2><p id="step1-sub">Stems (WAV, AIFF, MP3, FLAC), a .zip, a Pro Tools, REAPER or Ableton session with its audio, or a link.</p></div></div>
       <div class="mode-switch" role="tablist" aria-label="What do you have?">
         <button type="button" role="tab" id="mode-stems" aria-selected="true" aria-controls="stems-pane"><span class="mode-icon stems" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>I have stems</b><small>Separate tracks, a zip or a session</small></button>
         <button type="button" role="tab" id="mode-song" aria-selected="false" aria-controls="song-pane"><span class="mode-icon song" aria-hidden="true"><i></i></span><b>I have one song file</b><small>We split it into stems for you</small></button>
@@ -45,7 +45,7 @@
         <strong>Drop your stems here</strong>
         <small>Up to 48 tracks and 7 minutes. Drop the whole Pro Tools session folder and every take goes where you have it.</small>
         <span class="drop-actions"><span class="btn-accent">Choose files</span><button type="button" id="pick-folder" class="btn-ghost">Choose a folder</button></span>
-        <input id="stem-files" type="file" multiple accept=".wav,.wave,.aif,.aiff,.aifc,.mp3,.m4a,.aac,.flac,.ogg,.opus,.caf,.zip,audio/*,application/zip">
+        <input id="stem-files" type="file" multiple accept=".wav,.wave,.aif,.aiff,.aifc,.mp3,.m4a,.aac,.flac,.ogg,.opus,.caf,.zip,.ptx,.ptf,.rpp,.als,audio/*,application/zip">
       </label>
       <input id="stem-folder" type="file" webkitdirectory multiple hidden>
       <div class="mix-link"><label for="stem-link">Or paste a link</label><div class="link-row"><input id="stem-link" type="url" inputmode="url" placeholder="Dropbox or Google Drive link to a .zip of stems"><button type="button" id="fetch-link" class="btn-ghost">Fetch</button></div></div>
@@ -75,6 +75,7 @@
         </div>
       </div>
       <p id="intake-note" class="mix-note" role="status" aria-live="polite"></p>
+      <div id="session-card" class="session-card" hidden></div>
       <ol id="stem-list" class="stem-list" aria-label="Your tracks" hidden></ol>
     </div>
 

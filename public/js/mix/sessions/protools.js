@@ -180,7 +180,8 @@ export function sessionLayout(session) {
     if (!byFile.has(key)) byFile.set(key, { file: key, track: p.trackName, clips: [] });
     byFile.get(key).clips.push({ start: p.start / session.rate, offset: c.offset / session.rate, length: c.length / session.rate, name: c.name });
   }
-  for (const f of byFile.values()) f.clips.sort((a, b) => a.start - b.start);
+  // a stereo track lists each clip once per channel: keep one
+  for (const f of byFile.values()) { f.clips.sort((a, b) => a.start - b.start || a.offset - b.offset); f.clips = f.clips.filter((c, i, arr) => !i || Math.abs(c.start - arr[i - 1].start) > 1e-6 || Math.abs(c.offset - arr[i - 1].offset) > 1e-6 || Math.abs(c.length - arr[i - 1].length) > 1e-6); }
   const used = new Set(byFile.keys());
   return { rate: session.rate, files: [...byFile.values()], unused: session.files.filter((f) => !used.has(f)), tracks: session.tracks.map((t) => t.name) };
 }

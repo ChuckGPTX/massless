@@ -258,3 +258,18 @@
 .lane.ghost-lane{border:1px dashed rgba(63,184,232,.35);background:rgba(63,184,232,.05)}
 .rough-report.moves{border-color:rgba(255,191,47,.35);background:linear-gradient(100deg,rgba(255,191,47,.07),rgba(169,139,255,.05))}
 @media(max-width:640px){.arrangement{margin-left:96px}.result-arr{margin-left:0}}
+
+/* the session card: the DAW's tracks, their jobs and what's on them */
+.session-card{border:1px solid rgba(169,139,255,.35);border-radius:16px;padding:14px 16px;background:linear-gradient(100deg,rgba(169,139,255,.08),rgba(255,255,255,.02));display:grid;gap:10px;animation:mx-in .35s both}
+.session-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.session-daw{font:700 11px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--mx-violet);border:1px solid rgba(169,139,255,.45);border-radius:999px;padding:4px 8px}
+.session-head b{font:700 15px/1.2 var(--ui)}
+.session-head small{color:var(--muted);font-size:13px}
+.session-tracks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:4px 14px}
+.session-tracks li{display:grid;grid-template-columns:minmax(0,1.1fr) auto minmax(0,1.4fr);gap:8px;align-items:baseline;font-size:12.5px;padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.08);min-width:0}
+.session-tracks .tn{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.session-tracks .tj{color:var(--mx-violet);font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+.session-tracks .tc{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+.session-tracks li.empty .tc{color:var(--dim)}
+.session-tracks li.missing .tc{color:#ffb36b}
+.session-tracks li.has .tc{color:#55e3a1}
