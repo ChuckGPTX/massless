@@ -113,3 +113,15 @@ test('every genre says how hard to build into a chorus', async () => {
   const { GENRES } = await import('../public/js/mix/rules.js');
   for (const [id, g] of Object.entries(GENRES)) { assert.ok(g.arrange, id); assert.ok(g.arrange.sweepTo >= 150 && g.arrange.sweepTo <= 800, `${id} sweep`); assert.ok(g.arrange.dropBeats >= 1 && g.arrange.dropBeats <= 4, `${id} drop`); }
 });
+
+test('with one voice, sections are at least four bars and build-ups only go into real choruses', () => {
+  // loudness flickers bar to bar; one voice throughout
+  const energy = Array.from({ length: 32 }, (_, b) => (b % 3 === 0 ? -16 : -22) + (b >= 16 ? 5 : 0));
+  const s = findSections({ layers: Array(32).fill(1), lead: Array(32).fill(1), energy });
+  assert.ok(s.every((x) => x.to - x.from >= 4), `short sections: ${JSON.stringify(s)}`);
+  assert.ok(s.length <= 3, `too many sections: ${s.length}`);
+  const A = arrangementMoves([{ kind: 'verse', from: 0, to: 8 }, { kind: 'chorus', from: 8, to: 10 }, { kind: 'verse', from: 10, to: 12 }, { kind: 'chorus', from: 12, to: 20 }], 1.6, Math.round(20 * 1.6 * ENV_RATE));
+  assert.deepEqual(A.moves.map((m) => m.bar), [], 'a two-bar chorus and a chorus after a two-bar verse get no build-up');
+  const B = arrangementMoves([{ kind: 'verse', from: 0, to: 8 }, { kind: 'chorus', from: 8, to: 16 }], 1.6, Math.round(16 * 1.6 * ENV_RATE));
+  assert.deepEqual(B.moves.map((m) => m.bar), [8]);
+});

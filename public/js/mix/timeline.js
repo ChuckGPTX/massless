@@ -162,10 +162,11 @@ export function findSections({ layers, lead, energy, adlib = [], hook = [] }) {
   const sm = raw.map((k, b) => { const w = [raw[b - 1] ?? k, k, raw[b + 1] ?? k]; return w.filter((x) => x === k).length >= 2 ? k : w[0] === w[2] ? w[0] : k; });
   const out = [];
   for (let b = 0; b < n; b++) { if (out.length && out[out.length - 1].kind === sm[b]) out[out.length - 1].to = b + 1; else out.push({ kind: sm[b], from: b, to: b + 1 }); }
-  // runs of a single bar join their longer neighbour
+  // short runs join their longer neighbour: one bar with stacks to go by, four bars when only loudness decides
+  const minBars = maxLayers <= 1 ? 4 : 2;
   for (let i = 0; i < out.length; i++) {
     const s = out[i];
-    if (s.to - s.from > 1 || out.length === 1) continue;
+    if (s.to - s.from >= minBars || out.length === 1) continue;
     const prev = out[i - 1], next = out[i + 1];
     const into = prev && (!next || prev.to - prev.from >= next.to - next.from) ? prev : next;
     if (!into) continue;
@@ -197,7 +198,8 @@ export function arrangementMoves(sections, bar, frames, opts = {}) {
   for (const key of ['lead', 'double', 'adlib']) lift[key] = ramp(lift[key]);
   const leadVerbR = ramp(leadVerb);
   sections.forEach((s, i) => {
-    if (s.kind !== 'chorus' || i === 0 || s.from < sweepBars) return;
+    // a build-up needs a real chorus (four bars or more) after a real section of something else
+    if (s.kind !== 'chorus' || i === 0 || s.from < sweepBars || s.to - s.from < 4 || sections[i - 1].to - sections[i - 1].from < 4) return;
     const T = s.from * bar;
     // 1. the music thins out: a high-pass sweeping up over the last bars
     fill(beatHpf, T - sweepBars * bar, T - dropBeats * beat, (u) => 25 * (sweepTo / 25) ** (u * u));
