@@ -125,3 +125,21 @@ test('with one voice, sections are at least four bars and build-ups only go into
   const B = arrangementMoves([{ kind: 'verse', from: 0, to: 8 }, { kind: 'chorus', from: 8, to: 16 }], 1.6, Math.round(16 * 1.6 * ENV_RATE));
   assert.deepEqual(B.moves.map((m) => m.bar), [8]);
 });
+
+test('doubler: a detuned, late copy each side, different on the left and the right, at the asked level', async () => {
+  const { doubler } = await import('../public/js/mix/fx.js');
+  const rate = 44100, n = rate, mono = new Float32Array(n);
+  for (let i = 0; i < n; i++) mono[i] = 0.5 * Math.sin((2 * Math.PI * 220 * i) / rate);
+  const [L, R] = doubler([mono, mono], rate, { cents: 7, delayMs: [14, 22], wetDb: -10 });
+  assert.equal(L.length, n); assert.equal(R.length, n);
+  // nothing before the delay, something after
+  assert.ok(L.subarray(0, Math.round(rate * 0.013)).every((v) => v === 0));
+  assert.ok(R.subarray(0, Math.round(rate * 0.021)).every((v) => v === 0));
+  const rms = (x, a, b) => Math.sqrt(x.subarray(a, b).reduce((s, v) => s + v * v, 0) / (b - a));
+  const mid = rms(mono, rate * 0.5, rate * 0.9), l = rms(L, rate * 0.5, rate * 0.9), r = rms(R, rate * 0.5, rate * 0.9);
+  assert.ok(Math.abs(20 * Math.log10(l / mid) + 10) < 2, `left ${20 * Math.log10(l / mid)} dB`);
+  assert.ok(Math.abs(20 * Math.log10(r / mid) + 10) < 2, `right ${20 * Math.log10(r / mid)} dB`);
+  // the two sides are not the same signal
+  let diff = 0; for (let i = rate * 0.5; i < rate * 0.9; i++) diff += (L[i] - R[i]) ** 2;
+  assert.ok(Math.sqrt(diff / (rate * 0.4)) > 0.3 * l);
+});

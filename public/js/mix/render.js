@@ -24,7 +24,8 @@ function compressor(ctx, c) {
 function filter(ctx, f) {
   const n = ctx.createBiquadFilter();
   n.type = f.type; n.frequency.value = Math.min(f.f, ctx.sampleRate * 0.45);
-  if (f.q != null) n.Q.value = f.type === 'lowshelf' || f.type === 'highshelf' ? 0 : f.q;
+  // Q is given the usual way (0.707 = Butterworth); for lowpass and highpass the browser wants it in dB.
+  if (f.q != null) n.Q.value = f.type === 'lowshelf' || f.type === 'highshelf' ? 0 : f.type === 'lowpass' || f.type === 'highpass' ? 20 * Math.log10(f.q) : f.q;
   if (f.gain != null) n.gain.value = f.gain;
   return n;
 }
@@ -190,15 +191,36 @@ export async function renderBuses(buses, plan, rate, length) {
   }
   const vox = source(buses.vox, G.vox);
   if (vox) {
-    // the lead bus: glue, then a touch of bus EQ (the templates' Vocal EQ on the lead bus)
-    let c = vox.connect(compressor(ctx, plan.vox));
-    c = c.connect(filter(ctx, { type: 'peaking', f: 250, q: 1.2, gain: -1 })).connect(filter(ctx, { type: 'highshelf', f: 10000, gain: 0.8 }));
+    // The lead bus in three bands (Linkwitz-Riley crossovers, which sum flat): the lows and the highs get their own
+    // compressors, so mud and harshness ride themselves down only when they build up (the multiband-on-vocals
+    // move), while the mids get the glue. Every band passes one compressor, so the bands stay aligned.
+    const lr = (type, f) => { const a = filter(ctx, { type, f, q: Math.SQRT1_2 }), b = filter(ctx, { type, f, q: Math.SQRT1_2 }); a.connect(b); return { in: a, out: b }; };
+    const mb = plan.mb || { low: 220, high: 4500 };
+    const join = ctx.createGain();
+    const lowMid = lr('lowpass', mb.high), high = lr('highpass', mb.high);
+    vox.connect(lowMid.in); vox.connect(high.in);
+    const low = lr('lowpass', mb.low), mid = lr('highpass', mb.low);
+    lowMid.out.connect(low.in); lowMid.out.connect(mid.in);
+    low.out.connect(compressor(ctx, plan.voxLow || plan.vox)).connect(join);
+    mid.out.connect(compressor(ctx, plan.vox)).connect(join);
+    high.out.connect(compressor(ctx, plan.voxHigh || plan.vox)).connect(join);
+    // then a touch of bus EQ (the templates' Vocal EQ on the lead bus)
+    const c = join.connect(filter(ctx, { type: 'peaking', f: 250, q: 1.2, gain: -1 })).connect(filter(ctx, { type: 'highshelf', f: 10000, gain: 0.8 }));
     c.connect(sumA); c.connect(sumC);
-    // parallel distortion under the lead (the DISTORTION bus of the rap templates): band-limited, blended low
+    // Air: an exciter (the Aphex / Pultec "sheen" step): the top of the voice, saturated so it grows harmonics
+    // above 7 kHz, blended low under the lead. Only what's above the cutoff gets in, and only new highs come out.
+    if (Number.isFinite(plan.air)) {
+      const sh = ctx.createWaveShaper(); sh.curve = saturationCurve(2.5); sh.oversample = '2x';
+      const ag = ctx.createGain(); ag.gain.value = dbToGain(plan.air);
+      const a = c.connect(filter(ctx, { type: 'highpass', f: 3500, q: Math.SQRT1_2 })).connect(filter(ctx, { type: 'highpass', f: 3500, q: Math.SQRT1_2 })).connect(sh).connect(filter(ctx, { type: 'highpass', f: 3500, q: Math.SQRT1_2 })).connect(ag);
+      a.connect(sumA); a.connect(sumC);
+    }
+    // parallel distortion under the lead (the DISTORTION bus of the rap templates): band-limited, blended low;
+    // a neutral compressor keeps its path the same length as the lead's
     if (Number.isFinite(plan.dist)) {
       const sh = ctx.createWaveShaper(); sh.curve = saturationCurve(6); sh.oversample = '2x';
       const dg = ctx.createGain(); dg.gain.value = dbToGain(plan.dist);
-      const d = vox.connect(filter(ctx, { type: 'highpass', f: 300, q: 0.7 })).connect(sh).connect(filter(ctx, { type: 'lowpass', f: 5000, q: 0.7 })).connect(dg);
+      const d = vox.connect(compressor(ctx)).connect(filter(ctx, { type: 'highpass', f: 300, q: 0.7 })).connect(sh).connect(filter(ctx, { type: 'lowpass', f: 5000, q: 0.7 })).connect(dg);
       d.connect(sumA); d.connect(sumC);
     }
     // a short slap under the lead (100-150 ms, the rock and hip-hop templates' SLAP return)

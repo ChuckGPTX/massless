@@ -1,4 +1,20 @@
-// Sample-domain effects the bus stage uses: a transient shaper and the octave-down "deep" layer.
+// Sample-domain effects the bus stage uses: a transient shaper, the octave-down "deep" layer, and the doubler.
+
+import { ghostDouble } from './timeline.js';
+
+/**
+ * A doubler for the hook bus (the templates' DOUBLER return; the "vocal doubler to make the vocal 3D" step):
+ * the bus, summed to mono, pitched up a few cents and 14 ms late on the left, down and 22 ms late on the right.
+ * Different offsets each side keep it from collapsing to a centre image. Returns [L, R] at the layer's level.
+ */
+export function doubler(chs, rate, { cents = 7, delayMs = [14, 22], wetDb = -10 } = {}) {
+  const n = chs[0].length, mono = new Float32Array(n);
+  for (let i = 0; i < n; i++) mono[i] = chs.length > 1 ? 0.5 * (chs[0][i] + chs[1][i]) : chs[0][i];
+  const g = 10 ** (wetDb / 20);
+  const L = ghostDouble(mono, rate, { cents, delayMs: delayMs[0] }), R = ghostDouble(mono, rate, { cents: -cents, delayMs: delayMs[1] });
+  for (let i = 0; i < n; i++) { L[i] *= g; R[i] *= g; }
+  return [L, R];
+}
 
 /**
  * Transient shaper: lifts the first milliseconds of every hit by `attackDb` (the AVOX Punch / SPL Transient
