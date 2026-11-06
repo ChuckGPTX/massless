@@ -9,7 +9,7 @@ export const STAGE_LUFS = -18; // every stem is gain-staged here before its chai
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
 
-export const NEUTRAL_MACROS = { vox: 0, low: 0, bright: 0, space: 0, width: 0, loud: 0 };
+export const NEUTRAL_MACROS = { vox: 0, low: 0, bright: 0, space: 0, width: 0, loud: 0, tune: 0 };
 export function cleanMacros(m = {}) {
   const out = {};
   for (const k of Object.keys(NEUTRAL_MACROS)) out[k] = clamp(Number(m[k]) || 0, -LIMITS.macro, LIMITS.macro);
@@ -192,6 +192,7 @@ function mergeShelves(eq) {
 /** A plain sentence per strip for the mix notes. */
 export function describeStrip(name, p, fader, extra = {}) {
   const bits = [];
+  if (extra.tuned) bits.push(`tuned to ${extra.tuned.key} (${extra.tuned.cents} cents on average, ${extra.tuned.speedMs} ms)`);
   if (extra.tightened) bits.push(`tightened to the lead on ${extra.tightened} phrase${extra.tightened === 1 ? '' : 's'}`);
   if (p.gated) bits.push('clean between phrases');
   if (p.hpf) bits.push(`high-pass ${Math.round(p.hpf)} Hz`);

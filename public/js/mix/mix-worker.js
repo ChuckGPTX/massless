@@ -6,6 +6,8 @@ import { analyzeStem, sumEnvelopes, tempo, envelope, ENV_RATE } from './analyze.
 import { sketch, waveLag, fineShiftAt, relativeShifts, fitLevels, shiftEnv, gapsBetween, fittedEnvelope } from './rough.js';
 import { ROLE_RULES } from './rules.js';
 import { fineEnvelope, tightenOffsets, gateCurve, findSections, arrangementMoves, barActivity } from './timeline.js';
+import { chroma, detectKey } from './tune.js';
+import { transientShape } from './fx.js';
 import { planStrip, faderGain, busBalance, toneMatch, vocalDuck } from './plan.js';
 import { GENRES } from './rules.js';
 import { LoudnessMeter } from '../loudness.js';
@@ -13,7 +15,7 @@ import { octaveSpectrum, preChain, master, limit, measureOutput } from '../maste
 import { analyzeBands, estimateBeat } from '../lyrics-engine.js';
 
 const S = { rate: 44100, feats: [], rough: null, length: 0, buses: null };
-const BUS = ['drums', 'inst', 'vox', 'voxVerb', 'beatVerb'];
+const BUS = ['drums', 'inst', 'vox', 'hook', 'voxVerb', 'hookVerb', 'beatVerb'];
 const dbToGain = (d) => 10 ** (d / 20);
 const TAIL = (rate) => Math.round(rate * 2.5); // room for reverb and delay tails after the last note
 
@@ -142,7 +144,7 @@ function probableRough(roles, used) {
 }
 
 const H = {
-  reset({ rate }) { Object.assign(S, { rate, feats: [], rough: null, length: 0, buses: null, bounce: null, align: [], shift: [], levelAdjust: [], common: 0, placed: [], fine: [], tighten: [], arrange: null, gates: [] }); return {}; },
+  reset({ rate }) { Object.assign(S, { rate, feats: [], rough: null, length: 0, buses: null, bounce: null, align: [], shift: [], levelAdjust: [], common: 0, placed: [], fine: [], tighten: [], arrange: null, gates: [], chroma: [], key: null }); return {}; },
 
   // The artist's rough mix (full bounce): kept to line stems up against, learn the balance from, and check the result.
   bounce({ channels }) {
@@ -169,6 +171,7 @@ const H = {
     const mono = chs.length > 1 ? Float32Array.from(chs[0], (v, i) => 0.5 * (v + chs[1][i])) : chs[0];
     // A 1 kHz envelope for timing work (doubles against the lead); the worker drops it once the mix is planned.
     S.fine[index] = f.activeRatio < 0.9 && f.activeRatio > 0.02 ? fineEnvelope(mono, S.rate) : null;
+    S.chroma[index] = f.activeRatio > 0.02 ? chroma(mono, S.rate) : null; // the notes it holds, for the song's key
     if (S.bounce) {
       // Where does this stem sit in the rough? Onsets first (coarse), then the waveform itself (to the sample).
       // Find it in the waveform (a 2.2 kHz sketch), then pin it to the sample. Loops stay at bar 1 when that fits as well.
@@ -203,6 +206,15 @@ const H = {
     S.envLength = frames;
     S.roles = roles;
     const live = (i) => used[i] && S.feats[i] && !rough.leaveOut?.includes(i);
+    // The song's key: the music's notes (then the vocals' when there's no music), for the retune.
+    // the music's notes at full weight, each vocal's at a third (the vocals are what gets tuned, so they get a say)
+    const musicChroma = new Float32Array(12);
+    let voters = 0;
+    for (const [pool, weight] of [[['beat', 'music', 'keys', 'pad', 'synth', 'guitar', 'bass', '808'], 1], [['leadVox', 'backVox', 'double'], 0.35]]) {
+      roles.forEach((r, i) => { if (pool.includes(r) && live(i) && S.chroma[i]) { for (let k = 0; k < 12; k++) musicChroma[k] += S.chroma[i][k] * weight; voters++; } });
+    }
+    S.musicChroma = voters ? musicChroma : null;
+    S.key = voters ? detectKey(musicChroma) : null;
     // Doubles follow the lead: each phrase measured against the lead (whichever lead sings there), to the ms.
     const leadIdx = roles.map((r, i) => (r === 'leadVox' && live(i) && S.fine[i] ? i : -1)).filter((i) => i >= 0);
     const tightened = [];
@@ -231,7 +243,7 @@ const H = {
       S.arrange = { ...A, bar, sections };
       arrange = { bar, bars, sections: sections.map((s) => ({ ...s, from: +(s.from * bar).toFixed(2), to: +(s.to * bar).toFixed(2), fromBar: s.from, toBar: s.to })), moves: A.moves, layers: Array.from(layers) };
     }
-    return { bpm: beat?.bpm || 0, beat, duration: S.length / S.rate, renderLength: S.length + TAIL(S.rate), hasKick: !!S.kickLow, hasVox: !!S.voxPres, rough, tightened, arrange };
+    return { bpm: beat?.bpm || 0, beat, duration: S.length / S.rate, renderLength: S.length + TAIL(S.rate), hasKick: !!S.kickLow, hasVox: !!S.voxPres, rough, tightened, arrange, key: S.key, musicChroma: S.musicChroma ? Array.from(S.musicChroma) : null };
   },
 
   /** The phrase moves for one double, so the engine can lift its phrases into place before rendering. */
@@ -266,10 +278,11 @@ const H = {
     S.buses ||= Object.fromEntries(BUS.map((b) => [b, [new Float32Array(n), new Float32Array(n)]]));
     const measured = loudness(dry, S.rate);
     const fader = faderGain(plan, measured), g = dbToGain(fader);
-    const bus = plan.group === 'vox' ? 'vox' : plan.group === 'drums' ? 'drums' : 'inst';
+    // leads on the vocal bus; doubles, backing vocals, ad-libs and the deep layer on the hook bus, as the templates route them
+    const bus = plan.group === 'vox' ? (['double', 'backVox', 'adlib', 'deep'].includes(plan.role) ? 'hook' : 'vox') : plan.group === 'drums' ? 'drums' : 'inst';
     for (let c = 0; c < 2; c++) { addInto(S.buses[bus][c], dry[c], g); if (wet) addInto(S.buses[bus][c], wet[c], g); }
     if (plan.verb && plan.verb.send > -50) {
-      const target = plan.verb.bus === 'vox' ? 'voxVerb' : 'beatVerb', sg = g * dbToGain(plan.verb.send);
+      const target = plan.verb.bus === 'vox' ? (bus === 'hook' ? 'hookVerb' : 'voxVerb') : 'beatVerb', sg = g * dbToGain(plan.verb.send);
       // Send automation: more room in the verses, a throw into each drop, and the dry punch right before the chorus.
       const curve = plan.verbCurve || plan.fxMute ? Float32Array.from({ length: S.envLength }, (_, k) => (plan.verbCurve?.[k] || 0) + (plan.fxMute?.[k] || 0)) : null;
       for (let c = 0; c < 2; c++) {
@@ -285,11 +298,15 @@ const H = {
   // Balance the vocal against the beat, then hand the buses back for the bus stage.
   buses({ genre, macros }) {
     const B = S.buses, G = GENRES[genre] || GENRES.hiphop;
+    // Punch: the drums' hits lifted a little at their start (the templates' AVOX Punch on ad-libs, SPL-style on drums).
+    if (G.punch && B.drums[0].some((v) => v !== 0)) { const p = transientShape(B.drums, S.rate, { attackDb: G.punch }); B.drums[0] = p[0]; B.drums[1] = p[1]; }
+    const hookOn = B.hook[0].some((v) => v !== 0);
     const beatSum = [0, 1].map((c) => { const out = Float32Array.from(B.drums[c]); addInto(out, B.inst[c], 1); return out; });
-    const beatLufs = loudness(beatSum, S.rate), voxLufs = B.vox[0].some((v) => v !== 0) ? loudness(B.vox, S.rate) : -120;
+    const voxSum = [0, 1].map((c) => { const out = Float32Array.from(B.vox[c]); if (hookOn) addInto(out, B.hook[c], 1); return out; });
+    const beatLufs = loudness(beatSum, S.rate), voxLufs = voxSum[0].some((v) => v !== 0) ? loudness(voxSum, S.rate) : -120;
     const bal = busBalance({ beatLufs: beatLufs > -100 ? beatLufs : NaN, voxLufs: voxLufs > -100 ? voxLufs : NaN, genre, macros });
     const duck = vocalDuck(S.voxPres, S.envLength, { eqDepth: 2.5 * (G.duck ?? 1), gainDepth: 0.8, verbDepth: G.verbDuck ? 5 : 0 });
-    const gains = { drums: bal.beat, inst: bal.beat, vox: bal.vox, voxVerb: bal.vox, beatVerb: bal.beat };
+    const gains = { drums: bal.beat, inst: bal.beat, vox: bal.vox, hook: bal.vox, voxVerb: bal.vox, hookVerb: bal.vox, beatVerb: bal.beat };
     const out = {}, transfer = [];
     for (const b of BUS) { if (B[b][0].some((v) => v !== 0)) { out[b] = B[b]; transfer.push(...B[b].map((x) => x.buffer)); } else out[b] = null; }
     S.buses = null;

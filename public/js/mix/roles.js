@@ -15,6 +15,7 @@ export const ROLES = {
   backVox: { name: 'Backing vocals', group: 'vox', color: '#5ab8ff' },
   adlib: { name: 'Ad-libs', group: 'vox', color: '#7aa5ff' },
   double: { name: 'Double (of the lead)', group: 'vox', color: '#3fb8e8' },
+  deep: { name: 'Deep layer', group: 'vox', color: '#5a6bd6' },
   keys: { name: 'Keys / piano', group: 'music', color: '#55e3a1' },
   pad: { name: 'Pad / strings', group: 'music', color: '#4cc7a0' },
   guitar: { name: 'Guitar', group: 'music', color: '#8fe06b' },

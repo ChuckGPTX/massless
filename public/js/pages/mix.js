@@ -131,7 +131,7 @@ function renderStems() {
     const sel = document.createElement('select'); sel.setAttribute('aria-label', `What is ${s.name}?`);
     sel.append(new Option(guess ? `${ROLES[guess].name}` : s.role && ROLES[s.role] ? ROLES[s.role].name : 'Auto-detect', ''));
     sel.append(new Option('Rough mix (reference)', 'rough'), new Option('Leave out', 'skip'));
-    for (const id of ROLE_IDS) if (id !== guess) sel.append(new Option(ROLES[id].name, id));
+    for (const id of ROLE_IDS) if (id !== guess && id !== 'deep') sel.append(new Option(ROLES[id].name, id));
     sel.value = state.roles[i] && state.roles[i] !== guess ? state.roles[i] : '';
     if (state.roles[i] === 'rough' || state.roles[i] === 'skip') li.classList.add(state.roles[i]);
     if (state.roles[i] === 'rough') sw.style.background = '#e8e4f2';
@@ -292,7 +292,8 @@ const TRICK_TEXT = {
   sidechain: (n) => `${n} ducks a few dB every time the kick hits, so the low end stays tight and loud.`,
   deess: (n, p) => `${n}: the “s” sounds around ${fmtHz(p.deess?.f || 6800)} are turned down only when they jump out.`,
   pan: (n, p) => `${n} goes ${Math.abs(p.pan) < 0.05 ? 'to the centre' : `${Math.round(Math.abs(p.pan) * 100)}% ${p.pan < 0 ? 'left' : 'right'}`}${p.width > 1.05 ? `, ${Math.round((p.width - 1) * 100)}% wider` : ''}.`,
-  stack: (n, d) => `${n} has no doubles, so the chorus gets two made from it: ${d.cents > 0 ? '+' : ''}${d.cents} cents and ${d.delayMs} ms late, hard ${d.pan < 0 ? 'left' : 'right'}. Verses stay single, so the chorus opens up.`,
+  tune: (n, d) => `${n} pulled to ${d.key}: ${d.cents} cents on average, at ${d.speedMs} ms, so the notes land and the slides stay.`,
+  stack: (n, d) => d.deep ? `${n} laid an octave down under the hooks, band-limited, so the hook has weight without a second singer.` : `${n} has no doubles, so the chorus gets two made from it: ${d.cents > 0 ? '+' : ''}${d.cents} cents and ${d.delayMs} ms late, hard ${d.pan < 0 ? 'left' : 'right'}. Verses stay single, so the chorus opens up.`,
 };
 const m2 = (s) => (s >= 0.95 ? `${s.toFixed(1)} s` : `${Math.round(s * 1000)} ms`);
 function arrangeText(a) {
@@ -313,7 +314,7 @@ function alignText(r) {
   if (r.missing?.length) bits.push(`Your rough has parts the stems don't at ${r.missing.join(', ')}.`);
   return bits.join(' ');
 }
-const TRICK_TITLE = { stack: 'Stacking', align: 'Lining up', eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
+const TRICK_TITLE = { tune: 'Retune', stack: 'Stacking', align: 'Lining up', eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
 
 function setBar(v) { const p = Math.round(v * 100); $('#bar-fill').style.width = p + '%'; $('#bar-pct').textContent = p + '%'; $('.bar').setAttribute('aria-valuenow', p); }
 
@@ -517,6 +518,8 @@ function showRough(r) {
   if (r.tightened?.length) moves.push(`Tightened the doubles to the lead: ${r.tightened.map((t) => `${t.name} (${t.phrases} phrase${t.phrases === 1 ? '' : 's'}, up to ${t.maxMs} ms)`).join(', ')}.`);
   if (r.arrange && r.arrange.sections.some((s) => s.kind !== 'break')) { const ch = r.arrange.sections.filter((s) => s.kind === 'chorus'); moves.push(`${r.arrange.sections.map((s) => `${sectionLabel[s.kind]} ${fmtTime(s.from)}`).join(' · ')}.${ch.length ? ' Choruses lifted (lead +1 dB, doubles +2 dB); verses given more room.' : ''}`); for (const m of r.arrange.moves) moves.push(`Build-up into ${m.time}: filter sweep from ${fmtTime(m.sweepFrom)}, the beat drops for ${m2(m.drop)}, vocal effects off for ${m2(m.punch)}, the last words thrown +${m.throwDb} dB into the gap.`); }
   if (r.ghosts) moves.push(`${r.ghosts} had no doubles, so the choruses got two made from it (∓6 cents, 10 and 20 ms, hard left and right).`);
+  if (r.key) moves.push(`Key: ${r.key.name}.${r.tuned?.length ? ` Tuned ${r.tuned.length === 1 ? r.tuned[0].name : `${r.tuned.length} vocals`} to it (${r.tuned.map((t) => `${t.name} ${t.cents} cents`).slice(0, 6).join(', ')}${r.tuned.length > 6 ? '…' : ''}).` : ''}`);
+  if (r.buses) { const b = []; if (r.buses.hook) b.push('doubles, backing vocals and ad-libs on their own hook bus with glue, warmth and a hall'); if (Number.isFinite(r.buses.dist)) b.push(`parallel distortion ${r.buses.dist} dB under the lead`); if (Number.isFinite(r.buses.slap)) b.push(`a 110 ms slap at ${r.buses.slap} dB`); if (Number.isFinite(r.buses.parComp)) b.push(`parallel compression ${r.buses.parComp} dB under the drums`); if (r.buses.punch) b.push(`+${r.buses.punch} dB of punch on the drum hits`); if (r.buses.deep) b.push('the lead an octave down under the hooks'); if (b.length) moves.push(`Buses: ${b.join('; ')}.`); }
   $('#moves-report').hidden = !moves.length;
   if (moves.length) { $('#moves-report').innerHTML = '<h3>The arrangement</h3><ul></ul>'; $('#moves-report').querySelector('ul').replaceChildren(...moves.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; })); }
   const split = songMode && state.method === 'split' && !!state.split;
@@ -551,7 +554,7 @@ function showRough(r) {
   rr.querySelector('ul').replaceChildren(...items.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; }));
 }
 
-const MACRO_LABELS = { vox: 'Vocal level', low: 'Low end', bright: 'Brightness', space: 'Space', width: 'Width', loud: 'Loudness' };
+const MACRO_LABELS = { vox: 'Vocal level', tune: 'Tune', low: 'Low end', bright: 'Brightness', space: 'Space', width: 'Width', loud: 'Loudness' };
 function buildMacros(m) {
   $('#macros').replaceChildren(...Object.entries(MACRO_LABELS).map(([k, label]) => {
     const row = document.createElement('label'); row.className = 'macro';

@@ -9,6 +9,8 @@ import { decode } from '../extract.js';
 import { labelStems, ROLES, ROLE_IDS } from './roles.js';
 import { looksLikeRough } from './rough.js';
 import { placeClips, applyTightening, ghostDouble, fmtTime } from './timeline.js';
+import { retune } from './tune.js';
+import { octaveDown } from './fx.js';
 import { renderStrip, renderBuses, makeIR } from './render.js';
 import { GENRES } from './rules.js';
 import { cleanMacros, spreadPans, describeStrip, NEUTRAL_MACROS } from './plan.js';
@@ -177,7 +179,10 @@ export async function runMix(stems, opts = {}) {
   // Choruses with a lone lead get two made doubles (pitched ∓6 cents, 10 and 20 ms late, hard left and right).
   const hasDoubles = live.some((i) => ['double', 'backVox'].includes(labels[i].role) && !leftOut.has(i));
   const choruses = prep.arrange?.sections.filter((s) => s.kind === 'chorus') || [];
-  const ghostFor = !hasDoubles && choruses.length ? live.find((i) => labels[i].role === 'leadVox' && !leftOut.has(i)) : undefined;
+  const leadFor = choruses.length ? live.find((i) => labels[i].role === 'leadVox' && !leftOut.has(i)) : undefined;
+  const ghostFor = !hasDoubles ? leadFor : undefined;
+  // the deep layer: the lead an octave down under the hooks, in genres built on it
+  const deepFor = G.deep ? leadFor : undefined;
 
   // 3. The console: every strip.
   const strips = [];
@@ -186,23 +191,35 @@ export async function runMix(stems, opts = {}) {
     const i = order[k], role = labels[i].role;
     emit({ type: 'stage', id: 'console', label: `Mixing ${names[i]}`, index: i });
     const { plan } = await call('plan', { index: i, role, pan: pans[i], genre, macros, bpm: prep.bpm });
-    const ghosts = i === ghostFor ? await Promise.all([[-6, 10, -0.85], [6, 20, 0.85]].map(async ([cents, delayMs, pan]) => ({ cents, delayMs, pan, plan: (await call('plan', { index: i, role: 'double', pan, genre, macros, bpm: prep.bpm, ghost: true })).plan }))) : [];
+    const ghostSpecs = [...(i === ghostFor ? [[-6, 10, -0.85, 'double'], [6, 20, 0.85, 'double']] : []), ...(i === deepFor ? [[-1200, 0, 0, 'deep']] : [])];
+    const ghosts = await Promise.all(ghostSpecs.map(async ([cents, delayMs, pan, grole]) => ({ cents, delayMs, pan, role: grole, plan: (await call('plan', { index: i, role: grole, pan, genre, macros, bpm: prep.bpm, ghost: true })).plan })));
     emit({ type: 'trick', kind: pickTrick(plan), index: i, data: plan });
     const tighten = (prep.tightened || []).some((t) => t.index === i) ? (await call('tightening', { index: i })).moves : null;
-    const chs = await open(stems[i], signal, { tighten });
-    const mono = ghosts.length ? (chs.length > 1 ? Float32Array.from(chs[0], (v, j) => 0.5 * (v + chs[1][j])) : chs[0].slice()) : null;
+    let chs = await open(stems[i], signal, { tighten });
+    // Retune: every vocal pulled toward the song's key at the genre's speed (the Tune macro moves it; -3 turns it off).
+    let tuned = null;
+    if (['leadVox', 'backVox', 'double', 'adlib'].includes(role) && G.tune && macros.tune > -3 && prep.key) {
+      emit({ type: 'stage', id: 'console', label: `Tuning ${names[i]} to ${prep.key.name}`, index: i });
+      const speedMs = Math.max(0, Math.round(G.tune.speedMs * 2 ** (-macros.tune / 1.5))), strength = Math.min(1, G.tune.strength * (1 + macros.tune * 0.15));
+      const mono = chs.length > 1 ? Float32Array.from(chs[0], (v, j) => 0.5 * (v + chs[1][j])) : chs[0];
+      const r = retune(mono, RATE, { key: prep.key, speedMs, strength });
+      if (r.voicedShare > 0.02) { chs = [r.audio]; tuned = { key: prep.key.name, cents: Math.round(r.cents), speedMs, strength }; emit({ type: 'trick', kind: 'tune', index: i, data: { ...tuned } }); }
+    }
+    const monoForGhosts = ghosts.length ? (chs.length > 1 ? Float32Array.from(chs[0], (v, j) => 0.5 * (v + chs[1][j])) : chs[0].slice()) : null;
     const { dry, wet } = await renderStrip(chs, plan, RATE, prep.renderLength);
     const light = (p) => ({ ...p, rider: null, duck: null, auto: null, hpfCurve: null, deess: p.deess ? { f: p.deess.f } : null });
     const r = await call('addStrip', { index: i, plan: light(plan), dry, wet }, [...dry, ...wet].map((c) => c.buffer));
-    strips[i] = { name: names[i], track: stems[i].track?.replace(/\.dup\d+$/, '') || null, role, color: ROLES[role].color, fader: r.fader, pan: plan.pan, plan: lite(plan), text: describeStrip(names[i], plan, r.fader, { tightened: tighten?.length || 0 }) };
+    strips[i] = { name: names[i], track: stems[i].track?.replace(/\.dup\d+$/, '') || null, role, color: ROLES[role].color, fader: r.fader, pan: plan.pan, plan: lite(plan), tuned, text: describeStrip(names[i], plan, r.fader, { tightened: tighten?.length || 0, tuned }) };
     emit({ type: 'strip', index: i, strip: strips[i] });
     for (const g of ghosts) {
-      emit({ type: 'stage', id: 'console', label: `Stacking ${names[i]} for the chorus`, index: i });
-      emit({ type: 'trick', kind: 'stack', index: i, data: { cents: g.cents, delayMs: g.delayMs, pan: g.pan, choruses: choruses.length } });
-      const gch = [ghostDouble(mono, RATE, { cents: g.cents, delayMs: g.delayMs })];
+      const deep = g.role === 'deep';
+      emit({ type: 'stage', id: 'console', label: deep ? `Laying ${names[i]} an octave down under the hooks` : `Stacking ${names[i]} for the chorus`, index: i });
+      emit({ type: 'trick', kind: 'stack', index: i, data: { cents: g.cents, delayMs: g.delayMs, pan: g.pan, choruses: choruses.length, deep } });
+      const gch = [deep ? octaveDown(monoForGhosts, RATE) : ghostDouble(monoForGhosts, RATE, { cents: g.cents, delayMs: g.delayMs })];
       const out = await renderStrip(gch, g.plan, RATE, prep.renderLength);
       const gr = await call('addStrip', { index: i, plan: light(g.plan), dry: out.dry, wet: out.wet }, [...out.dry, ...out.wet].map((c) => c.buffer));
-      strips.push({ name: `${names[i]} · double ${g.pan < 0 ? 'L' : 'R'}`, role: 'double', color: ROLES.double.color, fader: gr.fader, pan: g.pan, plan: lite(g.plan), made: true, text: `${names[i]} double ${g.pan < 0 ? 'L' : 'R'}: made from the lead, ${g.cents > 0 ? '+' : ''}${g.cents} cents and ${g.delayMs} ms late, in the choruses only · fader ${gr.fader.toFixed(1)} dB` });
+      const label = deep ? 'deep layer' : `double ${g.pan < 0 ? 'L' : 'R'}`;
+      strips.push({ name: `${names[i]} · ${label}`, role: g.role, color: ROLES[g.role].color, fader: gr.fader, pan: g.pan, plan: lite(g.plan), made: true, text: deep ? `${names[i]} deep layer: the lead an octave down, under the hooks only, band-limited · fader ${gr.fader.toFixed(1)} dB` : `${names[i]} ${label}: made from the lead, ${g.cents > 0 ? '+' : ''}${g.cents} cents and ${g.delayMs} ms late, in the choruses only · fader ${gr.fader.toFixed(1)} dB` });
       emit({ type: 'strip', index: i, strip: strips[strips.length - 1], ghost: true });
     }
     prog(0.3, 0.45, (k + 1) / order.length);
@@ -220,6 +237,11 @@ export async function runMix(stems, opts = {}) {
     duck: { f: 2500, eq: b.duck.eq, gain: b.duck.gain },
     verbDuck: G.verbDuck ? b.duck.verb : null,
     voxIR: makeIR(RATE, { decay: Math.max(0.5, G.verbDecay + macros.space * 0.15), predelay: G.predelay ?? 0.035, damp: 7000, early: 0.15 }),
+    // the hook bus gets a hall: longer and darker than the lead's plate, so the stack sits behind the lead
+    hookIR: makeIR(RATE, { decay: Math.max(0.8, G.verbDecay * 1.4 + macros.space * 0.2), predelay: 0.045, damp: 5500, early: 0.1, seed: 23 }),
+    hookReturn: { hp: 300, lp: 5500 },
+    hook: { threshold: -22, ratio: 3, attack: 0.01, release: 0.15, knee: 6 },
+    dist: Number.isFinite(G.dist) ? G.dist : null, parComp: Number.isFinite(G.parComp) ? G.parComp : null, slap: Number.isFinite(G.slap) ? G.slap : null,
     beatIR: makeIR(RATE, { decay: 0.9, predelay: 0.01, damp: 5000, early: 0.35, seed: 11 }),
     voxReturn: { hp: 250, lp: 6000 }, beatReturn: { hp: 300, lp: 6000 },
   };
@@ -236,7 +258,7 @@ export async function runMix(stems, opts = {}) {
   return {
     rate: RATE,
     audio: { mix: m.mix, instrumental: m.instrumental, acapella: m.acapella, before: m.before, premaster: m.premaster },
-    report: { rough: roughInfo ? { ...roughInfo, coverage: m.coverage } : null, session, arrange: prep.arrange ? { ...prep.arrange, moves: prep.arrange.moves.map((mv) => ({ ...mv, time: fmtTime(mv.at) })) } : null, tightened: (prep.tightened || []).map((t) => ({ name: names[t.index], phrases: t.phrases, maxMs: t.maxMs })), ghosts: ghostFor !== undefined ? names[ghostFor] : null, genre, genreName: G.name, bpm: prep.bpm, lufs: m.lufs, truePeak: m.truePeak, targetLufs: G.lufs, macros, strips, balance: b.balance, tone: m.tone, notes: ai?.notes || '', reference: ai?.reference || null, usedReferenceFile: !!reference, aiUsed: !!ai },
+    report: { buses: { hook: live.some((i) => ['double', 'backVox', 'adlib'].includes(labels[i].role) && !leftOut.has(i)), dist: busPlan.dist, parComp: busPlan.parComp, slap: busPlan.slap, punch: G.punch || 0, deep: deepFor !== undefined }, rough: roughInfo ? { ...roughInfo, coverage: m.coverage } : null, session, key: prep.key ? { name: prep.key.name, score: +prep.key.score.toFixed(2) } : null, tuned: strips.filter((s) => s?.tuned).map((s) => ({ name: s.name, cents: s.tuned.cents })), arrange: prep.arrange ? { ...prep.arrange, moves: prep.arrange.moves.map((mv) => ({ ...mv, time: fmtTime(mv.at) })) } : null, tightened: (prep.tightened || []).map((t) => ({ name: names[t.index], phrases: t.phrases, maxMs: t.maxMs })), ghosts: ghostFor !== undefined ? names[ghostFor] : null, genre, genreName: G.name, bpm: prep.bpm, lufs: m.lufs, truePeak: m.truePeak, targetLufs: G.lufs, macros, strips, balance: b.balance, tone: m.tone, notes: ai?.notes || '', reference: ai?.reference || null, usedReferenceFile: !!reference, aiUsed: !!ai },
   };
 }
 

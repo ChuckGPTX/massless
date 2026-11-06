@@ -174,7 +174,11 @@ export async function renderBuses(buses, plan, rate, length) {
   };
   const G = plan.gains || {};
   const drums = source(buses.drums, G.drums);
-  if (drums) { const c = drums.connect(compressor(ctx, plan.drums)); c.connect(sumA); c.connect(sumB); }
+  if (drums) {
+    const c = drums.connect(compressor(ctx, plan.drums)); c.connect(sumA); c.connect(sumB);
+    // parallel compression: a squashed copy under the drums, for weight without losing the hits
+    if (Number.isFinite(plan.parComp)) { const pc = ctx.createGain(); pc.gain.value = dbToGain(plan.parComp); const sq = drums.connect(compressor(ctx, { threshold: -32, ratio: 8, attack: 0.001, release: 0.1, knee: 4 })).connect(filter(ctx, { type: 'highpass', f: 60, q: 0.7 })).connect(pc); sq.connect(sumA); sq.connect(sumB); }
+  }
   const inst = source(buses.inst, G.inst);
   if (inst) {
     const eq = filter(ctx, { type: 'peaking', f: plan.duck?.f || 2500, q: 0.9, gain: 0 });
@@ -185,7 +189,35 @@ export async function renderBuses(buses, plan, rate, length) {
     inst.connect(compressor(ctx)).connect(sumB); // the instrumental keeps everything the vocal was covering
   }
   const vox = source(buses.vox, G.vox);
-  if (vox) { const c = vox.connect(compressor(ctx, plan.vox)); c.connect(sumA); c.connect(sumC); }
+  if (vox) {
+    // the lead bus: glue, then a touch of bus EQ (the templates' Vocal EQ on the lead bus)
+    let c = vox.connect(compressor(ctx, plan.vox));
+    c = c.connect(filter(ctx, { type: 'peaking', f: 250, q: 1.2, gain: -1 })).connect(filter(ctx, { type: 'highshelf', f: 10000, gain: 0.8 }));
+    c.connect(sumA); c.connect(sumC);
+    // parallel distortion under the lead (the DISTORTION bus of the rap templates): band-limited, blended low
+    if (Number.isFinite(plan.dist)) {
+      const sh = ctx.createWaveShaper(); sh.curve = saturationCurve(6); sh.oversample = '2x';
+      const dg = ctx.createGain(); dg.gain.value = dbToGain(plan.dist);
+      const d = vox.connect(filter(ctx, { type: 'highpass', f: 300, q: 0.7 })).connect(sh).connect(filter(ctx, { type: 'lowpass', f: 5000, q: 0.7 })).connect(dg);
+      d.connect(sumA); d.connect(sumC);
+    }
+    // a short slap under the lead (100-150 ms, the rock and hip-hop templates' SLAP return)
+    if (Number.isFinite(plan.slap)) {
+      const dl = ctx.createDelay(1); dl.delayTime.value = 0.11; const sg = ctx.createGain(); sg.gain.value = dbToGain(plan.slap);
+      const sl = c.connect(dl).connect(filter(ctx, { type: 'highpass', f: 400, q: 0.7 })).connect(filter(ctx, { type: 'lowpass', f: 5000, q: 0.7 })).connect(sg);
+      sl.connect(sumA); sl.connect(sumC);
+    }
+  }
+  const hook = source(buses.hook, G.hook);
+  if (hook) {
+    // the hook / BGV bus: glue, warmth, and the same gentle EQ, so the stack reads as one voice
+    const sh = ctx.createWaveShaper(); sh.curve = saturationCurve(1.6); sh.oversample = '2x';
+    const dry = ctx.createGain(), wet = ctx.createGain(), join = ctx.createGain(); dry.gain.value = 0.82; wet.gain.value = 0.18;
+    const g = hook.connect(compressor(ctx, plan.hook || { threshold: -22, ratio: 3, attack: 0.01, release: 0.15, knee: 6 }));
+    g.connect(dry).connect(join); g.connect(sh).connect(wet).connect(join);
+    const c = join.connect(filter(ctx, { type: 'peaking', f: 300, q: 1.2, gain: -1.5 })).connect(filter(ctx, { type: 'highshelf', f: 10000, gain: 0.6 }));
+    c.connect(sumA); c.connect(sumC);
+  }
   const ret = (chs, gainDb, ir, eq, duckCurve, targets) => {
     const s = source(chs, gainDb);
     if (!s || !ir) return;
@@ -197,6 +229,7 @@ export async function renderBuses(buses, plan, rate, length) {
     for (const t of targets) c.connect(t);
   };
   ret(buses.voxVerb, G.voxVerb, plan.voxIR, plan.voxReturn, plan.verbDuck, [sumA, sumC]);
+  ret(buses.hookVerb, G.hookVerb, plan.hookIR || plan.voxIR, plan.hookReturn || plan.voxReturn, plan.verbDuck, [sumA, sumC]);
   ret(buses.beatVerb, G.beatVerb, plan.beatIR, plan.beatReturn, null, [sumA, sumB]);
   const out = await ctx.startRendering();
   const pair = (k) => [out.getChannelData(k * 2).slice(lat, lat + length), out.getChannelData(k * 2 + 1).slice(lat, lat + length)];
