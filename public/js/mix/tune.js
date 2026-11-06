@@ -174,9 +174,14 @@ export function applyCorrection(mono, rate, cents, { hop = Math.round(rate * 0.0
  * The whole thing. music: a mono array to find the key in (null: the vocal's own notes decide).
  * Returns { audio, key, cents: average |correction| while voiced, voicedShare }.
  */
-export function retune(mono, rate, { music = null, musicChroma = null, key = null, speedMs = 60, strength = 1 } = {}) {
+export function retune(mono, rate, { music = null, musicChroma = null, key = null, speedMs = 60, strength = 1, adapt = true } = {}) {
   const hop = Math.round(rate * 0.01);
   const track = pitchTrack(mono, rate, { hop });
+  // Sung or rapped? Notes held steady for a quarter second or more are singing; a rap moves every few frames.
+  // A sung lead gets the templates' singing chain: the retune twice as fast (the Auto-Tune EFX lock) at full strength.
+  const sungShare = sustainedShare(track);
+  const sung = sungShare >= 0.3;
+  if (adapt && sung) { speedMs = Math.round(speedMs * 0.5); strength = Math.max(strength, 0.9); }
   let K = key;
   if (!K) { // the music's notes and the sung notes vote together
     const base = musicChroma || (music ? chroma(music, rate) : null), sung = noteHistogram(track);
@@ -185,7 +190,23 @@ export function retune(mono, rate, { music = null, musicChroma = null, key = nul
   const cents = correctionCurve(track, K, { hopMs: 10, speedMs, strength });
   let voiced = 0, sum = 0;
   for (let k = 0; k < track.length; k++) if (track[k]) { voiced++; sum += Math.abs(cents[k]); }
-  return { audio: applyCorrection(mono, rate, cents, { hop, track }), key: K, cents: voiced ? sum / voiced : 0, voicedShare: track.length ? voiced / track.length : 0 };
+  return { audio: applyCorrection(mono, rate, cents, { hop, track }), key: K, cents: voiced ? sum / voiced : 0, voicedShare: track.length ? voiced / track.length : 0, sungShare, sung, speedMs, strength };
+}
+
+/** The share of voiced frames that sit in a held note: a run of 25+ frames (250 ms) that stays within 60 cents. */
+export function sustainedShare(track, { minFrames = 25, cents = 60 } = {}) {
+  let voiced = 0, held = 0, run = 0, ref = 0;
+  for (let k = 0; k < track.length; k++) {
+    const f = track[k];
+    if (!f) { if (run >= minFrames) held += run; run = 0; continue; }
+    voiced++;
+    if (run && Math.abs(1200 * Math.log2(f / ref)) <= cents) run++;
+    else { if (run >= minFrames) held += run; run = 1; ref = f; }
+    // let the reference drift with the note so a slow vibrato still counts as held
+    ref = ref * 0.9 + f * 0.1;
+  }
+  if (run >= minFrames) held += run;
+  return voiced ? held / voiced : 0;
 }
 
 export { NOTE, SCALES };

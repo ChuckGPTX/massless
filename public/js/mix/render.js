@@ -107,7 +107,10 @@ export async function renderStrip(chs, p, rate, length) {
     into.connect(hp).connect(lp).connect(dl); dl.connect(fb).connect(dl);
     const dpan = ctx.createStereoPanner(); dpan.pan.value = p.delay.pan ?? 0;
     const split3 = ctx.createChannelSplitter(2);
-    dl.connect(dpan).connect(split3); split3.connect(merger, 0, 2); split3.connect(merger, 1, 3);
+    // the delay ducker: the echoes duck while the voice sings and come up in the gaps
+    let echo = dl;
+    if (p.delayDuck) { const dg = ctx.createGain(); curveAt(dg.gain, p.delayDuck, dur, true); echo = dl.connect(dg); }
+    echo.connect(dpan).connect(split3); split3.connect(merger, 0, 2); split3.connect(merger, 1, 3);
   }
   merger.connect(ctx.destination);
   // Where the stem sits in the song (from the rough mix): later is a delay, earlier skips into the file.

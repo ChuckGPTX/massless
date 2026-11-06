@@ -58,3 +58,11 @@ test('punch lifts the start of a hit more than its tail; the octave layer halves
 test('every genre says how to tune and which parallel buses to run', () => {
   for (const [id, g] of Object.entries(GENRES)) { assert.ok(g.tune && g.tune.speedMs >= 0 && g.tune.strength > 0, `${id} tune`); assert.ok('dist' in g && 'parComp' in g && 'punch' in g && 'deep' in g, `${id} buses`); }
 });
+
+test('sustainedShare: held notes count as singing, a moving line does not', async () => {
+  const { sustainedShare } = await import('../public/js/mix/tune.js');
+  const held = new Float32Array(400); for (let k = 0; k < 400; k++) held[k] = k % 100 < 80 ? 220 * (1 + 0.01 * Math.sin(k / 3)) : 0; // 800 ms notes with vibrato, gaps between
+  const rap = new Float32Array(400); for (let k = 0; k < 400; k++) rap[k] = k % 10 < 8 ? 150 + 40 * ((k / 10) % 5) : 0; // a new pitch every 100 ms
+  assert.ok(sustainedShare(held) > 0.9, `held ${sustainedShare(held)}`);
+  assert.ok(sustainedShare(rap) < 0.05, `rap ${sustainedShare(rap)}`);
+});
