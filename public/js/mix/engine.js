@@ -10,7 +10,7 @@ import { labelStems, ROLES, ROLE_IDS } from './roles.js';
 import { looksLikeRough } from './rough.js';
 import { placeClips, applyTightening, ghostDouble, fmtTime } from './timeline.js';
 import { retune } from './tune.js';
-import { octaveDown } from './fx.js';
+import { octaveDown, lowLevelLift } from './fx.js';
 import { renderStrip, renderBuses, makeIR } from './render.js';
 import { GENRES } from './rules.js';
 import { cleanMacros, spreadPans, describeStrip, NEUTRAL_MACROS } from './plan.js';
@@ -148,6 +148,9 @@ export async function runMix(stems, opts = {}) {
   }
   const prep = await call('prepare', { roles: labels.map((l, i) => (i === roughIndex ? 'rough' : forced[i] === 'skip' ? 'skip' : l.role)), hookBars, genre });
   emit({ type: 'tempo', bpm: prep.bpm });
+  // A second lead on the same bars is a stacked take: it becomes a centre double under the first.
+  const stackedPan = new Set();
+  for (const t of prep.stacked || []) { labels[t.index] = { role: 'double', source: 'stack' }; stackedPan.add(t.index); emit({ type: 'relabel', index: t.index, role: 'double', color: ROLES.double.color }); emit({ type: 'trick', kind: 'stacked', index: t.index, data: { name: names[t.index], lead: names[t.with], share: t.share } }); }
   if (prep.arrange) emit({ type: 'arrange', ...prep.arrange, names });
   for (const t of prep.tightened || []) emit({ type: 'tighten', index: t.index, name: names[t.index], phrases: t.phrases, maxMs: t.maxMs });
   // No rough given, but one "stem" is clearly the whole song: start again with it as the rough.
@@ -174,6 +177,7 @@ export async function runMix(stems, opts = {}) {
     const pp = rest.length === 1 && role !== 'guitar' && role !== 'double' ? [-0.3] : spreadPans(rest.length, role === 'double' ? 0.85 : role === 'guitar' ? 0.6 : 0.35, role === 'double' ? -0.2 : 0.15);
     pp.forEach((p, k) => { pans[rest[k]] = p; });
   }
+  for (const i of stackedPan) pans[i] = 0; // a stacked take sits under the lead, in the centre
   // Several doubles on one side spread inward a little, so they're a wall, not a point.
   for (const side of [-1, 1]) { const ds = live.filter((i) => labels[i].role === 'double' && !leftOut.has(i) && Math.sign(pans[i] || 0) === side); ds.forEach((i, k) => { pans[i] = side * Math.max(0.55, 0.9 - k * 0.15); }); }
   // Choruses with a lone lead get two made doubles (pitched ∓6 cents, 10 and 20 ms late, hard left and right).
@@ -203,8 +207,10 @@ export async function runMix(stems, opts = {}) {
       const speedMs = Math.max(0, Math.round(G.tune.speedMs * 2 ** (-macros.tune / 1.5))), strength = Math.min(1, G.tune.strength * (1 + macros.tune * 0.15));
       const mono = chs.length > 1 ? Float32Array.from(chs[0], (v, j) => 0.5 * (v + chs[1][j])) : chs[0];
       const r = retune(mono, RATE, { key: prep.key, speedMs, strength });
-      if (r.voicedShare > 0.02) { chs = [r.audio]; tuned = { key: prep.key.name, cents: Math.round(r.cents), speedMs, strength }; emit({ type: 'trick', kind: 'tune', index: i, data: { ...tuned } }); }
+      if (r.voicedShare > 0.02) { chs = [r.audio]; tuned = { key: prep.key.name, cents: Math.round(r.cents), speedMs: r.speedMs, strength: r.strength, sung: r.sung, sungShare: +r.sungShare.toFixed(2) }; emit({ type: 'trick', kind: 'tune', index: i, data: { ...tuned } }); }
     }
+    // Low-level lift (the templates' MV2 on the lead): quiet syllables come up, nothing near the floor moves.
+    if (['leadVox', 'backVox'].includes(role) && Number.isFinite(G.lift) && macros.vox > -3) { chs = lowLevelLift(chs, RATE, { maxDb: G.lift * (1 + macros.vox * 0.15) }); emit({ type: 'trick', kind: 'lift', index: i, data: { db: G.lift } }); }
     const monoForGhosts = ghosts.length ? (chs.length > 1 ? Float32Array.from(chs[0], (v, j) => 0.5 * (v + chs[1][j])) : chs[0].slice()) : null;
     const { dry, wet } = await renderStrip(chs, plan, RATE, prep.renderLength);
     const light = (p) => ({ ...p, rider: null, duck: null, auto: null, hpfCurve: null, deess: p.deess ? { f: p.deess.f } : null });

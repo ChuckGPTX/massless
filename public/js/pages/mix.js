@@ -293,7 +293,9 @@ const TRICK_TEXT = {
   sidechain: (n) => `${n} ducks a few dB every time the kick hits, so the low end stays tight and loud.`,
   deess: (n, p) => `${n}: the “s” sounds around ${fmtHz(p.deess?.f || 6800)} are turned down only when they jump out.`,
   pan: (n, p) => `${n} goes ${Math.abs(p.pan) < 0.05 ? 'to the centre' : `${Math.round(Math.abs(p.pan) * 100)}% ${p.pan < 0 ? 'left' : 'right'}`}${p.width > 1.05 ? `, ${Math.round((p.width - 1) * 100)}% wider` : ''}.`,
-  tune: (n, d) => `${n} pulled to ${d.key}: ${d.cents} cents on average, at ${d.speedMs} ms, so the notes land and the slides stay.`,
+  tune: (n, d) => `${n} pulled to ${d.key}: ${d.cents} cents on average, at ${d.speedMs} ms${d.sung ? ' (a sung take: the singing chain, locked tighter)' : ''}, so the notes land and the slides stay.`,
+  lift: (n, d) => `${n}: the quiet syllables lifted up to ${d.db} dB toward the loud ones, nothing near the floor touched, so every word is heard.`,
+  stacked: (n, d) => `${n} sings the same bars as ${d.lead} (${Math.round(d.share * 100)}% of them): it becomes a stacked take under the lead, centred and tightened to it.`,
   stack: (n, d) => d.deep ? `${n} laid an octave down under the hooks, band-limited, so the hook has weight without a second singer.` : `${n} has no doubles, so the chorus gets two made from it: ${d.cents > 0 ? '+' : ''}${d.cents} cents and ${d.delayMs} ms late, hard ${d.pan < 0 ? 'left' : 'right'}. Verses stay single, so the chorus opens up.`,
 };
 const m2 = (s) => (s >= 0.95 ? `${s.toFixed(1)} s` : `${Math.round(s * 1000)} ms`);
@@ -315,7 +317,7 @@ function alignText(r) {
   if (r.missing?.length) bits.push(`Your rough has parts the stems don't at ${r.missing.join(', ')}.`);
   return bits.join(' ');
 }
-const TRICK_TITLE = { tune: 'Retune', stack: 'Stacking', align: 'Lining up', eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
+const TRICK_TITLE = { tune: 'Retune', lift: 'Low-level lift', stacked: 'Stacked take', stack: 'Stacking', align: 'Lining up', eq: 'EQ', comp: 'Compression', sidechain: 'Sidechain', deess: 'De-esser', pan: 'Stereo field', verb: 'Space', loud: 'Loudness', listen: 'Listening' };
 
 function setBar(v) { const p = Math.round(v * 100); $('#bar-fill').style.width = p + '%'; $('#bar-pct').textContent = p + '%'; $('.bar').setAttribute('aria-valuenow', p); }
 

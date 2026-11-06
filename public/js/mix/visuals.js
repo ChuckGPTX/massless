@@ -101,6 +101,8 @@ export class TrickPanel {
     g.strokeStyle = AMBER; g.lineWidth = 3; g.shadowColor = AMBER; g.shadowBlur = 12; g.stroke(); g.shadowBlur = 0;
     for (const e of p.eq || []) { if (Math.abs(e.gain || 0) < 0.4) continue; const x = fx(e.f, w), y = h / 2 - ((e.gain * k) / 20) * (h * 0.42); g.fillStyle = e.gain < 0 ? CYAN : AMBER; g.beginPath(); g.arc(x, y, 6, 0, TAU); g.fill(); }
   }
+  draw_lift(g, w, h, t, abs) { return this.draw_comp(g, w, h, t, abs); }
+  draw_stacked(g, w, h, t, abs) { return this.draw_pan(g, w, h, t, abs); }
   draw_comp(g, w, h, t, abs) {
     const c = this.data.comp || { threshold: -20, ratio: 4 }, pad = 30, size = Math.min(w * 0.55, h - pad * 2), ox = pad, oy = h - pad;
     const toX = (db) => ox + ((db + 48) / 48) * size, toY = (db) => oy - ((db + 48) / 48) * size;

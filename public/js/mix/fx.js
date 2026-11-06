@@ -49,3 +49,38 @@ export function octaveDown(mono, rate) {
   }
   return out;
 }
+
+/**
+ * Low-level lift (the templates' MV2 / "upward compression" on the lead): quiet syllables come up by as much as
+ * `maxDb`, loud ones don't move, and nothing near the noise floor is lifted. Measured against the stem's own loud
+ * level (its 95th percentile), so it works the same at any gain. Envelope: 5 ms attack, 120 ms release; the gain
+ * itself is smoothed over 20 ms so it never clicks.
+ */
+export function lowLevelLift(chs, rate, { maxDb = 3, kneeDb = -12, floorDb = -42 } = {}) {
+  const n = chs[0].length, out = chs.map(() => new Float32Array(n));
+  const aA = Math.exp(-1 / (rate * 0.005)), aR = Math.exp(-1 / (rate * 0.12)), aG = Math.exp(-1 / (rate * 0.02));
+  const env = new Float32Array(n);
+  let e = 0;
+  for (let i = 0; i < n; i++) { let x = 0; for (const c of chs) { const a = c[i] < 0 ? -c[i] : c[i]; if (a > x) x = a; } e = x > e ? x + (e - x) * aA : x + (e - x) * aR; env[i] = e; }
+  // the loud level: the 95th percentile of the envelope, sampled every 10 ms
+  const step = Math.max(1, Math.round(rate / 100)), samples = [];
+  for (let i = 0; i < n; i += step) if (env[i] > 1e-5) samples.push(env[i]);
+  if (samples.length < 50) return chs;
+  samples.sort((a, b) => a - b);
+  const refDb = 20 * Math.log10(samples[Math.floor(samples.length * 0.95)]);
+  const fullAt = kneeDb - 12, fadeFrom = floorDb + 10; // full lift from 12 dB under the knee down to 10 dB above the floor
+  let g = 1;
+  for (let i = 0; i < n; i++) {
+    const rel = 20 * Math.log10(env[i] + 1e-9) - refDb;
+    let lift = 0;
+    if (rel < kneeDb && rel > floorDb) {
+      if (rel >= fullAt) lift = maxDb * (kneeDb - rel) / (kneeDb - fullAt);
+      else if (rel >= fadeFrom) lift = maxDb;
+      else lift = maxDb * (rel - floorDb) / (fadeFrom - floorDb);
+    }
+    const target = 10 ** (lift / 20);
+    g = target + (g - target) * aG;
+    for (let c = 0; c < chs.length; c++) out[c][i] = chs[c][i] * g;
+  }
+  return out;
+}

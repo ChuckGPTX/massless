@@ -204,8 +204,25 @@ const H = {
     const vox = pick(['leadVox', 'backVox', 'double']);
     S.voxPres = vox.length ? sumEnvelopes(vox.map((f) => f.pres), frames) : null;
     S.envLength = frames;
-    S.roles = roles;
     const live = (i) => used[i] && S.feats[i] && !rough.leaveOut?.includes(i);
+    // Two leads singing the same bars (a session's "Main A" and "Main B") are one lead and a stacked take: the
+    // second becomes a centre double, tightened to the first, so the lead stays one voice instead of two in a fight.
+    const stacked = [];
+    const leads = roles.map((r, i) => (r === 'leadVox' && live(i) && S.feats[i].active ? i : -1)).filter((i) => i >= 0);
+    for (let a = 1; a < leads.length; a++) {
+      const i = leads[a], A = S.feats[i].active;
+      for (let b = 0; b < a; b++) {
+        const j = leads[b], B = S.feats[j].active;
+        if (stacked.some((t) => t.index === j)) continue;
+        let both = 0, na = 0, nb = 0;
+        for (let k = 0; k < Math.min(A.length, B.length); k++) { if (A[k]) na++; if (B[k]) nb++; if (A[k] && B[k]) both++; }
+        if (na && nb && both / Math.min(na, nb) >= 0.5) { // the take that sings more stays the lead
+          const [lead, stack] = na > nb ? [i, j] : [j, i];
+          stacked.push({ index: stack, with: lead, share: +(both / Math.min(na, nb)).toFixed(2) }); roles[stack] = 'double'; break;
+        }
+      }
+    }
+    S.roles = roles;
     // The song's key: the music's notes (then the vocals' when there's no music), for the retune.
     // the music's notes at full weight, each vocal's at a third (the vocals are what gets tuned, so they get a say)
     const musicChroma = new Float32Array(12);
@@ -243,13 +260,14 @@ const H = {
       S.arrange = { ...A, bar, sections };
       arrange = { bar, bars, sections: sections.map((s) => ({ ...s, from: +(s.from * bar).toFixed(2), to: +(s.to * bar).toFixed(2), fromBar: s.from, toBar: s.to })), moves: A.moves, layers: Array.from(layers) };
     }
-    return { bpm: beat?.bpm || 0, beat, duration: S.length / S.rate, renderLength: S.length + TAIL(S.rate), hasKick: !!S.kickLow, hasVox: !!S.voxPres, rough, tightened, arrange, key: S.key, musicChroma: S.musicChroma ? Array.from(S.musicChroma) : null };
+    return { bpm: beat?.bpm || 0, beat, duration: S.length / S.rate, renderLength: S.length + TAIL(S.rate), hasKick: !!S.kickLow, hasVox: !!S.voxPres, rough, tightened, arrange, key: S.key, musicChroma: S.musicChroma ? Array.from(S.musicChroma) : null, stacked };
   },
 
   /** The phrase moves for one double, so the engine can lift its phrases into place before rendering. */
   tightening({ index }) { return { moves: S.tighten[index] || [] }; },
 
   plan({ index, role, pan, genre, macros, bpm, ghost = false }) {
+    const G = GENRES[genre] || GENRES.hiphop;
     const p = planStrip({ feats: S.feats[index], role, pan }, { genre, macros, bpm, kickLow: S.kickLow, length: S.envLength, has808: S.roles?.includes('808') });
     // The artist's balance from the rough nudges the rulebook level, and the stem moves to where it sits in the song.
     p.level += S.levelAdjust[index] || 0;
@@ -269,6 +287,10 @@ const H = {
     if (ghost) { for (let k = 0; k < n; k++) auto[k] += A?.sections ? -60 : 0; if (A) for (const s of A.sections) if (s.kind === 'chorus') for (let k = Math.round(s.from * A.bar * ENV_RATE); k < Math.min(n, Math.round(s.to * A.bar * ENV_RATE)); k++) auto[k] += 60; }
     p.auto = gate || A || ghost ? auto : null;
     p.gated = !!gate;
+    // The delay ducker (the templates' "Delay Ducker" return): the echoes sit under the voice while it sings and
+    // bloom in the gaps between phrases. Keyed off the stem's own envelope, so every vocal ducks its own delay.
+    if (vocal && p.delay && f?.env && Number.isFinite(G.delayDuck)) p.delayDuck = vocalDuck(f.env, n, { gainDepth: G.delayDuck }).gain;
+    if (vocal && !ghost && Number.isFinite(G.clip)) p.clip = G.clip;
     return { plan: p };
   },
 
@@ -276,6 +298,9 @@ const H = {
   addStrip({ index, plan, dry, wet }) {
     const n = S.length + TAIL(S.rate);
     S.buses ||= Object.fromEntries(BUS.map((b) => [b, [new Float32Array(n), new Float32Array(n)]]));
+    // Vocal clip limiter (the templates' L1 / Maxim on every vocal track): the hottest syllables are caught at
+    // -6 dBFS with 2 ms look-ahead, so a shout never jumps out of the stack and the fader lands on the body of the take.
+    if (plan.group === 'vox' && plan.clip) { const l = limit(dry, S.rate, 1, plan.clip, false).out; for (let c = 0; c < dry.length; c++) dry[c] = l[c]; }
     const measured = loudness(dry, S.rate);
     const fader = faderGain(plan, measured), g = dbToGain(fader);
     // leads on the vocal bus; doubles, backing vocals, ad-libs and the deep layer on the hook bus, as the templates route them

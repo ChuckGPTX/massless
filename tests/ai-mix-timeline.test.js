@@ -143,3 +143,18 @@ test('doubler: a detuned, late copy each side, different on the left and the rig
   let diff = 0; for (let i = rate * 0.5; i < rate * 0.9; i++) diff += (L[i] - R[i]) ** 2;
   assert.ok(Math.sqrt(diff / (rate * 0.4)) > 0.3 * l);
 });
+
+test('lowLevelLift: quiet syllables come up, loud ones stay, silence stays silent', async () => {
+  const { lowLevelLift } = await import('../public/js/mix/fx.js');
+  const rate = 44100, n = rate * 4, x = new Float32Array(n);
+  // 4 s: loud bursts (0.5), quiet bursts (0.05 = -20 dB), silence between
+  for (let i = 0; i < n; i++) { const t = i / rate, ph = t % 1; const a = ph < 0.3 ? 0.5 : ph > 0.5 && ph < 0.8 ? 0.05 : 0; x[i] = a * Math.sin(2 * Math.PI * 220 * t); }
+  const [y] = lowLevelLift([x], rate, { maxDb: 3 });
+  const rms = (s, a, b) => { a = Math.round(a); b = Math.round(b); let e = 0; for (let i = a; i < b; i++) e += s[i] * s[i]; return Math.sqrt(e / (b - a)); };
+  const loudIn = rms(x, rate * 1.1, rate * 1.28), loudOut = rms(y, rate * 1.1, rate * 1.28);
+  const quietIn = rms(x, rate * 1.6, rate * 1.78), quietOut = rms(y, rate * 1.6, rate * 1.78);
+  assert.ok(Math.abs(20 * Math.log10(loudOut / loudIn)) < 0.3, `loud moved ${20 * Math.log10(loudOut / loudIn)} dB`);
+  const lift = 20 * Math.log10(quietOut / quietIn);
+  assert.ok(lift > 1.5 && lift <= 2.5, `quiet lifted ${lift} dB (a -20 dB syllable sits on the ramp toward the full 3 dB at -24)`);
+  assert.ok(rms(y, rate * 1.85, rate * 1.98) < 1e-6, 'silence stays silent');
+});
