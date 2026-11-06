@@ -177,6 +177,21 @@ export class TrickPanel {
     if (k >= 1) { g.strokeStyle = '#55e3a1'; g.lineWidth = 2; for (let i = 0; i < 8; i++) { const x = (i / 8) * w; g.beginPath(); g.moveTo(x, lanes[0]); g.lineTo(x, lanes[1]); g.stroke(); } g.fillStyle = '#55e3a1'; g.fillText('LOCKED TO THE SAMPLE', w - h * 0.62, h * 0.95); }
   }
   draw_split(g, w, h, t, abs) { drawSplit(g, w, h, abs, this.data.levels, this.data.found); }
+  draw_tune(g, w, h, t, abs) {
+    // a sung line wobbling between the scale's notes, pulled onto them as the correction lands
+    grid(g, w, h);
+    const k = Math.min(1, t / 1.6), rows = 5, rowY = (r) => h * (0.15 + (r / (rows - 1)) * 0.7);
+    g.strokeStyle = 'rgba(255,255,255,.18)'; g.setLineDash([3, 7]);
+    for (let r = 0; r < rows; r++) { g.beginPath(); g.moveTo(0, rowY(r)); g.lineTo(w, rowY(r)); g.stroke(); }
+    g.setLineDash([]);
+    const notes = [2, 2, 1, 1, 3, 2, 2, 0, 1, 1];
+    g.lineWidth = 3; g.beginPath();
+    for (let x = 0; x <= w; x += 3) { const seg = Math.min(notes.length - 1, Math.floor((x / w) * notes.length)), target = rowY(notes[seg]); const wobble = Math.sin(x * 0.07 + abs * 3) * h * 0.06 + Math.sin(x * 0.013) * h * 0.08; const y = target + wobble * (1 - k); x ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.strokeStyle = CYAN; g.shadowColor = CYAN; g.shadowBlur = 10; g.stroke(); g.shadowBlur = 0;
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.font = `600 ${Math.round(h * 0.05)}px "Instrument Sans", sans-serif`;
+    g.fillText(`${this.data.key || ''} · ${this.data.speedMs ?? ''} ms`, 10, h * 0.1);
+    if (k >= 1) { g.fillStyle = '#55e3a1'; g.fillText('ON THE NOTE', w - h * 0.42, h * 0.95); }
+  }
   draw_stack(g, w, h, t, abs) {
     // the lead in the middle; two copies peel off to the sides, a hair detuned, and the chorus gets wide
     const k = Math.min(1, t / 1.4), ease = 1 - (1 - k) ** 3, spread = ease * w * 0.3, mid = h / 2;
