@@ -5,7 +5,7 @@
 export const AUDIO_EXT = /\.(wav|wave|aif|aiff|aifc|mp3|m4a|aac|flac|ogg|oga|opus|caf|webm)$/i;
 export const SESSION_EXT = { als: 'Ableton Live', alp: 'Ableton Live pack', logicx: 'Logic Pro', flp: 'FL Studio', ptx: 'Pro Tools', ptf: 'Pro Tools', cpr: 'Cubase', rpp: 'REAPER', song: 'Studio One', band: 'GarageBand', bwproject: 'Bitwig', reason: 'Reason' };
 export const MAX_STEMS = 48;
-const SKIP = /(^|\/)(__MACOSX|\.DS_Store|\._|Backup|Freeze Files|Samples\/Imported\/.*preview)/i;
+const SKIP = /(^|\/)(__MACOSX|\.DS_Store|\._|[^/]*Backups?[^/]*\/|Freeze Files|Samples\/Imported\/.*preview)/i;
 
 const sessionOf = (name) => { const m = String(name).toLowerCase().match(/\.([a-z]+)$/); return m && SESSION_EXT[m[1]] ? SESSION_EXT[m[1]] : null; };
 const baseName = (p) => String(p).split('/').pop();
@@ -81,15 +81,20 @@ export async function zipEntry(file, entry) {
  */
 export async function gather(files) {
   const stems = [], sessions = new Set(), sessionFiles = [], skipped = [];
+  const mtimes = new Map();
+  const mtimeOf = (path) => mtimes.get(path) || 0;
   const add = (path, size, blob) => {
-    if (SKIP.test(path)) return;
+    // Session files are kept even from the DAW's backup folder: the newest backup is often the only one with the
+    // audio placed. Backup audio and OS droppings are skipped.
     const s = sessionOf(path);
-    if (s) { sessions.add(s); sessionFiles.push({ name: baseName(path), path, daw: s, size, blob }); return; }
+    if (s) { if (/(^|\/)(__MACOSX|\._)/.test(path)) return; sessions.add(s); sessionFiles.push({ name: baseName(path), path, daw: s, size, mtime: mtimeOf(path), blob }); return; }
+    if (SKIP.test(path)) return;
     if (!AUDIO_EXT.test(path)) { if (!/\.(txt|pdf|png|jpe?g|asd|reapeaks|pkf|xml|json|mid|midi|nfo|ini)$/i.test(path)) skipped.push(baseName(path)); return; }
     stems.push({ name: baseName(path).replace(AUDIO_EXT, ''), path, size, blob });
   };
   for (const f of files) {
     const path = f.webkitRelativePath || f.relativePath || f.name;
+    mtimes.set(path, f.lastModified || 0);
     if (/\.zip$/i.test(f.name) || f.type === 'application/zip' || f.type === 'application/x-zip-compressed') {
       const entries = await listZip(f);
       for (const e of entries) add(e.name, e.size, () => zipEntry(f, e));

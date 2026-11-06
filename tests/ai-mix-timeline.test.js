@@ -99,7 +99,7 @@ test('a session layout gives each dropped recording its clips and role; recordin
   const layout = { rate: 48000, files: [{ file: 'Record Mono_07.wav', track: 'Main B', clips: [{ start: 0, offset: 0, length: 6.75 }, { start: 6.4, offset: 0, length: 6.75 }] }, { file: 'Beat.wav', track: 'Instrumental', clips: [{ start: 0, offset: 0, length: 60 }] }], unused: ['Record Mono_02.wav'], tracks: [] };
   const stems = [{ name: 'Record Mono_02', path: 'Falling/Audio Files/Record Mono_02.wav' }, { name: 'Record Mono_07', path: 'Falling/Audio Files/Record Mono_07.wav' }, { name: 'Beat', path: 'Falling/Audio Files/Beat.wav' }];
   const r = applySession(stems, layout);
-  assert.deepEqual(r, { placed: 2, unused: 1, missing: 0 });
+  assert.deepEqual(r, { placed: 2, unused: 1, missing: [] });
   assert.equal(stems[1].role, 'leadVox'); assert.equal(stems[1].clips.length, 2); assert.equal(stems[2].role, 'beat');
   assert.equal(stems[0].role, 'skip'); assert.equal(stems[0].unused, true);
   // the scramble: a Pro Tools 10+ header (type 5) round-trips through the key

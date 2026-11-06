@@ -4,7 +4,7 @@ import { runMix } from '../mix/engine.js';
 import { GENRES, TIPS } from '../mix/rules.js';
 import { ROLES, ROLE_IDS, roleFromName } from '../mix/roles.js';
 import { looksLikeRough } from '../mix/rough.js';
-import { readSession, applySession } from '../mix/sessions/index.js';
+import { readSessions, applySession, canReadSession } from '../mix/sessions/index.js';
 import { sectionLabel, fmtTime } from '../mix/timeline.js';
 import { TrickPanel, heroConsole, drawPeaks, drawEqThumb, splitArt, SPLIT_PARTS } from '../mix/visuals.js';
 import { fmtHz } from '../mix/plan.js';
@@ -20,7 +20,7 @@ const GENRE_NOTES = {
   country: 'Natural, clear vocal', latin: 'Dembow forward, big low end',
 };
 const params = new URLSearchParams(location.search);
-const state = { session: null, mode: params.get('mode') === 'song' ? 'song' : 'stems', song: null, method: 'split', split: null, roughFile: null, stems: [], sessions: [], roles: [], genre: GENRES[params.get('genre')] ? params.get('genre') : 'hiphop', refFile: null, result: null, ctrl: null, macros: null };
+const state = { session: null, sessionFiles: [], mode: params.get('mode') === 'song' ? 'song' : 'stems', song: null, method: 'split', split: null, roughFile: null, stems: [], sessions: [], roles: [], genre: GENRES[params.get('genre')] ? params.get('genre') : 'hiphop', refFile: null, result: null, ctrl: null, macros: null };
 
 // ---------- intake ----------
 const stopHero = heroConsole($('#hero-console'));
@@ -54,34 +54,68 @@ async function take(files) {
     const zipFile = [...files].find((f) => /\.zip$/i.test(f.name));
     if (zipFile) state.zipName = zipFile.name;
     const g = await gather([...files]);
-    if (!g.stems.length) { note(g.sessions.length ? `That ${g.sessions[0]} session has no audio files inside. Export or consolidate every track as a stem from bar 1, then drop the folder or a zip.` : 'No audio files found. Drop WAV, AIFF, MP3 or FLAC stems, or a zip of them.', true); return; }
-    // add to what's already there (people drop the vocals, then the beat)
+    // Session files come first: on their own, with the audio, or in any order over several drops.
+    const known = new Set(state.sessionFiles.map((f) => f.path + f.size));
+    for (const f of g.sessionFiles) if (!known.has(f.path + f.size)) state.sessionFiles.push(f);
+    const readable = state.sessionFiles.filter((f) => canReadSession(f.name)), unreadable = state.sessionFiles.filter((f) => !canReadSession(f.name));
+    if (!g.stems.length && !readable.length) {
+      note(unreadable.length ? `${unreadable[0].daw} sessions can’t be read yet (${unreadable[0].name}). Export every track as a stem from bar 1 and drop those, or drop a Pro Tools, REAPER or Ableton session with its audio.` : 'No audio files found. Drop WAV, AIFF, MP3 or FLAC stems, a zip of them, or a session folder.', true);
+      return;
+    }
+    // add to what's already there (people drop the vocals, then the beat, or the session, then the audio)
     const keys = new Set(state.stems.map((s) => s.path + s.size));
     for (const s of g.stems) if (!keys.has(s.path + s.size)) state.stems.push(s);
     state.roles = state.stems.map((s, i) => state.roles[i] || '');
-    // A DAW session came along: it says where every recording sits, on which track, and which takes went unused.
     let sessionNote = '';
-    const sf = g.sessionFiles.find((f) => /\.(ptx|ptf)$/i.test(f.name));
-    if (sf) {
-      try {
-        const { daw, layout } = await readSession(await sf.blob());
-        const r = applySession(state.stems, layout);
-        state.session = { daw, name: sf.name, ...r };
-        state.stems.forEach((s, i) => { if (s.unused) state.roles[i] = 'skip'; else if (s.role && !state.roles[i]) state.roles[i] = s.role; });
-        sessionNote = ` Opened your ${daw} session: ${r.placed} recording${r.placed === 1 ? '' : 's'} placed where you have them${r.unused ? `, ${r.unused} unused take${r.unused === 1 ? '' : 's'} left out` : ''}${r.missing ? `, ${r.missing} file${r.missing === 1 ? '' : 's'} the session names weren’t in the drop` : ''}.`;
-      } catch (e) { sessionNote = ` Couldn’t read ${sf.name} (${e.message}), so the stems are mixed as exported.`; }
+    if (readable.length) {
+      const read = await readSessions(readable);
+      state.session = read.best ? { ...read.best, all: read.all } : null;
+      if (read.best) {
+        const r = applySession(state.stems, read.best.layout);
+        state.session = { ...state.session, ...r };
+        state.roles = state.stems.map((s, i) => (s.roleFromSession ? s.role : state.roles[i] === 'skip' || ROLE_IDS.includes(state.roles[i]) ? state.roles[i] : ''));
+        const others = read.all.filter((s) => s !== read.best);
+        const sel = read.best.placed ? `Opened your ${read.best.daw} session ${read.best.name}${others.length ? ' (the newest one with audio on its tracks)' : ''}: ${r.placed} recording${r.placed === 1 ? '' : 's'} placed where you have ${r.placed === 1 ? 'it' : 'them'}${r.unused ? `, ${r.unused} unused take${r.unused === 1 ? '' : 's'} left out` : ''}.` : `${read.best.name} has ${read.best.tracks.length} tracks laid out but no audio on them yet.`;
+        const miss = r.missing.length ? ` It needs ${r.missing.length === 1 ? 'one more file' : `${r.missing.length} more files`} that ${r.missing.length === 1 ? 'wasn’t' : 'weren’t'} in the drop (${r.missing.slice(0, 3).join(', ')}${r.missing.length > 3 ? '…' : ''}): drop the Audio Files folder and they’ll go to their tracks.` : '';
+        const note2 = others.filter((s) => s.error || !s.placed).map((s) => s.error ? `${s.name}: ${s.error}` : `${s.name} places no audio`).join('; ');
+        sessionNote = ` ${sel}${miss}${note2 ? ` (${note2}.)` : ''}`;
+      } else sessionNote = ` Couldn’t read ${read.all[0]?.name}: ${read.all[0]?.error}`;
     }
+    renderStems(); renderSession(); roughStatus();
     // The full bounce, if it came along: the best-named candidate becomes the rough mix.
     if (!state.roughFile && !state.roles.includes('rough')) {
-      const paths = state.stems.map((x) => x.path), cands = state.stems.map((x, i) => i).filter((i) => looksLikeRough(paths[i], paths));
-      if (cands.length) { const best = cands.sort((a, b) => (/rough|bounce|mixdown|full/i.test(paths[b]) - /rough|bounce|mixdown|full/i.test(paths[a])) || state.stems[b].size - state.stems[a].size)[0]; state.roles[best] = 'rough'; }
+      const paths = state.stems.map((x) => x.path), cands = state.stems.map((x, i) => i).filter((i) => looksLikeRough(paths[i], paths) && !state.stems[i].clips);
+      if (cands.length) { const best = cands.sort((a, b) => (/rough|bounce|mixdown|full/i.test(paths[b]) - /rough|bounce|mixdown|full/i.test(paths[a])) || state.stems[b].size - state.stems[a].size)[0]; state.roles[best] = 'rough'; renderStems(); roughStatus(); }
     }
-    renderStems(); roughStatus();
-    const sess = sessionNote || (g.sessions.length ? ` Found a ${g.sessions.join(' and ')} session: its clips are placed by that app, so we mix the audio files as they are. For the best result, export every track as a stem from bar 1.` : '');
-    note(`${state.stems.length} track${state.stems.length === 1 ? '' : 's'} ready.${g.skipped.length ? ` Skipped ${g.skipped.length} file${g.skipped.length === 1 ? '' : 's'} that aren't audio.` : ''}${sess}`, !!sess && !sessionNote.startsWith(' Opened'));
-    warmHuman();
+    const sess = sessionNote || (g.sessions.length && !readable.length ? ` Found a ${g.sessions.join(' and ')} session: its clips are placed by that app, so we mix the audio files as they are. For the best result, export every track as a stem from bar 1.` : '');
+    const n = state.stems.length;
+    note(`${n ? `${n} track${n === 1 ? '' : 's'} ready.` : 'Session read. Now drop its audio.'}${g.skipped.length ? ` Skipped ${g.skipped.length} file${g.skipped.length === 1 ? '' : 's'} that aren't audio.` : ''}${sess}`, !n || (!!sess && !sessionNote.startsWith(' Opened')));
+    if (n) warmHuman();
   } catch (e) { note(e.message || 'Couldn’t open those files.', true); }
   updateStart();
+}
+
+/** The session as the DAW shows it: every track, its job, and what's on it. */
+function renderSession() {
+  const card = $('#session-card'), S = state.session;
+  card.hidden = !S;
+  if (!S) return;
+  const have = new Set(state.stems.map((s) => s.path.split('/').pop().toLowerCase()));
+  const jobs = { leadVox: 'Lead vocal', double: 'Double', adlib: 'Ad-libs', backVox: 'Backing vocals', beat: 'Beat', kick: 'Kick', snare: 'Snare', hats: 'Hi-hats', bass: 'Bass', '808': '808', drums: 'Drums', keys: 'Keys', pad: 'Pad', guitar: 'Guitar', synth: 'Synth', fx: 'FX', perc: 'Percussion', room: 'Room', music: 'Music' };
+  card.innerHTML = '<div class="session-head"><span class="session-daw"></span><b></b><small></small></div><ul class="session-tracks"></ul>';
+  card.querySelector('.session-daw').textContent = S.daw;
+  card.querySelector('b').textContent = S.name;
+  card.querySelector('small').textContent = `${S.tracks.length} tracks · ${S.placed || 0} with audio here${S.bpm ? ` · ${Math.round(S.bpm)} BPM` : ''}`;
+  card.querySelector('ul').replaceChildren(...S.tracks.filter((t) => !t.bus).map((t) => {
+    const li = document.createElement('li');
+    const missing = t.files.filter((f) => !have.has(f.split('/').pop().toLowerCase()));
+    li.className = t.clips ? (missing.length ? 'missing' : 'has') : 'empty';
+    li.innerHTML = '<span class="tn"></span><span class="tj"></span><span class="tc"></span>';
+    li.querySelector('.tn').textContent = t.name;
+    li.querySelector('.tj').textContent = t.role ? jobs[t.role] || t.role : '';
+    li.querySelector('.tc').textContent = !t.clips ? 'empty' : missing.length ? `needs ${missing.join(', ')}` : `${t.clips} clip${t.clips === 1 ? '' : 's'} · ${t.files.join(', ')}`;
+    return li;
+  }));
 }
 
 function renderStems() {
@@ -533,7 +567,7 @@ $('#remix').onclick = () => {
   state.macros = Object.fromEntries([...document.querySelectorAll('#macros input')].map((i) => [i.dataset.k, Number(i.value)]));
   stopAudio(); start();
 };
-$('#again').onclick = () => { stopAudio(); state.song = null; state.split = null; $('#song-card').hidden = true; $('#song-drop').hidden = false; state.stems = []; state.roles = []; state.roughFile = null; $('#rough-file').value = ''; roughStatus(); state.macros = null; state.result = null; renderStems(); updateStart(); note(''); show('intake'); };
+$('#again').onclick = () => { stopAudio(); state.session = null; state.sessionFiles = []; $('#session-card').hidden = true; state.song = null; state.split = null; $('#song-card').hidden = true; $('#song-drop').hidden = false; state.stems = []; state.roles = []; state.roughFile = null; $('#rough-file').value = ''; roughStatus(); state.macros = null; state.result = null; renderStems(); updateStart(); note(''); show('intake'); };
 
 function toBuffer(chs) {
   ctx ||= new AudioContext();
