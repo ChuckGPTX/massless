@@ -233,6 +233,11 @@ export async function runMix(stems, opts = {}) {
     gains: b.gains,
     drums: { threshold: -22, ratio: 2.5, attack: 0.03, release: 0.12, knee: 6 },
     vox: { threshold: -20, ratio: 2, attack: 0.01, release: 0.15, knee: 6 },
+    // the lead bus's outer bands: lows below 220 Hz (mud) and highs above 4.5 kHz (harshness) on their own compressors;
+    // the Bright macro moves the high band's threshold (turn it down and the top gets tamed harder)
+    voxLow: { threshold: -30 - Math.max(0, -macros.low) * 1.5, ratio: 3, attack: 0.012, release: 0.12, knee: 6 },
+    voxHigh: { threshold: -34 + macros.bright * 1.5, ratio: 2.5, attack: 0.002, release: 0.06, knee: 8 },
+    air: Number.isFinite(G.air) && macros.bright > -3 ? G.air + macros.bright * 1.5 : null,
     mix: { threshold: -14, ratio: 2, attack: 0.03, release: 0.2, knee: 6 },
     duck: { f: 2500, eq: b.duck.eq, gain: b.duck.gain },
     verbDuck: G.verbDuck ? b.duck.verb : null,
@@ -258,7 +263,7 @@ export async function runMix(stems, opts = {}) {
   return {
     rate: RATE,
     audio: { mix: m.mix, instrumental: m.instrumental, acapella: m.acapella, before: m.before, premaster: m.premaster },
-    report: { buses: { hook: live.some((i) => ['double', 'backVox', 'adlib'].includes(labels[i].role) && !leftOut.has(i)), dist: busPlan.dist, parComp: busPlan.parComp, slap: busPlan.slap, punch: G.punch || 0, deep: deepFor !== undefined }, rough: roughInfo ? { ...roughInfo, coverage: m.coverage } : null, session, key: prep.key ? { name: prep.key.name, score: +prep.key.score.toFixed(2) } : null, tuned: strips.filter((s) => s?.tuned).map((s) => ({ name: s.name, cents: s.tuned.cents })), arrange: prep.arrange ? { ...prep.arrange, moves: prep.arrange.moves.map((mv) => ({ ...mv, time: fmtTime(mv.at) })) } : null, tightened: (prep.tightened || []).map((t) => ({ name: names[t.index], phrases: t.phrases, maxMs: t.maxMs })), ghosts: ghostFor !== undefined ? names[ghostFor] : null, genre, genreName: G.name, bpm: prep.bpm, lufs: m.lufs, truePeak: m.truePeak, targetLufs: G.lufs, macros, strips, balance: b.balance, tone: m.tone, notes: ai?.notes || '', reference: ai?.reference || null, usedReferenceFile: !!reference, aiUsed: !!ai },
+    report: { buses: { hook: live.some((i) => ['double', 'backVox', 'adlib'].includes(labels[i].role) && !leftOut.has(i)) || ghostFor !== undefined, dist: busPlan.dist, parComp: busPlan.parComp, slap: busPlan.slap, punch: G.punch || 0, deep: deepFor !== undefined, air: busPlan.air, doubler: Number.isFinite(G.doubler) ? G.doubler : null, mb: true }, rough: roughInfo ? { ...roughInfo, coverage: m.coverage } : null, session, key: prep.key ? { name: prep.key.name, score: +prep.key.score.toFixed(2) } : null, tuned: strips.filter((s) => s?.tuned).map((s) => ({ name: s.name, cents: s.tuned.cents })), arrange: prep.arrange ? { ...prep.arrange, moves: prep.arrange.moves.map((mv) => ({ ...mv, time: fmtTime(mv.at) })) } : null, tightened: (prep.tightened || []).map((t) => ({ name: names[t.index], phrases: t.phrases, maxMs: t.maxMs })), ghosts: ghostFor !== undefined ? names[ghostFor] : null, genre, genreName: G.name, bpm: prep.bpm, lufs: m.lufs, truePeak: m.truePeak, targetLufs: G.lufs, macros, strips, balance: b.balance, tone: m.tone, notes: ai?.notes || '', reference: ai?.reference || null, usedReferenceFile: !!reference, aiUsed: !!ai },
   };
 }
 

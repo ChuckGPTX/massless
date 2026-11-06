@@ -7,7 +7,7 @@ import { sketch, waveLag, fineShiftAt, relativeShifts, fitLevels, shiftEnv, gaps
 import { ROLE_RULES } from './rules.js';
 import { fineEnvelope, tightenOffsets, gateCurve, findSections, arrangementMoves, barActivity } from './timeline.js';
 import { chroma, detectKey } from './tune.js';
-import { transientShape } from './fx.js';
+import { transientShape, doubler } from './fx.js';
 import { planStrip, faderGain, busBalance, toneMatch, vocalDuck } from './plan.js';
 import { GENRES } from './rules.js';
 import { LoudnessMeter } from '../loudness.js';
@@ -301,6 +301,8 @@ const H = {
     // Punch: the drums' hits lifted a little at their start (the templates' AVOX Punch on ad-libs, SPL-style on drums).
     if (G.punch && B.drums[0].some((v) => v !== 0)) { const p = transientShape(B.drums, S.rate, { attackDb: G.punch }); B.drums[0] = p[0]; B.drums[1] = p[1]; }
     const hookOn = B.hook[0].some((v) => v !== 0);
+    // Doubler: the stack (doubles, backing vocals, ad-libs) widened with a detuned, late copy each side.
+    if (hookOn && Number.isFinite(G.doubler)) { const d = doubler(B.hook, S.rate, { wetDb: G.doubler }); for (let c = 0; c < 2; c++) addInto(B.hook[c], d[c], 1); }
     const beatSum = [0, 1].map((c) => { const out = Float32Array.from(B.drums[c]); addInto(out, B.inst[c], 1); return out; });
     const voxSum = [0, 1].map((c) => { const out = Float32Array.from(B.vox[c]); if (hookOn) addInto(out, B.hook[c], 1); return out; });
     const beatLufs = loudness(beatSum, S.rate), voxLufs = voxSum[0].some((v) => v !== 0) ? loudness(voxSum, S.rate) : -120;
