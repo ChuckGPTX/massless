@@ -2,6 +2,8 @@
 // Zips are read straight from the file with File.slice, one entry at a time, so a 2 GB session never sits in memory.
 // Stored entries are sliced; deflated ones go through the browser's own DecompressionStream.
 
+import { unbundle, BUNDLE_EXT } from '../bundles.js';
+
 export const AUDIO_EXT = /\.(wav|wave|aif|aiff|aifc|mp3|m4a|aac|flac|ogg|oga|opus|caf|webm)$/i;
 export const SESSION_EXT = { als: 'Ableton Live', alp: 'Ableton Live pack', logicx: 'Logic Pro', flp: 'FL Studio', ptx: 'Pro Tools', ptf: 'Pro Tools', cpr: 'Cubase', rpp: 'REAPER', song: 'Studio One', band: 'GarageBand', bwproject: 'Bitwig', reason: 'Reason' };
 export const MAX_STEMS = 48;
@@ -77,10 +79,11 @@ export async function zipEntry(file, entry) {
 /**
  * Turn whatever was dropped into a list of stems.
  * items: File[] (files, a folder's files with webkitRelativePath, or one zip).
- * Returns { stems: [{ name, path, size, blob() }], sessions: ['Ableton Live', ...], sessionFiles: [{ name, path, daw, size, blob() }], skipped: [names] }.
+ * Returns { stems: [{ name, path, size, blob() }], sessions: ['Ableton Live', ...], sessionFiles: [{ name, path, daw, size, blob() }], skipped: [names],
+ * bundles: [{ name, kind, count, note }] (Cakewalk bundles opened into their recordings) }.
  */
 export async function gather(files) {
-  const stems = [], sessions = new Set(), sessionFiles = [], skipped = [];
+  const stems = [], sessions = new Set(), sessionFiles = [], skipped = [], bundles = [];
   const mtimes = new Map();
   const mtimeOf = (path) => mtimes.get(path) || 0;
   const add = (path, size, blob) => {
@@ -92,9 +95,13 @@ export async function gather(files) {
     if (!AUDIO_EXT.test(path)) { if (!/\.(txt|pdf|png|jpe?g|asd|reapeaks|pkf|xml|json|mid|midi|nfo|ini)$/i.test(path)) skipped.push(baseName(path)); return; }
     stems.push({ name: baseName(path).replace(AUDIO_EXT, ''), path, size, blob });
   };
-  for (const f of files) {
+  for (let f of files) {
     const path = f.webkitRelativePath || f.relativePath || f.name;
     mtimes.set(path, f.lastModified || 0);
+    if (BUNDLE_EXT.test(f.name)) { // a Cakewalk bundle: its recordings, each a stem
+      try { const b = await unbundle(f); bundles.push({ name: f.name, kind: b.kind, count: b.recordings.length, note: b.note }); for (const r of b.recordings) { add(r.name, r.size, async () => r); stems[stems.length - 1].fromBundle = true; } } catch (e) { skipped.push(f.name); }
+      continue;
+    }
     if (/\.zip$/i.test(f.name) || f.type === 'application/zip' || f.type === 'application/x-zip-compressed') {
       const entries = await listZip(f);
       for (const e of entries) add(e.name, e.size, () => zipEntry(f, e));
@@ -107,7 +114,7 @@ export async function gather(files) {
   if (unique.length > MAX_STEMS) throw new Error(`That’s ${unique.length} audio files. Mix up to ${MAX_STEMS} stems at a time: group similar parts (for example all background vocals) into one stem.`);
   // The session file itself: the newest one at the top of the folder (backups are skipped above).
   sessionFiles.sort((a, b) => a.path.split('/').length - b.path.split('/').length || b.size - a.size);
-  return { stems: unique, sessions: [...sessions], sessionFiles, skipped };
+  return { stems: unique, sessions: [...sessions], sessionFiles, skipped, bundles };
 }
 
 // ---------- links ----------

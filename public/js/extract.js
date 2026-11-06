@@ -15,7 +15,7 @@ export const MAX_PCM_BYTES = 2.2e9; // decoded audio a tab can hold: about 95 mi
 export const MIN_SECONDS = 0.1;
 const CACHE_BYTES = 1.5e9; // decoded audio kept between reading and converting; past it the oldest is decoded again
 const CHUNK = 1 << 17; // frames per message to the worker (2.7 s at 48 kHz)
-const ACCEPT = /\.(mp4|m4v|mov|webm|mkv|mp3|wav|wave|m4a|aac|ogg|oga|opus|flac|aif|aiff|caf|3gp)$/i;
+const ACCEPT = /\.(mp4|m4v|mov|webm|mkv|mp3|wav|wave|m4a|aac|ogg|oga|opus|flac|aif|aiff|caf|3gp|cwb|bun)$/i;
 
 export function looksLikeMedia(file) {
   return /^(audio|video)\//.test(file.type) || ACCEPT.test(file.name);

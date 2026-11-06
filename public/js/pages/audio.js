@@ -1,6 +1,7 @@
 import { VOICES, BEDS, MELO_LANGS, speak, speakMelo, renderBed, voiceBackend, MAX_BED_SECONDS } from '../audio-engine.js';
 import * as T from '../transcribe.js';
 import * as X from '../extract.js';
+import { expandBundles, BUNDLE_EXT } from '../bundles.js';
 import * as store from '../store.js';
 import { warmHuman } from '../human.js';
 import { createMaster } from './audio-master.js';
@@ -480,11 +481,15 @@ function syncOptions() {
 }
 
 // the queue
-function extAdd(files) {
-  const list = [...(files || [])];
+async function extAdd(files) {
+  let list = [...(files || [])];
   if (!list.length) return;
   if (state.tab !== 'ext') showTab('ext');
   let skipped = 0;
+  // A DAW bundle (Cakewalk .cwb) opens into the recordings inside it, each its own file here.
+  if (list.some((f) => BUNDLE_EXT.test(f.name))) {
+    list = await expandBundles(list, (f, b, err) => { if (b) toast(`${f.name}: ${b.note}`); else { skipped++; toast(`${f.name}: ${err?.message || 'couldn’t be opened.'}`, 'error'); } });
+  }
   for (const file of list) {
     if (!X.looksLikeMedia(file)) { skipped++; continue; }
     const it = { id: `x${++extSeq}`, file, name: file.name, size: file.size, status: 'reading', start: 0, end: 0, duration: 0 };

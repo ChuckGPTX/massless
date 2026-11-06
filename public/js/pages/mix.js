@@ -84,12 +84,13 @@ async function take(files) {
     renderStems(); renderSession(); roughStatus();
     // The full bounce, if it came along: the best-named candidate becomes the rough mix.
     if (!state.roughFile && !state.roles.includes('rough')) {
-      const paths = state.stems.map((x) => x.path), cands = state.stems.map((x, i) => i).filter((i) => looksLikeRough(paths[i], paths) && !state.stems[i].clips);
+      const paths = state.stems.map((x) => x.path), cands = state.stems.map((x, i) => i).filter((i) => looksLikeRough(paths[i], paths) && !state.stems[i].clips && !state.stems[i].fromBundle); // a bundle's recordings are tracks, never the bounce
       if (cands.length) { const best = cands.sort((a, b) => (/rough|bounce|mixdown|full/i.test(paths[b]) - /rough|bounce|mixdown|full/i.test(paths[a])) || state.stems[b].size - state.stems[a].size)[0]; state.roles[best] = 'rough'; renderStems(); roughStatus(); }
     }
     const sess = sessionNote || (g.sessions.length && !readable.length ? ` Found a ${g.sessions.join(' and ')} session: its clips are placed by that app, so we mix the audio files as they are. For the best result, export every track as a stem from bar 1.` : '');
     const n = state.stems.length;
-    note(`${n ? `${n} track${n === 1 ? '' : 's'} ready.` : 'Session read. Now drop its audio.'}${g.skipped.length ? ` Skipped ${g.skipped.length} file${g.skipped.length === 1 ? '' : 's'} that aren't audio.` : ''}${sess}`, !n || (!!sess && !sessionNote.startsWith(' Opened')));
+    const bund = (g.bundles || []).map((b) => ` Opened ${b.name}: ${b.note}`).join('');
+    note(`${n ? `${n} track${n === 1 ? '' : 's'} ready.` : 'Session read. Now drop its audio.'}${g.skipped.length ? ` Skipped ${g.skipped.length} file${g.skipped.length === 1 ? '' : 's'} that aren't audio.` : ''}${sess}${bund}`, !n || (!!sess && !sessionNote.startsWith(' Opened')));
     if (n) warmHuman();
   } catch (e) { note(e.message || 'Couldn’t open those files.', true); }
   updateStart();

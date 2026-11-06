@@ -92,7 +92,7 @@ export async function runMix(stems, opts = {}) {
   const session = stems.some((s) => s.clips?.length) ? { placed: stems.filter((s) => s.clips?.length).length, unused: stems.filter((s) => s.unused).length, daw: opts.sessionName || 'your session' } : null;
   const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
   let roughIndex = forced.findIndex((r) => r === 'rough');
-  if (roughIndex < 0 && !opts.roughFile && opts.autoRough !== false) roughIndex = stems.findIndex((s) => looksLikeRough(s.path, stems.map((x) => x.path)));
+  if (roughIndex < 0 && !opts.roughFile && opts.autoRough !== false) roughIndex = stems.findIndex((s) => !s.fromBundle && looksLikeRough(s.path, stems.map((x) => x.path)));
   const roughSource = opts.roughFile ? { name: opts.roughFile.name.replace(/\.[^.]+$/, ''), path: opts.roughFile.name, blob: async () => opts.roughFile } : roughIndex >= 0 ? stems[roughIndex] : null;
   const excluded = (i) => i === roughIndex || forced[i] === 'skip';
   let roughInfo = null;
